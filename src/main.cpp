@@ -2,12 +2,14 @@
 #include <Encoder.h>
 #include <ILI9341_t3.h>
 #include <font_Nunito.h>
+#include <Adafruit_NeoPixel.h>
 #include "hardware/board.h"
 
 #define LED_PIN 13
 
 ILI9341_t3 *tft;
 Encoder knob(1, 2);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(2, 23, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   pinMode(LED_PIN, OUTPUT);
@@ -23,6 +25,22 @@ void setup() {
   tft->println("Blue Nexus");
   tft->setCursor(10, 60);
   tft->println("Preparing for self tests ...");
+
+  strip.begin();
+  strip.show();
+}
+
+uint32_t Wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
 
 void loop() {
@@ -35,12 +53,16 @@ void loop() {
 
   if (i > 5) {
     tft->setTextColor(ILI9341_GREEN);
+    strip.setPixelColor(0, strip.Color(0, 255, 0));
   }
   else if (i > 2) {
     tft->setTextColor(ILI9341_YELLOW);
+    strip.setPixelColor(0, strip.Color(100, 100, 0));
   } else {
     tft->setTextColor(ILI9341_RED);
+    strip.setPixelColor(0, strip.Color(255, 0, 0));
   }
+  strip.show();
 
 
   i--;
@@ -51,6 +73,8 @@ void loop() {
 
   tft->setCursor(display_width /2, display_height - 20);
   tft->print(knob.read());
+  strip.setPixelColor(1, Wheel(knob.read() & 0xff));
 
   delay(1000);
 }
+
