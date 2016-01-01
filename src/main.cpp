@@ -77,6 +77,7 @@ void loop() {
 
   tft->setCursor(display_width /2, display_height - 20);
   tft->print(knob.read());
+  analogWrite(display_pwm, knob.read());
   strip.setPixelColor(1, Wheel(knob.read() & 0xff));
 
   delay(1000);
