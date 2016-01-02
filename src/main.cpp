@@ -8,13 +8,17 @@
 #define LED_PIN 13
 
 ILI9341_t3 *tft;
-Encoder knob(1, 2);
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(2, 23, NEO_GRB + NEO_KHZ800);
+
+Encoder knob(encoder_a, encoder_b);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(2, neopixel_pin, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, 1);
+
   tft = new ILI9341_t3(display_cs, display_dc, 255 /* rst unused */, display_mosi, display_sck, display_miso);
   tft->begin();
+
   tft->fillScreen(ILI9341_BLUE);
   tft->setRotation(3);
 
@@ -73,8 +77,8 @@ void loop() {
 
   tft->setCursor(display_width /2, display_height - 20);
   tft->print(knob.read());
+  analogWrite(display_pwm, knob.read());
   strip.setPixelColor(1, Wheel(knob.read() & 0xff));
 
   delay(1000);
 }
-
