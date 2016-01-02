@@ -1,0 +1,59 @@
+# Blue Nexus Firmware Roadmap
+
+## v0
+
+Blue Nexus Firmware v0 is used to test the board and demonstrate that all the peripherals are working. It should provide some auto-diagnostic of the board, a serial interface for more tests remote controlled by a PC and a simple UI. All the drivers are written to be easily re-used for v1 firmware.
+
+ - General test framework 
+   Each test provides at least one of two interfaces:
+    * It implements a display page
+    * It implements some serial commands
+
+ - Testing the board (Screen, Rot Enc, WS2812)
+    * One display page and the user can move the rotary encoder and see the value change.
+    * One display page and the user can change the color of the WS2812 lights
+      Click to switch to the other LED. Turn to change the color currently displayed.
+
+ - Testing the NMEA in/out
+    * One page shows all incoming NMEA messages
+    * One serial command to enable the NMEA transmitters
+    * One serial command to send an NMEA message to one of the two serial interfaces
+
+ - Testing the NMEA2k in/out
+   * One serial command to disable/enable NMEA2k
+   * One command to activate dumping on the serial port, NMEA2k frames (in canboat format)
+   * One page to enable/disable NMEA2k and then show all messages
+
+ - Testing the WiFi module
+   * One page to test very basic connectivity with the WiFi module, assuming it is running a stock firmware
+   * One serial command to put the bluenexus in pass-through mode which will allow the user to program it. Upon reset, it goes back in normal mode and can read/send things.
+
+ - Testing the main battery monitor (INA219)
+   * One page to display the current voltage and current
+
+ - Testing the onboard ADCs
+   * One page to display the current voltage on all three ADCs
+
+ - Testing the Inertial Measurement Unit (Bosch BNO055)
+  * One page to display the current 9 axis reading (accel/gyro/mag)
+  * One page to display current heading / rotation speed / pitch
+
+ - Testing the barometer (BMP280)
+  * One page to display the current pressure
+
+ - Testing the SDCard
+  * One page to display wether a card is present or not. And some basic information.
+  * One command to add data to a log file.
+
+## v1
+
+Blue Nexus Firmware v1 is usable on a boat and provides useful features.
+
+ [ ] Transmit GPS NMEA frames to WiFi
+ [ ] Transmit AIS NMEA frames to WiFi
+ [ ] Convert incoming GPS NMEA frames to NMEA2000 frames
+ [ ] Convert incoming AIS NMEA frames to NMEA2000 frames
+ [ ] Convert NMEA2000 Depth/Speed/Temperature frames to NMEA frames on WiFi
+ [ ] Send NMEA frames with battery voltage and realtime current consumption
+ [ ] 
+
