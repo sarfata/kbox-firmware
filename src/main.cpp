@@ -7,13 +7,14 @@
 
 #define LED_PIN 13
 
-Encoder knob(1, 2);
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(2, 23, NEO_GRB + NEO_KHZ800);
+Encoder knob(encoder_a, encoder_b);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(2, neopixel_pin, NEO_GRB + NEO_KHZ800);
 
 MFD *mfd;
 
 void setup() {
   pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, 1);
 
   ILI9341Display *display = new ILI9341Display(display_mosi, display_miso, display_sck, display_cs, display_dc, display_backlight, Size(display_width, display_height));
   mfd = new MFD(*display);
@@ -54,11 +55,8 @@ void loop() {
     i = 10;
   }
 
-
-  //tft->setCursor(display_width /2, display_height - 20);
-  //tft->print(knob.read());
-  strip.setPixelColor(1, Wheel(knob.read() & 0xff));
+  //analogWrite(display_pwm, knob.read());
+  //strip.setPixelColor(1, Wheel(knob.read() & 0xff));
 
   delay(1000);
 }
-
