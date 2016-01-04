@@ -1,8 +1,8 @@
 #pragma once
 
 #include <ILI9341_t3.h>
-#include "mfd.h"
-#include "../hardware/pin.h"
+#include "MFD.h"
+#include "pin.h"
 
 class ILI9341Display : public Display {
   private:
@@ -21,8 +21,8 @@ class ILI9341Display : public Display {
     void setBacklight(BacklightIntensity intensity);
 
     /* GC interface */
-    void draw_text(Point a, char *text);
-    void draw_line(Point a, Point b, Color color);
-    void draw_rectangle(Point orig, Size size, Color color);
-    void fill_rectangle(Point orig, Size size, Color color);
+    void drawText(Point a, Font font, Color color, const char *text);
+    void drawLine(Point a, Point b, Color color);
+    void drawRectangle(Point orig, Size size, Color color);
+    void fillRectangle(Point orig, Size size, Color color);
 };
