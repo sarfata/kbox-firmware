@@ -82,9 +82,17 @@ class Page {
       return false;
     };
     virtual bool processEvent(const Event &e) {
-      // Should not happen.
-      DEBUG("Unsupported event.");
-      return false;
+      switch (e.getEventType()) {
+        case EventTypeButton:
+          return this->processEvent((ButtonEvent&) e);
+        case EventTypeEncoder:
+          return this->processEvent((EncoderEvent&) e);
+        case EventTypeTick:
+          return this->processEvent((TickEvent&) e);
+        default:
+          DEBUG("Unsupported event.");
+          return false;
+      }
     };
     virtual void paint(GC &context) = 0;
 };
