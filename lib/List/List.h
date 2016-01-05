@@ -48,7 +48,22 @@ template <class T> class LinkedList {
       return CircularLinkedListIterator<T>(this);
     };
 
+    int size() {
+      int size = 0;
+      for (LinkedList<T> *it = this; it != 0 && it->get() != 0; size++, it = it->next()) {
+      }
+      return size;
+    }
+
     void emptyList() {
+      // Delete all the LinkedList containers that we created when adding elements.
+      // Actual data of the list should be deleted by caller.
+      LinkedList<T> *e = _next;
+      while (e) {
+        LinkedList<T> *toDelete = e;
+        e = toDelete->next();
+        delete(e);
+      }
       _e = 0;
       _next = 0;
     };
@@ -68,7 +83,7 @@ template <class T> class LinkedListIterator {
         return 0;
     };
 
-    /* Returns the current element and moves to next one if it exists. Returns 0 when list is exhausted.
+    /* Returns the current element and moves to next one. Returns 0 when list is exhausted.
      */
     T *next() {
       if (_current) {
