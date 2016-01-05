@@ -1,4 +1,3 @@
-
 #pragma once
 
 template <class T> class LinkedListIterator;
@@ -24,10 +23,10 @@ template <class T> class LinkedList {
       }
       else {
         if (_next == 0) {
-          _next = new LinkedList<T>(_e);
+          _next = new LinkedList<T>(element);
         }
         else {
-          _next->add(_e);
+          _next->add(element);
         }
       }
     };
