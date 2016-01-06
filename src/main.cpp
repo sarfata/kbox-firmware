@@ -6,6 +6,7 @@
 #include <ili9341display.h>
 #include <Debug.h>
 #include "EncoderTestPage.h"
+#include "WifiTestPage.h"
 #include "hardware/board.h"
 
 #define LED_PIN 13
@@ -28,8 +29,11 @@ void setup() {
 
   mfd = new MFD(*display, *encoder, *button);
 
-  EncoderTestPage *encPage = new EncoderTestPage();
-  mfd->addPage(encPage);
+  //EncoderTestPage *encPage = new EncoderTestPage();
+  //mfd->addPage(encPage);
+
+  WifiTestPage *wifiPage = new WifiTestPage();
+  mfd->addPage(wifiPage);
 
   strip.begin();
   strip.show();

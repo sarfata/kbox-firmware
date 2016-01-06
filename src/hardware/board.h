@@ -16,3 +16,8 @@ static const pin_t encoder_b = 18;
 static const pin_t encoder_button = 17;
 
 static const pin_t neopixel_pin = 22;
+
+static const pin_t wifi_enable = 2;
+static const pin_t wifi_program = 5;
+static const pin_t wifi_rst = 23;
+// This one was hijacked for display_dc - static const pin_t wifi_cs = 21;
