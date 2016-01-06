@@ -3,6 +3,7 @@
 class EncoderTestPage: public Page {
   private:
     int clicked = 0;
+    time_ms_t longClickTrigger;
     int counter = 0;
     unsigned long int timer = 0;
     bool needsPainting = true;

@@ -1,5 +1,7 @@
 #include "MFD.h"
 
+#undef DEBUG
+#define DEBUG(...) /* */
 
 MFD::MFD(Display & d, Encoder &e, Bounce &b) : display(d), encoder(e), button(b), pageIterator(pages.circularIterator()) {
   display.fillRectangle(Origin, display.getSize(), ColorBlue);
@@ -37,9 +39,15 @@ void MFD::loop() {
   // Make sure we have a current page.
   if (!pageIterator.current()) {
     DEBUG("No current page!");
-    pageIterator.next();
     // bail out here and hope we will have a valid page next time.
     return;
+  }
+
+  // TODO: find a better way to do this.
+  if (firstTick) {
+    DEBUG("firstTick!");
+    pageIterator.current()->willAppear();
+    firstTick = false;
   }
 
   this->processInputs();
@@ -54,7 +62,9 @@ void MFD::loop() {
     // Forward the event to the current page. If the handler returns false, skip to next page.
     if (!pageIterator.current()->processEvent(*e)) {
       DEBUG("Going to next page.");
+      pageIterator.current()->willDisappear();
       pageIterator.next();
+      pageIterator.current()->willAppear();
     }
     delete(e);
   }

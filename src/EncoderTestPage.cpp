@@ -11,7 +11,11 @@ bool EncoderTestPage::processEvent(const EncoderEvent &e) {
 
 bool EncoderTestPage::processEvent(const ButtonEvent &e) {
   if (e.clickType == ButtonEventTypePressed) {
-    clicked++;
+    clicked++  ;
+    longClickTrigger = millis() + 1000;
+  }
+  if (e.clickType == ButtonEventTypeReleased) {
+    longClickTrigger = 0;
   }
   Serial.println("Button pressed/released");
   needsPainting = true;
@@ -19,6 +23,11 @@ bool EncoderTestPage::processEvent(const ButtonEvent &e) {
 }
 
 bool EncoderTestPage::processEvent(const TickEvent &e) {
+  if (longClickTrigger && millis() > longClickTrigger) {
+    DEBUG("long click");
+    longClickTrigger = 0;
+    return false;
+  }
   timer = e.getMillis();
   needsPainting = true;
   return true;

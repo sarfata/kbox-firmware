@@ -47,9 +47,11 @@ class EncoderEvent : public Event {
     int rotation;
 };
 
+typedef unsigned long int time_ms_t;
+
 class TickEvent : public Event {
   private:
-    unsigned long int millis;
+    time_ms_t millis;
 
   public:
     TickEvent(unsigned long int millis) : Event(EventTypeTick), millis(millis) {};
@@ -69,6 +71,9 @@ class Page {
   private:
 
   public:
+    virtual void willAppear() {};
+    virtual void willDisappear() {};
+
     virtual bool processEvent(const ButtonEvent &e) {
       // By default this will force switching to the next page.
       return false;
@@ -79,7 +84,7 @@ class Page {
     }
     virtual bool processEvent(const TickEvent &e) {
       // By default this will be ignored.
-      return false;
+      return true;
     };
     virtual bool processEvent(const Event &e) {
       switch (e.getEventType()) {
@@ -95,6 +100,7 @@ class Page {
       }
     };
     virtual void paint(GC &context) = 0;
+    virtual ~Page() {};
 };
 
 /*
@@ -110,13 +116,15 @@ class Page {
 class MFD {
   protected:
     // Define tick duration in ms.
-    static const int tickDuration = 50;
+    static const int tickDuration = 200;
     Display &display;
     Encoder &encoder;
     Bounce &button;
     LinkedList<Page> pages;
     LinkedList<Event> events;
     unsigned long int lastTick;
+    
+    bool firstTick = true;
 
     CircularLinkedListIterator<Page> pageIterator;
 
