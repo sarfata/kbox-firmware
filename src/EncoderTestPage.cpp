@@ -34,15 +34,16 @@ void EncoderTestPage::paint(GC &gc) {
   gc.drawText(Point(2, 5), FontDefault, ColorWhite, "  Encoder, Button, Tick");
 
 
-  gc.fillRectangle(Point(42, 80), Size(320 -42, 60), ColorBlue);
-  snprintf(text, sizeof(text), "Encoder pos: %i", counter);
+//  gc.fillRectangle(Point(42, 80), Size(320 -42, 60), ColorBlue);
+//
+  snprintf(text, sizeof(text), "Encoder pos: %3i  ", counter);
   gc.drawText(Point(42, 80), FontDefault, ColorWhite, text);
 
-  snprintf(text, sizeof(text), "Clicks: %i", clicked);
-  gc.drawText(Point(42, 100), FontDefault, ColorWhite, text);
+  snprintf(text, sizeof(text), "Clicks: %i  ", clicked);
+  gc.drawText(Point(42, 120), FontDefault, ColorWhite, text);
 
   snprintf(text, sizeof(text), "Ticks: %lu", timer);
-  gc.drawText(Point(42, 120), FontDefault, ColorWhite, text);
+  gc.drawText(Point(42, 160), FontDefault, ColorWhite, text);
 
   needsPainting = false;
 }

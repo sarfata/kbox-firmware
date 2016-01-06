@@ -1,0 +1,10 @@
+{ 
+  "name": "List",
+  "keywords": "List",
+  "description": "Very basic c++ style structures",
+  "frameworks": "arduino",
+  "platforms": "teensy",
+  "include": [ "List.h" ],
+  "exclude": [ "test/*" ]
+
+}

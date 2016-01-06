@@ -25,7 +25,7 @@ void ILI9341Display::setBacklight(BacklightIntensity intensity) {
 
 void ILI9341Display::drawText(Point a, Font font, Color color, const char *text) {
   display->setCursor(a.x(), a.y());
-  display->setTextColor(color);
+  display->setTextColor(color, ColorBlue);
   display->setFont(Nunito_18);
   display->println(text);
 }

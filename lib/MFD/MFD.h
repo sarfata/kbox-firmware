@@ -110,7 +110,7 @@ class Page {
 class MFD {
   protected:
     // Define tick duration in ms.
-    static const int tickDuration = 500;
+    static const int tickDuration = 50;
     Display &display;
     Encoder &encoder;
     Bounce &button;

@@ -37,5 +37,4 @@ void setup() {
 
 void loop() {
   mfd->loop();
-  delay(1);
 }
