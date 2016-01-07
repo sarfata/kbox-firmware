@@ -75,8 +75,8 @@ class Page {
     virtual void willDisappear() {};
 
     virtual bool processEvent(const ButtonEvent &e) {
-      // By default this will force switching to the next page.
-      return false;
+      // By default button down will force switching to the next page.
+      return !(e.clickType == ButtonEventTypePressed);
     }
     virtual bool processEvent(const EncoderEvent &e) {
       // By default this will be ignored.
