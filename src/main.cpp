@@ -7,6 +7,7 @@
 #include <Debug.h>
 #include "EncoderTestPage.h"
 #include "WifiTestPage.h"
+#include "ShuntMonitorPage.h"
 #include "hardware/board.h"
 
 #define LED_PIN 13
@@ -32,8 +33,11 @@ void setup() {
   //EncoderTestPage *encPage = new EncoderTestPage();
   //mfd->addPage(encPage);
 
-  WifiTestPage *wifiPage = new WifiTestPage();
-  mfd->addPage(wifiPage);
+  //WifiTestPage *wifiPage = new WifiTestPage();
+  //mfd->addPage(wifiPage);
+
+  ShuntMonitorPage *shuntPage = new ShuntMonitorPage();
+  mfd->addPage(shuntPage);
 
   strip.begin();
   strip.show();

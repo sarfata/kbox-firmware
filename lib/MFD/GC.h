@@ -49,6 +49,7 @@ typedef uint16_t Color;
 
 // FIXME: Color definitions change with displays. This should be made display-dependent.
 static const Color ColorBlue = 0x001F;
+static const Color ColorRed = 0xF800;
 static const Color ColorWhite = 0xFFFF;
 static const Color ColorBlack = 0x0000;
 
