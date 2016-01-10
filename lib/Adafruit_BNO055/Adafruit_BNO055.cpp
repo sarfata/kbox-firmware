@@ -28,6 +28,11 @@
 
 #include "Adafruit_BNO055.h"
 
+#include <i2c_t3.h>
+#define Wire Wire1
+
+#include "Debug.h"
+
 /***************************************************************************
  CONSTRUCTOR
  ***************************************************************************/
@@ -55,15 +60,17 @@ Adafruit_BNO055::Adafruit_BNO055(int32_t sensorID, uint8_t address)
 bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode)
 {
   /* Enable I2C */
-  Wire.begin();
+  //Wire.begin();
 
   /* Make sure we have the right device */
   uint8_t id = read8(BNO055_CHIP_ID_ADDR);
   if(id != BNO055_ID)
   {
+    DEBUG("Waiting for BNO055 to boot ...");
     delay(1000); // hold on for boot
     id = read8(BNO055_CHIP_ID_ADDR);
     if(id != BNO055_ID) {
+      DEBUG("Failed to see BNO055 appear after 1 sec");
       return false;  // still not? ok bail
     }
   }
@@ -72,16 +79,24 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode)
   setMode(OPERATION_MODE_CONFIG);
 
   /* Reset */
-  write8(BNO055_SYS_TRIGGER_ADDR, 0x20);
-  while (read8(BNO055_CHIP_ID_ADDR) != BNO055_ID)
-  {
-    delay(10);
-  }
-  delay(50);
+  // Rebooting the chip seems to cause a-lot of problems. It works once but not twice.
+  // Avoiding this.
+  //DEBUG("Rebooting bno055 ...");
+  //write8(BNO055_SYS_TRIGGER_ADDR, 0x20);
+  //while (read8(BNO055_CHIP_ID_ADDR) != BNO055_ID)
+  //{
+    //DEBUG("waiting ...");
+    //delay(100);
+  //}
+  //delay(50);
+
+  DEBUG("rebooted");
 
   /* Set to normal power mode */
+  DEBUG("going into normal power mode");
   write8(BNO055_PWR_MODE_ADDR, POWER_MODE_NORMAL);
   delay(10);
+
 
   write8(BNO055_PAGE_ID_ADDR, 0);
 
@@ -109,6 +124,7 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode)
   setMode(mode);
   delay(20);
 
+  DEBUG("done");
   return true;
 }
 
@@ -556,6 +572,7 @@ bool Adafruit_BNO055::isFullyCalibrated(void)
 /**************************************************************************/
 bool Adafruit_BNO055::write8(adafruit_bno055_reg_t reg, byte value)
 {
+  DEBUG("Write register(%x, %x)", reg, value);
   Wire.beginTransmission(_address);
   #if ARDUINO >= 100
     Wire.write((uint8_t)reg);
@@ -565,6 +582,7 @@ bool Adafruit_BNO055::write8(adafruit_bno055_reg_t reg, byte value)
     Wire.send(value);
   #endif
   Wire.endTransmission();
+  DEBUG("write done");
 
   /* ToDo: Check for error! */
   return true;
@@ -577,6 +595,7 @@ bool Adafruit_BNO055::write8(adafruit_bno055_reg_t reg, byte value)
 /**************************************************************************/
 byte Adafruit_BNO055::read8(adafruit_bno055_reg_t reg )
 {
+  DEBUG("read 8 from %x", reg);
   byte value = 0;
 
   Wire.beginTransmission(_address);
@@ -592,6 +611,8 @@ byte Adafruit_BNO055::read8(adafruit_bno055_reg_t reg )
   #else
     value = Wire.receive();
   #endif
+    
+  DEBUG("read => %x", value);
 
   return value;
 }
@@ -603,6 +624,7 @@ byte Adafruit_BNO055::read8(adafruit_bno055_reg_t reg )
 /**************************************************************************/
 bool Adafruit_BNO055::readLen(adafruit_bno055_reg_t reg, byte * buffer, uint8_t len)
 {
+  DEBUG("read %i bytes  from %x", len, reg);
   Wire.beginTransmission(_address);
   #if ARDUINO >= 100
     Wire.write((uint8_t)reg);
@@ -612,6 +634,10 @@ bool Adafruit_BNO055::readLen(adafruit_bno055_reg_t reg, byte * buffer, uint8_t 
   Wire.endTransmission();
   Wire.requestFrom(_address, (byte)len);
 
+  if (Wire.available() != len) {
+    DEBUG("Unable to read %i bytes from register %x - Got %i bytes instead.", len, reg, Wire.available());
+  }
+
   for (uint8_t i = 0; i < len; i++)
   {
     #if ARDUINO >= 100
@@ -620,6 +646,7 @@ bool Adafruit_BNO055::readLen(adafruit_bno055_reg_t reg, byte * buffer, uint8_t 
       buffer[i] = Wire.receive();
     #endif
   }
+  DEBUG("read => %i bytes", len);
 
   /* ToDo: Check for errors! */
   return true;

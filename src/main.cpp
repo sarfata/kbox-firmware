@@ -10,6 +10,7 @@
 #include "WifiTestPage.h"
 #include "ShuntMonitorPage.h"
 #include "BarometerPage.h"
+#include "IMUPage.h"
 #include "hardware/board.h"
 
 #define LED_PIN 13
@@ -27,6 +28,7 @@ void setup() {
 
   // Initialize our I2C bus
   Wire1.begin();
+  Wire1.setTimeout(1000);
 
   ILI9341Display *display = new ILI9341Display(display_mosi, display_miso, display_sck, display_cs, display_dc, display_backlight, Size(display_width, display_height));
   Encoder *encoder = new Encoder(encoder_a, encoder_b);
@@ -44,8 +46,11 @@ void setup() {
   ShuntMonitorPage *shuntPage = new ShuntMonitorPage();
   //mfd->addPage(shuntPage);
 
-  BarometerPage *barometerPage = new BarometerPage();
-  mfd->addPage(barometerPage);
+  //BarometerPage *barometerPage = new BarometerPage();
+  //mfd->addPage(barometerPage);
+  
+  IMUPage *imuPage = new IMUPage();
+  mfd->addPage(imuPage);
 
   strip.begin();
   strip.show();
