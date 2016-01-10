@@ -3,8 +3,6 @@
 #include "hardware/board.h"
 
 ShuntMonitorPage::ShuntMonitorPage() {
-  Wire1.begin();
-  Wire1.setDefaultTimeout(100);
 }
 
 bool ShuntMonitorPage::readRegister(uint8_t registerAddress, uint16_t *registerValue) {

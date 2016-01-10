@@ -2,12 +2,14 @@
 #include <Encoder.h>
 #include <Bounce.h>
 #include <Adafruit_NeoPixel.h>
+#include <i2c_t3.h>
 #include <MFD.h>
 #include <ili9341display.h>
 #include <Debug.h>
 #include "EncoderTestPage.h"
 #include "WifiTestPage.h"
 #include "ShuntMonitorPage.h"
+#include "BarometerPage.h"
 #include "hardware/board.h"
 
 #define LED_PIN 13
@@ -23,6 +25,9 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, 1);
 
+  // Initialize our I2C bus
+  Wire1.begin();
+
   ILI9341Display *display = new ILI9341Display(display_mosi, display_miso, display_sck, display_cs, display_dc, display_backlight, Size(display_width, display_height));
   Encoder *encoder = new Encoder(encoder_a, encoder_b);
   pinMode(encoder_button, INPUT_PULLUP);
@@ -30,14 +35,17 @@ void setup() {
 
   mfd = new MFD(*display, *encoder, *button);
 
-  //EncoderTestPage *encPage = new EncoderTestPage();
+  EncoderTestPage *encPage = new EncoderTestPage();
   //mfd->addPage(encPage);
 
-  //WifiTestPage *wifiPage = new WifiTestPage();
+  WifiTestPage *wifiPage = new WifiTestPage();
   //mfd->addPage(wifiPage);
 
   ShuntMonitorPage *shuntPage = new ShuntMonitorPage();
-  mfd->addPage(shuntPage);
+  //mfd->addPage(shuntPage);
+
+  BarometerPage *barometerPage = new BarometerPage();
+  mfd->addPage(barometerPage);
 
   strip.begin();
   strip.show();
