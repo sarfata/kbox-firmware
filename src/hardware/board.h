@@ -22,6 +22,10 @@ static const pin_t wifi_program = 5;
 static const pin_t wifi_rst = 23;
 // This one was hijacked for display_dc - static const pin_t wifi_cs = 21;
 
+static const pin_t can_standby = 33;
+
 static const uint8_t ina219_address = 0b1000000;
 
 static const uint8_t bmp280_address = 0x76;
+
+

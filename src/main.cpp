@@ -10,6 +10,7 @@
 #include "WifiTestPage.h"
 #include "ShuntMonitorPage.h"
 #include "BarometerPage.h"
+#include "NMEA2000Page.h"
 #include "hardware/board.h"
 
 #define LED_PIN 13
@@ -45,7 +46,10 @@ void setup() {
   //mfd->addPage(shuntPage);
 
   BarometerPage *barometerPage = new BarometerPage();
-  mfd->addPage(barometerPage);
+  //mfd->addPage(barometerPage);
+
+  NMEA2000Page *nmea2000Page = new NMEA2000Page();
+  mfd->addPage(nmea2000Page);
 
   strip.begin();
   strip.show();
