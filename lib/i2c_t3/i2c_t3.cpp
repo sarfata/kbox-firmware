@@ -119,6 +119,7 @@
 #include "core_pins.h"
 #include "i2c_t3.h"
 
+#include "Debug.h"
 
 // ------------------------------------------------------------------------------------------------------
 // Static inits
@@ -997,7 +998,9 @@ void i2c_t3::sendRequest_(struct i2cStruct* i2c, uint8_t bus, uint8_t addr, size
             // Master receive loop
             while(i2c->rxBufferLength < i2c->reqCount && i2c->currentStatus == I2C_RECEIVING)
             {
+                DEBUG("i2c wait1");
                 i2c_wait_(i2c);
+                DEBUG("i2c wait2");
                 chkTimeout = (timeout != 0 && deltaT >= timeout);
                 // check if 2nd to last byte or timeout
                 if((i2c->rxBufferLength+2) == i2c->reqCount || (chkTimeout && !i2c->timeoutRxNAK))
@@ -1026,9 +1029,11 @@ void i2c_t3::sendRequest_(struct i2cStruct* i2c, uint8_t bus, uint8_t addr, size
                 }
                 else
                 {
+                    DEBUG("grabbing next byte len=%i", i2c->rxBufferLength);
                     // grab next data, not last byte, will ACK
                     data = *(i2c->D);
                     i2c->rxBuffer[i2c->rxBufferLength++] = data;
+                    DEBUG("done");
                 }
                 if(chkTimeout) i2c->timeoutRxNAK = 1; // set flag to indicate NAK sent
             }

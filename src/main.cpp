@@ -10,8 +10,12 @@
 #include "WifiTestPage.h"
 #include "ShuntMonitorPage.h"
 #include "BarometerPage.h"
+<<<<<<< HEAD
 #include "NMEA2000Page.h"
 #include "NMEAPage.h"
+=======
+#include "IMUPage.h"
+>>>>>>> bno055
 #include "hardware/board.h"
 
 #define LED_PIN 13
@@ -29,6 +33,9 @@ void setup() {
 
   // Initialize our I2C bus
   Wire1.begin();
+  // BNO055 needs up to 1ms to read 6 registers
+  Wire1.setTimeout(5000);
+  Wire1.setOpMode(I2C_OP_MODE_IMM);
 
   ILI9341Display *display = new ILI9341Display(display_mosi, display_miso, display_sck, display_cs, display_dc, display_backlight, Size(display_width, display_height));
   Encoder *encoder = new Encoder(encoder_a, encoder_b);
@@ -46,15 +53,18 @@ void setup() {
   ShuntMonitorPage *shuntPage = new ShuntMonitorPage();
   //mfd->addPage(shuntPage);
 
-  BarometerPage *barometerPage = new BarometerPage();
+  //BarometerPage *barometerPage = new BarometerPage();
   //mfd->addPage(barometerPage);
+
+  IMUPage *imuPage = new IMUPage();
+  mfd->addPage(imuPage);
 
   NMEA2000Page *nmea2000Page = new NMEA2000Page();
   //mfd->addPage(nmea2000Page);
 
   NMEAPage *nmeaPage = new NMEAPage();
   mfd->addPage(nmeaPage);
-  
+
   strip.begin();
   strip.show();
 }
