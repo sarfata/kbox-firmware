@@ -28,4 +28,6 @@ static const uint8_t ina219_address = 0b1000000;
 
 static const uint8_t bmp280_address = 0x76;
 
+static const pin_t nmea1_out_enable = 24;
+static const pin_t nmea2_out_enable = 31;
 
