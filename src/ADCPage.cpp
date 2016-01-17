@@ -9,8 +9,8 @@ ADCPage::ADCPage() {
   adc.setSamplingSpeed(ADC_HIGH_SPEED);
 
   // If you do not force the ADC later, make sure to configure ADC1 too because
-  // the ADC library might decide to use it.
-  // A11 and A14 (bat1 and bat3) can only be read by ADC_0
+  // the ADC library might decide to use it (it round-robins read requests).
+  // Also, it seems A11 and A14 (bat1 and bat3) can only be read by ADC_0
   // We could optimize reading speed by reading two adcs in parallel.
   //adc.setAveraging(32, ADC_1);
   //adc.setResolution(12, ADC_1);
@@ -31,13 +31,6 @@ void ADCPage::fetchValues() {
   int bat3_adc = adc.analogRead(bat3_analog, ADC_0);
 
   DEBUG("ADCs: Input: %i Bat1: %i Bat2: %i Bat3: %i", input_adc, bat1_adc, bat2_adc, bat3_adc);
-
-  //input_adc = adc.analogRead(input_analog, ADC_1);
-  //bat1_adc = adc.analogRead(bat1_analog, ADC_1);
-  //bat2_adc = adc.analogRead(bat2_analog, ADC_1);
-  //bat3_adc = adc.analogRead(bat3_analog, ADC_1);
-
-  //DEBUG("ADC2s: Input: %i Bat1: %i Bat2: %i Bat3: %i", input_adc, bat1_adc, bat2_adc, bat3_adc);
 
   input = input_adc * 21.78 / adc.getMaxValue();
   bat1 = bat1_adc * 21.78 / adc.getMaxValue();
