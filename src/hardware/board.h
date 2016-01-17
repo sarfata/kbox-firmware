@@ -36,3 +36,5 @@ static const pin_t bat2_analog = A11;
 static const pin_t bat3_analog = A12;
 static const pin_t input_analog = A14;
 
+static const pin_t sdcard_cs = 15;
+

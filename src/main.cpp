@@ -14,6 +14,7 @@
 #include "NMEAPage.h"
 #include "IMUPage.h"
 #include "ADCPage.h"
+#include "SdcardTestPage.h"
 #include "hardware/board.h"
 
 #define LED_PIN 13
@@ -64,7 +65,10 @@ void setup() {
   //mfd->addPage(nmeaPage);
 
   ADCPage *adcPage = new ADCPage();
-  mfd->addPage(adcPage);
+  //mfd->addPage(adcPage);
+  
+  SdcardTestPage *sdcardPage = new SdcardTestPage();
+  mfd->addPage(sdcardPage);
 
   strip.begin();
   strip.show();
