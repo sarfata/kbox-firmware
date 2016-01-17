@@ -55,7 +55,7 @@ class TickEvent : public Event {
 
   public:
     TickEvent(unsigned long int millis) : Event(EventTypeTick), millis(millis) {};
-    unsigned long int getMillis() const { return millis; };
+    time_ms_t getMillis() const { return millis; };
 };
 
 
