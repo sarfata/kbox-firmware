@@ -31,3 +31,8 @@ static const uint8_t bmp280_address = 0x76;
 static const pin_t nmea1_out_enable = 24;
 static const pin_t nmea2_out_enable = 31;
 
+static const pin_t bat1_analog = A10;
+static const pin_t bat2_analog = A11;
+static const pin_t bat3_analog = A12;
+static const pin_t input_analog = A14;
+

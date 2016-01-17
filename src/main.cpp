@@ -10,12 +10,10 @@
 #include "WifiTestPage.h"
 #include "ShuntMonitorPage.h"
 #include "BarometerPage.h"
-<<<<<<< HEAD
 #include "NMEA2000Page.h"
 #include "NMEAPage.h"
-=======
 #include "IMUPage.h"
->>>>>>> bno055
+#include "ADCPage.h"
 #include "hardware/board.h"
 
 #define LED_PIN 13
@@ -57,13 +55,16 @@ void setup() {
   //mfd->addPage(barometerPage);
 
   IMUPage *imuPage = new IMUPage();
-  mfd->addPage(imuPage);
+  //mfd->addPage(imuPage);
 
   NMEA2000Page *nmea2000Page = new NMEA2000Page();
   //mfd->addPage(nmea2000Page);
 
   NMEAPage *nmeaPage = new NMEAPage();
-  mfd->addPage(nmeaPage);
+  //mfd->addPage(nmeaPage);
+
+  ADCPage *adcPage = new ADCPage();
+  mfd->addPage(adcPage);
 
   strip.begin();
   strip.show();
