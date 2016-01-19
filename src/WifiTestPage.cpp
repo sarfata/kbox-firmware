@@ -33,7 +33,8 @@ void WifiTestPage::willAppear() {
 
 bool WifiTestPage::processEvent(const ButtonEvent &e) {
   if (e.clickType == ButtonEventTypePressed) {
-    Serial1.println("AT+GMR");
+    DEBUG("Getting status...");
+    Serial1.println("AT+PING=\"www.google.com\"");
     return true;
   }
   return true;
@@ -67,11 +68,8 @@ bool WifiTestPage::processEvent(const TickEvent &e) {
       DEBUG("Sending AT+CWLAP");
       Serial1.println("AT+CWLAP");
     }
-  }
-  else {
-    DEBUG("0 bytes to read ...");
-  }
 
+  }
   return true;
 }
 
