@@ -15,6 +15,7 @@
 #include "IMUPage.h"
 #include "ADCPage.h"
 #include "SdcardTestPage.h"
+#include "ClockPage.h"
 #include "hardware/board.h"
 
 #define LED_PIN 13
@@ -68,7 +69,10 @@ void setup() {
   //mfd->addPage(adcPage);
   
   SdcardTestPage *sdcardPage = new SdcardTestPage();
-  mfd->addPage(sdcardPage);
+  //mfd->addPage(sdcardPage);
+
+  ClockPage *clockPage = new ClockPage();
+  mfd->addPage(clockPage);
 
   strip.begin();
   strip.show();
