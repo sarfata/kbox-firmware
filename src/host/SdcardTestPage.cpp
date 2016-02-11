@@ -1,5 +1,5 @@
 #include <SdFat.h>
-#include "hardware/board.h"
+#include "board.h"
 #include "SdcardTestPage.h"
 
 SdcardTestPage::SdcardTestPage() {

@@ -1,5 +1,5 @@
 #include "WifiTestPage.h"
-#include "hardware/board.h"
+#include "board.h"
 
 WifiTestPage::WifiTestPage() {
   Serial1.begin(115200);

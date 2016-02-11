@@ -1,6 +1,6 @@
 #include "BarometerPage.h"
 #include "i2c_t3.h"
-#include "hardware/board.h"
+#include "board.h"
 
 #include "Adafruit_BMP280.h"
 

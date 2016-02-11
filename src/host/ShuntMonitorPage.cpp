@@ -1,6 +1,6 @@
 #include "ShuntMonitorPage.h"
 #include "i2c_t3.h"
-#include "hardware/board.h"
+#include "board.h"
 
 ShuntMonitorPage::ShuntMonitorPage() {
 }

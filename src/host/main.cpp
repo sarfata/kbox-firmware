@@ -16,7 +16,7 @@
 #include "ADCPage.h"
 #include "SdcardTestPage.h"
 #include "ClockPage.h"
-#include "hardware/board.h"
+#include "board.h"
 
 #define LED_PIN 13
 

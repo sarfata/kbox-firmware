@@ -1,5 +1,5 @@
 #include "IMUPage.h"
-#include "hardware/board.h"
+#include "board.h"
 
 IMUPage::IMUPage() {
   DEBUG("Initing BNO055");
