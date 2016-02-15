@@ -12,14 +12,12 @@ NMEAPage::NMEAPage() {
   Serial2.begin(4800);
 
   // Serial 3 is nmea2 or seatalk
-#define SEATALK 1
 #if SEATALK
 #ifndef SERIAL_9N1
-#error "To get Seatalk support, you must edit HardwareSerial.h to enable SERIAL_9BIT_SUPPORT."
+#error "To get Seatalk support, you must compile with -DSERIAL_9BIT_SUPPORT."
 #endif
   // Configure Serial 3 in 9 bits per byte mode (Seatalk)
-  // This requires uncommenting "SERIAL_9BIT_SUPPORT" in HardwareSerial.h
-  // (part of the teensy3 framework)
+  // This requires compiling with -DSERIAL_9BIT_SUPPORT (cf HardwareSerial.h)
   Serial3.begin(4800, SERIAL_9N1);
 #else
   Serial3.begin(4800);
@@ -65,6 +63,7 @@ bool NMEAPage::processEvent(const TickEvent &e) {
     }
     DEBUG("NMEA2 / Seatalk: %s", hexBuffer);
 #else
+    int read = Serial3.readBytes(buffer, available);
     buffer[read] = 0;
     DEBUG("NMEA2 %i: %s", read, buffer);
 #endif
