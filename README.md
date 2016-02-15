@@ -132,6 +132,7 @@ origins:
     git remote add sarfata-nmea2000teensy git@github.com:sarfata/NMEA2000_teensy.git
     git remote add teachop-flexcan git@github.com:teachop/FlexCAN_Library.git
     git remote add paul-ili9341 git@github.com:PaulStoffregen/ILI9341_t3.git
+    git remote add paul-time git@github.com:PaulStoffregen/Time.git
 
 To pull changes:
 
