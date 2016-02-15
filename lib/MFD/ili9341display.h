@@ -11,7 +11,7 @@ class ILI9341Display : public Display {
     pin_t backlightPin;
 
   public:
-    ILI9341Display(pin_t mosi, pin_t miso, pin_t sck, pin_t cs, pin_t dc, pin_t backlight, Size size);
+    ILI9341Display(pin_t mosi, pin_t miso, pin_t sck, pin_t cs, pin_t dc, pin_t backlight, uint8_t rotation, Size size);
 
     /* Display interface */
     const Size& getSize() const {

@@ -37,7 +37,7 @@ void setup() {
   Wire1.setTimeout(5000);
   Wire1.setOpMode(I2C_OP_MODE_IMM);
 
-  ILI9341Display *display = new ILI9341Display(display_mosi, display_miso, display_sck, display_cs, display_dc, display_backlight, Size(display_width, display_height));
+  ILI9341Display *display = new ILI9341Display(display_mosi, display_miso, display_sck, display_cs, display_dc, display_backlight, display_rotation, Size(display_width, display_height));
   Encoder *encoder = new Encoder(encoder_a, encoder_b);
   pinMode(encoder_button, INPUT_PULLUP);
   Bounce *button = new Bounce(encoder_button, 10 /* ms */);

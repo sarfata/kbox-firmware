@@ -7,6 +7,10 @@ ADCPage::ADCPage() {
   adc.setConversionSpeed(ADC_LOW_SPEED);
   adc.setSamplingSpeed(ADC_HIGH_SPEED);
 
+#ifndef BOARD_v1_revA
+  adc.setReference(ADC_REF_EXT, ADC_0);
+  adc.setReference(ADC_REF_EXT, ADC_1);
+#endif
   // If you do not force the ADC later, make sure to configure ADC1 too because
   // the ADC library might decide to use it (it round-robins read requests).
   // Also, it seems A11 and A14 (bat1 and bat3) can only be read by ADC_0
@@ -31,10 +35,10 @@ void ADCPage::fetchValues() {
 
   DEBUG("ADCs: Input: %i Bat1: %i Bat2: %i Bat3: %i", input_adc, bat1_adc, bat2_adc, bat3_adc);
 
-  input = input_adc * 21.78 / adc.getMaxValue();
-  bat1 = bat1_adc * 21.78 / adc.getMaxValue();
-  bat2 = bat2_adc * 21.78 / adc.getMaxValue();
-  bat3 = bat3_adc * 21.78 / adc.getMaxValue();
+  input = input_adc * analog_max_voltage / adc.getMaxValue();
+  bat1 = bat1_adc * analog_max_voltage / adc.getMaxValue();
+  bat2 = bat2_adc * analog_max_voltage / adc.getMaxValue();
+  bat3 = bat3_adc * analog_max_voltage / adc.getMaxValue();
 }
 
 bool ADCPage::processEvent(const ButtonEvent &e) {

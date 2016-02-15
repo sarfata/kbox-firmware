@@ -10,14 +10,18 @@ WifiTestPage::WifiTestPage() {
 
   pinMode(wifi_enable, OUTPUT);
   pinMode(wifi_program, OUTPUT);
+#ifndef BOARD_v1_revA
+  pinMode(wifi_cs, OUTPUT);
+  digitalWrite(wifi_cs, 0);
+#endif
   pinMode(wifi_rst, OUTPUT);
 
   // To boot from Flash, we need
-  // GPIO0 (wifi_program) HIGH and GPIO2 HIGH (hard-wired)
-  // GPIO15 (wifi_cs) LOW (hard-wired)
+  // GPIO0 (wifi_program) HIGH and GPIO2 HIGH (pulled up via a resistor)
+  // GPIO15 (wifi_cs) LOW
   // Then we need RST LOW and we set ENABLE HIGH
   digitalWrite(wifi_program, HIGH);
-  //digitalWrite(wifi_enable, HIGH);
+
   DEBUG("WifiTestPage Constructor");
 }
 
