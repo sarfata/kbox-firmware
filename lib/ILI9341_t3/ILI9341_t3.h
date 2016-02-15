@@ -134,7 +134,7 @@ class ILI9341_t3 : public Print
   public:
 	ILI9341_t3(uint8_t _CS, uint8_t _DC, uint8_t _RST = 255, uint8_t _MOSI=11, uint8_t _SCLK=13, uint8_t _MISO=12);
 	void begin(void);
-  	void sleep(bool enable);		
+	void sleep(bool enable);
 	void pushColor(uint16_t color);
 	void fillScreen(uint16_t color);
 	void drawPixel(int16_t x, int16_t y, uint16_t color);
@@ -156,7 +156,7 @@ class ILI9341_t3 : public Print
 	// Added functions to read pixel data...
 	uint16_t readPixel(int16_t x, int16_t y);
 	void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
-	void writeRect(int16_t x, int16_t y, int16_t w, int16_t h, const uint16_t *pcolors);
+	void writeRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
 
 	// from Adafruit_GFX.h
 	void drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
@@ -168,6 +168,9 @@ class ILI9341_t3 : public Print
 	void drawRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h, int16_t radius, uint16_t color);
 	void fillRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h, int16_t radius, uint16_t color);
 	void drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h, uint16_t color);
+	void drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bgcolor);
+	void draw8Bitmap(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h);
+	void draw8Bitmap(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h, uint8_t transparent);
 	void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size);
 	void setCursor(int16_t x, int16_t y);
 	void setTextColor(uint16_t c);
@@ -176,6 +179,9 @@ class ILI9341_t3 : public Print
 	uint8_t getTextSize();
 	void setTextWrap(boolean w);
 	boolean getTextWrap();
+	void setClipRect(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
+	  { _clipx1 = x1; _clipy1 = y1; _clipx2 = x2; _clipy2 = y2;} ;
+	void setClipRect() { _clipx1 = 0; _clipy1 = 0; _clipx2 = _width; _clipy2 = _height; }
 	virtual size_t write(uint8_t);
 	int16_t width(void)  { return _width; }
 	int16_t height(void) { return _height; }
@@ -187,11 +193,20 @@ class ILI9341_t3 : public Print
 	void setFont(const ILI9341_t3_font_t &f) { font = &f; }
 	void setFontAdafruit(void) { font = NULL; }
 	void drawFontChar(unsigned int c);
+	void measureChar(uint8_t c, uint16_t* w, uint16_t* h);
+	uint16_t fontCapHeight() { return font->cap_height; }
+  uint16_t fontLineSpace() { return font->line_space; }
+  uint16_t fontGap() { return font->line_space - font->cap_height; };
 
+  void drawText(const char* text, const char* wrapChars = nullptr);
+  const char* lineBreakChars = " -";
+  uint16_t measureTextWidth(const char* text);
+  uint16_t measureTextHeight(const char* text);
 
  protected:
 	int16_t _width, _height; // Display w/h as modified by current rotation
 	int16_t  cursor_x, cursor_y;
+  int16_t  _clipx1, _clipy1, _clipx2, _clipy2;
 	uint16_t textcolor, textbgcolor;
 	uint8_t textsize, rotation;
 	boolean wrap; // If set, 'wrap' text at right edge of display
@@ -275,23 +290,42 @@ class ILI9341_t3 : public Print
 	}
 	void HLine(int16_t x, int16_t y, int16_t w, uint16_t color)
 	  __attribute__((always_inline)) {
+
+    // Rudimentary clipping
+    if((y < _clipy1) || (x >= _clipx2) || (y >= _clipy2)) return;
+    if(x<_clipx1) { w = w - (_clipx1 - x); x = _clipx1; }
+    if((x+w-1) >= _clipx2)  w = _clipx2-x;
+    if (w<1) return;
+
 		setAddr(x, y, x+w-1, y);
 		writecommand_cont(ILI9341_RAMWR);
 		do { writedata16_cont(color); } while (--w > 0);
 	}
 	void VLine(int16_t x, int16_t y, int16_t h, uint16_t color)
 	  __attribute__((always_inline)) {
+
+    // Rudimentary clipping
+    if((x < _clipx1) || (x >= _clipx2) || (y >= _clipy2)) return;
+    if(y < _clipy1) { h = h - (_clipy1 - y); y = _clipy1;}
+    if((y+h-1) >= _clipy2) h = _clipy2-y;
+    if(h<1) return;
+
+
 		setAddr(x, y, x, y+h-1);
 		writecommand_cont(ILI9341_RAMWR);
 		do { writedata16_cont(color); } while (--h > 0);
 	}
 	void Pixel(int16_t x, int16_t y, uint16_t color)
 	  __attribute__((always_inline)) {
+
+  	if((x < _clipx1) ||(x >= _clipx2) || (y < _clipy1) || (y >= _clipy2)) return;
+
 		setAddr(x, y, x, y);
 		writecommand_cont(ILI9341_RAMWR);
 		writedata16_cont(color);
 	}
 	void drawFontBits(uint32_t bits, uint32_t numbits, uint32_t x, uint32_t y, uint32_t repeat);
+	void drawFontBitsOpaque(uint32_t bits, uint32_t numbits, uint32_t x, uint32_t y, uint32_t repeat);
 };
 
 #ifndef swap
