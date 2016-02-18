@@ -40,7 +40,7 @@ We are still working hard on the software but we anticipate that the first and
 most useful use-cases will be:
 
  - Relay GPS and AIS information to your mobile devices (for example, an iPad
-   running [iNavX](http://inavx.com).
+   running [iNavX](http://inavx.com)).
  - Monitor your energy and display voltages and currents on your existing
    NMEA2000 equipment
  - Record your boat position, and all its parameters (speed over ground, speed
@@ -77,6 +77,34 @@ To compile both firmwares, install platformio and then run:
 If you run into problems or would like to suggest new features for this project,
 please use the [GitHub issue tracker](https://github.com/sarfata/kbox-firmware).
 
+## License
+
+This project is distributed under the GPL License v3. Please note that most of the
+libraries have their own license.
+
+ - [Adafruit Sensor](https://github.com/adafruit/Adafruit_BMP280_Library) is
+ under the Apache license
+ - [Adafruit BMP280](https://github.com/adafruit/Adafruit_BMP280_Library) is under the BSD license
+ - [Adafruit BNO055](https://github.com/adafruit/Adafruit_BNO055/) is under the MIT license
+ - [ADC library](https://github.com/pedvide/ADC) is a permissive custom license
+ - [FlexCAN](https://github.com/teachop/FlexCAN_Library) does not seem to have a
+ license [yet](https://github.com/teachop/FlexCAN_Library/issues/12)
+ - [i2c_t3](https://github.com/nox771/i2c_t3) is under the LGPL
+ - [ILI9341_t3](https://github.com/PaulStoffregen/ILI9341_t3) is under the MIT
+   license
+ - [NMEA2000](https://github.com/ttlappalainen/NMEA2000/) is under the LGPL
+ - [NMEA2000_teensy](https://github.com/sarfata/NMEA2000_teensy) is under the
+   LGPL
+ - [Time](https://github.com/PaulStoffregen/Time) is under the LGPL
+ - [SdFat](https://github.com/greiman/SdFat) is under the GPL
+ - The Teensy core files are distributed under the MIT license with [a specific
+   clause](https://forum.pjrc.com/threads/25996-Question-about-licensing-of-core-files).
+   The KBox hardware includes [a bootloader chip sold by pjrc.com](http://www.pjrc.com/store/ic_mkl02.html)
+   and supports the Teensy project.
+
+**[Fair winds and following seas](https://en.wikipedia.org/wiki/Following_sea)
+to the authors of these libraries! Without them, this project would not have
+been possible!**
 
 # Advanced topics
 
@@ -121,7 +149,7 @@ Now open a different terminal to flash or debug the program.
 
 ### Flashing a firmware
 
-    $ platformio run 
+    $ platformio run
     [ ... building the .elf file ... ]
     $ arm-none-eabi-objcopy -O binary .pioenvs/teensy31/firmware.elf
     firmware.bin
