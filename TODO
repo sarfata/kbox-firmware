@@ -1,8 +1,8 @@
-# Blue Nexus Firmware Roadmap
+# KBox Firmware Roadmap
 
 ## v0
 
-Blue Nexus Firmware v0 is used to test the board and demonstrate that all the peripherals are working. It should provide some auto-diagnostic of the board, a serial interface for more tests remote controlled by a PC and a simple UI. All the drivers are written to be easily re-used for v1 firmware.
+KBox Firmware v0 is used to test the board and demonstrate that all the peripherals are working. It should provide some auto-diagnostic of the board, a serial interface for more tests remote controlled by a PC and a simple UI. All the drivers are written to be easily re-used for v1 firmware.
 
  - General test framework 
    Each test provides at least one of two interfaces:
@@ -26,7 +26,7 @@ Blue Nexus Firmware v0 is used to test the board and demonstrate that all the pe
 
  - Testing the WiFi module
    * One page to test very basic connectivity with the WiFi module, assuming it is running a stock firmware
-   * One serial command to put the bluenexus in pass-through mode which will allow the user to program it. Upon reset, it goes back in normal mode and can read/send things.
+   * One serial command to put the kbox in pass-through mode which will allow the user to program it. Upon reset, it goes back in normal mode and can read/send things.
 
  - Testing the main battery monitor (INA219)
    * One page to display the current voltage and current
@@ -47,7 +47,7 @@ Blue Nexus Firmware v0 is used to test the board and demonstrate that all the pe
 
 ## v1
 
-Blue Nexus Firmware v1 is usable on a boat and provides useful features.
+KBox Firmware v1 is usable on a boat and provides useful features.
 
  [ ] Transmit GPS NMEA frames to WiFi
  [ ] Transmit AIS NMEA frames to WiFi

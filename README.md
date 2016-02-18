@@ -1,8 +1,69 @@
-# Blue Nexus Firmware
+# KBox Firmware
+
+## What is KBox?
+
+KBox connects your various boat networks together and translates message from
+one bus to the other. KBox also includes multiple sensors that publish
+information on your boat networks. Finally KBox has a screen that can be used to
+repeat some of your boat parameters.
+
+![KBox picture](kbox.jpg)
+
+Of course KBox is designed with the [SignalK specification](http://signalk.org)
+in mind and will be compatible with it.
+
+KBox hardware includes:
+
+ - One NMEA2000 interface,
+ - Two NMEA0183 inputs (one of them can be used as a Seatalk input),
+ - Two NMEA0183 outputs,
+ - One WiFi interface that can connect to an existing network or create a new
+   network on your boat,
+ - Three analog inputs to measure voltages between 0 and 23V (batteries, solar
+   panels, generators, etc),
+ - One shunt input to measure current consumption of your main house battery,
+ - One barometer,
+ - One inertial measurement unit providing a magnetic compass, an accelerometer
+   to measure roll, pitch and yaw as well as a gyroscope,
+ - An SDCard to record data.
+
+KBox is an open-source hardware project. You can review the schematics and build
+it yourself. We also intend to get a few batches manufactured by a professional
+board assembly house. If you are interested, put your name in our form!
+
+[I am interested in an early manufacturing batch](http://goo.gl/forms/y78AeACvyr).
+
+## KBox firmware overview
+
+KBox is based on the [Teensy 3.2](https://www.pjrc.com/teensy/) architecture and
+is compatible with the Arduino development environment. The WiFi module is an
+ESP8266-13 and is also programmed with an Arduino compatible SDK.
+
+This project contains the source code for the firmware running on the host
+micro-controller (teensy-like Cortex M4 micro-controller) and the firmware
+running on the WiFi module.
+
+To build the project, we use the [platformio](http://platformio.org) tool. It is
+compatible with Linux, Mac OS and Windows.
+
+To compile both firmwares, install platformio and then run:
+
+    $ platformio run
+
+## Reporting problems and Sharing suggestions
+
+If you run into problems or would like to suggest new features for this project,
+please use the [GitHub issue tracker](https://github.com/sarfata/kbox-firmware).
+
+
+# Advanced topics
 
 ## Using OpenOCD
 
-Use a CMSIS-DAP compatible SWD/JTAG connector. The [Armstart
+KBox includes a 10 pin standardized Cortex debug connector. This connector
+allows us to connect a debugger and truly debug the code running on the board.
+
+We recommend using a CMSIS-DAP compatible SWD/JTAG connector. The [Armstart
 IBDAP-CMSIS-DAP](ibdap) is only $19 and widely available.
 
 Follow the [Armstart instructions](ibdap) to compile OpenOCD with CMSIS-DAP
