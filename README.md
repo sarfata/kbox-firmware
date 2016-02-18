@@ -2,7 +2,7 @@
 
 ## What is KBox?
 
-KBox connects your various boat networks together and translates message from
+KBox connects your boat networks together and translates message from
 one bus to the other. KBox also includes multiple sensors that publish
 information on your boat networks. Finally KBox has a screen that can be used to
 repeat some of your boat parameters.
@@ -11,6 +11,7 @@ repeat some of your boat parameters.
 
 Of course KBox is designed with the [SignalK specification](http://signalk.org)
 in mind and will be compatible with it.
+
 
 KBox hardware includes:
 
@@ -32,6 +33,27 @@ it yourself. We also intend to get a few batches manufactured by a professional
 board assembly house. If you are interested, put your name in our form!
 
 [I am interested in an early manufacturing batch](http://goo.gl/forms/y78AeACvyr).
+
+## What can I do with KBox?
+
+We are still working hard on the software but we anticipate that the first and
+most useful use-cases will be:
+
+ - Relay GPS and AIS information to your mobile devices (for example, an iPad
+   running [iNavX](http://inavx.com).
+ - Monitor your energy and display voltages and currents on your existing
+   NMEA2000 equipment
+ - Record your boat position, and all its parameters (speed over ground, speed
+   over water, heeling angle, apparent and true wind, etc) to an SDCard to
+   replay the race at a later point.
+
+However, because KBox is open-source, you can do a lot more things with it:
+
+ - Use KBox as a basic NMEA2000 to USB or Network gateway (for example, for
+   SignalK development)
+ - Build an open-source autopilot and use KBox hardware as the main sensor and
+   computer (we have extension ports to connect to the actuator)
+ - etc ...
 
 ## KBox firmware overview
 
@@ -58,7 +80,7 @@ please use the [GitHub issue tracker](https://github.com/sarfata/kbox-firmware).
 
 # Advanced topics
 
-## Using OpenOCD
+## Using OpenOCD to debug KBox
 
 KBox includes a 10 pin standardized Cortex debug connector. This connector
 allows us to connect a debugger and truly debug the code running on the board.
