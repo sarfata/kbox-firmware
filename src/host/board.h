@@ -20,7 +20,12 @@
 */
 
 #include <Arduino.h>
-#include <pin.h>
+
+#include <stdint.h>
+typedef uint16_t pin_t;
+
+
+static const pin_t led_pin = 13;
 
 /* TFT Screen Definition */
 static const uint32_t display_width = 320;
