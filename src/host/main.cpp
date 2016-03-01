@@ -47,8 +47,10 @@ MFD *mfd;
 
 void setup() {
   delay(3000);
-  Serial.begin(115200);
-  Serial.println("Starting...");
+
+  DEBUG_INIT();
+  DEBUG("Starting");
+
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, 1);
 

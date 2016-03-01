@@ -23,15 +23,26 @@
 #include <Arduino.h>
 #include <stdarg.h>
 
+#ifdef ESP8266
+#define DebugSerial Serial1
+#else
+#define DebugSerial Serial
+#endif
+
+
+void debug_init() {
+    DebugSerial.begin(115200);
+}
+
 void debug(const char *fname, int lineno, const char *fmt, ... ) {
-  Serial.print(fname);
-  Serial.print(":");
-  Serial.print(lineno);
-  Serial.print(" ");
+  DebugSerial.print(fname);
+  DebugSerial.print(":");
+  DebugSerial.print(lineno);
+  DebugSerial.print(" ");
   char tmp[128]; // resulting string limited to 128 chars
   va_list args;
   va_start (args, fmt );
   vsnprintf(tmp, 128, fmt, args);
   va_end (args);
-  Serial.println(tmp);
+  DebugSerial.println(tmp);
 }

@@ -19,28 +19,31 @@
 
 */
 
+#include "Debug.h"
 #include "NetServer.h"
 
 NetServer::NetServer(int port) {
   server = new WiFiServer(port);
   server->begin();
   server->setNoDelay(true);
-
 }
 
 void NetServer::handleNewClients() {
   if (server->hasClient()) {
+    DEBUG("Handling new client");
     int i;
     for (i = 0; i < maxClients; i++) {
       if (!clients[i] || !clients[i].connected()) {
+        DEBUG("Assigning slot %i", i);
         if (clients[i]) {
           clients[i].stop();
         }
         clients[i] = server->available();
-        continue;
+        break;
       }
     }
     if (i >= maxClients) {
+      DEBUG("Rejecting client - Too many connections already.");
       // We cannot accept this connection at the moment
       WiFiClient c = server->available();
       c.stop();
@@ -68,7 +71,6 @@ int NetServer::clientsCount() {
 
 void NetServer::loop() {
   handleNewClients();
-
 }
 
 

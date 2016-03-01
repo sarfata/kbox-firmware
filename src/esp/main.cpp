@@ -21,6 +21,7 @@
 
 #include <ESP8266WiFi.h>
 #include <Adafruit_NeoPixel.h>
+#include <Debug.h>
 #include "NetServer.h"
 
 uint8_t neopixel_pin = 4;
@@ -32,6 +33,8 @@ static const uint32_t connectedColor = rgb.Color(0x00, 0xff, 0x00);
 static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0xff);
 
 void setup() {
+  DEBUG_INIT();
+
   rgb.begin();
   rgb.setPixelColor(0, 0, 0, 0xff);
   rgb.show();
@@ -41,7 +44,8 @@ void setup() {
 
   Serial.begin(115200);
   Serial.setTimeout(0);
-  Serial.println("Starting kbox ...");
+
+  DEBUG("Starting KBox");
 }
 
 uint8_t buffer[4096];
@@ -51,6 +55,10 @@ void loop() {
 
   if (Serial.available()) {
     int read = Serial.readBytes(buffer, sizeof(buffer));
+
+    buffer[read] = 0;
+    DEBUG("Sending %i bytes to all clients: %s", read, buffer);
+
     server.writeAll(buffer, read);
   }
 

@@ -21,6 +21,8 @@
 
 #pragma once
 
+#define DEBUG_INIT() debug_init()
 #define DEBUG(...) debug(__FILE__, __LINE__, __VA_ARGS__)
 
+void debug_init();
 void debug(const char *fname, int lineno, const char *fmt, ... );
