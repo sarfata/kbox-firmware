@@ -44,62 +44,144 @@ TEST_CASE("List basics", "[list]") {
 
   WHEN("the list is empty") {
     REQUIRE( list.size() == 0 );
-    REQUIRE( list.get() == 0 );
-    REQUIRE( list.next() == 0 );
+    REQUIRE( list.begin() == list.end() );
   }
 
   WHEN("the list has one element") {
     int i = 42;
-    list.add(&i);
+    list.add(i);
     REQUIRE( list.size() == 1 );
-    REQUIRE( list.get() == &i );
-    REQUIRE( list.next() == 0 );
+    REQUIRE( *(list.begin()) == i );
+
+    LinkedList<int>::iterator it = list.begin();
+    REQUIRE( it != list.end() );
+    it++;
+    REQUIRE( it == list.end() );
   }
 
   WHEN("the list has 10 elements") {
     for (int i = 0; i < 10; i++) {
-      list.add((int*)malloc(sizeof(int)));
+      list.add(i);
     }
 
     REQUIRE( list.size() == 10 );
 
-    WHEN("the list is emptied") {
-      list.emptyList();
-      
-      REQUIRE( list.size() == 0 );
-      REQUIRE( list.get() == 0 );
-      REQUIRE( list.next() == 0 );
+    LinkedList<int>::iterator it = list.begin();
+    THEN("all elements should be there") {
+      for (int i = 0; i < 10; i++, it++) {
+        REQUIRE( *it == i );
+      }
     }
 
+    WHEN("you reset the iterator") {
+      for (int i = 0; i < 5; i++, it++) {
+        REQUIRE( *it == i );
+      }
+
+      THEN("you should still be able to list the firs elements") {
+        it = list.begin();
+
+        for (int i = 0; i < 5; i++, it++) {
+          REQUIRE( *it == i );
+        }
+      }
+    }
+
+    WHEN("the list is emptied") {
+      list.clear();
+      REQUIRE( list.size() == 0 );
+    }
+  }
+
+  WHEN("you make a copy of the list") {
+    for (int i = 0; i < 10; i++) {
+      list.add(i);
+    }
+
+    LinkedList<int> l2 = list;
+    REQUIRE( l2.size() == 10 );
+  }
+
+
+}
+
+int refcnt = 0;
+
+class Object {
+  private:
+    std::string label;
+  public:
+    Object(const Object &o) : label(o.label) { refcnt++; };
+    Object(std::string l) : label(l) { refcnt++; };
+    ~Object() { refcnt--; };
+};
+
+TEST_CASE("Check for leaks", "[list]") {
+  LinkedList<Object> list;
+
+  WHEN("elements are added to the list") {
+    // Note the local scope here
+    {
+      Object o1("a"), o2("b");
+
+      REQUIRE( refcnt == 2 );
+
+      list.add(o1);
+      list.add(o2);
+
+      REQUIRE( refcnt == 4 );
+    }
+
+    REQUIRE( refcnt == 2 );
+  }
+
+  WHEN("the list is cleared") {
+    list.clear();
+
+    REQUIRE( refcnt == 0 );
+  }
+
+  WHEN("you make a copy of the list") {
+    {
+      Object o1("a"), o2("b");
+
+      list.add(o1);
+      list.add(o2);
+    }
+    REQUIRE( refcnt == 2);
+
+    {
+      LinkedList<Object> l2 = list;
+
+      REQUIRE(refcnt == 4);
+    }
+    REQUIRE(refcnt == 2);
   }
 }
 
-TEST_CASE("List iterator", "[iterator]") {
+TEST_CASE("Circular iterator", "[list]") {
   LinkedList<int> list;
-  LinkedListIterator<int> it = list.iterator();
 
-  WHEN("the list is empty") {
-    REQUIRE( it.next() == 0 );
+  LinkedList<int>::circularIterator it = list.circularBegin();
+
+  WHEN("The list is empty") {
+    REQUIRE(it == list.circularEnd());
   }
 
-  WHEN("the list has one element") {
-    int a = 1;
+  WHEN("The list has one element") {
+    int i = 1;
+    list.add(i);
 
-    list.add(&a);
+    it = list.circularBegin();
 
-    REQUIRE( it.next() == &a );
-    REQUIRE( it.next() == 0 );
+    REQUIRE(*it == 1);
+    REQUIRE(it != list.circularEnd());
+    it++;
+    REQUIRE(*it == 1);
+    REQUIRE(it != list.circularEnd());
+    it++;
+    REQUIRE(it != list.circularEnd());
+    // etc...
   }
 
-  WHEN("the list has two elemetns") {
-    int a = 1;
-    int b = 2;
-
-    list.add(&a);
-    list.add(&b);
-
-    REQUIRE( it.next() == &a );
-    REQUIRE( it.next() == &b );
-  }
 }
-

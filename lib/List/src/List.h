@@ -1,137 +1,245 @@
 /*
 
-    This file is part of KBox.
+  The MIT License
 
-    Copyright (C) 2016 Thomas Sarlandie.
+  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
+
+
+  This file is part of KBox. Unlike the rest of the project, this file is MIT
+  because no-one should ever have to write that manually. I found very very few
+  list implementation for Arduino I liked.
+
+  A big thanks to NorthWestern University ~riesbeck on implementing iterators.
+  Could not have done it without you!
+  http://www.cs.northwestern.edu/~riesbeck/programming/c++/stl-iterator-define.html
 
 */
 
 #pragma once
 
 template <class T> class LinkedListIterator;
-template <class T> class CircularLinkedListIterator;
+template <class T> class LinkedListConstIterator;
+template <class T> class LinkedListCircularIterator;
 
-/* LinkedList template.
- *
- * Implemented with a head sentinel so the first element of the list can be null (current = 0) when the list is empty.
- */
 template <class T> class LinkedList {
   private:
-    T *_e;
-    LinkedList<T> *_next;
+    class node {
+      public:
+        T value;
+        node *next;
+
+        node(const T &v) : value(v), next(0) {};
+    };
+
+    node *head;
+
+    friend class LinkedListIterator<T>;
+    friend class LinkedListConstIterator<T>;
+    friend class LinkedListCircularIterator<T>;
 
   public:
-    LinkedList() : _e(0), _next(0) {};
-    LinkedList(T *e) : _e(e), _next(0) {};
+    typedef LinkedListIterator<T> iterator;
+    typedef LinkedListConstIterator<T> constIterator;
+    typedef LinkedListCircularIterator<T> circularIterator;
 
-    void add(T *element) {
-      // The list can be created empty so we need to support inserting in the first element.
-      if (_e == 0) {
-        _e = element;
+    LinkedList() : head(0) {};
+
+    LinkedList(const LinkedList &l) : head(0) {
+      for (constIterator it = l.begin(); it != l.end(); it++) {
+        add(*it);
+      }
+    };
+
+    ~LinkedList() {
+      clear();
+    };
+
+    LinkedList<T>& operator=(const LinkedList<T> &l) {
+      clear();
+      for (constIterator it = l.begin(); it != l.end(); it++) {
+        add(*it);
+      }
+      return *this;
+    };
+
+    void add(const T &v) {
+      if (head == 0) {
+        head = new node(v);
       }
       else {
-        if (_next == 0) {
-          _next = new LinkedList<T>(element);
+        node *n = head;
+        while (n->next != 0) {
+          n = n->next;
         }
-        else {
-          _next->add(element);
-        }
+        n->next = new node(v);
       }
     };
 
-    T *get() {
-      return _e;
+    void clear() {
+      node *n = head;
+      while (n != 0) {
+        node *next = n->next;
+        delete(n);
+        n = next;
+      }
+      head = 0;
     };
 
-    LinkedList<T> *next() {
-      return _next;
+    iterator begin() {
+      return iterator(head);
     };
 
-    LinkedListIterator<T> iterator() {
-      return LinkedListIterator<T>(this);
+    constIterator begin() const {
+      return constIterator(head);
     };
 
-    CircularLinkedListIterator<T> circularIterator() {
-      return CircularLinkedListIterator<T>(this);
+    iterator end() {
+      return iterator(0);
+    };
+
+    constIterator end() const {
+      return constIterator(0);
+    };
+
+    circularIterator circularBegin() {
+      return circularIterator(head);
+    };
+
+    circularIterator circularEnd() {
+      return circularIterator(0);
     };
 
     int size() {
-      int size = 0;
-      for (LinkedList<T> *it = this; it != 0 && it->get() != 0; size++, it = it->next()) {
+      LinkedList<T>::node *n = head;
+      int sz = 0;
+      while (n != 0) {
+        n = n->next;
+        sz++;
       }
-      return size;
-    }
-
-    void emptyList() {
-      // Delete all the LinkedList containers that we created when adding elements.
-      // Actual data of the list should be deleted by caller.
-      LinkedList<T> *e = _next;
-      while (e) {
-        LinkedList<T> *toDelete = e;
-        e = toDelete->next();
-        delete(e);
-      }
-      _e = 0;
-      _next = 0;
+      return sz;
     };
+
+    bool operator==(const LinkedList<T> &l) const {
+      return l.head == head;
+    };
+
+    bool operator!=(const LinkedList<T> &l) const {
+      return l.head != head;
+    };
+
 };
 
 template <class T> class LinkedListIterator {
   protected:
-    LinkedList<T> *_current;
+    typename LinkedList<T>::node *_current;
 
   public:
-    LinkedListIterator(LinkedList<T> *list) : _current(list) {};
+    LinkedListIterator(typename LinkedList<T>::node *node) : _current(node) {};
 
-    T *current() {
-      if (_current)
-        return _current->get();
-      else
-        return 0;
+    LinkedListIterator<T>& operator=(const LinkedListIterator<T> &l) {
+      _current = l._current;
+      return *this;
     };
 
-    /* Returns the current element and moves to next one. Returns 0 when list is exhausted.
-     */
-    T *next() {
-      if (_current) {
-        T *c = _current->get();
-        _current = _current->next();
-        return c;
+    bool operator==(LinkedListIterator<T> l) {
+      return l._current == _current;
+    }
+
+    bool operator!=(LinkedListIterator<T> l) {
+      return l._current != _current;
+    }
+
+    LinkedListIterator<T> & operator++() {
+      _current = _current->next;
+      return *this;
+    }
+
+    // Postfix operator takes an argument (that we do not use)
+    LinkedListIterator<T> operator++(int) {
+      LinkedListIterator<T> clone(*this);
+      ++(*this);
+      return clone;
+    }
+
+    T & operator*() {
+      return _current->value;
+    }
+
+    T * operator->() {
+      return &(operator*());
+    }
+};
+
+template <class T> class LinkedListConstIterator {
+  protected:
+    typename LinkedList<T>::node const *_current;
+
+  public:
+    LinkedListConstIterator(typename LinkedList<T>::node const *node) : _current(node) {};
+
+    bool operator==(LinkedListConstIterator<T> l) {
+      return l._current == _current;
+    }
+
+    bool operator!=(LinkedListConstIterator<T> l) {
+      return l._current != _current;
+    }
+
+    LinkedListConstIterator<T> & operator++() {
+      _current = _current->next;
+      return *this;
+    }
+
+    // Postfix operator takes an argument (that we do not use)
+    LinkedListConstIterator<T> operator++(int) {
+      LinkedListConstIterator<T> clone(*this);
+      _current = _current->next;
+      return clone;
+    }
+
+    const T & operator*() {
+      return _current->value;
+    }
+};
+
+template <class T> class LinkedListCircularIterator : public LinkedListIterator<T> {
+  protected:
+    typename LinkedList<T>::node *_head;
+
+  public:
+    LinkedListCircularIterator(typename LinkedList<T>::node *head) : LinkedListIterator<T>(head), _head(head) {};
+
+    LinkedListCircularIterator<T> & operator++() {
+      if (this->_current->next) {
+        this->_current = this->_current->next;
       }
       else {
-        return 0;
+        this->_current = this->_head;
       }
+      return *this;
+    };
+
+    LinkedListIterator<T> operator++(int) {
+      LinkedListIterator<T> clone(*this);
+      ++(*this);
+      return clone;
     };
 };
-
-template <class T> class CircularLinkedListIterator : public LinkedListIterator<T> {
-  private:
-    LinkedList<T> *_first;
-
-  public:
-    CircularLinkedListIterator(LinkedList<T> *list) : LinkedListIterator<T>(list), _first(list) {};
-
-    T *next() {
-      T *e = LinkedListIterator<T>::next();
-
-      // Resets the list when we have reached the end.
-      if (!this->current()) {
-        this->_current = _first;
-      }
-      return e;
-    };
-};
-

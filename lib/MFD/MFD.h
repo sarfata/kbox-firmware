@@ -141,13 +141,12 @@ class MFD {
     Display &display;
     Encoder &encoder;
     Bounce &button;
-    LinkedList<Page> pages;
+    LinkedList<Page*> pages;
+    LinkedList<Page*>::circularIterator pageIterator;
     LinkedList<Event> events;
     unsigned long int lastTick;
     
     bool firstTick = true;
-
-    CircularLinkedListIterator<Page> pageIterator;
 
     void processInputs();
     void processTicks();
