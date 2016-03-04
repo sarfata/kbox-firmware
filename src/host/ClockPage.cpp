@@ -53,7 +53,7 @@ bool ClockPage::processEvent(const ButtonEvent &e) {
 }
 
 bool ClockPage::processEvent(const TickEvent &e) {
-  static time_t lastUpdate = 0;
+  static time_ms_t lastUpdate = 0;
 
   if (e.getMillis() + 500 > lastUpdate) {
     needsPainting = true;

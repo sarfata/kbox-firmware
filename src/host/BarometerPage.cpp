@@ -41,8 +41,6 @@ void BarometerPage::willAppear() {
 }
 
 void BarometerPage::fetchValues() {
-  uint8_t reg;
-
   temperature = bmp280.readTemperature();
   pressure = bmp280.readPressure();
 
