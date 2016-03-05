@@ -20,15 +20,15 @@
 */
 
 #include "ili9341display.h"
+#include "board.h"
 
-ILI9341Display::ILI9341Display(pin_t mosi, pin_t miso, pin_t sck, pin_t cs, pin_t dc, pin_t backlight, uint8_t rotation, Size size)
-  : size(size), backlightPin(backlight)
+ILI9341Display::ILI9341Display() : size(Size(display_width, display_height)), backlightPin(display_backlight)
 {
-  display = new ILI9341_t3(cs, dc, 255 /* rst unused */, mosi, sck, miso);
+  display = new ILI9341_t3(display_cs, display_dc, 255 /* rst unused */, display_mosi, display_sck, display_miso);
 
   display->begin();
   display->fillScreen(ILI9341_BLUE);
-  display->setRotation(rotation);
+  display->setRotation(display_rotation);
 
   setBacklight(BacklightIntensityMax);
 }

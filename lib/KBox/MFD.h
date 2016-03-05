@@ -29,10 +29,9 @@
 #include <Debug.h>
 #include <List.h>
 
-#include "GC.h"
-#include "Display.h"
-#include "ili9341display.h"
-#include <font_Nunito.h>
+#include "drivers/GC.h"
+#include "drivers/Display.h"
+#include "drivers/ili9341display.h"
 
 enum EventType {
   EventTypeButton,

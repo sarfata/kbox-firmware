@@ -20,7 +20,7 @@
 */
 
 #include "IMUPage.h"
-#include "board.h"
+#include <board.h>
 
 IMUPage::IMUPage() {
   DEBUG("Initing BNO055");

@@ -20,7 +20,7 @@
 */
 
 #include "ADCPage.h"
-#include "board.h"
+#include <board.h>
 
 ADCPage::ADCPage() {
   adc.setAveraging(32);

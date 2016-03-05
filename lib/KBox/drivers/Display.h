@@ -19,25 +19,22 @@
 
 */
 
-#include <MFD.h>
-#include <Adafruit_BMP280.h>
 
-class BarometerPage : public Page {
-  private:
-    bool needsPainting;
-    int status = -1;
+#pragma once
 
-    void fetchValues();
+#include <stdint.h>
+#include "GC.h"
 
-    Adafruit_BMP280 bmp280;
-    float temperature;
-    float pressure;
+typedef uint16_t BacklightIntensity;
+const BacklightIntensity BacklightIntensityMax = 255;
+const BacklightIntensity BacklightIntensityOff = 0;
 
+class Display : public GC {
   public:
-    BarometerPage();
+    // Returns the physical size of the display in pixels
+    virtual const Size& getSize() const = 0;
 
-    void willAppear();
-    bool processEvent(const ButtonEvent &e);
-    void paint(GC &gc);
+    // Set backlight intensity
+    virtual void setBacklight(BacklightIntensity intensity);
 };
 

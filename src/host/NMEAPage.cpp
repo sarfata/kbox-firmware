@@ -19,8 +19,8 @@
 
 */
 
+#include <board.h>
 #include "NMEAPage.h"
-#include "board.h"
 
 NMEAPage::NMEAPage() {
   // Make sure both NMEA transceivers are enabled.

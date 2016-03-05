@@ -20,7 +20,8 @@
 */
 
 #include <Arduino.h>
-#include <board.h>
+#include <KBox.h>
+
 
 void setup_wifi() {
   Serial1.begin(115200);

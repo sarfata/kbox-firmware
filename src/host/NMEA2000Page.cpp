@@ -21,7 +21,7 @@
 
 #include "NMEA2000Page.h"
 #include "i2c_t3.h"
-#include "board.h"
+#include <board.h>
 
 #include "Adafruit_BMP280.h"
 
