@@ -21,8 +21,6 @@
 
 #include <SPI.h>
 #include <Encoder.h>
-#include <Bounce.h>
-#include <Adafruit_NeoPixel.h>
 #include <i2c_t3.h>
 #include <Debug.h>
 #include <KBox.h>
@@ -42,12 +40,7 @@
 #include "SdcardTestPage.h"
 #include "ClockPage.h"
 
-#define LED_PIN 13
-
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(2, neopixel_pin, NEO_GRB + NEO_KHZ800);
-
-MFD *mfd;
-TaskManager taskManager;
+KBox kbox;
 
 void setup() {
   delay(3000);
@@ -55,30 +48,13 @@ void setup() {
   DEBUG_INIT();
   DEBUG("Starting");
 
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, 1);
-  DEBUG("led ok");
+  kbox.setup();
 
-  // Initialize our I2C bus
-  //Wire1.begin();
-  // BNO055 needs up to 1ms to read 6 registers
-  //Wire1.setTimeout(5000);
-  //Wire1.setOpMode(I2C_OP_MODE_IMM);
+  digitalWrite(led_pin, 1);
 
-  DEBUG("wire ok");
+
 
   //taskManager.addTask(new IntervalTask(new BarometerTask(), 1000));
-  taskManager.setup();
-
-  DEBUG("task manager ok");
-  ILI9341Display *display = new ILI9341Display();
-  DEBUG("display ok");
-  Encoder *encoder = new Encoder(encoder_a, encoder_b);
-  pinMode(encoder_button, INPUT_PULLUP);
-  Bounce *button = new Bounce(encoder_button, 10 /* ms */);
-
-  DEBUG("Starting mfd");
-  mfd = new MFD(*display, *encoder, *button);
 
   //EncoderTestPage *encPage = new EncoderTestPage();
   //mfd->addPage(encPage);
@@ -107,16 +83,11 @@ void setup() {
   //SdcardTestPage *sdcardPage = new SdcardTestPage();
   //mfd->addPage(sdcardPage);
 
-  ClockPage *clockPage = new ClockPage();
-  mfd->addPage(clockPage);
-
-  strip.begin();
-  strip.show();
+  kbox.addPage(new ClockPage());
 
   DEBUG("setup done");
 }
 
 void loop() {
-  taskManager.loop();
-  mfd->loop();
+  kbox.loop();
 }

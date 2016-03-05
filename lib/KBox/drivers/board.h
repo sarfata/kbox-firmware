@@ -82,3 +82,4 @@ static const pin_t input_analog = A14;
 
 static const pin_t sdcard_cs = 15;
 
+void init_board();

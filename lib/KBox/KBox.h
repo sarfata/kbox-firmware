@@ -33,3 +33,23 @@
 
 
 /* Other dependencies */
+#include <Adafruit_NeoPixel.h>
+#include <Bounce.h>
+
+/* KBox class to represent all the hardware */
+class KBox {
+  private:
+    Adafruit_NeoPixel neopixels = Adafruit_NeoPixel(2, neopixel_pin, NEO_GRB + NEO_KHZ800);
+    ILI9341Display display = ILI9341Display();
+    Encoder encoder = Encoder(encoder_a, encoder_b);
+    Bounce button = Bounce(encoder_button, 10 /* ms */);
+    MFD mfd = MFD(display, encoder, button);
+    TaskManager taskManager = TaskManager();
+  
+  public:
+    void setup();
+    void loop();
+
+    void addPage(Page *p) { mfd.addPage(p); };
+    void addTask(Task *t) { taskManager.addTask(t); };
+};
