@@ -19,25 +19,17 @@
 
 */
 
+#pragma once
+
 #include <ADC.h>
-#include <MFD.h>
+#include "TaskManager.h"
 
-class ADCPage : public Page {
+class ADCTask : public Task {
   private:
-    bool needsPainting, dirty;
-    int status = -1;
-
-    void fetchValues();
-
     ADC adc;
-    float bat1, bat2, bat3, input;
+    float bat1, bat2, bat3, supply;
 
   public:
-    ADCPage();
-
-    void willAppear();
-    bool processEvent(const ButtonEvent &e);
-    bool processEvent(const TickEvent &e);
-    void paint(GC &gc);
+    void setup();
+    void loop();
 };
-

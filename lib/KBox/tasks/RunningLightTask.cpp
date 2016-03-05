@@ -19,24 +19,15 @@
 
 */
 
-#include <MFD.h>
-#include <NMEA2000.h>
-#include <N2kMessages.h>
-#include <NMEA2000_teensy.h>
+#include "../drivers/board.h"
+#include "RunningLightTask.h"
 
-class NMEA2000Page : public Page {
-  private:
-    bool needsPainting;
-    int status = -1;
+void RunningLightTask::setup() {
+  flipFlop = false;
+  digitalWrite(led_pin, flipFlop);
+}
 
-    tNMEA2000_teensy NMEA2000;
-
-  public:
-    NMEA2000Page();
-
-    void willAppear();
-    bool processEvent(const TickEvent &e);
-    bool processEvent(const ButtonEvent &e);
-    void paint(GC &gc);
-};
-
+void RunningLightTask::loop() {
+  flipFlop = !flipFlop;
+  digitalWrite(led_pin, flipFlop);
+}

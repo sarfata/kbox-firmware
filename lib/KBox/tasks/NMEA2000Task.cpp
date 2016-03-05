@@ -19,17 +19,15 @@
 
 */
 
-#include "NMEA2000Page.h"
-#include "i2c_t3.h"
-#include <board.h>
-
-#include "Adafruit_BMP280.h"
+#include <Debug.h>
+#include "../drivers/board.h"
+#include "NMEA2000Task.h"
 
 static void handler(const tN2kMsg &msg) {
   DEBUG("Received N2K Message with pgn: %i", msg.PGN);
 }
 
-NMEA2000Page::NMEA2000Page() {
+void NMEA2000Task::setup() {
   // Make sure the CAN transceiver is enabled.
   pinMode(can_standby, OUTPUT);
   digitalWrite(can_standby, 0);
@@ -59,35 +57,11 @@ NMEA2000Page::NMEA2000Page() {
   }
 }
 
-void NMEA2000Page::willAppear() {
-  needsPainting = true;
-}
-
-bool NMEA2000Page::processEvent(const TickEvent &e) {
-  DEBUG("send wind and parse messages...");
+void NMEA2000Task::loop() {
+  NMEA2000.ParseMessages();
 
   // Send test message.
-  tN2kMsg N2kMsg;
-  SetN2kWindSpeed(N2kMsg, 1, 5.0, 10.0, N2kWind_Apprent);
-  NMEA2000.SendMsg(N2kMsg);
-
-  NMEA2000.ParseMessages();
-  return true;
-}
-
-bool NMEA2000Page::processEvent(const ButtonEvent &e) {
-  if (e.clickType == ButtonEventTypePressed) {
-    needsPainting = true;
-  }
-  return true;
-}
-
-void NMEA2000Page::paint(GC &gc) {
-  if (!needsPainting)
-    return;
-
-  gc.fillRectangle(Point(0, 0), Size(320, 240), ColorBlue);
-  gc.drawText(Point(2, 5), FontDefault, ColorWhite, "  NMEA2000 Test Page");
-
-  needsPainting = false;
+  //tN2kMsg N2kMsg;
+  //SetN2kWindSpeed(N2kMsg, 1, 5.0, 10.0, N2kWind_Apprent);
+  //NMEA2000.SendMsg(N2kMsg);
 }

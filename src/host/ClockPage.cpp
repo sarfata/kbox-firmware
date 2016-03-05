@@ -71,7 +71,6 @@ void ClockPage::paint(GC &gc) {
   gc.fillRectangle(Point(0, 0), Size(320, 240), ColorBlue);
   gc.drawText(Point(2, 5), FontDefault, ColorWhite, "  Clock");
 
-  DEBUG("Printing time...");
   time_t t = now();
   snprintf(text, sizeof(text), "%02i:%02i:%02i", hour(t), minute(t), second(t));
   gc.drawText(Point(20, 80), FontDefault, ColorWhite, text);

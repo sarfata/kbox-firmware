@@ -30,14 +30,6 @@
 #include <ili9341display.h>
 #include <Bounce.h>
 
-#include "EncoderTestPage.h"
-#include "WifiTestPage.h"
-#include "ShuntMonitorPage.h"
-#include "NMEA2000Page.h"
-#include "NMEAPage.h"
-#include "IMUPage.h"
-#include "ADCPage.h"
-#include "SdcardTestPage.h"
 #include "ClockPage.h"
 
 KBox kbox;
@@ -48,11 +40,13 @@ void setup() {
   DEBUG_INIT();
   DEBUG("Starting");
 
-  kbox.setup();
 
   digitalWrite(led_pin, 1);
 
 
+  kbox.addTask(new IntervalTask(new RunningLightTask(), 250));
+  kbox.addTask(new IntervalTask(new ADCTask(), 1000));
+  kbox.addTask(new NMEA2000Task());
 
   //taskManager.addTask(new IntervalTask(new BarometerTask(), 1000));
 
@@ -85,6 +79,7 @@ void setup() {
 
   kbox.addPage(new ClockPage());
 
+  kbox.setup();
   DEBUG("setup done");
 }
 

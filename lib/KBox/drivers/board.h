@@ -78,7 +78,7 @@ static const pin_t bat2_analog = A11;
 static const pin_t bat3_analog = A10;
 static const float analog_max_voltage = 3.0 / (10000/(10000+56000.0));
 #endif
-static const pin_t input_analog = A14;
+static const pin_t supply_analog = A14;
 
 static const pin_t sdcard_cs = 15;
 

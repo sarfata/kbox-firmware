@@ -106,7 +106,7 @@ void IMUPage::paint(GC &gc) {
     snprintf(text, sizeof(text), "X: %.1f Y: %.1f Z:%.1f", eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
     gc.drawText(Point(2, 125), FontDefault, ColorWhite, text);
   } else {
-    snprintf(text, sizeof(text), "Error: %f", status);
+    snprintf(text, sizeof(text), "Error: %i", status);
     gc.drawText(Point(0, 30), FontDefault, ColorRed, text);
   }
 

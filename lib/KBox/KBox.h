@@ -27,7 +27,10 @@
 #include "drivers/ili9341display.h"
 
 /* Tasks */
+#include "tasks/RunningLightTask.h"
 #include "tasks/BarometerTask.h"
+#include "tasks/ADCTask.h"
+#include "tasks/NMEA2000Task.h"
 
 /* Pages */
 
