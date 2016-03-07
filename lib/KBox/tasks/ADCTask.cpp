@@ -50,12 +50,12 @@ void ADCTask::loop() {
   int bat2_adc = adc.analogRead(bat2_analog, ADC_0);
   int bat3_adc = adc.analogRead(bat3_analog, ADC_0);
 
-  DEBUG("ADCs: Supply: %i Bat1: %i Bat2: %i Bat3: %i", supply_adc, bat1_adc, bat2_adc, bat3_adc);
+  //DEBUG("ADCs: Supply: %i Bat1: %i Bat2: %i Bat3: %i", supply_adc, bat1_adc, bat2_adc, bat3_adc);
 
   supply = supply_adc * analog_max_voltage / adc.getMaxValue();
   bat1 = bat1_adc * analog_max_voltage / adc.getMaxValue();
   bat2 = bat2_adc * analog_max_voltage / adc.getMaxValue();
   bat3 = bat3_adc * analog_max_voltage / adc.getMaxValue();
 
-  DEBUG("ADC - Supply: %f Bat1: %f Bat2: %f Bat3: %f", supply, bat1, bat2, bat3);
+  DEBUG("ADC - Supply: %.2fV Bat1: %.2fV Bat2: %.2fV Bat3: %.2fV", supply, bat1, bat2, bat3);
 }
