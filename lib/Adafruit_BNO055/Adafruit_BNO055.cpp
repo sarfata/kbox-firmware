@@ -111,12 +111,12 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode)
   */
 
   /* Configure axis mapping (see section 3.4) */
-  /*
-  write8(BNO055_AXIS_MAP_CONFIG_ADDR, REMAP_CONFIG_P2); // P0-P7, Default is P1
+  //write8(BNO055_AXIS_MAP_CONFIG_ADDR, REMAP_CONFIG_P2); // P0-P7, Default is P1
+  write8(BNO055_AXIS_MAP_CONFIG_ADDR, 0b00001001); // P0-P7, Default is P1
   delay(10);
-  write8(BNO055_AXIS_MAP_SIGN_ADDR, REMAP_SIGN_P2); // P0-P7, Default is P1
+  //write8(BNO055_AXIS_MAP_SIGN_ADDR, REMAP_SIGN_P2); // P0-P7, Default is P1
+  write8(BNO055_AXIS_MAP_SIGN_ADDR, 0b00000000); // P0-P7, Default is P1
   delay(10);
-  */
   
   write8(BNO055_SYS_TRIGGER_ADDR, 0x0);
   delay(10);
@@ -572,7 +572,7 @@ bool Adafruit_BNO055::isFullyCalibrated(void)
 /**************************************************************************/
 bool Adafruit_BNO055::write8(adafruit_bno055_reg_t reg, byte value)
 {
-  DEBUG("Write register(%x, %x)", reg, value);
+  //DEBUG("Write register(%x, %x)", reg, value);
   Wire.beginTransmission(_address);
   #if ARDUINO >= 100
     Wire.write((uint8_t)reg);
@@ -582,7 +582,7 @@ bool Adafruit_BNO055::write8(adafruit_bno055_reg_t reg, byte value)
     Wire.send(value);
   #endif
   Wire.endTransmission();
-  DEBUG("write done");
+  //DEBUG("write done");
 
   /* ToDo: Check for error! */
   return true;
@@ -595,7 +595,7 @@ bool Adafruit_BNO055::write8(adafruit_bno055_reg_t reg, byte value)
 /**************************************************************************/
 byte Adafruit_BNO055::read8(adafruit_bno055_reg_t reg )
 {
-  DEBUG("read 8 from %x", reg);
+  //DEBUG("read 8 from %x", reg);
   byte value = 0;
 
   Wire.beginTransmission(_address);
@@ -612,7 +612,7 @@ byte Adafruit_BNO055::read8(adafruit_bno055_reg_t reg )
     value = Wire.receive();
   #endif
     
-  DEBUG("read => %x", value);
+  //DEBUG("read => %x", value);
 
   return value;
 }
@@ -624,7 +624,7 @@ byte Adafruit_BNO055::read8(adafruit_bno055_reg_t reg )
 /**************************************************************************/
 bool Adafruit_BNO055::readLen(adafruit_bno055_reg_t reg, byte * buffer, uint8_t len)
 {
-  DEBUG("read %i bytes  from %x", len, reg);
+  //DEBUG("read %i bytes  from %x", len, reg);
   Wire.beginTransmission(_address);
   #if ARDUINO >= 100
     Wire.write((uint8_t)reg);
@@ -646,7 +646,7 @@ bool Adafruit_BNO055::readLen(adafruit_bno055_reg_t reg, byte * buffer, uint8_t 
       buffer[i] = Wire.receive();
     #endif
   }
-  DEBUG("read => %i bytes", len);
+  //DEBUG("read => %i bytes", len);
 
   /* ToDo: Check for errors! */
   return true;

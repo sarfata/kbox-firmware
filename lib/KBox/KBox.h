@@ -31,6 +31,7 @@
 #include "tasks/BarometerTask.h"
 #include "tasks/ADCTask.h"
 #include "tasks/NMEA2000Task.h"
+#include "tasks/IMUTask.h"
 
 /* Pages */
 

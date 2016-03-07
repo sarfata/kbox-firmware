@@ -19,30 +19,16 @@
 
 */
 
-#include "KBox.h"
-#include <i2c_t3.h>
+#include <Adafruit_BNO055.h>
+#include "TaskManager.h"
 
-void KBox::setup() {
-  pinMode(led_pin, OUTPUT);
+class IMUTask : public Task {
+  private:
+    Adafruit_BNO055 bno055;
+    uint8_t sysCalib, gyroCalib, accelCalib, magCalib;
+    imu::Vector<3> eulerAngles;
 
-  // Initialize our I2C bus
-  Wire1.begin();
-  // BNO055 needs up to 1ms to read 6 registers
-  Wire1.setTimeout(5000);
-  //Wire1.setOpMode(I2C_OP_MODE_IMM);
-
-  pinMode(encoder_button, INPUT_PULLUP);
-
-  neopixels.begin();
-
-  neopixels.show();
-  // seems useful to make sure the neopixels are cleared every boot.
-  neopixels.show();
-
-  taskManager.setup();
-}
-
-void KBox::loop() {
-  mfd.loop();
-  taskManager.loop();
-}
+  public:
+    void setup();
+    void loop();
+};
