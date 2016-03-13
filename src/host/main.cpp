@@ -49,6 +49,8 @@ void setup() {
   kbox.addTask(new NMEA2000Task());
   kbox.addTask(new IntervalTask(new IMUTask(), 50));
   kbox.addTask(new IntervalTask(new BarometerTask(), 1000));
+  kbox.addTask(new NMEAReaderTask(NMEA1_SERIAL));
+  kbox.addTask(new NMEAReaderTask(NMEA2_SERIAL));
 
   //EncoderTestPage *encPage = new EncoderTestPage();
   //mfd->addPage(encPage);

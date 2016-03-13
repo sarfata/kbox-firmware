@@ -24,7 +24,7 @@
 #include <stdint.h>
 typedef uint16_t pin_t;
 
-
+/* "Running Light" led */
 static const pin_t led_pin = 13;
 
 /* TFT Screen Definition */
@@ -42,12 +42,15 @@ static const uint8_t display_rotation = 3;
 static const uint8_t display_rotation = 1;
 #endif
 
+/* Encoder */
 static const pin_t encoder_a = 19;
 static const pin_t encoder_b = 18;
 static const pin_t encoder_button = 17;
 
+/* NeoPixels */
 static const pin_t neopixel_pin = 22;
 
+/* ESP8266 */
 static const pin_t wifi_enable = 2;
 static const pin_t wifi_program = 5;
 static const pin_t wifi_rst = 23;
@@ -58,15 +61,22 @@ static const pin_t wifi_rst = 23;
 static const pin_t wifi_cs = 31;
 #endif
 
+/* CAN Transceiver */
 static const pin_t can_standby = 33;
 
+/* INA219 Battery Monitor */
 static const uint8_t ina219_address = 0x40;
 
+/* BMP280 Barometer */
 static const uint8_t bmp280_address = 0x76;
 
+/* Serial Transceiver */
 static const pin_t nmea1_out_enable = 24;
 static const pin_t nmea2_out_enable = 16;
+#define NMEA1_SERIAL Serial2
+#define NMEA2_SERIAL Serial3
 
+/* Analag Inputs */
 #ifdef BOARD_v1_revA
 static const pin_t bat1_analog = A10;
 static const pin_t bat2_analog = A11;
@@ -80,6 +90,7 @@ static const float analog_max_voltage = 3.0 / (10000/(10000+56000.0));
 #endif
 static const pin_t supply_analog = A14;
 
+/* SDCard Interface */
 static const pin_t sdcard_cs = 15;
 
 void init_board();

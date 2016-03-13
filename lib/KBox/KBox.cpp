@@ -33,13 +33,22 @@ void KBox::setup() {
   // BNO055 only supports up to 400kHz
   Wire1.setRate(I2C_RATE_400);
 
+  // Initialize encoder pins
   pinMode(encoder_button, INPUT_PULLUP);
 
+  // Initialize neopixels
   neopixels.begin();
-
   neopixels.show();
   // seems useful to make sure the neopixels are cleared every boot.
   neopixels.show();
+
+  // Initialize serialports
+  digitalWrite(nmea1_out_enable, 0);
+  digitalWrite(nmea2_out_enable, 0);
+  pinMode(nmea1_out_enable, OUTPUT);
+  pinMode(nmea2_out_enable, OUTPUT);
+  NMEA1_SERIAL.begin(38400);
+  NMEA2_SERIAL.begin(38400);
 
   taskManager.setup();
 }

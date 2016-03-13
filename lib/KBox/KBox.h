@@ -32,6 +32,7 @@
 #include "tasks/ADCTask.h"
 #include "tasks/NMEA2000Task.h"
 #include "tasks/IMUTask.h"
+#include "tasks/NMEAReaderTask.h"
 
 /* Pages */
 
