@@ -49,7 +49,6 @@ void IMUTask::loop() {
     //DEBUG("Vector Euler x=%f y=%f z=%f", eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
     DEBUG("Course: %.0f MAG  Pitch: %.1f  Heel: %.1f", eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
   }
-  return;
   {
     imu::Vector<3> vector = bno055.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
     DEBUG("Vector Magnetometer x=%f y=%f z=%f", vector.x(), vector.y(), vector.z());

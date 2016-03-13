@@ -47,8 +47,8 @@ void setup() {
   kbox.addTask(new IntervalTask(new RunningLightTask(), 250));
   kbox.addTask(new IntervalTask(new ADCTask(), 1000));
   kbox.addTask(new NMEA2000Task());
-
-  //taskManager.addTask(new IntervalTask(new BarometerTask(), 1000));
+  kbox.addTask(new IntervalTask(new IMUTask(), 50));
+  kbox.addTask(new IntervalTask(new BarometerTask(), 1000));
 
   //EncoderTestPage *encPage = new EncoderTestPage();
   //mfd->addPage(encPage);
