@@ -61,18 +61,6 @@ void setup() {
   //ShuntMonitorPage *shuntPage = new ShuntMonitorPage();
   //mfd->addPage(shuntPage);
 
-  //BarometerPage *barometerPage = new BarometerPage();
-  //mfd->addPage(barometerPage);
-
-  //IMUPage *imuPage = new IMUPage();
-  //mfd->addPage(imuPage);
-
-  //NMEA2000Page *nmea2000Page = new NMEA2000Page();
-  //mfd->addPage(nmea2000Page);
-
-  //NMEAPage *nmeaPage = new NMEAPage();
-  //mfd->addPage(nmeaPage);
-
   //ADCPage *adcPage = new ADCPage();
   //mfd->addPage(adcPage);
   
