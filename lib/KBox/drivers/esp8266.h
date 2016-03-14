@@ -19,22 +19,6 @@
 
 */
 
-#include "WiFiTask.h"
-#include "../drivers/board.h"
-#include "../drivers/esp8266.h"
-
-void WiFiTask::setup() {
-  esp_init();
-  DEBUG("booting ESP!");
-  esp_reboot_in_program();
-}
-
-void WiFiTask::loop() {
-  char buf[100];
-  while (WiFiSerial.available() > 0) {
-    int read = WiFiSerial.readBytes(buf, sizeof(buf) - 1);
-    buf[read] = 0;
-    DEBUG("WiFi: %s", buf);
-  }
-}
-
+void esp_init();
+void esp_reboot_in_flasher();
+void esp_reboot_in_program();

@@ -22,39 +22,32 @@
 #include <Arduino.h>
 #include <KBox.h>
 
-
-void setup_wifi() {
-  Serial1.begin(115200);
-  Serial1.setTimeout(0);
-
-  digitalWrite(wifi_enable, 0);
-  digitalWrite(wifi_rst, 0);
-
-  // wifi_program is gpio0, wifi_cs is gpio15
-  // gpio2 is pulled up in hardware
-  digitalWrite(wifi_program, 0);
-  digitalWrite(wifi_cs, 0);
-
-  pinMode(wifi_enable, OUTPUT);
-  pinMode(wifi_rst, OUTPUT);
-  pinMode(wifi_program, OUTPUT);
-  pinMode(wifi_cs, OUTPUT);
-
-  // Boot the ESP module
-  digitalWrite(wifi_enable, 1);
-  digitalWrite(wifi_rst, 1);
-}
+KBox kbox;
+bool flashMode = false;
 
 void setup() {
   Serial.begin(115200);
   Serial.setTimeout(0);
-  pinMode(led_pin, OUTPUT);
-  setup_wifi();
+
+  kbox.setup();
+  kbox.getNeopixels().setPixelColor(0, 0x00, 0x20, 0x00);
+  kbox.getNeopixels().show();
+  esp_init();
+  esp_reboot_in_program();
 }
 
 void loop() {
   digitalWrite(led_pin, 1);
   uint8_t buffer[4096];
+
+  // On most ESP, the RTS line is used to reset the module
+  // DTR is used to boot in flash - or - run program
+  if (Serial.rts() && !flashMode) {
+    kbox.getNeopixels().setPixelColor(0, 0x20, 0x00, 0x00);
+    kbox.getNeopixels().show();
+    esp_reboot_in_flasher();
+    flashMode = true;
+  }
 
   if (Serial.available()) {
     digitalWrite(led_pin, 0);

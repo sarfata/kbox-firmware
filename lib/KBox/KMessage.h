@@ -95,6 +95,7 @@ class NMEA2000Message: public KMessage {
     String toString() const {
       String s("Received N2K message with PGN: ");
       s.append(msg.PGN);
+      return s;
     };
 
     String toSignalK() const {

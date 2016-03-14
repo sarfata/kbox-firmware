@@ -49,7 +49,9 @@ class IntervalTask : public Task {
     Task *task;
 
   public:
-    IntervalTask(Task *t, uint32_t interval) : task(t), interval(interval), lastRun(0) {};
+    IntervalTask(Task *t, uint32_t interval) : interval(interval),lastRun(0) {
+      task = t;
+    };
 
     ~IntervalTask() {
       delete(task);

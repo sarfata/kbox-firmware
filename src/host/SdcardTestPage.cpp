@@ -81,7 +81,9 @@ void SdcardTestPage::willAppear() {
 bool SdcardTestPage::processEvent(const ButtonEvent &e) {
   if (e.clickType == ButtonEventTypePressed) {
     readCard();
+    return true;
   }
+  return false;
 }
 
 void SdcardTestPage::paint(GC &gc) {
