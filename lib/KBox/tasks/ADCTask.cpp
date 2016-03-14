@@ -57,5 +57,15 @@ void ADCTask::loop() {
   bat2 = bat2_adc * analog_max_voltage / adc.getMaxValue();
   bat3 = bat3_adc * analog_max_voltage / adc.getMaxValue();
 
-  DEBUG("ADC - Supply: %.2fV Bat1: %.2fV Bat2: %.2fV Bat3: %.2fV", supply, bat1, bat2, bat3);
+  //DEBUG("ADC - Supply: %.2fV Bat1: %.2fV Bat2: %.2fV Bat3: %.2fV", supply, bat1, bat2, bat3);
+
+  VoltageMeasurement m1("bat1", bat1);
+  VoltageMeasurement m2("bat2", bat2);
+  VoltageMeasurement m3("bat3", bat1);
+  VoltageMeasurement mSupply("Supply", supply);
+
+  sendMessage(m1);
+  sendMessage(m2);
+  sendMessage(m3);
+  sendMessage(mSupply);
 }

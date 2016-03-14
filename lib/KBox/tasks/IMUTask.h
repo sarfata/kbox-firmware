@@ -21,8 +21,9 @@
 
 #include <Adafruit_BNO055.h>
 #include "TaskManager.h"
+#include "KMessage.h"
 
-class IMUTask : public Task {
+class IMUTask : public Task, public KGenerator {
   private:
     Adafruit_BNO055 bno055;
     uint8_t sysCalib, gyroCalib, accelCalib, magCalib;

@@ -19,24 +19,14 @@
 
 */
 
-#include <Adafruit_BMP280.h>
-#include "TaskManager.h"
 #include "KMessage.h"
 
-class BarometerTask : public Task, public KGenerator {
-  private:
-    int status = -1;
+void KGenerator::connectTo(KReceiver &receiver) {
+  connectedReceivers.add(&receiver);
+}
 
-    void fetchValues();
-
-    Adafruit_BMP280 bmp280;
-    float temperature;
-    float pressure;
-
-  public:
-    BarometerTask() {};
-
-    void setup();
-    void loop();
-};
-
+void KGenerator::sendMessage(const KMessage &m) {
+  for (LinkedList<KReceiver*>::iterator it = connectedReceivers.begin(); it != connectedReceivers.end(); it++) {
+    (*it)->processMessage(m);
+  }
+}

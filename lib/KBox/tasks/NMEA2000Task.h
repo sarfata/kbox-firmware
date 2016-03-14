@@ -22,11 +22,15 @@
 #include <N2kMessages.h>
 #include <NMEA2000_teensy.h>
 #include <TaskManager.h>
+#include "KMessage.h"
 
-class NMEA2000Task : public Task {
+class NMEA2000Task : public Task, public KGenerator {
   tNMEA2000_teensy NMEA2000;
 
   public:
     void setup();
     void loop();
+
+    // Helper for the handler who is not a part of this class
+    void publishN2kMessage(const tN2kMsg& msg);
 };

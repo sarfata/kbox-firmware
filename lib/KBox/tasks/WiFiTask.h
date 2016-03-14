@@ -19,24 +19,21 @@
 
 */
 
-#include <Adafruit_BMP280.h>
+#pragma once
+
 #include "TaskManager.h"
 #include "KMessage.h"
+#include "Debug.h"
 
-class BarometerTask : public Task, public KGenerator {
-  private:
-    int status = -1;
-
-    void fetchValues();
-
-    Adafruit_BMP280 bmp280;
-    float temperature;
-    float pressure;
-
+class WiFiTask : public Task, public KReceiver {
   public:
-    BarometerTask() {};
+    WiFiTask() {};
 
     void setup();
     void loop();
+
+    void processMessage(const KMessage &m) {
+      //DEBUG("Wifi message: %s", m.toString().c_str());
+    };
 };
 

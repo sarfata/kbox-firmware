@@ -23,8 +23,16 @@
 #include "../drivers/board.h"
 #include "NMEA2000Task.h"
 
+static NMEA2000Task *handlerContext;
+
 static void handler(const tN2kMsg &msg) {
-  DEBUG("Received N2K Message with pgn: %i", msg.PGN);
+  //DEBUG("Received N2K Message with pgn: %i", msg.PGN);
+  handlerContext->publishN2kMessage(msg);
+}
+
+void NMEA2000Task::publishN2kMessage(const tN2kMsg& msg) {
+  NMEA2000Message m(msg);
+  sendMessage(m);
 }
 
 void NMEA2000Task::setup() {
@@ -45,6 +53,7 @@ void NMEA2000Task::setup() {
                                 2046 // Just choosen free from code list on http://www.nmea.org/Assets/20121020%20nmea%202000%20registration%20list.pdf
                                );
 
+  handlerContext = this;
   NMEA2000.SetMsgHandler(handler);
   NMEA2000.EnableForward(false);
   NMEA2000.SetMode(tNMEA2000::N2km_ListenAndNode, 22);

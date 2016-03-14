@@ -40,7 +40,9 @@ void BarometerTask::fetchValues() {
   temperature = bmp280.readTemperature();
   pressure = bmp280.readPressure();
 
-  DEBUG("Read temperature=%.2f C and pressure=%.1f hPa", temperature, pressure/100);
+  //DEBUG("Read temperature=%.2f C and pressure=%.1f hPa", temperature, pressure/100);
+  BarometerSentence s(pressure / 100);
+  sendMessage(s);
 }
 
 void BarometerTask::loop() {

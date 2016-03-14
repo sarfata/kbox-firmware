@@ -23,6 +23,7 @@
 #include "Debug.h"
 
 void NMEAReaderTask::setup() {
+  index = 0;
 }
 
 void NMEAReaderTask::loop() {
@@ -47,7 +48,9 @@ void NMEAReaderTask::loop() {
           // And we know that index is < MAX_NMEA_SENTENCE_LENGTH
           // because we tested buffer.
           buffer[index] = 0;
-          DEBUG("NMEA: %s", buffer);
+          //DEBUG("NMEA: %s", buffer);
+          NMEASentence s((char*)buffer);
+          this->sendMessage(s);
         }
         // Start again from scratch.
         index = 0;

@@ -22,11 +22,12 @@
 #pragma once
 
 #include "TaskManager.h"
+#include "KMessage.h"
 
 // completely arbitrary value. "ought to be enough..."
 #define MAX_NMEA_SENTENCE_LENGTH 200
 
-class NMEAReaderTask : public Task {
+class NMEAReaderTask : public Task, public KGenerator {
   private:
     Stream& stream;
     int index;

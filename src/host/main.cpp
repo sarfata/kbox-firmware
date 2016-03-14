@@ -25,7 +25,7 @@
 #include <Debug.h>
 #include <KBox.h>
 
-// Those are included here to force platformio to link to them. 
+// Those are included here to force platformio to link to them.
 // See issue github.com/platformio/platformio/issues/432 for a better way to do this.
 #include <ili9341display.h>
 #include <Bounce.h>
@@ -43,27 +43,44 @@ void setup() {
 
   digitalWrite(led_pin, 1);
 
+  // Create all the receiver task first
+  WiFiTask *wifi = new WiFiTask();
 
+  // Create all the generating tasks and connect them
+
+  ADCTask *adcTask = new ADCTask();
+  adcTask->connectTo(*wifi);
+
+  NMEAReaderTask *reader1 = new NMEAReaderTask(NMEA1_SERIAL);
+  NMEAReaderTask *reader2 = new NMEAReaderTask(NMEA2_SERIAL);
+  reader1->connectTo(*wifi);
+  reader2->connectTo(*wifi);
+
+  NMEA2000Task *n2kTask = new NMEA2000Task();
+  n2kTask->connectTo(*wifi);
+
+  IMUTask *imuTask = new IMUTask();
+  imuTask->connectTo(*wifi);
+
+  BarometerTask *baroTask = new BarometerTask();
+  baroTask->connectTo(*wifi);
+
+  // Add all the tasks
   kbox.addTask(new IntervalTask(new RunningLightTask(), 250));
-  kbox.addTask(new IntervalTask(new ADCTask(), 1000));
-  kbox.addTask(new NMEA2000Task());
-  kbox.addTask(new IntervalTask(new IMUTask(), 50));
-  kbox.addTask(new IntervalTask(new BarometerTask(), 1000));
-  kbox.addTask(new NMEAReaderTask(NMEA1_SERIAL));
-  kbox.addTask(new NMEAReaderTask(NMEA2_SERIAL));
+  kbox.addTask(new IntervalTask(adcTask, 1000));
+  kbox.addTask(new IntervalTask(imuTask, 50));
+  kbox.addTask(new IntervalTask(baroTask, 1000));
+  kbox.addTask(n2kTask);
+  kbox.addTask(reader1);
+  kbox.addTask(reader2);
+  kbox.addTask(wifi);
 
   //EncoderTestPage *encPage = new EncoderTestPage();
   //mfd->addPage(encPage);
 
-  //WifiTestPage *wifiPage = new WifiTestPage();
-  //mfd->addPage(wifiPage);
-
   //ShuntMonitorPage *shuntPage = new ShuntMonitorPage();
   //mfd->addPage(shuntPage);
 
-  //ADCPage *adcPage = new ADCPage();
-  //mfd->addPage(adcPage);
-  
   //SdcardTestPage *sdcardPage = new SdcardTestPage();
   //mfd->addPage(sdcardPage);
 

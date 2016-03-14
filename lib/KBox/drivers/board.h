@@ -56,10 +56,12 @@ static const pin_t wifi_program = 5;
 static const pin_t wifi_rst = 23;
 #ifdef BOARD_v1_revA
 // On v1 revA, the CS line was supposed to be 21 but was hijacked to be display_dc.
-#error No wifi cs line available on v1 revA. Use a more recent board!
+// So wifi_cs is *not* available on revA and SPI cannot be used to talk to the ESP module.
+static const pin_t wifi_cs = 0;
 #else
 static const pin_t wifi_cs = 31;
 #endif
+#define WiFiSerial Serial1
 
 /* CAN Transceiver */
 static const pin_t can_standby = 33;

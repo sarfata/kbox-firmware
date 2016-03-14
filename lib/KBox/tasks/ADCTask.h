@@ -23,8 +23,9 @@
 
 #include <ADC.h>
 #include "TaskManager.h"
+#include "KMessage.h"
 
-class ADCTask : public Task {
+class ADCTask : public Task, public KGenerator {
   private:
     ADC adc;
     float bat1, bat2, bat3, supply;

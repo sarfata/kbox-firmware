@@ -21,6 +21,7 @@
 
 #include "MFD.h"
 #include "TaskManager.h"
+#include "KMessage.h"
 
 /* Drivers */
 #include "drivers/board.h"
@@ -33,6 +34,7 @@
 #include "tasks/NMEA2000Task.h"
 #include "tasks/IMUTask.h"
 #include "tasks/NMEAReaderTask.h"
+#include "tasks/WiFiTask.h"
 
 /* Pages */
 
