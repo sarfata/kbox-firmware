@@ -31,9 +31,6 @@ class WiFiTask : public Task, public KReceiver {
 
     void setup();
     void loop();
-
-    void processMessage(const KMessage &m) {
-      //DEBUG("Wifi message: %s", m.toString().c_str());
-    };
+    void processMessage(const KMessage &m);
 };
 

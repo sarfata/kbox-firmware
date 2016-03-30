@@ -19,7 +19,6 @@
 
 */
 
-#include <ESP8266WiFi.h>
 #include <Adafruit_NeoPixel.h>
 #include <Debug.h>
 #include "NetServer.h"
@@ -31,6 +30,9 @@ NetServer server(4242);
 
 static const uint32_t connectedColor = rgb.Color(0x00, 0xff, 0x00);
 static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0xff);
+
+#include <Arduino.h>
+#include <ESP8266WiFi.h>
 
 void setup() {
   DEBUG_INIT();
@@ -44,13 +46,20 @@ void setup() {
 
   Serial.begin(115200);
   Serial.setTimeout(0);
+  Serial.setDebugOutput(true);
 
-  DEBUG("Starting KBox");
+  DEBUG("Starting KBox WiFi module");
 }
 
-uint8_t buffer[4096];
+uint8_t buffer[1024];
 
 void loop() {
+  static unsigned long int nextPrint = 0;
+  if (millis() > nextPrint) {
+    DEBUG("Still running ... %i connected clients - %i heap", server.clientsCount(), ESP.getFreeHeap());
+    nextPrint = millis() + 500;
+  }
+
   server.loop();
 
   if (Serial.available()) {

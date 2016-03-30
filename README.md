@@ -97,6 +97,7 @@ libraries have their own license.
    LGPL
  - [Time](https://github.com/PaulStoffregen/Time) is under the LGPL
  - [SdFat](https://github.com/greiman/SdFat) is under the GPL
+ - [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP) is under the LGPL
  - The Teensy core files are distributed under the MIT license with [a specific
    clause](https://forum.pjrc.com/threads/25996-Question-about-licensing-of-core-files).
    The KBox hardware includes [a bootloader chip sold by pjrc.com](http://www.pjrc.com/store/ic_mkl02.html)
@@ -244,6 +245,11 @@ origins:
     git remote add teachop-flexcan git@github.com:teachop/FlexCAN_Library.git
     git remote add paul-ili9341 git@github.com:PaulStoffregen/ILI9341_t3.git
     git remote add paul-time git@github.com:PaulStoffregen/Time.git
+    git remote add espasynctcp git@github.com:me-no-dev/ESPAsyncTCP.git
+
+To add a new subtree:
+
+    git subtree add --prefix=lib/ESPAsyncTCP espasynctcp/master
 
 To pull changes:
 

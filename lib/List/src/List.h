@@ -103,6 +103,14 @@ template <class T> class LinkedList {
       head = 0;
     };
 
+    void removeFirst() {
+      node *n = head;
+      if (head) {
+        head = head->next;
+        delete(n);
+      }
+    };
+
     iterator begin() {
       return iterator(head);
     };

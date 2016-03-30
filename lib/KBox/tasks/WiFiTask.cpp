@@ -38,3 +38,9 @@ void WiFiTask::loop() {
   }
 }
 
+void WiFiTask::processMessage(const KMessage &m) {
+    WiFiSerial.println(m.toString());
+    DEBUG("Sending %s", m.toString().c_str());
+}
+
+

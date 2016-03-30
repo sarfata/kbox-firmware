@@ -22,6 +22,46 @@
 #pragma once
 
 #include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#include <List.h>
+#include <Debug.h>
+
+/*
+ * Used to build a buffer (with a LinkedList<NetMessage>) of 
+ * messages that are waiting for each client.
+ * Using a LinkedList here is pretty inefficient.
+ * FIXME: Use a circular buffer or dynamic buffer (with a max size) instead of
+ * this.
+ */
+class NetMessage {
+  private:
+    uint8_t* _bytes;
+    int _len;
+
+  public:
+    NetMessage(uint8_t *bytes, int len) : _len(len) {
+      _bytes = (uint8_t*)malloc(len);
+      memcpy(_bytes, bytes, len);
+    };
+
+    NetMessage(const NetMessage &m) {
+      _bytes = (uint8_t*)malloc(m._len);
+      memcpy(_bytes, m._bytes, m._len);
+      _len = m._len;
+    };
+
+    ~NetMessage() {
+      free(_bytes);
+    };
+
+    int len() const {
+      return _len;
+    };
+
+    const uint8_t* bytes() const {
+      return _bytes;
+    };
+};
 
 class NetServer {
   public:
@@ -32,9 +72,12 @@ class NetServer {
     int clientsCount();
 
   private:
-    void handleNewClients();
-
     static const int maxClients = 8;
-    WiFiClient clients[maxClients];
-    WiFiServer *server;
+    AsyncClient *clients[maxClients];
+    AsyncServer server;
+
+    LinkedList<NetMessage> queues[maxClients];
+
+    void handleNewClient(AsyncClient *client);
+    void handleDisconnect(int clientIndex);
 };
