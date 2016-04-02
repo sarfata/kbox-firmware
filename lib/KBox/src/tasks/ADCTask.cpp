@@ -70,7 +70,7 @@ void ADCTask::loop() {
   VoltageMeasurement m1(2, "bat1", bat1);
   VoltageMeasurement m2(3, "bat2", bat2);
   VoltageMeasurement m3(4, "bat3", bat3);
-  VoltageMeasurement mSupply(0, "Supply", 0+supply);
+  VoltageMeasurement mSupply(0, "Supply", supply);
 
   sendMessage(m1);
   sendMessage(m2);

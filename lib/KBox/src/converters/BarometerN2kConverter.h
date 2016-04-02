@@ -19,32 +19,10 @@
 
 */
 
-#include <Debug.h>
-#include "BarometerTask.h"
-#include "i2c_t3.h"
-#include "../drivers/board.h"
+#include "KMessage.h"
 
-#include "Adafruit_BMP280.h"
+class BarometerN2kConverter : public KReceiver, public KGenerator {
+  public:
+    void processMessage(const KMessage&m);
+};
 
-void BarometerTask::setup() {
-  if (!bmp280.begin(bmp280_address)) {
-    DEBUG("Error initializing BMP280");
-    status = 1;
-  }
-  else {
-    status = 0;
-  }
-}
-
-void BarometerTask::fetchValues() {
-  temperature = bmp280.readTemperature();
-  pressure = bmp280.readPressure();
-
-  DEBUG("Read temperature=%.2f C and pressure=%.1f hPa", temperature, pressure/100);
-  BarometerMeasurement m(temperature, pressure / 100);
-  sendMessage(m);
-}
-
-void BarometerTask::loop() {
-  fetchValues();
-}

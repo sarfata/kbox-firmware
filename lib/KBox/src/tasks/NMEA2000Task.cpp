@@ -74,9 +74,14 @@ void NMEA2000Task::setup() {
 
 void NMEA2000Task::loop() {
   NMEA2000.ParseMessages();
+}
 
-  // Send test message.
-  //tN2kMsg N2kMsg;
-  //SetN2kWindSpeed(N2kMsg, 1, 5.0, 10.0, N2kWind_Apprent);
-  //NMEA2000.SendMsg(N2kMsg);
+void NMEA2000Task::processMessage(const KMessage &m) {
+  if (m.getMessageType() == KMessageType::NMEA2000Message) {
+    const NMEA2000Message& n2km = static_cast<const NMEA2000Message&>(m);
+    bool result = NMEA2000.SendMsg(n2km.getN2kMsg());
+    DEBUG("Sending message on n2k bus - pgn=%i prio=%i src=%i dst=%i len=%i result=%s", n2km.getN2kMsg().PGN, n2km.getN2kMsg().Priority,
+        n2km.getN2kMsg().Source,
+        n2km.getN2kMsg().Destination, n2km.getN2kMsg().DataLen, result ? "success":"fail");
+  }
 }

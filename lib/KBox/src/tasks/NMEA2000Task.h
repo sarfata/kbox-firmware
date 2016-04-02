@@ -24,7 +24,7 @@
 #include <TaskManager.h>
 #include "KMessage.h"
 
-class NMEA2000Task : public Task, public KGenerator {
+class NMEA2000Task : public Task, public KGenerator, public KReceiver {
   tNMEA2000_teensy NMEA2000;
 
   public:
@@ -33,4 +33,6 @@ class NMEA2000Task : public Task, public KGenerator {
 
     // Helper for the handler who is not a part of this class
     void publishN2kMessage(const tN2kMsg& msg);
+
+    void processMessage(const KMessage&);
 };

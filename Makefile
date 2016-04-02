@@ -12,8 +12,10 @@ wifi:
 	sleep 1
 	../esptool/esptool.py --port $(PORT) write_flash 0x0 .pioenvs/esp/firmware.bin
 
-runlogs:
+host:
 	platformio run -e host
+
+runlogs: host
 	sleep 1
 	miniterm.py --rts 0 $(PORT) 115200
 

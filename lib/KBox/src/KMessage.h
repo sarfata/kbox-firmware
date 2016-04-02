@@ -25,8 +25,16 @@
 #include <WString.h>
 #include "NMEA2000.h"
 
+enum class KMessageType { NMEASentence, BarometerMeasurement, VoltageMeasurement, NMEA2000Message, IMUMessage };
+
 class KMessage {
+  private:
+    KMessageType _type;
   public:
+    KMessage(KMessageType type) : _type(type) {};
+    const KMessageType& getMessageType() const {
+      return _type;
+    };
     virtual String toString() const = 0;
     virtual String toSignalK() const = 0;
 };
@@ -35,7 +43,7 @@ class NMEASentence : public KMessage {
   private:
     String sentence;
   public:
-    NMEASentence(const char *s) : sentence(s) {};
+    NMEASentence(const char *s) : KMessage(KMessageType::NMEASentence), sentence(s) {};
 
     String toString() const {
       return sentence;
@@ -46,12 +54,21 @@ class NMEASentence : public KMessage {
     };
 };
 
-class BarometerSentence : public KMessage {
+class BarometerMeasurement : public KMessage {
   private:
+    float temperature;
     float pressure;
 
   public:
-    BarometerSentence(float p) : pressure(p) {};
+    BarometerMeasurement(float t, float p) : KMessage(KMessageType::BarometerMeasurement), temperature(t), pressure(p) {};
+
+    float getTemperature() const {
+      return temperature;
+    };
+
+    float getPressure() const {
+      return pressure;
+    };
 
     String toString() const {
       String s("Current pressure is: ");
@@ -66,12 +83,12 @@ class BarometerSentence : public KMessage {
 
 class VoltageMeasurement: public KMessage {
   private:
-    String label;
     int index;
+    String label;
     float voltage;
 
   public:
-    VoltageMeasurement(int index, String label, float voltage) : index(index), label(label), voltage(voltage) {};
+    VoltageMeasurement(int index, String label, float voltage) : KMessage(KMessageType::VoltageMeasurement), index(index), label(label), voltage(voltage) {};
 
     String toString() const {
       String s("Voltage '");
@@ -99,7 +116,11 @@ class NMEA2000Message: public KMessage {
     tN2kMsg msg;
 
   public:
-    NMEA2000Message(tN2kMsg m) : msg(m) {};
+    NMEA2000Message(tN2kMsg m) : KMessage(KMessageType::NMEA2000Message), msg(m) {};
+
+    const tN2kMsg& getN2kMsg() const {
+      return msg;
+    };
 
     String toString() const;
 
@@ -114,7 +135,7 @@ class IMUMessage: public KMessage {
     float course, pitch, heel;
 
   public:
-    IMUMessage(int c, float course, float pitch, float heel) : calibration(c), course(course), pitch(pitch), heel(heel)
+    IMUMessage(int c, float course, float pitch, float heel) : KMessage(KMessageType::IMUMessage), calibration(c), course(course), pitch(pitch), heel(heel)
     {};
 
     String toString() const {

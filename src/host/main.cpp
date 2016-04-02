@@ -57,7 +57,7 @@ void setup() {
   VoltageN2kConverter *voltageConverter = new VoltageN2kConverter();
   adcTask->connectTo(*voltageConverter);
   voltageConverter->connectTo(*wifi);
-  //  voltageConverter->connectTo(*n2kTask);
+  voltageConverter->connectTo(*n2kTask);
 
   NMEAReaderTask *reader1 = new NMEAReaderTask(NMEA1_SERIAL);
   NMEAReaderTask *reader2 = new NMEAReaderTask(NMEA2_SERIAL);
@@ -68,7 +68,12 @@ void setup() {
   //imuTask->connectTo(*wifi);
 
   BarometerTask *baroTask = new BarometerTask();
-  //baroTask->connectTo(*wifi);
+
+  BarometerN2kConverter *bn2k = new BarometerN2kConverter();
+  bn2k->connectTo(*wifi);
+  bn2k->connectTo(*n2kTask);
+
+  baroTask->connectTo(*bn2k);
 
   // Add all the tasks
   kbox.addTask(new IntervalTask(new RunningLightTask(), 250));

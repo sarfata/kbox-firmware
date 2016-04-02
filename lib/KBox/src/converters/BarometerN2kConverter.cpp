@@ -19,32 +19,16 @@
 
 */
 
-#include <Debug.h>
-#include "BarometerTask.h"
-#include "i2c_t3.h"
-#include "../drivers/board.h"
+#include "BarometerN2kConverter.h"
+#include <N2kMessages.h>
 
-#include "Adafruit_BMP280.h"
-
-void BarometerTask::setup() {
-  if (!bmp280.begin(bmp280_address)) {
-    DEBUG("Error initializing BMP280");
-    status = 1;
+void BarometerN2kConverter::processMessage(const KMessage &m) {
+  if (m.getMessageType() == KMessageType::BarometerMeasurement) {
+    const BarometerMeasurement &bm = static_cast<const BarometerMeasurement&>(m);
+    tN2kMsg n2km;
+    static int sid = 0;
+    SetN2kPGN130311(n2km, sid++, N2kts_MainCabinTemperature, CToKelvin(bm.getTemperature()),
+        N2khs_InsideHumidity, 0.42, bm.getPressure());
+    sendMessage(NMEA2000Message(n2km));
   }
-  else {
-    status = 0;
-  }
-}
-
-void BarometerTask::fetchValues() {
-  temperature = bmp280.readTemperature();
-  pressure = bmp280.readPressure();
-
-  DEBUG("Read temperature=%.2f C and pressure=%.1f hPa", temperature, pressure/100);
-  BarometerMeasurement m(temperature, pressure / 100);
-  sendMessage(m);
-}
-
-void BarometerTask::loop() {
-  fetchValues();
 }

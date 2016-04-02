@@ -39,6 +39,7 @@
 
 /* Converters */
 #include "converters/VoltageN2kConverter.h"
+#include "converters/BarometerN2kConverter.h"
 
 /* Pages */
 
