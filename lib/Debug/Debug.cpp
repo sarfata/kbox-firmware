@@ -24,7 +24,8 @@
 #include <stdarg.h>
 
 #ifdef ESP8266
-#define DebugSerial Serial1
+//#define DebugSerial Serial1
+#define DebugSerial Serial
 #else
 #define DebugSerial Serial
 #endif
