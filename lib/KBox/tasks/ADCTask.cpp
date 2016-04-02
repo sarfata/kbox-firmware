@@ -23,6 +23,9 @@
 #include "ADCTask.h"
 #include "../drivers/board.h"
 
+#include <NMEA2000.h>
+#include <N2kMessages.h>
+
 void ADCTask::setup() {
   DEBUG("ADCTask setup");
   adc.setAveraging(1);
@@ -59,10 +62,15 @@ void ADCTask::loop() {
 
   //DEBUG("ADC - Supply: %.2fV Bat1: %.2fV Bat2: %.2fV Bat3: %.2fV", supply, bat1, bat2, bat3);
 
-  VoltageMeasurement m1("bat1", bat1);
-  VoltageMeasurement m2("bat2", bat2);
-  VoltageMeasurement m3("bat3", bat1);
-  VoltageMeasurement mSupply("Supply", supply);
+  // Would be nice if the indexes were configurable.
+  // In the future, we will have:
+  //  0: INA191 measured service battery voltage (+current)
+  //  1: nmea2000 supply
+  //  2/3/4: adc inputs - We could re-label them on the board
+  VoltageMeasurement m1(2, "bat1", bat1);
+  VoltageMeasurement m2(3, "bat2", bat2);
+  VoltageMeasurement m3(4, "bat3", bat3);
+  VoltageMeasurement mSupply(0, "Supply", 0+supply);
 
   sendMessage(m1);
   sendMessage(m2);

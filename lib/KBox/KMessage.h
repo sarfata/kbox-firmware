@@ -67,10 +67,11 @@ class BarometerSentence : public KMessage {
 class VoltageMeasurement: public KMessage {
   private:
     String label;
+    int index;
     float voltage;
 
   public:
-    VoltageMeasurement(String label, float voltage) : label(label), voltage(voltage) {};
+    VoltageMeasurement(int index, String label, float voltage) : index(index), label(label), voltage(voltage) {};
 
     String toString() const {
       String s("Voltage '");
@@ -83,6 +84,14 @@ class VoltageMeasurement: public KMessage {
     String toSignalK() const {
       return String("{ type: 'voltage', value: 'not implemented yet'}");
     };
+
+    int getIndex() const {
+      return index;
+    };
+
+    float getVoltage() const {
+      return voltage;
+    };
 };
 
 class NMEA2000Message: public KMessage {
@@ -92,11 +101,7 @@ class NMEA2000Message: public KMessage {
   public:
     NMEA2000Message(tN2kMsg m) : msg(m) {};
 
-    String toString() const {
-      String s("Received N2K message with PGN: ");
-      s.append(msg.PGN);
-      return s;
-    };
+    String toString() const;
 
     String toSignalK() const {
       return String("{ type: 'n2k', value: 'n2k not implemented yet'}");

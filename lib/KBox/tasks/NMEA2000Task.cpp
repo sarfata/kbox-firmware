@@ -26,7 +26,7 @@
 static NMEA2000Task *handlerContext;
 
 static void handler(const tN2kMsg &msg) {
-  //DEBUG("Received N2K Message with pgn: %i", msg.PGN);
+  DEBUG("Received N2K Message with pgn: %i", msg.PGN);
   handlerContext->publishN2kMessage(msg);
 }
 
@@ -40,18 +40,24 @@ void NMEA2000Task::setup() {
   pinMode(can_standby, OUTPUT);
   digitalWrite(can_standby, 0);
 
-  NMEA2000.SetProductInformation("00000002", // Manufacturer's Model serial code
-                                 100, // Manufacturer's product code
-                                 "Simple wind monitor",  // Manufacturer's Model ID
-                                 "1.0.0.11 (2015-11-10)",  // Manufacturer's Software version code
-                                 "1.0.0.0 (2015-11-10)" // Manufacturer's Model version
+  NMEA2000.SetProductInformation("2", // Manufacturer's Model serial code
+                                 // Manufacturer's product code
+                                 1,
+                                 // Manufacturer's Model ID
+                                 "KBox",
+                                 // Manufacturer's Software version code
+                                 "0.0.1 (2016-04-01)",
+                                 // Manufacturer's Model version
+                                 "v1 revB (2016-02-01)"
                                  );
-  //// Det device information
-  NMEA2000.SetDeviceInformation(1, // Unique number. Use e.g. Serial number.
-                                130, // Device function=Atmospheric. See codes on http://www.nmea.org/Assets/20120726%20nmea%202000%20class%20&%20function%20codes%20v%202.00.pdf
-                                55, // Device class=External Environment. See codes on  http://www.nmea.org/Assets/20120726%20nmea%202000%20class%20&%20function%20codes%20v%202.00.pdf
-                                2046 // Just choosen free from code list on http://www.nmea.org/Assets/20121020%20nmea%202000%20registration%20list.pdf
-                               );
+  //// Set device information
+  NMEA2000.SetDeviceInformation(2, // Unique number. Use e.g. Serial number.
+    // Class 25, Function 130 => Register on network as a PC Gateway.
+    // See: http://www.nmea.org/Assets/20120726%20nmea%202000%20class%20&%20function%20codes%20v%202.00.pdf
+    130, 25,
+    // Just choosen free from code list on http://www.nmea.org/Assets/20121020%20nmea%202000%20registration%20list.pdf
+    42
+  );
 
   handlerContext = this;
   NMEA2000.SetMsgHandler(handler);

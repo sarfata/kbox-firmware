@@ -48,22 +48,27 @@ void setup() {
 
   // Create all the generating tasks and connect them
 
+  NMEA2000Task *n2kTask = new NMEA2000Task();
+  n2kTask->connectTo(*wifi);
+
   ADCTask *adcTask = new ADCTask();
-  adcTask->connectTo(*wifi);
+
+  // Convert battery measurement into n2k messages before sending them to wifi.
+  VoltageN2kConverter *voltageConverter = new VoltageN2kConverter();
+  adcTask->connectTo(*voltageConverter);
+  voltageConverter->connectTo(*wifi);
+  //  voltageConverter->connectTo(*n2kTask);
 
   NMEAReaderTask *reader1 = new NMEAReaderTask(NMEA1_SERIAL);
   NMEAReaderTask *reader2 = new NMEAReaderTask(NMEA2_SERIAL);
   reader1->connectTo(*wifi);
-  reader2->connectTo(*wifi);
-
-  NMEA2000Task *n2kTask = new NMEA2000Task();
-  n2kTask->connectTo(*wifi);
+  //reader2->connectTo(*wifi);
 
   IMUTask *imuTask = new IMUTask();
-  imuTask->connectTo(*wifi);
+  //imuTask->connectTo(*wifi);
 
   BarometerTask *baroTask = new BarometerTask();
-  baroTask->connectTo(*wifi);
+  //baroTask->connectTo(*wifi);
 
   // Add all the tasks
   kbox.addTask(new IntervalTask(new RunningLightTask(), 250));

@@ -37,6 +37,9 @@
 #include "tasks/NMEAReaderTask.h"
 #include "tasks/WiFiTask.h"
 
+/* Converters */
+#include "converters/VoltageN2kConverter.h"
+
 /* Pages */
 
 
