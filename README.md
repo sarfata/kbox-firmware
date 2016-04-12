@@ -65,12 +65,42 @@ This project contains the source code for the firmware running on the host
 micro-controller (teensy-like Cortex M4 micro-controller) and the firmware
 running on the WiFi module.
 
+## Building and flashing KBox
+
 To build the project, we use the [platformio](http://platformio.org) tool. It is
 compatible with Linux, Mac OS and Windows.
 
 To compile both firmwares, install platformio and then run:
 
     $ platformio run
+
+To flash the wifi module you will first need to load a special program in the
+teensy:
+
+    $ platformio run -e program-esp
+
+At this point, the top led of the board will go blue, signaling that it is ready
+to be programmed.
+
+Compile the ESP8266 firmware with:
+
+    $ platformio run -e esp
+
+And use [esptool.py](https://github.com/themadinventor/esptool) to flash it:
+
+    $ esptool.py --port /dev/ttyACM0 write_flash 0x0 .pioens/esp/firmware.bin
+
+While flashing, the top led of KBox will go red and the running light will blink
+as data is transmitted.
+
+Finally, flash the real KBox firmware to the teensy:
+
+    $ platfomio run -e host
+
+If you have `make` available (Linux/Mac) you can do all of this in one command:
+
+    $ make wifi host
+
 
 ## Reporting problems and Sharing suggestions
 

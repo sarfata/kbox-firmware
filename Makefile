@@ -21,3 +21,7 @@ runlogs: host
 
 logs:
 	miniterm.py --rts 0 $(PORT) 115200
+
+test:
+	cd lib/List/test && make test
+	cd lib/KBox/test && make test

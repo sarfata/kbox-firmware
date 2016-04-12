@@ -21,26 +21,27 @@
 
 #pragma once
 
-#include "TaskManager.h"
-#include "KMessage.h"
+#include <stdint.h>
+#include <stdbool.h>
 
-// completely arbitrary value. "ought to be enough..."
-#define MAX_NMEA_SENTENCE_LENGTH 200
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class NMEAReaderTask : public Task, public KGenerator {
-  private:
-    HardwareSerial& stream;
-    LinkedList<NMEASentence> receiveQueue;
-    unsigned int rxValidCounter = 0;
-    unsigned int rxErrorCounter = 0;
+/* Computes the NMEA Checksum of a NMEA sentence.  The string should be
+ * null-terminated or contain a '*' (the NMEA end separator).
+ */
+uint8_t nmea_compute_checksum(const char *s);
 
-  public:
-    NMEAReaderTask(HardwareSerial&s);
+/* Returns the checsum included in an NMEA sentence or -1 if it could not be
+ * found.
+ */
+int nmea_read_checksum(const char *s);
 
-    void setup();
-    void loop();
+/* Applies some heuristic and validates the checksum to see if a NMEA sentence
+ * is valid. */
+bool nmea_is_valid(const char *s);
 
-    unsigned int getRxValidCounter() const { return rxValidCounter; };
-    unsigned int getRxErrorCounter() const { return rxErrorCounter; };
-};
-
+#ifdef __cplusplus
+}
+#endif

@@ -20,6 +20,7 @@
 */
 
 #include "KMessage.h"
+#include "util/nmea.h"
 
 /* Some helper functions to generate hex-serialized NMEA messages */
 static const char *hex = "0123456789ABCDEF";
@@ -40,18 +41,6 @@ static int appendWord(char *s, uint32_t i) {
   append2Bytes(s, i >> 16);
   append2Bytes(s + 4, i & 0xffff);
   return 8;
-}
-
-static int checksum(char *sentence) {
-  // Skip the $ at the beginning
-  int i = 1;
-
-  int checksum = 0;
-  while (sentence[i] != '*') {
-    checksum ^= sentence[i];
-    i++;
-  }
-  return checksum;
 }
 
 String NMEA2000Message::toString() const {
@@ -75,7 +64,7 @@ String NMEA2000Message::toString() const {
   }
 
   *buffer++ = '*';
-  buffer += appendByte(buffer, checksum(s));
+  buffer += appendByte(buffer, nmea_compute_checksum(s));
   *buffer = 0;
 
   String str(s);

@@ -28,3 +28,4 @@ install:
 
 script:
     - platformio run -e host -t size -e esp -t size -e program-esp -t size
+    - make test

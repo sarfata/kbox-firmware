@@ -24,6 +24,7 @@
 #include <List.h>
 #include <WString.h>
 #include "NMEA2000.h"
+#include "util/nmea.h"
 
 enum class KMessageType { NMEASentence, BarometerMeasurement, VoltageMeasurement, NMEA2000Message, IMUMessage };
 
@@ -44,6 +45,10 @@ class NMEASentence : public KMessage {
     String sentence;
   public:
     NMEASentence(const char *s) : KMessage(KMessageType::NMEASentence), sentence(s) {};
+
+    bool isValid() const {
+      return nmea_is_valid(sentence.c_str());
+    };
 
     String toString() const {
       return sentence;
