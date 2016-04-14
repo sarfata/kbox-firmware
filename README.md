@@ -107,7 +107,15 @@ If you have `make` available (Linux/Mac) you can do all of this in one command:
 If you run into problems or would like to suggest new features for this project,
 please use the [GitHub issue tracker](https://github.com/sarfata/kbox-firmware).
 
-## Contributors
+## Contributing
+
+Please post contributions on GitHub, in the form of pull-requests and add your
+name to the list of contributors below. We kindly ask that all contributors
+share their code under the MIT license. If you wish to share your code under a
+different release, please make it a library and post a pull-request to include
+your library.
+
+List of contributors:
 
  - Thomas Sarlandie
 
@@ -116,7 +124,9 @@ please use the [GitHub issue tracker](https://github.com/sarfata/kbox-firmware).
 The original code of this project is distributed under the MIT license.
 
 Please note that most of the libraries have their own license. Some are under
-the GPL. This mean that the full package of the KBox code + these libraries
+the GPL. [Because of License compatibility
+rules](https://en.wikipedia.org/wiki/License_compatibility#GPL_compatibility),
+this means that the full package of the KBox code + these libraries currently
 falls under the GPL license.
 
 Contact me if you need a distribution of only the MIT code to re-use it
