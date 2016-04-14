@@ -1,5 +1,4 @@
 /*
-
   The MIT License
 
   Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
@@ -22,15 +21,9 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 
-
-  This file is part of KBox. Unlike the rest of the project, this file is MIT
-  because no-one should ever have to write that manually. I found very very few
-  list implementation for Arduino I liked.
-
   A big thanks to NorthWestern University ~riesbeck on implementing iterators.
   Could not have done it without you!
   http://www.cs.northwestern.edu/~riesbeck/programming/c++/stl-iterator-define.html
-
 */
 
 #pragma once
