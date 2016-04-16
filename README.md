@@ -13,7 +13,7 @@ Of course KBox is designed with the [SignalK specification](http://signalk.org)
 in mind and will be compatible with it.
 
 
-KBox hardware includes:
+[KBox hardware](kbox-hw) includes:
 
  - One NMEA2000 interface,
  - Two NMEA0183 inputs (one of them can be used as a Seatalk input),
@@ -28,11 +28,15 @@ KBox hardware includes:
    to measure roll, pitch and yaw as well as a gyroscope,
  - An SDCard to record data.
 
-KBox is an open-source hardware project. You can review the schematics and build
-it yourself. We also intend to get a few batches manufactured by a professional
-board assembly house. If you are interested, put your name in our form!
+[KBox is an open-source hardware project](kbox-hw). You can review the
+schematics and build it yourself. We also intend to get a few batches
+manufactured by a professional board assembly house. If you are interested, put
+your name in our form!
 
 [I am interested in an early manufacturing batch](http://goo.gl/forms/y78AeACvyr).
+
+[Find more news about KBox on
+hackaday.io](https://hackaday.io/project/11055-kbox).
 
 ## What can I do with KBox?
 
@@ -47,13 +51,45 @@ most useful use-cases will be:
    over water, heeling angle, apparent and true wind, etc) to an SDCard to
    replay the race at a later point.
 
-However, because KBox is open-source, you can do a lot more things with it:
+Because KBox is open-source, you can do a lot more things with it:
 
  - Use KBox as a basic NMEA2000 to USB or Network gateway (for example, for
    SignalK development)
  - Build an open-source autopilot and use KBox hardware as the main sensor and
    computer (we have extension ports to connect to the actuator)
  - etc ...
+
+### Current software status
+
+As of April 2016, the KBox firmware supports:
+
+ - General functionnality
+   - Creating a new WiFi network (KBox) or joining an existing network (via simple
+     code modification and recompiling)
+   - Support up to 8 simultaneous TCP clients connected on port 4242
+   - Very basic clock on the screen
+ - NMEA0183 reception and forwarding
+   - Receiving NMEA0183 sentence from an external source and forwarding them to
+     WiFi clients via a TCP socket
+ - NMEA2000:
+   - Receiving NMEA2000 packets and translating them to `$PCDIN` nmea sentences to
+     all WiFi clients. iNavX will decode this just fine as well as a few other
+     programs.
+ - Sensors
+   - Sending nmea2000 bus voltage as well as all three battery banks voltage to
+     WiFi clients via $PCDIN nmea 2000 messages, and to the NMEA2000 network.
+   - Sending current pressure via nmea 2000 $PCDIN messages to wifi clients and
+     to the NMEA2000 network.
+
+Current focus is on improving the translation of key sentences from one network
+to the other:
+
+ - Translate NMEA0183 GPS and AIS messages to NMEA2000 messages
+ - Translate NMEA0183 messages received via WiFi to NMEA2000 messages (so that
+   you can set a waypoint on the iPad and get bearing, distance, time to reach
+   information on a NMEA2000 display)
+ - Logging everything to SDCard so we can enjoy sailing, collect a lot of data,
+   go home and continue working on new conversions from the dry comfort of home.
 
 ## KBox firmware overview
 
@@ -106,6 +142,9 @@ If you have `make` available (Linux/Mac) you can do all of this in one command:
 
 If you run into problems or would like to suggest new features for this project,
 please use the [GitHub issue tracker](https://github.com/sarfata/kbox-firmware).
+
+You can also find me (@sarfata) on the [SignalK Slack
+server](http://slack-invite.signalk.org/).
 
 ## Contributing
 
@@ -279,4 +318,4 @@ To load a firmware with GDB, simply use the `load` command:
     (gdb)
 
 ibdap: https://github.com/Armstart-com/IBDAP-CMSIS-DAP
-
+kbox-hw: https://github.com/sarfata/kbox-hardware
