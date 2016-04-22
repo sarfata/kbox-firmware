@@ -28,6 +28,7 @@ class RunningLightTask : public Task {
     bool flipFlop;
 
   public:
+    RunningLightTask() : Task("RunningLight") {};
     void setup();
     void loop();
 };

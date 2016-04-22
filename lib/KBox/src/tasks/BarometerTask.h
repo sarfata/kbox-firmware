@@ -36,7 +36,7 @@ class BarometerTask : public Task, public KGenerator {
     float pressure;
 
   public:
-    BarometerTask() {};
+    BarometerTask() : Task("Barometer") {};
 
     void setup();
     void loop();

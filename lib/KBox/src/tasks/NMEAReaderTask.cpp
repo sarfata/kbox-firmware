@@ -115,12 +115,14 @@ void serialEvent3() {
   }
 }
 
-NMEAReaderTask::NMEAReaderTask(HardwareSerial &s) : stream(s) {
+NMEAReaderTask::NMEAReaderTask(HardwareSerial &s) : Task("NMEA Reader"), stream(s) {
   if (&s == &Serial2) {
     received2 = &receiveQueue;
+    _taskName = "NMEA Reader1";
   }
   if (&s == &Serial3) {
     received3 = &receiveQueue;
+    _taskName = "NMEA Reader2";
   }
 }
 

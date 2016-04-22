@@ -29,7 +29,7 @@
 
 class WiFiTask : public Task, public KReceiver {
   public:
-    WiFiTask() {};
+    WiFiTask() : Task("WiFi") {};
 
     void setup();
     void loop();

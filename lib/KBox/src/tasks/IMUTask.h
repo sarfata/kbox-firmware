@@ -32,6 +32,7 @@ class IMUTask : public Task, public KGenerator {
     imu::Vector<3> eulerAngles;
 
   public:
+    IMUTask() : Task("IMU") {};
     void setup();
     void loop();
 };

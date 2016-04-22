@@ -33,6 +33,7 @@ class ADCTask : public Task, public KGenerator {
     float bat1, bat2, bat3, supply;
 
   public:
+    ADCTask() : Task("ADC") {};
     void setup();
     void loop();
 };

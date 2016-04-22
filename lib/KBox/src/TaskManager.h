@@ -25,11 +25,20 @@
 
 #include <Arduino.h> // for millis()
 #include <stdint.h>
+#include <limits.h>
 #include "List.h"
 
 class Task {
+  protected:
+    const char *_taskName;
+
   public:
+    Task(const char *taskName) : _taskName(taskName) {};
     virtual ~Task() {};
+
+    virtual const char *getTaskName() const {
+      return _taskName;
+    };
 
     /**
      * Performs initial setup of the task. It is ok to take some time
@@ -51,7 +60,7 @@ class IntervalTask : public Task {
     Task *task;
 
   public:
-    IntervalTask(Task *t, uint32_t interval) : interval(interval),lastRun(0) {
+    IntervalTask(Task *t, uint32_t interval) : Task(t->getTaskName()), interval(interval),lastRun(0) {
       task = t;
     };
 
@@ -72,29 +81,65 @@ class IntervalTask : public Task {
 };
 
 
+class RunStat {
+  private:
+    unsigned int runCount;
+    unsigned long totalRunTime;
+    unsigned long minRunTime;
+    unsigned long maxRunTime;
+
+  public:
+    RunStat() : runCount(0), totalRunTime(0), minRunTime(ULONG_MAX), maxRunTime(0) { };
+
+    void recordRun(unsigned long runTimeUs) {
+      runCount++;
+      totalRunTime += runTimeUs;
+      if (minRunTime == 0 || runTimeUs < minRunTime) {
+        minRunTime = runTimeUs;
+      }
+      if (runTimeUs > maxRunTime) {
+        maxRunTime = runTimeUs;
+      }
+    };
+
+    inline unsigned long count() { return runCount; };
+    inline unsigned long totalTime() { return totalRunTime; };
+    inline unsigned long maxTime() const { return maxRunTime; };
+
+    inline unsigned long minTime() const {
+      if (runCount > 0) {
+        return minRunTime;
+      }
+      else {
+        return 0;
+      }
+    };
+
+    inline unsigned long avgTime() {
+      if (runCount == 0) {
+        return 0;
+      }
+      return totalRunTime / runCount;
+    }
+};
 
 class TaskManager {
-  public:
-    TaskManager() {
-    };
-
-    void addTask(Task* task) {
-      tasks.add(task);
-    };
-
-    void setup() {
-      for (LinkedList<Task*>::iterator it = tasks.begin(); it != tasks.end(); it++) {
-        (*it)->setup();
-      }
-    };
-
-    void loop() {
-      for (LinkedList<Task*>::iterator it = tasks.begin(); it != tasks.end(); it++) {
-        (*it)->loop();
-      }
-    };
-
   private:
+    bool running = false;
     LinkedList<Task*> tasks;
+    RunStat loopStats;
+    RunStat *taskStats = 0;
+
+    elapsedMillis statDisplayTimer;
+    unsigned long statDisplayInterval = 5000;
+
+  public:
+    TaskManager() { };
+
+    void addTask(Task *t);
+    void restartStats();
+
+    void setup();
+    void loop();
 };
 

@@ -30,6 +30,7 @@ class NMEA2000Task : public Task, public KGenerator, public KReceiver {
   tNMEA2000_teensy NMEA2000;
 
   public:
+    NMEA2000Task() : Task("NMEA2000") {};
     void setup();
     void loop();
 
