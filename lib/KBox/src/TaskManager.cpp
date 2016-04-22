@@ -44,31 +44,37 @@ void TaskManager::loop() {
   elapsedMicros loopTimer;
 
   int i = 0;
-  for (LinkedList<Task*>::iterator it = tasks.begin(); it != tasks.end(); it++) {
-    elapsedMicros timer;
-    (*it)->loop();
-    if (taskStats) {
-      taskStats[i++].recordRun(timer);
+  for (LinkedList<Task*>::iterator it = tasks.begin(); it != tasks.end(); it++, i++) {
+    if ((*it)->ready()) {
+      elapsedMicros timer;
+      (*it)->loop();
+      if (taskStats) {
+        taskStats[i].recordRun(timer);
+      }
     }
   }
   loopStats.recordRun(loopTimer);
 
   if (statDisplayTimer > statDisplayInterval) {
-    DEBUG("-------------------------------------------------------------------------------------");
-    i = 0;
-    DEBUG("%2s %16s %5s %10s %9s %9s %9s", "ID", "TaskName", "Run", "Total (ms)", "Average (us)", "Min (us)", "Max (us)");
-    for (LinkedList<Task*>::iterator it = tasks.begin(); it != tasks.end(); it++) {
-      DEBUG("%2i %16s %5lu %10lu %9lu %9lu %9lu",
-          i, (*it)->getTaskName(), taskStats[i].count(), taskStats[i].totalTime() / 1000, taskStats[i].avgTime(), taskStats[i].minTime(), taskStats[i].maxTime());
-      i++;
-    }
-    DEBUG("-- %16s %5lu %10lu %9lu %9lu %9lu", "totals (in ms)",
-        loopStats.count(), loopStats.totalTime() / 1000, loopStats.avgTime() / 1000, loopStats.minTime() / 1000, loopStats.maxTime() / 1000);
-
-    DEBUG("-------------------------------------------------------------------------------------");
-
+    displayStats();
     statDisplayTimer = 0;
   }
+}
+
+void TaskManager::displayStats() {
+  DEBUG("-------------------------------------------------------------------------------------");
+  int i = 0;
+  DEBUG("%2s %16s %10s %10s %9s %9s %9s", "ID", "TaskName", "Runs", "Total (ms)", "Average (us)", "Min (us)", "Max (us)");
+  for (LinkedList<Task*>::iterator it = tasks.begin(); it != tasks.end(); it++) {
+    DEBUG("%2i %16s %10lu %10lu %9lu %9lu %9lu",
+        i, (*it)->getTaskName(), taskStats[i].count(), taskStats[i].totalTime() / 1000, 
+        taskStats[i].avgTime(), taskStats[i].minTime(), taskStats[i].maxTime());
+    i++;
+  }
+  DEBUG("-- %16s %10lu %10lu %9lu %9lu %9lu", "totals (in ms)",
+      loopStats.count(), loopStats.totalTime() / 1000, loopStats.avgTime() / 1000, loopStats.minTime() / 1000, loopStats.maxTime() / 1000);
+
+  DEBUG("-------------------------------------------------------------------------------------");
 }
 
 void TaskManager::restartStats() {

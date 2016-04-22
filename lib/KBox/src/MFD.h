@@ -34,6 +34,7 @@
 #include "drivers/GC.h"
 #include "drivers/Display.h"
 #include "drivers/ili9341display.h"
+#include "TaskManager.h"
 
 enum EventType {
   EventTypeButton,
@@ -135,7 +136,7 @@ class Page {
  * Currently defines it's HID very strictly: one encoder, one button. We could
  * make that a bit more generic in the future.
  */
-class MFD {
+class MFD : public Task {
   protected:
     // Define tick duration in ms.
     static const int tickDuration = 200;
@@ -155,6 +156,8 @@ class MFD {
 
   public:
     MFD(Display &display, Encoder &enc, Bounce &but);
+
+    void setup() {};
     void loop();
 
     void addPage(Page *p) {

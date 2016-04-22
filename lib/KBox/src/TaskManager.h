@@ -51,16 +51,23 @@ class Task {
      * Perform your work as fast as possible, do not block.
      */
     virtual void loop() = 0;
+
+    /**
+     * Whether the task is ready to run.
+     */
+    virtual bool ready() {
+      return true;
+    };
 };
 
 class IntervalTask : public Task {
   private:
     uint32_t interval;
-    uint32_t lastRun;
+    elapsedMillis timeSinceLastRun;
     Task *task;
 
   public:
-    IntervalTask(Task *t, uint32_t interval) : Task(t->getTaskName()), interval(interval),lastRun(0) {
+    IntervalTask(Task *t, uint32_t interval) : Task(t->getTaskName()), interval(interval) {
       task = t;
     };
 
@@ -72,11 +79,13 @@ class IntervalTask : public Task {
       task->setup();
     };
 
+    bool ready() {
+      return timeSinceLastRun > interval;
+    };
+
     void loop() {
-      if (millis() > lastRun + interval) {
-        task->loop();
-        lastRun = millis();
-      }
+      task->loop();
+      timeSinceLastRun = 0;
     };
 };
 
@@ -138,6 +147,7 @@ class TaskManager {
 
     void addTask(Task *t);
     void restartStats();
+    void displayStats();
 
     void setup();
     void loop();

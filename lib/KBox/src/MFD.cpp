@@ -26,7 +26,7 @@
 #undef DEBUG
 #define DEBUG(...) /* */
 
-MFD::MFD(Display & d, Encoder &e, Bounce &b) : display(d), encoder(e), button(b), pageIterator(pages.circularBegin()) {
+MFD::MFD(Display & d, Encoder &e, Bounce &b) : Task("MFD"), display(d), encoder(e), button(b), pageIterator(pages.circularBegin()) {
   display.fillRectangle(Origin, display.getSize(), ColorBlue);
   lastTick = 0;
 }

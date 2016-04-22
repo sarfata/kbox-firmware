@@ -52,10 +52,10 @@ void KBox::setup() {
   NMEA1_SERIAL.begin(38400);
   NMEA2_SERIAL.begin(38400);
 
+  taskManager.addTask(&mfd);
   taskManager.setup();
 }
 
 void KBox::loop() {
-  mfd.loop();
   taskManager.loop();
 }
