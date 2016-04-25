@@ -33,6 +33,7 @@ static void handler(const tN2kMsg &msg) {
 }
 
 void NMEA2000Task::publishN2kMessage(const tN2kMsg& msg) {
+  _rxValid++;
   NMEA2000Message m(msg);
   sendMessage(m);
 }
@@ -85,5 +86,12 @@ void NMEA2000Task::processMessage(const KMessage &m) {
     DEBUG("Sending message on n2k bus - pgn=%i prio=%i src=%i dst=%i len=%i result=%s", n2km.getN2kMsg().PGN, n2km.getN2kMsg().Priority,
         n2km.getN2kMsg().Source,
         n2km.getN2kMsg().Destination, n2km.getN2kMsg().DataLen, result ? "success":"fail");
+
+    if (result) {
+      _txValid++;
+    }
+    else {
+      _txErrors++;
+    }
   }
 }

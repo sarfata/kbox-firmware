@@ -58,7 +58,7 @@ class MFD : public Task {
     Bounce &button;
     LinkedList<Page*> pages;
     LinkedList<Page*>::circularIterator pageIterator;
-    LinkedList<Event> events;
+    LinkedList<Event*> events;
     unsigned long int lastTick;
 
     bool firstTick = true;

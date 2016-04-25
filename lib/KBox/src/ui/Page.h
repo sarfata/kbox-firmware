@@ -29,6 +29,7 @@
 #include "Event.h"
 #include "Layer.h"
 
+#include <Debug.h>
 /* A page is one simple app available on the MFD.
  *
  * - Only one page can be active at a time.
@@ -68,8 +69,10 @@ class BasePage {
 class Page : public BasePage {
   private:
     LinkedList<Layer *> _layers;
+    bool isDirty;
 
   public:
+    void willAppear();
     virtual ~Page();
     void addLayer(Layer *l);
     void paint(GC &context);

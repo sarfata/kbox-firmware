@@ -36,7 +36,7 @@ void WiFiTask::loop() {
   while (WiFiSerial.available() > 0) {
     int read = WiFiSerial.readBytes(buf, sizeof(buf) - 1);
     buf[read] = 0;
-    DEBUG("WiFi: %s", buf);
+    //DEBUG("WiFi: %s", buf);
   }
 }
 

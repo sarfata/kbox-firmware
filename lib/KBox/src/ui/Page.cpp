@@ -49,11 +49,19 @@ void Page::addLayer(Layer *l) {
   _layers.add(l);
 }
 
+void Page::willAppear() {
+  isDirty = true;
+}
+
 void Page::paint(GC &gc) {
+  if (isDirty) {
+    gc.fillRectangle(Point(0, 0), Size(320, 240), ColorBlack);
+  }
   for (LinkedList<Layer*>::iterator it = _layers.begin(); it != _layers.end(); it++) {
-    if ((*it)->isDirty()) {
+    if (isDirty || (*it)->isDirty()) {
       (*it)->paint(gc);
     }
   }
+  isDirty = false;
 }
 

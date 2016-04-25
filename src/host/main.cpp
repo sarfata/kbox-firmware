@@ -58,21 +58,21 @@ void setup() {
   // Convert battery measurement into n2k messages before sending them to wifi.
   VoltageN2kConverter *voltageConverter = new VoltageN2kConverter();
   adcTask->connectTo(*voltageConverter);
-  voltageConverter->connectTo(*wifi);
+  //voltageConverter->connectTo(*wifi);
   voltageConverter->connectTo(*n2kTask);
 
   NMEAReaderTask *reader1 = new NMEAReaderTask(NMEA1_SERIAL);
   NMEAReaderTask *reader2 = new NMEAReaderTask(NMEA2_SERIAL);
   reader1->connectTo(*wifi);
-  //reader2->connectTo(*wifi);
+  reader2->connectTo(*wifi);
 
-  IMUTask *imuTask = new IMUTask();
+  //IMUTask *imuTask = new IMUTask();
   //imuTask->connectTo(*wifi);
 
   BarometerTask *baroTask = new BarometerTask();
 
   BarometerN2kConverter *bn2k = new BarometerN2kConverter();
-  bn2k->connectTo(*wifi);
+  //bn2k->connectTo(*wifi);
   bn2k->connectTo(*n2kTask);
 
   baroTask->connectTo(*bn2k);
@@ -80,7 +80,7 @@ void setup() {
   // Add all the tasks
   kbox.addTask(new IntervalTask(new RunningLightTask(), 250));
   kbox.addTask(new IntervalTask(adcTask, 1000));
-  kbox.addTask(new IntervalTask(imuTask, 50));
+  //kbox.addTask(new IntervalTask(imuTask, 50));
   kbox.addTask(new IntervalTask(baroTask, 1000));
   kbox.addTask(n2kTask);
   kbox.addTask(reader1);
@@ -99,6 +99,14 @@ void setup() {
   BatteryMonitorPage *batPage = new BatteryMonitorPage();
   adcTask->connectTo(*batPage);
   kbox.addPage(batPage);
+
+  StatsPage *statsPage = new StatsPage();
+  statsPage->setNmea1Task(reader1);
+  statsPage->setNmea2Task(reader2);
+  statsPage->setNMEA2000Task(n2kTask);
+  statsPage->setTaskManager(&(kbox.getTaskManager()));
+
+  kbox.addPage(statsPage);
 
   kbox.setup();
   DEBUG("setup done");

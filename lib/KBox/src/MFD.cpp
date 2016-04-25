@@ -35,25 +35,25 @@ MFD::MFD(Display & d, Encoder &e, Bounce &b) : Task("MFD"), display(d), encoder(
 void MFD::processInputs() {
   /* Generate new events if needed */
   if (encoder.read() != 0) {
-    Event e = EncoderEvent(encoder.read());
+    Event *e = new EncoderEvent(encoder.read());
     encoder.write(0);
     events.add(e);
   }
   if (button.update()) {
     if (button.fallingEdge()) {
-      events.add(ButtonEvent(ButtonEventTypePressed));
+      events.add(new ButtonEvent(ButtonEventTypePressed));
     }
     else {
-      events.add(ButtonEvent(ButtonEventTypeReleased));
+      events.add(new ButtonEvent(ButtonEventTypeReleased));
     }
   }
 }
 
 void MFD::processTicks() {
   if (millis() > lastTick + tickDuration) {
-    TickEvent e = TickEvent(millis());
+    TickEvent *e = new TickEvent(millis());
     events.add(e);
-    lastTick = e.getMillis();
+    lastTick = e->getMillis();
   }
 }
 
@@ -79,18 +79,22 @@ void MFD::loop() {
   this->processInputs();
   this->processTicks();
 
-  LinkedList<Event>::iterator it = events.begin();
   if (events.size() > 0) {
     DEBUG("Processing %i events", events.size());
   }
-  for (LinkedList<Event>::iterator it = events.begin(); it != events.end(); it++) {
+  for (LinkedList<Event*>::iterator it = events.begin(); it != events.end(); it++) {
     // Forward the event to the current page. If the handler returns false, skip to next page.
-    if (!(*pageIterator)->processEvent(*it)) {
+    if ((*it)->getEventType() == EventType::EventTypeButton) {
+      ButtonEvent *be = static_cast<ButtonEvent* >(*it);
+      DEBUG("Processing button event with type: %i", be->clickType);
+    }
+    if (!(*pageIterator)->processEvent(**it)) {
       DEBUG("Going to next page.");
       (*pageIterator)->willDisappear();
       pageIterator++;
       (*pageIterator)->willAppear();
     }
+    delete(*it);
   }
   events.clear();
 

@@ -45,7 +45,7 @@
 
 /* Pages */
 #include "pages/BatteryMonitorPage.h"
-
+#include "pages/StatsPage.h"
 
 /* Other dependencies */
 #include <Adafruit_NeoPixel.h>
@@ -71,5 +71,9 @@ class KBox {
 
     Adafruit_NeoPixel& getNeopixels() {
       return neopixels;
+    };
+
+    const TaskManager& getTaskManager() const {
+      return taskManager;
     };
 };

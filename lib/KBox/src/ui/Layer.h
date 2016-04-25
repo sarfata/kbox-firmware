@@ -39,6 +39,7 @@ class Layer {
 
   public:
     Layer(Point origin, Size size) : _dirty(true), _origin(origin), _size(size) { };
+    virtual ~Layer() {};
 
     Point getOrigin() const {
       return _origin;

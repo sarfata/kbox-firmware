@@ -124,7 +124,7 @@ class RunStat {
       }
     };
 
-    inline unsigned long avgTime() {
+    inline unsigned long avgTime() const {
       if (runCount == 0) {
         return 0;
       }
@@ -148,6 +148,9 @@ class TaskManager {
     void addTask(Task *t);
     void restartStats();
     void displayStats();
+    const RunStat& getRunStat() const {
+      return loopStats;
+    };
 
     void setup();
     void loop();

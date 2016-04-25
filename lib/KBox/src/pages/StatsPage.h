@@ -24,34 +24,41 @@
 
 #pragma once
 
-#include <N2kMessages.h>
-#include <NMEA2000_teensy.h>
-#include <TaskManager.h>
-#include "KMessage.h"
+#include "ui/Page.h"
+#include "ui/TextLayer.h"
 
-class NMEA2000Task : public Task, public KGenerator, public KReceiver {
+#include "tasks/NMEAReaderTask.h"
+#include "tasks/NMEA2000Task.h"
+
+class StatsPage : public Page {
   private:
-    tNMEA2000_teensy NMEA2000;
-    unsigned int _rxValid, _txValid, _txErrors;
+    TextLayer *nmea1Rx, *nmea1Errors, *nmea2Rx, *nmea2Errors;
+    TextLayer *canRx, *canTx, *canTxErrors;
+    TextLayer *freeRam, *avgLoopTime;
 
+    const TaskManager *taskManager;
+    const NMEAReaderTask *reader1, *reader2;
+    const NMEA2000Task *nmea2000Task;
+
+    void loadView();
 
   public:
-    NMEA2000Task() : Task("NMEA2000"), _rxValid(0), _txValid(0), _txErrors(0) {};
-    void setup();
-    void loop();
+    StatsPage();
+    bool processEvent(const TickEvent &e);
 
-    // Helper for the handler who is not a part of this class
-    void publishN2kMessage(const tN2kMsg& msg);
-
-    void processMessage(const KMessage&);
-
-    unsigned int getRxValidCounter() const {
-      return _rxValid;
+    void setTaskManager(const TaskManager *t) {
+      taskManager = t;
     };
-    unsigned int getTxValidCounter() const {
-      return _txValid;
+
+    void setNmea1Task(const NMEAReaderTask *t) {
+      reader1 = t;
     };
-    unsigned int getTxErrors() const {
-      return _txErrors;
+
+    void setNmea2Task(const NMEAReaderTask *t) {
+      reader2 = t;
+    };
+
+    void setNMEA2000Task(const NMEA2000Task *t) {
+      nmea2000Task = t;
     };
 };
