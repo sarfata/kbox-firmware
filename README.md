@@ -1,5 +1,7 @@
 # KBox Firmware
 
+![Travis status](https://api.travis-ci.org/sarfata/kbox-firmware.svg)
+
 ## What is KBox?
 
 KBox connects your boat networks together and translates message from
