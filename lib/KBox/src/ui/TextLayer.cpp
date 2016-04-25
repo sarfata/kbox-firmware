@@ -53,6 +53,8 @@ void TextLayer::setFont(const Font &font) {
 }
 
 void TextLayer::paint(GC &gc) {
+  Layer::paint(gc);
+
   Point o = getOrigin();
   gc.drawText(o, _font, _color, _bgColor, _text);
 }

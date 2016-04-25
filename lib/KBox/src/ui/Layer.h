@@ -64,5 +64,7 @@ class Layer {
       return _dirty;
     };
 
-    virtual void paint(GC &gc) {};
+    virtual void paint(GC &gc) {
+      _dirty = false;
+    };
 };
