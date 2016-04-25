@@ -53,6 +53,10 @@ void ILI9341Display::drawText(Point a, Font font, Color color, const char *text)
 }
 
 void ILI9341Display::drawText(Point a, Font font, Color color, Color bgColor, const char *text) {
+  drawText(a, font, color, bgColor, String(text));
+}
+
+void ILI9341Display::drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text) {
   display->setCursor(a.x(), a.y());
   display->setTextColor(color, bgColor);
 

@@ -21,33 +21,39 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#pragma once
 
-#include <ILI9341_t3.h>
-#include "Display.h"
-#include "pin.h"
+#include "Page.h"
+#include <Debug.h>
 
-class ILI9341Display : public Display {
-  private:
-    ILI9341_t3 *display;
-    Size size;
-    pin_t backlightPin;
+bool BasePage::processEvent(const Event &e) {
+  switch (e.getEventType()) {
+    case EventTypeButton:
+      return this->processEvent((ButtonEvent&) e);
+    case EventTypeEncoder:
+      return this->processEvent((EncoderEvent&) e);
+    case EventTypeTick:
+      return this->processEvent((TickEvent&) e);
+    default:
+      DEBUG("Unsupported event.");
+      return false;
+  }
+}
 
-  public:
-    ILI9341Display();
+Page::~Page() {
+  for (LinkedList<Layer*>::iterator it = _layers.begin(); it != _layers.end(); it++) {
+    delete((*it));
+  }
+}
 
-    /* Display interface */
-    const Size& getSize() const {
-      return size;
+void Page::addLayer(Layer *l) {
+  _layers.add(l);
+}
+
+void Page::paint(GC &gc) {
+  for (LinkedList<Layer*>::iterator it = _layers.begin(); it != _layers.end(); it++) {
+    if ((*it)->isDirty()) {
+      (*it)->paint(gc);
     }
+  }
+}
 
-    void setBacklight(BacklightIntensity intensity);
-
-    /* GC interface */
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
-};

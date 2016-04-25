@@ -25,7 +25,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "GC.h"
+#include "ui/GC.h"
 
 typedef uint16_t BacklightIntensity;
 const BacklightIntensity BacklightIntensityMax = 255;

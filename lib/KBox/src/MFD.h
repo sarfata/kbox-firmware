@@ -31,100 +31,13 @@
 #include <Debug.h>
 #include <List.h>
 
-#include "drivers/GC.h"
+#include "ui/GC.h"
 #include "drivers/Display.h"
 #include "drivers/ili9341display.h"
 #include "TaskManager.h"
-
-enum EventType {
-  EventTypeButton,
-  EventTypeEncoder,
-  EventTypeTick
-};
-
-class Event {
-  private:
-    EventType type;
-
-  public:
-    Event(EventType type) : type(type) {};
-    EventType getEventType() const { return type; };
-};
-
-enum ButtonEventType {
-  ButtonEventTypePressed,
-  ButtonEventTypeReleased
-};
-class ButtonEvent : public Event {
-  private:
-  public:
-    ButtonEvent() : Event(EventTypeButton) {};
-    ButtonEvent(const ButtonEventType clickType) : Event(EventTypeButton), clickType(clickType) {};
-
-    ButtonEventType clickType;
-};
-
-class EncoderEvent : public Event {
-  public:
-    EncoderEvent(int rot) : Event(EventTypeEncoder), rotation(rot) {};
-    int rotation;
-};
-
-typedef unsigned long int time_ms_t;
-
-class TickEvent : public Event {
-  private:
-    time_ms_t millis;
-
-  public:
-    TickEvent(unsigned long int millis) : Event(EventTypeTick), millis(millis) {};
-    time_ms_t getMillis() const { return millis; };
-};
-
-
-class MFD;
-
-/* A page is one simple app available on the MFD.
- *
- * - Only one page can be active at a time.
- * - Pages know how to draw themselves on a GC.
- * - Pages know how to process incoming events.
- */
-class Page {
-  private:
-
-  public:
-    virtual void willAppear() {};
-    virtual void willDisappear() {};
-
-    virtual bool processEvent(const ButtonEvent &e) {
-      // By default button down will force switching to the next page.
-      return !(e.clickType == ButtonEventTypePressed);
-    }
-    virtual bool processEvent(const EncoderEvent &e) {
-      // By default this will be ignored.
-      return true;
-    }
-    virtual bool processEvent(const TickEvent &e) {
-      // By default this will be ignored.
-      return true;
-    };
-    virtual bool processEvent(const Event &e) {
-      switch (e.getEventType()) {
-        case EventTypeButton:
-          return this->processEvent((ButtonEvent&) e);
-        case EventTypeEncoder:
-          return this->processEvent((EncoderEvent&) e);
-        case EventTypeTick:
-          return this->processEvent((TickEvent&) e);
-        default:
-          DEBUG("Unsupported event.");
-          return false;
-      }
-    };
-    virtual void paint(GC &context) = 0;
-    virtual ~Page() {};
-};
+#include "ui/Page.h"
+#include "ui/Event.h"
+#include "ui/Page.h"
 
 /*
  * MFD or MultiFunctionDisplay manages multiple pages of information.
@@ -147,7 +60,7 @@ class MFD : public Task {
     LinkedList<Page*>::circularIterator pageIterator;
     LinkedList<Event> events;
     unsigned long int lastTick;
-    
+
     bool firstTick = true;
 
     void processInputs();

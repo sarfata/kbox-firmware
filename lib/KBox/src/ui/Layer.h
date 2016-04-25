@@ -21,33 +21,50 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
 
-#include <ILI9341_t3.h>
-#include "Display.h"
-#include "pin.h"
+#include "GC.h"
 
-class ILI9341Display : public Display {
+class Layer {
   private:
-    ILI9341_t3 *display;
-    Size size;
-    pin_t backlightPin;
+    bool _dirty;
+    Point _origin;
+    Size _size;
 
-  public:
-    ILI9341Display();
-
-    /* Display interface */
-    const Size& getSize() const {
-      return size;
+  protected:
+    void markDirty() {
+      _dirty = true;
     }
 
-    void setBacklight(BacklightIntensity intensity);
+  public:
+    Layer(Point origin, Size size) : _dirty(true), _origin(origin), _size(size) { };
 
-    /* GC interface */
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
+    Point getOrigin() const {
+      return _origin;
+    };
+    void setOrigin(const Point &p) {
+      if (p != _origin) {
+        _origin = p;
+        markDirty();
+      }
+    };
+
+    Size getSize() const {
+      return _size;
+    };
+    void setSize(const Size &s) {
+      if (s != _size) {
+        _size = s;
+        markDirty();
+      }
+    };
+
+    bool isDirty() const {
+      return _dirty;
+    };
+
+    virtual void paint(GC &gc) {
+      _dirty = false;
+    };
 };

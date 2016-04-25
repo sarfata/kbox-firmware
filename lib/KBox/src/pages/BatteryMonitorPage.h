@@ -24,31 +24,17 @@
 
 #include "MFD.h"
 #include "KMessage.h"
+#include "ui/TextLayer.h"
 
 class BatteryMonitorPage : public Page, public KReceiver {
   private:
-    bool needsPainting;
-    bool needsFullPainting;
-
-    float houseVoltage;
-    float houseCurrent;
-    bool displayHouseVoltage = false;
-    bool displayHouseCurrent = false;
-    bool houseCharging;
-
-    bool displayStarterVoltage;
-    float starterVoltage;
-
-    // We will always display this one.
-    float supplyVoltage;
+    TextLayer *houseVoltage, *houseCurrent, *starterVoltage, *supplyVoltage;
 
     Color colorForVoltage(float v);
-    const char* formatMeasurement(float measure, const char *unit, bool valid = true);
+    String formatMeasurement(float measure, const char *unit);
 
   public:
-    void paint(GC &context);
-    bool processEvent(const Event) { return true; };
-    void processMessage(const KMessage& message);
+    BatteryMonitorPage();
 
-    void willAppear();
+    void processMessage(const KMessage& message);
 };
