@@ -21,33 +21,35 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
 
-#include <ILI9341_t3.h>
-#include "Display.h"
-#include "pin.h"
+#include "WString.h"
+#include "Layer.h"
 
-class ILI9341Display : public Display {
+class TextLayer : public Layer {
   private:
-    ILI9341_t3 *display;
-    Size size;
-    pin_t backlightPin;
+    String _text;
+    Color _color;
+    Color _bgColor;
+    Font _font;
 
   public:
-    ILI9341Display();
+    TextLayer(const Point &origin, const Size &size, const String &text) : TextLayer(origin, size, text, ColorWhite, ColorBlack, FontDefault) {};
+    TextLayer(const Point &origin, const Size &size, const String &text, const Color &color, const Color &backgroundColor, const Font &font) :
+      Layer(origin, size), _text(text), _color(color), _bgColor(backgroundColor), _font(font) {};
 
-    /* Display interface */
-    const Size& getSize() const {
-      return size;
-    }
+    String getText() const { return _text; };
+    void setText(const String &s);
 
-    void setBacklight(BacklightIntensity intensity);
+    int getColor() const { return _color; };
+    void setColor(const Color &color);
 
-    /* GC interface */
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
+    Color getBackgroundColor() const { return _bgColor; };
+    void setBackgroundColor(const Color &c);
+
+    int getFont() const { return _font; };
+    void setFont(const Font &font);
+
+    virtual void paint(GC &gc);
 };

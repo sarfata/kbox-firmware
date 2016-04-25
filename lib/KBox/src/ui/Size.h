@@ -21,33 +21,33 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
 
-#include <ILI9341_t3.h>
-#include "Display.h"
-#include "pin.h"
+#include <stdint.h>
 
-class ILI9341Display : public Display {
+class Size {
   private:
-    ILI9341_t3 *display;
-    Size size;
-    pin_t backlightPin;
+    uint16_t _width, _height;
 
   public:
-    ILI9341Display();
+    Size(uint16_t w, uint16_t h) : _width(w), _height(h) {};
 
-    /* Display interface */
-    const Size& getSize() const {
-      return size;
-    }
+    uint16_t width() const {
+      return _width;
+    };
 
-    void setBacklight(BacklightIntensity intensity);
+    uint16_t height() const {
+      return _height;
+    };
 
-    /* GC interface */
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
+    bool operator==(const Size &s) const {
+      return s._width == _width && s._height == _height;
+    };
+
+    bool operator!=(const Size &s) const {
+      return !(s == *this);
+    };
+
 };
+

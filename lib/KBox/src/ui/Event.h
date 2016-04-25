@@ -21,33 +21,52 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
 
-#include <ILI9341_t3.h>
-#include "Display.h"
-#include "pin.h"
+enum EventType {
+  EventTypeButton,
+  EventTypeEncoder,
+  EventTypeTick
+};
 
-class ILI9341Display : public Display {
+class Event {
   private:
-    ILI9341_t3 *display;
-    Size size;
-    pin_t backlightPin;
+    EventType type;
 
   public:
-    ILI9341Display();
-
-    /* Display interface */
-    const Size& getSize() const {
-      return size;
-    }
-
-    void setBacklight(BacklightIntensity intensity);
-
-    /* GC interface */
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
+    Event(EventType type) : type(type) {};
+    EventType getEventType() const { return type; };
 };
+
+enum ButtonEventType {
+  ButtonEventTypePressed,
+  ButtonEventTypeReleased
+};
+class ButtonEvent : public Event {
+  private:
+  public:
+    ButtonEvent() : Event(EventTypeButton) {};
+    ButtonEvent(const ButtonEventType clickType) : Event(EventTypeButton), clickType(clickType) {};
+
+    ButtonEventType clickType;
+};
+
+class EncoderEvent : public Event {
+  public:
+    EncoderEvent(int rot) : Event(EventTypeEncoder), rotation(rot) {};
+    int rotation;
+};
+
+typedef unsigned long int time_ms_t;
+
+class TickEvent : public Event {
+  private:
+    time_ms_t millis;
+
+  public:
+    TickEvent(unsigned long int millis) : Event(EventTypeTick), millis(millis) {};
+    time_ms_t getMillis() const { return millis; };
+};
+
+

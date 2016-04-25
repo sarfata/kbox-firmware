@@ -21,33 +21,11 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
 
-#include <ILI9341_t3.h>
-#include "Display.h"
-#include "pin.h"
-
-class ILI9341Display : public Display {
-  private:
-    ILI9341_t3 *display;
-    Size size;
-    pin_t backlightPin;
-
-  public:
-    ILI9341Display();
-
-    /* Display interface */
-    const Size& getSize() const {
-      return size;
-    }
-
-    void setBacklight(BacklightIntensity intensity);
-
-    /* GC interface */
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
+enum Font {
+  FontDefault,
+  FontLarge
 };
+
