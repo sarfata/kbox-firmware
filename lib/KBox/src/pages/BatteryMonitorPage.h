@@ -21,32 +21,34 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#pragma once
 
-#include <ILI9341_t3.h>
-#include "Display.h"
-#include "pin.h"
+#include "MFD.h"
+#include "KMessage.h"
 
-class ILI9341Display : public Display {
+class BatteryMonitorPage : public Page, public KReceiver {
   private:
-    ILI9341_t3 *display;
-    Size size;
-    pin_t backlightPin;
+    bool needsPainting;
+    bool needsFullPainting;
+
+    float houseVoltage;
+    float houseCurrent;
+    bool displayHouseVoltage = false;
+    bool displayHouseCurrent = false;
+    bool houseCharging;
+
+    bool displayStarterVoltage;
+    float starterVoltage;
+
+    // We will always display this one.
+    float supplyVoltage;
+
+    Color colorForVoltage(float v);
+    const char* formatMeasurement(float measure, const char *unit, bool valid = true);
 
   public:
-    ILI9341Display();
+    void paint(GC &context);
+    bool processEvent(const Event) { return true; };
+    void processMessage(const KMessage& message);
 
-    /* Display interface */
-    const Size& getSize() const {
-      return size;
-    }
-
-    void setBacklight(BacklightIntensity intensity);
-
-    /* GC interface */
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
+    void willAppear();
 };

@@ -109,6 +109,10 @@ class VoltageMeasurement: public KMessage {
       return String("{ type: 'voltage', value: 'not implemented yet'}");
     };
 
+    String getLabel() const {
+      return label;
+    };
+
     int getIndex() const {
       return index;
     };

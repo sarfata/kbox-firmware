@@ -23,6 +23,7 @@
 */
 #include "ili9341display.h"
 #include "board.h"
+#include "font_DroidSans.h"
 
 ILI9341Display::ILI9341Display() : size(Size(display_width, display_height)), backlightPin(display_backlight)
 {
@@ -46,10 +47,23 @@ void ILI9341Display::setBacklight(BacklightIntensity intensity) {
   }
 }
 
+// TODO: delete me when everything has been updated to provide bgColor
 void ILI9341Display::drawText(Point a, Font font, Color color, const char *text) {
+  this->drawText(a, font, color, ColorBlue, text);
+}
+
+void ILI9341Display::drawText(Point a, Font font, Color color, Color bgColor, const char *text) {
   display->setCursor(a.x(), a.y());
-  display->setTextColor(color, ColorBlue);
-  display->setFont(Nunito_18);
+  display->setTextColor(color, bgColor);
+
+  switch (font) {
+    case FontDefault:
+      display->setFont(DroidSans_12);
+      break;
+    case FontLarge:
+      display->setFont(DroidSans_32);
+      break;
+  };
   display->println(text);
 }
 

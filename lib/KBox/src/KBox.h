@@ -44,6 +44,7 @@
 #include "converters/BarometerN2kConverter.h"
 
 /* Pages */
+#include "pages/BatteryMonitorPage.h"
 
 
 /* Other dependencies */

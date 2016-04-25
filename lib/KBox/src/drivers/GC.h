@@ -73,17 +73,20 @@ typedef uint16_t Color;
 // FIXME: Color definitions change with displays. This should be made display-dependent.
 static const Color ColorBlue = 0x001F;
 static const Color ColorRed = 0xF800;
+static const Color ColorGreen = 0x07E0;
 static const Color ColorWhite = 0xFFFF;
 static const Color ColorBlack = 0x0000;
 
 enum Font {
-  FontDefault
+  FontDefault,
+  FontLarge
 };
 
 /* Graphics Context offers basic drawing primitives. */
 class GC {
   public:
     virtual void drawText(Point a, Font font, Color color, const char *text) = 0;
+    virtual void drawText(Point a, Font font, Color color, Color bgColor, const char *text) = 0;
     virtual void drawLine(Point a, Point b, Color color) = 0;
     virtual void drawRectangle(Point orig, Size size, Color color) = 0;
     virtual void fillRectangle(Point orig, Size size, Color color) = 0;

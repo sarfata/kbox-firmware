@@ -69,10 +69,10 @@ void ADCTask::loop() {
   //  0: INA191 measured service battery voltage (+current)
   //  1: nmea2000 supply
   //  2/3/4: adc inputs - We could re-label them on the board
-  VoltageMeasurement m1(2, "bat1", bat1);
-  VoltageMeasurement m2(3, "bat2", bat2);
+  VoltageMeasurement mSupply(1, "supply", supply);
+  VoltageMeasurement m1(2, "house", bat1);
+  VoltageMeasurement m2(3, "starter", bat2);
   VoltageMeasurement m3(4, "bat3", bat3);
-  VoltageMeasurement mSupply(0, "Supply", supply);
 
   sendMessage(m1);
   sendMessage(m2);

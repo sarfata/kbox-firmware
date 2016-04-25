@@ -96,7 +96,9 @@ void setup() {
   //SdcardTestPage *sdcardPage = new SdcardTestPage();
   //mfd->addPage(sdcardPage);
 
-  kbox.addPage(new ClockPage());
+  BatteryMonitorPage *batPage = new BatteryMonitorPage();
+  adcTask->connectTo(*batPage);
+  kbox.addPage(batPage);
 
   kbox.setup();
   DEBUG("setup done");

@@ -23,11 +23,12 @@
 */
 #include "MFD.h"
 
+// Disable debug from MFD.
 #undef DEBUG
 #define DEBUG(...) /* */
 
 MFD::MFD(Display & d, Encoder &e, Bounce &b) : Task("MFD"), display(d), encoder(e), button(b), pageIterator(pages.circularBegin()) {
-  display.fillRectangle(Origin, display.getSize(), ColorBlue);
+  display.fillRectangle(Origin, display.getSize(), ColorBlack);
   lastTick = 0;
 }
 
@@ -84,7 +85,7 @@ void MFD::loop() {
   }
   for (LinkedList<Event>::iterator it = events.begin(); it != events.end(); it++) {
     // Forward the event to the current page. If the handler returns false, skip to next page.
-    if ((*pageIterator)->processEvent(*it)) {
+    if (!(*pageIterator)->processEvent(*it)) {
       DEBUG("Going to next page.");
       (*pageIterator)->willDisappear();
       pageIterator++;
