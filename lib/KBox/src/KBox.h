@@ -50,6 +50,7 @@
 /* Other dependencies */
 #include <Adafruit_NeoPixel.h>
 #include <Bounce.h>
+#include <font_DroidSans.h>
 
 /* KBox class to represent all the hardware */
 class KBox {
