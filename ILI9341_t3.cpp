@@ -43,6 +43,7 @@ ILI9341_t3::ILI9341_t3(uint8_t cs, uint8_t dc, uint8_t rst, uint8_t mosi, uint8_
 	textsize  = 1;
 	textcolor = textbgcolor = 0xFFFF;
 	wrap      = true;
+	setClipRect();
 	font      = NULL;
 }
 
@@ -63,7 +64,7 @@ void ILI9341_t3::pushColor(uint16_t color)
 
 void ILI9341_t3::drawPixel(int16_t x, int16_t y, uint16_t color) {
 
-	if((x < 0) ||(x >= _width) || (y < 0) || (y >= _height)) return;
+	if((x < _clipx1) ||(x >= _clipx2) || (y < _clipy1) || (y >= _clipy2)) return;
 
 	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
 	setAddr(x, y, x, y);
@@ -74,9 +75,12 @@ void ILI9341_t3::drawPixel(int16_t x, int16_t y, uint16_t color) {
 
 void ILI9341_t3::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
 {
-	// Rudimentary clipping
-	if((x >= _width) || (y >= _height)) return;
-	if((y+h-1) >= _height) h = _height-y;
+	// Rectangular clipping
+	if((x < _clipx1) || (x >= _clipx2) || (y >= _clipy2)) return;
+	if(y < _clipy1) { h = h - (_clipy1 - y); y = _clipy1;}
+	if((y+h-1) >= _clipy2) h = _clipy2-y;
+	if(h<1) return;
+
 	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
 	setAddr(x, y, x, y+h-1);
 	writecommand_cont(ILI9341_RAMWR);
@@ -85,13 +89,17 @@ void ILI9341_t3::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
 	}
 	writedata16_last(color);
 	SPI.endTransaction();
+
 }
 
 void ILI9341_t3::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
 {
-	// Rudimentary clipping
-	if((x >= _width) || (y >= _height)) return;
-	if((x+w-1) >= _width)  w = _width-x;
+	// Rectangular clipping
+	if((y < _clipy1) || (x >= _clipx2) || (y >= _clipy2)) return;
+	if(x<_clipx1) { w = w - (_clipx1 - x); x = _clipx1; }
+	if((x+w-1) >= _clipx2)  w = _clipx2-x;
+	if (w<1) return;
+
 	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
 	setAddr(x, y, x+w-1, y);
 	writecommand_cont(ILI9341_RAMWR);
@@ -104,16 +112,18 @@ void ILI9341_t3::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
 
 void ILI9341_t3::fillScreen(uint16_t color)
 {
-	fillRect(0, 0, _width, _height, color);
+	fillRect(_clipx1, _clipy1, _clipx2, _clipy2, color);
 }
 
 // fill a rectangle
 void ILI9341_t3::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 {
-	// rudimentary clipping (drawChar w/big text requires this)
-	if((x >= _width) || (y >= _height)) return;
-	if((x + w - 1) >= _width)  w = _width  - x;
-	if((y + h - 1) >= _height) h = _height - y;
+	// Rectangular clipping (drawChar w/big text requires this)
+	if((x >= _clipx2) || (y >= _clipy2)) return;
+	if((x + w - 1) >= _clipx2)  w = _clipx2  - x;
+	if((y + h - 1) >= _clipy2) h = _clipy2 - y;
+	if(x < _clipx1) x = _clipx1;
+	if(y < _clipy1) y = _clipy1;
 
 	// TODO: this can result in a very long transaction time
 	// should break this into multiple transactions, even though
@@ -172,8 +182,11 @@ void ILI9341_t3::setRotation(uint8_t m)
 		break;
 	}
 	SPI.endTransaction();
+	setClipRect();
 	cursor_x = 0;
 	cursor_y = 0;
+	origin_x = 0;
+	origin_y = 0;
 }
 
 void ILI9341_t3::setScroll(uint16_t offset)
@@ -208,14 +221,14 @@ uint8_t ILI9341_t3::readdata(void)
        // First wait until output queue is empty
         uint16_t wTimeout = 0xffff;
         while (((KINETISK_SPI0.SR) & (15 << 12)) && (--wTimeout)) ; // wait until empty
-        
+
 //       	KINETISK_SPI0.MCR |= SPI_MCR_CLR_RXF; // discard any received data
 //		KINETISK_SPI0.SR = SPI_SR_TCF;
-        
-        // Transfer a 0 out... 
-        writedata8_cont(0);   
-        
-        // Now wait until completed. 
+
+        // Transfer a 0 out...
+        writedata8_cont(0);
+
+        // Now wait until completed.
         wTimeout = 0xffff;
         while (((KINETISK_SPI0.SR) & (15 << 12)) && (--wTimeout)) ; // wait until empty
         r = KINETISK_SPI0.POPR;  // get the received byte... should check for it first...
@@ -452,7 +465,7 @@ void ILI9341_t3::begin(void)
 	writecommand_last(ILI9341_SLPOUT);    // Exit Sleep
 	SPI.endTransaction();
 
-	delay(120); 		
+	delay(120);
 	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
 	writecommand_last(ILI9341_DISPON);    // Display on
 	SPI.endTransaction();
@@ -835,6 +848,61 @@ void ILI9341_t3::drawBitmap(int16_t x, int16_t y,
   }
 }
 
+void ILI9341_t3::drawBitmap(int16_t x, int16_t y,
+			      const uint8_t *bitmap, int16_t w, int16_t h,
+			      uint16_t color, uint16_t bgcolor) {
+
+  int16_t i, j, byteWidth = (w + 7) / 8;
+// todo: optimize this with a single transaction
+  for(j=0; j<h; j++) {
+    for(i=0; i<w; i++ ) {
+      if(pgm_read_byte(bitmap + j * byteWidth + i / 8) & (128 >> (i & 7))) {
+		  	drawPixel(x+i, y+j, color);
+      } else {
+      	drawPixel(x+i, y+j, bgcolor);
+      }
+    }
+  }
+}
+
+// converts rgb 332 to rgb 565
+uint16_t conv8to16(uint8_t x) {
+	uint16_t r,g,b;
+	r = x>>5;
+	g = (x&0x1c)>2;
+	b = x&0x03;
+	return (((r<<13) + (r<<10))&0xf800) + (g<<8) + (g<<5) + (b<<3) + (b<<1) + (b>>1);
+}
+
+void ILI9341_t3::draw8Bitmap(int16_t x, int16_t y,
+			      const uint8_t *byteMap, int16_t w, int16_t h) {
+
+  int16_t i, j;
+
+  for(j=0; j<h; j++) {
+    for(i=0; i<w; i++ ) {
+      drawPixel(x+i, y+j, conv8to16(byteMap[j*w+i]));
+    }
+  }
+}
+
+void ILI9341_t3::draw8Bitmap(int16_t x, int16_t y,
+			      const uint8_t *byteMap, int16_t w, int16_t h,
+			      uint8_t transparent) {
+
+  int16_t i, j;
+
+  for(j=0; j<h; j++) {
+    for(i=0; i<w; i++ ) {
+    	uint8_t eightBit = byteMap[j*w+i];
+    	if (eightBit != transparent) {
+	      drawPixel(x+i, y+j, conv8to16(eightBit));
+      }
+    }
+  }
+}
+
+
 size_t ILI9341_t3::write(uint8_t c)
 {
 	if (font) {
@@ -853,9 +921,9 @@ size_t ILI9341_t3::write(uint8_t c)
 		} else {
 			drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize);
 			cursor_x += textsize*6;
-			if (wrap && (cursor_x > (_width - textsize*6))) {
+		if (wrap && (cursor_x > (_clipx2 - textsize*6))) {
 				cursor_y += textsize*8;
-				cursor_x = 0;
+				cursor_x = _clipx1;
 			}
 		}
 	}
@@ -866,14 +934,9 @@ size_t ILI9341_t3::write(uint8_t c)
 void ILI9341_t3::drawChar(int16_t x, int16_t y, unsigned char c,
 			    uint16_t fgcolor, uint16_t bgcolor, uint8_t size)
 {
-	if((x >= _width)            || // Clip right
-	   (y >= _height)           || // Clip bottom
-	   ((x + 6 * size - 1) < 0) || // Clip left  TODO: is this correct?
-	   ((y + 8 * size - 1) < 0))   // Clip top   TODO: is this correct?
-		return;
-
 	if (fgcolor == bgcolor) {
 		// This transparent approach is only about 20% faster
+		// Don't need to clip here since the called rendering primitives all clip
 		if (size == 1) {
 			uint8_t mask = 0x01;
 			int16_t xoff, yoff;
@@ -955,6 +1018,13 @@ void ILI9341_t3::drawChar(int16_t x, int16_t y, unsigned char c,
 			}
 		}
 	} else {
+		// Rectangular clipping
+		if((x >= _clipx2)            || // Clip right
+			 (y >= _clipy2)           || // Clip bottom
+			 ((x + 6 * size - 1) < _clipx1) || // Clip left  TODO: this is not correct
+			 ((y + 8 * size - 1) < _clipy1))   // Clip top   TODO: this is not correct
+			return;
+
 		// This solid background approach is about 5 time faster
 		SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
 		setAddr(x, y, x + 6 * size - 1, y + 8 * size - 1);
@@ -1021,6 +1091,58 @@ static uint32_t fetchbits_signed(const uint8_t *p, uint32_t index, uint32_t requ
 	return (int32_t)val;
 }
 
+
+// measure the size of a character
+void ILI9341_t3::measureChar(unsigned char c, uint16_t* w, uint16_t* h) {
+	if (font) {
+		*h = font->cap_height;
+		*w = 0;
+
+		uint32_t bitoffset;
+		const uint8_t *data;
+
+		if (c >= font->index1_first && c <= font->index1_last) {
+			bitoffset = c - font->index1_first;
+			bitoffset *= font->bits_index;
+		} else if (c >= font->index2_first && c <= font->index2_last) {
+			bitoffset = c - font->index2_first + font->index1_last - font->index1_first + 1;
+			bitoffset *= font->bits_index;
+		} else if (font->unicode) {
+			return; // TODO: implement sparse unicode
+		} else {
+			return;
+		}
+
+		data = font->data + fetchbits_unsigned(font->index, bitoffset, font->bits_index);
+
+		uint32_t encoding = fetchbits_unsigned(data, 0, 3);
+
+		if (encoding != 0) return;
+
+		//uint32_t width =
+		fetchbits_unsigned(data, 3, font->bits_width);
+		bitoffset = font->bits_width + 3;
+
+		//uint32_t height =
+		fetchbits_unsigned(data, bitoffset, font->bits_height);
+		bitoffset += font->bits_height;
+
+		//int32_t xoffset =
+		fetchbits_signed(data, bitoffset, font->bits_xoffset);
+		bitoffset += font->bits_xoffset;
+
+		//int32_t yoffset =
+		fetchbits_signed(data, bitoffset, font->bits_yoffset);
+		bitoffset += font->bits_yoffset;
+
+		uint32_t delta = fetchbits_unsigned(data, bitoffset, font->bits_delta);
+		*w = delta;
+	} else {
+		*w = 6 * textsize;
+		*h = 8 * textsize;
+	}
+
+}
 
 void ILI9341_t3::drawFontChar(unsigned int c)
 {
@@ -1091,24 +1213,51 @@ void ILI9341_t3::drawFontChar(unsigned int c)
 	int32_t linecount = height;
 	//uint32_t loopcount = 0;
 	uint32_t y = origin_y;
+	bool opaque = (textbgcolor != textcolor);
+	if (opaque) {
+//		Serial.printf("cursor_x %d, cursor_y %d, delta %d, line_space %d, width %d, height %d\n",
+//									 cursor_x   , cursor_y   , delta,    font->line_space, width, height);
+		int header = origin_y-cursor_y;
+		// clear above character
+		fillRect(cursor_x-delta,cursor_y,delta,header, textbgcolor);
+
+		// clear below character
+		fillRect(cursor_x-delta,origin_y+height,delta, font->line_space - (height + header), textbgcolor);
+	}
 	while (linecount) {
 		//Serial.printf("    linecount = %d\n", linecount);
 		uint32_t b = fetchbit(data, bitoffset++);
 		if (b == 0) {
 			//Serial.println("    single line");
+			if (opaque && (origin_x > cursor_x-(int32_t)delta)) {
+				drawFastHLine(cursor_x-delta, y, origin_x - (cursor_x-delta), textbgcolor);
+			}
 			uint32_t x = 0;
 			do {
 				uint32_t xsize = width - x;
 				if (xsize > 32) xsize = 32;
 				uint32_t bits = fetchbits_unsigned(data, bitoffset, xsize);
-				drawFontBits(bits, xsize, origin_x + x, y, 1);
+				if (!opaque) {
+					drawFontBits(bits, xsize, origin_x + x, y, 1);
+				} else {
+					drawFontBitsOpaque(bits, xsize, origin_x + x, y, 1);
+				}
 				bitoffset += xsize;
 				x += xsize;
 			} while (x < width);
+
+			int remaining = cursor_x-origin_x-width;
+			if (opaque && remaining > 0) {
+				drawFastHLine(origin_x+width, y, remaining, textbgcolor);
+			}
+
 			y++;
 			linecount--;
 		} else {
 			uint32_t n = fetchbits_unsigned(data, bitoffset, 3) + 2;
+			if (opaque && (origin_x > cursor_x-(int32_t)delta)) {
+				fillRect(cursor_x-delta, y, origin_x - (cursor_x-delta), n, textbgcolor);
+			}
 			bitoffset += 3;
 			uint32_t x = 0;
 			do {
@@ -1116,10 +1265,20 @@ void ILI9341_t3::drawFontChar(unsigned int c)
 				if (xsize > 32) xsize = 32;
 				//Serial.printf("    multi line %d\n", n);
 				uint32_t bits = fetchbits_unsigned(data, bitoffset, xsize);
-				drawFontBits(bits, xsize, origin_x + x, y, n);
+				if (!opaque) {
+					drawFontBits(bits, xsize, origin_x + x, y, n);
+				} else {
+					drawFontBitsOpaque(bits, xsize, origin_x + x, y, n);
+				}
 				bitoffset += xsize;
 				x += xsize;
 			} while (x < width);
+
+			int remaining = cursor_x-origin_x-width;
+			if (opaque && remaining > 0) {
+				fillRect(origin_x+width, y, remaining, n, textbgcolor);
+			}
+
 			y += n;
 			linecount -= n;
 		}
@@ -1132,7 +1291,7 @@ void ILI9341_t3::drawFontChar(unsigned int c)
 
 void ILI9341_t3::drawFontBits(uint32_t bits, uint32_t numbits, uint32_t x, uint32_t y, uint32_t repeat)
 {
-#if 0			
+#if 0
 	// TODO: replace this *slow* code with something fast...
 	//Serial.printf("      %d bits at %d,%d: %X\n", numbits, x, y, bits);
 	if (bits == 0) return;
@@ -1157,12 +1316,12 @@ void ILI9341_t3::drawFontBits(uint32_t bits, uint32_t numbits, uint32_t x, uint3
 	int w = 0;
 	do {
 		uint32_t x1 = x;
-		uint32_t n = numbits;		
-		
+		uint32_t n = numbits;
+
 		writecommand_cont(ILI9341_PASET); // Row addr set
 		writedata16_cont(y);   // YSTART
-		writedata16_cont(y);   // YEND	
-		
+		writedata16_cont(y);   // YEND
+
 		do {
 			n--;
 			if (bits & (1 << n)) {
@@ -1172,14 +1331,14 @@ void ILI9341_t3::drawFontBits(uint32_t bits, uint32_t numbits, uint32_t x, uint3
 				// "drawFastHLine(x1 - w, y, w, textcolor)"
 				writecommand_cont(ILI9341_CASET); // Column addr set
 				writedata16_cont(x1 - w);   // XSTART
-				writedata16_cont(x1);   // XEND					
+				writedata16_cont(x1);   // XEND
 				writecommand_cont(ILI9341_RAMWR);
 				while (w-- > 1) { // draw line
 					writedata16_cont(textcolor);
 				}
 				writedata16_last(textcolor);
 			}
-						
+
 			x1++;
 		} while (n > 0);
 
@@ -1188,18 +1347,69 @@ void ILI9341_t3::drawFontBits(uint32_t bits, uint32_t numbits, uint32_t x, uint3
 				writecommand_cont(ILI9341_CASET); // Column addr set
 				writedata16_cont(x1 - w);   // XSTART
 				writedata16_cont(x1);   // XEND
-				writecommand_cont(ILI9341_RAMWR);				
+				writecommand_cont(ILI9341_RAMWR);
 				while (w-- > 1) { //draw line
 					writedata16_cont(textcolor);
 				}
 				writedata16_last(textcolor);
 		}
-		
+
 		y++;
 		repeat--;
 	} while (repeat);
 	SPI.endTransaction();
-#endif	
+#endif
+}
+
+void ILI9341_t3::drawFontBitsOpaque(uint32_t bits, uint32_t numbits, uint32_t x, uint32_t y, uint32_t repeat)
+{
+	// TODO: replace this *slow* code with something fast...
+	if (bits == 0) {
+		while (repeat) {
+			drawFastHLine(x,y++, numbits, textbgcolor);
+			repeat--;
+		};
+		return;
+	}
+
+	do {
+		uint32_t x1 = x;
+		uint32_t n = numbits;
+		int w;
+		int bgw;
+
+		w = 0;
+		bgw = 0;
+
+		do {
+			n--;
+			if (bits & (1 << n)) {
+				if (bgw>0) {
+					drawFastHLine(x1 - bgw, y, bgw, textbgcolor);
+					bgw=0;
+				}
+				w++;
+			} else {
+				if (w>0) {
+					drawFastHLine(x1 - w, y, w, textcolor);
+					w = 0;
+				}
+				bgw++;
+			}
+			x1++;
+		} while (n > 0);
+
+		if (w > 0) {
+			drawFastHLine(x1 - w, y, w, textcolor);
+		}
+
+		if (bgw > 0) {
+			drawFastHLine(x1 - bgw, y, bgw, textbgcolor);
+		}
+
+		y++;
+		repeat--;
+	} while (repeat);
 }
 
 void ILI9341_t3::setCursor(int16_t x, int16_t y) {
@@ -1231,7 +1441,7 @@ void ILI9341_t3::setTextColor(uint16_t c, uint16_t b) {
 }
 
 void ILI9341_t3::setTextWrap(boolean w) {
-  wrap = w;
+	wrap = w;
 }
 
 boolean ILI9341_t3::getTextWrap()
@@ -1239,15 +1449,97 @@ boolean ILI9341_t3::getTextWrap()
 	return wrap;
 }
 
+
+void ILI9341_t3::drawText(const char* text, const char* wrapChars) {
+
+    if (!wrapChars) {
+      int16_t origx = cursor_x;
+
+      int i = 0;
+      while (text[i] != 0) {
+        write(text[i]);
+
+        // don't wrap to the left, wrap to the original spot
+        if (wrap && text[i] == '\n') {
+          cursor_x = origx;
+          cursor_y += fontLineSpace();
+        }
+        i++;
+      }
+    } else {
+    int i = 0;
+
+    int16_t left = getCursorX();
+    int16_t right = _clipx2;
+    int textlen = strlen(text);
+    while (i < textlen) {
+      int16_t x = getCursorX();
+
+      const char* curPos = text+i;
+
+      int j = 0;
+      const char* nextWord = curPos + strlen(curPos);
+      while (wrapChars[j]) {
+        const char* nextWrapChar = strchr(curPos, wrapChars[j]);
+        if (nextWrapChar) {
+          nextWord = min(nextWord, nextWrapChar);
+        }
+        j++;
+      }
+
+      int wordLen = nextWord - curPos + 1;
+
+      char curWord[wordLen+1];
+      strncpy(curWord, curPos, wordLen);
+      curWord[wordLen] = 0;
+
+      if (x+measureTextWidth(curWord) > right) {
+        setCursor(left, getCursorY()+fontLineSpace());
+      }
+
+      drawText(curWord);
+      i+=wordLen;
+    }
+  }
+}
+
+uint16_t ILI9341_t3::measureTextWidth(const char* text) {
+  uint16_t maxH = 0;
+  uint16_t currH = 0;
+  for (const char* i = text; *i != 0; i++) {
+    if (*i == '\n') {
+      if (currH > maxH)
+        maxH = currH;
+      currH = 0;
+    } else {
+      uint16_t h, w;
+      measureChar(*i, &w, &h);
+      currH += w;
+    }
+  }
+  uint16_t h = maxH > currH ? maxH : currH;
+  return h;
+}
+
+uint16_t ILI9341_t3::measureTextHeight(const char* text) {
+  int lines = 1;
+  for (const char* i = text; *i != 0; i++) {
+    if (*i == '\n') {
+      lines++;
+    }
+  }
+  return ((lines-1) * fontLineSpace() + fontCapHeight());
+}
+
 uint8_t ILI9341_t3::getRotation(void) {
-  return rotation;
+	return rotation;
 }
 
 void ILI9341_t3::sleep(bool enable) {
 	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
 	if (enable) {
-		writecommand_cont(ILI9341_DISPOFF);		
-		writecommand_last(ILI9341_SLPIN);	
+		writecommand_cont(ILI9341_DISPOFF);
+		writecommand_last(ILI9341_SLPIN);
 		  SPI.endTransaction();
 	} else {
 		writecommand_cont(ILI9341_DISPON);
