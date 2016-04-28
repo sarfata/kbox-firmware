@@ -43,7 +43,8 @@ void StatsPage::loadView() {
   static const int row3 = row2 + rowHeight;
   static const int row4 = row3 + rowHeight;
 
-  static const int row5 = 240 - rowHeight - margin;
+  static const int row6 = 240 - rowHeight - margin;
+  static const int row5 = row6 - rowHeight;
 
   //FIXME: the width below are incorrect. it might matter some day ...
   addLayer(new TextLayer(Point(col1, row1), Size(colWidth, rowHeight), "N1 Rx:"));
@@ -66,24 +67,29 @@ void StatsPage::loadView() {
   canTxErrors = new TextLayer(Point(col4, row3), Size(colWidth, rowHeight), "0");
   addLayer(canRx); addLayer(canTx); addLayer(canTxErrors);
 
-  addLayer(new TextLayer(Point(col1, row5), Size(colWidth, rowHeight), "Free RAM:"));
-  addLayer(new TextLayer(Point(col3, row5), Size(colWidth, rowHeight), "Avg Loop:"));
+  addLayer(new TextLayer(Point(col1, row5), Size(colWidth, rowHeight), "Used RAM:"));
+  addLayer(new TextLayer(Point(col1, row6), Size(colWidth, rowHeight), "Free RAM:"));
+  addLayer(new TextLayer(Point(col3, row6), Size(colWidth, rowHeight), "Avg Loop:"));
 
-  freeRam = new TextLayer(Point(col2, row5), Size(colWidth, rowHeight), "0");
-  avgLoopTime = new TextLayer(Point(col4, row5), Size(colWidth, rowHeight), "0");
-  addLayer(freeRam); addLayer(avgLoopTime);
+  usedRam = new TextLayer(Point(col2, row5), Size(colWidth, rowHeight), "0");
+  freeRam = new TextLayer(Point(col2, row6), Size(colWidth, rowHeight), "0");
+  avgLoopTime = new TextLayer(Point(col4, row6), Size(colWidth, rowHeight), "0");
+  addLayer(usedRam); addLayer(freeRam); addLayer(avgLoopTime);
 }
 
 // https://forum.pjrc.com/threads/25676-Teensy-3-how-to-know-RAM-usage
 // http://man7.org/linux/man-pages/man3/mallinfo.3.html
-int getFreeRam() 
-{ 
+int getFreeRam() {
   return mallinfo().arena - mallinfo().keepcost;
+}
+
+int getUsedRam() {
+  return mallinfo().uordblks;
 }
 
 bool StatsPage::processEvent(const TickEvent &e) {
   if (taskManager) {
-    avgLoopTime->setText(String(taskManager->getRunStat().avgTime()));
+    avgLoopTime->setText(String(taskManager->getRunStat().avgTime() / 1000).append(" ms"));
   }
   if (reader1) {
     nmea1Rx->setText(String(reader1->getRxValidCounter()));
@@ -100,6 +106,7 @@ bool StatsPage::processEvent(const TickEvent &e) {
   }
 
   freeRam->setText(String(getFreeRam()));
+  usedRam->setText(String(getUsedRam()));
 
   return true;
 }

@@ -34,7 +34,7 @@ class StatsPage : public Page {
   private:
     TextLayer *nmea1Rx, *nmea1Errors, *nmea2Rx, *nmea2Errors;
     TextLayer *canRx, *canTx, *canTxErrors;
-    TextLayer *freeRam, *avgLoopTime;
+    TextLayer *usedRam, *freeRam, *avgLoopTime;
 
     const TaskManager *taskManager;
     const NMEAReaderTask *reader1, *reader2;
@@ -45,6 +45,15 @@ class StatsPage : public Page {
   public:
     StatsPage();
     bool processEvent(const TickEvent &e);
+
+    bool processEvent(const EncoderEvent &e) {
+      static void *ptr;
+      static int total = 0;
+      total += 100;
+      DEBUG("malloc 100 bytes! total=%i", total);
+      ptr = malloc(100);
+      return true;
+    };
 
     void setTaskManager(const TaskManager *t) {
       taskManager = t;
