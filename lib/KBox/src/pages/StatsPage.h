@@ -29,32 +29,27 @@
 
 #include "tasks/NMEAReaderTask.h"
 #include "tasks/NMEA2000Task.h"
+#include "tasks/SDCardTask.h"
 
 class StatsPage : public Page {
   private:
     TextLayer *nmea1Rx, *nmea1Errors, *nmea2Rx, *nmea2Errors;
     TextLayer *canRx, *canTx, *canTxErrors;
     TextLayer *usedRam, *freeRam, *avgLoopTime;
+    TextLayer *logName, *logSize, *freeSpace;
 
-    const TaskManager *taskManager;
-    const NMEAReaderTask *reader1, *reader2;
-    const NMEA2000Task *nmea2000Task;
+    const TaskManager *taskManager = 0;
+    const NMEAReaderTask *reader1 = 0, *reader2 = 0;
+    const NMEA2000Task *nmea2000Task = 0;
+    const SDCardTask *sdcardTask = 0;
 
     void loadView();
+    String formatDiskSize(uint64_t intSize);
 
   public:
     StatsPage();
     bool processEvent(const TickEvent &e);
-
-    bool processEvent(const EncoderEvent &e) {
-      static void *ptr;
-      static int total = 0;
-      total += 100;
-      DEBUG("malloc 100 bytes! total=%i", total);
-      ptr = malloc(100);
-      return true;
-    };
-
+    
     void setTaskManager(const TaskManager *t) {
       taskManager = t;
     };
@@ -69,5 +64,9 @@ class StatsPage : public Page {
 
     void setNMEA2000Task(const NMEA2000Task *t) {
       nmea2000Task = t;
+    };
+
+    void setSDCardTask(const SDCardTask *t) {
+      sdcardTask = t;
     };
 };

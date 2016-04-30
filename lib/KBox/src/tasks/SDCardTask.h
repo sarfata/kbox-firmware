@@ -21,23 +21,45 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include <MFD.h>
+
+#pragma once
+
 #include <SdFat.h>
+#include "TaskManager.h"
+#include "KMessage.h"
 
-class SdcardTestPage : public Page {
-  private:
-    bool needsPainting;
-    int status;
-
-    SdFat sd;
-
-    void readCard();
-
+class Loggable {
   public:
-    SdcardTestPage();
-
-    void willAppear();
-    bool processEvent(const ButtonEvent &e);
-    void paint(GC &gc);
+    Loggable(String s, String m) : _source(s), _message(m), timestamp(millis()) {};
+    String _source;
+    String _message;
+    uint32_t timestamp;
 };
 
+class SDCardTask : public Task, public KReceiver {
+  private:
+    SdFat *sd = 0;
+    SdFile *logFile = 0;
+    bool cardReady = false;
+
+    bool cardInit();
+    String generateNewFileName(const String& baseName);
+    SdFile* createLogFile(const String& baseName);
+
+    LinkedList<Loggable> receivedMessages;
+
+  public:
+    SDCardTask();
+    virtual ~SDCardTask();
+
+    void setup();
+    void loop();
+    void processMessage(const KMessage&);
+
+    // Those two functions returns value in bytes.
+    uint64_t getFreeSpace() const;
+    uint32_t getLogSize() const;
+
+    bool isLogging() const;
+    String getLogFileName() const;
+};
