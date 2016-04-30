@@ -99,7 +99,7 @@ void NetServer::loop() {
   for (int i = 0; i < maxClients; i++) {
     if (clients[i] && clients[i]->connected()) {
       if (clients[i]->canSend() && queues[i].size() > 0) {
-        DEBUG("Sending for clients[%i] queue len=%i", i, queues[i].size());
+        //DEBUG("Sending for clients[%i] queue len=%i", i, queues[i].size());
 
         LinkedList<NetMessage>::iterator it = queues[i].begin();
         if (clients[i]->write((const char*)it->bytes(), it->len()) > 0) {

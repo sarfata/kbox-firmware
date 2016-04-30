@@ -54,6 +54,7 @@ void setup() {
 }
 
 uint8_t buffer[1024];
+size_t rxIndex = 0;
 
 void loop() {
   static unsigned long int nextPrint = 0;
@@ -64,13 +65,17 @@ void loop() {
 
   server.loop();
 
-  if (Serial.available()) {
-    int read = Serial.readBytes(buffer, sizeof(buffer));
+  while (Serial.available()) {
+    buffer[rxIndex++] = Serial.read();
 
-    buffer[read] = 0;
-    DEBUG("Sending %i bytes to all clients: %s", read, buffer);
-
-    server.writeAll(buffer, read);
+    if (buffer[rxIndex - 1] == '\n') {
+      server.writeAll(buffer, rxIndex);
+      rxIndex = 0;
+    }
+    if (rxIndex == sizeof(buffer)) {
+      DEBUG("Buffer overflow. Clearing buffer.");
+      rxIndex = 0;
+    }
   }
 
   if (server.clientsCount() > 0) {
