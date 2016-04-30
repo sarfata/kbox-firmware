@@ -32,17 +32,65 @@ void WiFiTask::setup() {
 }
 
 void WiFiTask::loop() {
-  char buf[100];
+  // Read data sent by WiFi module and print line by line
   while (WiFiSerial.available() > 0) {
-    int read = WiFiSerial.readBytes(buf, sizeof(buf) - 1);
-    buf[read] = 0;
-    //DEBUG("WiFi: %s", buf);
+    rxBuf[rxIndex++] = WiFiSerial.read();
+
+    if (rxBuf[rxIndex - 1] == '\n') {
+      rxBuf[rxIndex - 1] = 0;
+      DEBUG("WiFi: %s", rxBuf);
+      rxIndex = 0;
+    }
+    if (rxIndex >= sizeof(rxBuf) - 1) {
+      rxBuf[rxIndex] = 0;
+      DEBUG("WiFi full: %s", rxBuf);
+      rxIndex = 0;
+    }
+  }
+
+  // Try to send the first item from our queue (if possible)
+  // Send data waiting in queue (as much as possible, we are limited by tx buffer size).
+  while (sendQueue.size() || leftoverToSend.length()) {
+    String toSend;
+    if (leftoverToSend.length()) {
+      toSend = leftoverToSend;
+    }
+    else {
+      toSend = *(sendQueue.begin());
+    }
+
+    if (WiFiSerial.availableForWrite() <= 0) {
+      //DEBUG("Not sending because send buffer is full (need %i but %i available).", toSend.length(), WiFiSerial.availableForWrite());
+      break;
+    }
+    size_t available = WiFiSerial.availableForWrite();
+    String s = toSend;
+    s.remove(available);
+    size_t written = WiFiSerial.print(s);
+    //DEBUG("Sent %i/%i (%i avail) of %s", written, toSend.length(), available, toSend.c_str());
+
+    if (written == toSend.length()) {
+      if (leftoverToSend.length()) {
+        leftoverToSend = "";
+      }
+      else {
+        sendQueue.removeFirst();
+      }
+    }
+    else {
+      // If we did not have any leftover, then remove the entry from the queue
+      // and save it as a leftover.
+      // Otherwise, it was already removed from the queue.
+      if (leftoverToSend.length() == 0) {
+        sendQueue.removeFirst();
+      }
+      leftoverToSend = toSend.substring(written);
+    }
   }
 }
 
 void WiFiTask::processMessage(const KMessage &m) {
-    WiFiSerial.println(m.toString());
-    DEBUG("Sending %s", m.toString().c_str());
+  sendQueue.add(m.toString() + "\r\n");
 }
 
 

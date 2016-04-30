@@ -31,6 +31,12 @@ class WiFiTask : public Task, public KReceiver {
   public:
     WiFiTask() : Task("WiFi") {};
 
+    char rxBuf[1024];
+    size_t rxIndex = 0;
+
+    LinkedList<String> sendQueue;
+    String leftoverToSend;
+
     void setup();
     void loop();
     void processMessage(const KMessage &m);
