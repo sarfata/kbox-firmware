@@ -34,7 +34,6 @@ class NMEA2000Task : public Task, public KGenerator, public KReceiver {
     tNMEA2000_teensy NMEA2000;
     unsigned int _rxValid, _txValid, _txErrors;
 
-
   public:
     NMEA2000Task() : Task("NMEA2000"), _rxValid(0), _txValid(0), _txErrors(0) {};
     void setup();
