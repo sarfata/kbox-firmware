@@ -36,7 +36,7 @@ void IMUTask::setup() {
 
 void IMUTask::loop() {
   uint8_t system_status, self_test_status, system_error;
-  bno055.getSystemStatus(&system_status, &self_test_status, &system_error);
+  //bno055.getSystemStatus(&system_status, &self_test_status, &system_error);
   //DEBUG("BNO055 System Status: %x Self-Test Status: %x System Error: %x", system_status, self_test_status, system_error);
 
   bno055.getCalibration(&sysCalib, &gyroCalib, &accelCalib, &magCalib);
