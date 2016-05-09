@@ -1,4 +1,3 @@
 .pioenvs
-.sconsign.dblite
-tags
-*.pyc
+.clang_complete
+.gcc-flags.json
