@@ -23,7 +23,7 @@
 */
 
 #include "Page.h"
-#include <Debug.h>
+#include "KBoxDebug.h"
 
 bool BasePage::processEvent(const Event &e) {
   switch (e.getEventType()) {

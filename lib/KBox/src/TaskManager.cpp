@@ -23,7 +23,7 @@
 */
 
 #include "TaskManager.h"
-#include <Debug.h>
+#include "KBoxDebug.h"
 
 void TaskManager::addTask(Task* task) {
   if (running) {

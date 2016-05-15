@@ -21,9 +21,11 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #include "MFD.h"
 #include "TaskManager.h"
 #include "KMessage.h"
+#include "KBoxDebug.h"
 
 /* Drivers */
 #include "drivers/board.h"

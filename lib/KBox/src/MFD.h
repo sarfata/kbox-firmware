@@ -28,8 +28,8 @@
 
 #include <Bounce.h>
 #include <Encoder.h>
-#include <Debug.h>
 #include <List.h>
+#include "KBoxDebug.h"
 
 #include "ui/GC.h"
 #include "drivers/Display.h"

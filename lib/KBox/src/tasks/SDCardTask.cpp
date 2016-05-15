@@ -22,7 +22,7 @@
   THE SOFTWARE.
 */
 
-#include <Debug.h>
+#include "KBoxDebug.h"
 #include "SDCardTask.h"
 #include "drivers/board.h"
 

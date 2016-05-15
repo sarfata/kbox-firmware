@@ -31,7 +31,7 @@
 #include <i2c_t3.h>
 #define Wire Wire1
 
-#include "Debug.h"
+#include <KBoxDebug.h>
 
 /***************************************************************************
  CONSTRUCTOR

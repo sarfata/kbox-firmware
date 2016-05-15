@@ -25,7 +25,6 @@
 
 #include "TaskManager.h"
 #include "KMessage.h"
-#include "Debug.h"
 
 class WiFiTask : public Task, public KReceiver {
   public:

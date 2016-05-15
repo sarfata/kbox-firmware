@@ -21,23 +21,11 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
 
-#include <MFD.h>
+#define DEBUG_INIT() debug_init()
+#define DEBUG(...) debug(__FILE__, __LINE__, __VA_ARGS__)
 
-class WifiTestPage : public Page {
-  private:
-    bool needsPainting;
-    bool needsFullPainting;
-    static const int bufferSize = 1024;
-    int bufferIndex = 0;
-    char buffer[bufferSize];
-
-  public:
-    WifiTestPage();
-
-    bool processEvent(const ButtonEvent &e);
-    bool processEvent(const TickEvent &e);
-    void willAppear();
-    void paint(GC &gc);
-};
+void debug_init();
+void debug(const char *fname, int lineno, const char *fmt, ... );

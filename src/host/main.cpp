@@ -24,12 +24,10 @@
 #include <SPI.h>
 #include <Encoder.h>
 #include <i2c_t3.h>
-#include <Debug.h>
 #include <KBox.h>
 
 // Those are included here to force platformio to link to them.
 // See issue github.com/platformio/platformio/issues/432 for a better way to do this.
-#include <ili9341display.h>
 #include <Bounce.h>
 
 #include "ClockPage.h"

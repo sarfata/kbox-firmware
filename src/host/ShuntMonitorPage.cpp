@@ -23,7 +23,7 @@
 */
 #include "ShuntMonitorPage.h"
 #include "i2c_t3.h"
-#include "board.h"
+#include "drivers/board.h"
 
 ShuntMonitorPage::ShuntMonitorPage() {
 }

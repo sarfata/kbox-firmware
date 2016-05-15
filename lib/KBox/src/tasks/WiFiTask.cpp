@@ -22,6 +22,7 @@
   THE SOFTWARE.
 */
 #include "WiFiTask.h"
+#include "KBoxDebug.h"
 #include "../drivers/board.h"
 #include "../drivers/esp8266.h"
 

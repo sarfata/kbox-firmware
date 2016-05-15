@@ -22,7 +22,7 @@
   THE SOFTWARE.
 */
 #include <Adafruit_NeoPixel.h>
-#include <Debug.h>
+#include "ESPDebug.h"
 #include "NetServer.h"
 
 uint8_t neopixel_pin = 4;

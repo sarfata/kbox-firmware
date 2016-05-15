@@ -22,7 +22,7 @@
   THE SOFTWARE.
 */
 #include "ili9341display.h"
-#include "board.h"
+#include "drivers/board.h"
 #include "font_DroidSans.h"
 
 ILI9341Display::ILI9341Display() : size(Size(display_width, display_height)), backlightPin(display_backlight)

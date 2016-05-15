@@ -21,32 +21,28 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "KBoxDebug.h"
-#include "BarometerTask.h"
-#include "i2c_t3.h"
-#include "../drivers/board.h"
 
-#include "Adafruit_BMP280.h"
+#include <Arduino.h>
+#include <stdarg.h>
 
-void BarometerTask::setup() {
-  if (!bmp280.begin(bmp280_address)) {
-    DEBUG("Error initializing BMP280");
-    status = 1;
-  }
-  else {
-    status = 0;
-  }
+
+// By default print messages back to KBox.
+// We could also use Serial1 as an independent channel.
+#define DebugSerial Serial
+
+void debug_init() {
+    DebugSerial.begin(115200);
 }
 
-void BarometerTask::fetchValues() {
-  temperature = bmp280.readTemperature();
-  pressure = bmp280.readPressure();
-
-  DEBUG("Read temperature=%.2f C and pressure=%.1f hPa", temperature, pressure/100);
-  BarometerMeasurement m(temperature, pressure / 100);
-  sendMessage(m);
-}
-
-void BarometerTask::loop() {
-  fetchValues();
+void debug(const char *fname, int lineno, const char *fmt, ... ) {
+  DebugSerial.print(fname);
+  DebugSerial.print(":");
+  DebugSerial.print(lineno);
+  DebugSerial.print(" ");
+  char tmp[128]; // resulting string limited to 128 chars
+  va_list args;
+  va_start (args, fmt );
+  vsnprintf(tmp, 128, fmt, args);
+  va_end (args);
+  DebugSerial.println(tmp);
 }

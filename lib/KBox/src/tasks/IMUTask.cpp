@@ -21,8 +21,8 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include <Debug.h>
 #include "IMUTask.h"
+#include "KBoxDebug.h"
 
 void IMUTask::setup() {
   DEBUG("Initing BNO055");
