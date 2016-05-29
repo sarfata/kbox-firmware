@@ -28,13 +28,16 @@
 #include "Point.h"
 #include "Size.h"
 
-class Rectangle {
+class Rect {
   private:
     Point _origin;
     Size _size;
 
   public:
-    Rectangle(Point origin, Size size) : _origin(origin), _size(size) {};
-    Rectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) : _origin(x1, y1), _size(x2 - x1, y2 - y1) {};
+    Rect(Point origin, Size size) : _origin(origin), _size(size) {};
+    Rect(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height) : _origin(x1, y1), _size(width, height) {};
+
+    const Point& origin() const { return _origin; };
+    const Size& size() const { return _size; };
 };
 

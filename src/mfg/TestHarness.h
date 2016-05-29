@@ -21,32 +21,25 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
 
-#include <stdint.h>
-#include <WString.h>
+#include "drivers/Display.h"
+#include "MfgTest.h"
 
-#include "Point.h"
-#include "Size.h"
-#include "Rect.h"
-#include "Color.h"
-#include "Font.h"
+class TestHarness {
+  private:
+    Display& display;
 
-/* Graphics Context offers basic drawing primitives. */
-class GC {
   public:
-    virtual void drawText(Point a, Font font, Color color, const char *text) = 0;
-    virtual void drawText(Point a, Font font, Color color, Color bgColor, const char *text) = 0;
-    virtual void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text) = 0;
-    virtual void drawLine(Point a, Point b, Color color) = 0;
-    virtual void drawRectangle(Point orig, Size size, Color color) = 0;
-    virtual void fillRectangle(Point orig, Size size, Color color) = 0;
+    TestHarness(Display& d) : display(d) {};
 
-    void drawRectangle(const Rect& rect, Color color) {
-      drawRectangle(rect.origin(), rect.size(), color);
-    };
+    void runTest(MfgTest &t);
+    void runAllTests();
 
-    void fillRectangle(const Rect& rect, Color color) {
-      fillRectangle(rect.origin(), rect.size(), color);
-    };
+  protected:
+    void setup();
+
+    void updateStatus(Color c, const String& s);
 };
+
