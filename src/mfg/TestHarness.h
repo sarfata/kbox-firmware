@@ -24,15 +24,16 @@
 
 #pragma once
 
-#include "drivers/Display.h"
+#include <KBox.h>
 #include "MfgTest.h"
 
 class TestHarness {
   private:
+    KBox& kbox;
     Display& display;
 
   public:
-    TestHarness(Display& d) : display(d) {};
+    TestHarness(KBox& k) : kbox(k), display(kbox.getDisplay()) {};
 
     void runTest(MfgTest &t);
     void runAllTests();

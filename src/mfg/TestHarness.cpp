@@ -79,7 +79,7 @@ void TestHarness::runTest(MfgTest &t) {
 }
 
 void TestHarness::runAllTests() {
-  MfgTest* tests[] = { new EncoderTestRotationLeft(), new EncoderTestRotationRight(), new EncoderTestClick() };
+  MfgTest* tests[] = { new EncoderTestRotationLeft(kbox), new EncoderTestRotationRight(kbox), new EncoderTestClick(kbox) };
 
   Serial.println(">>>>> Starting KBox Manufacturing tests <<<<<");
 

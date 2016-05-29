@@ -26,13 +26,15 @@
 #include "TestHarness.h"
 #include "EncoderTest.h"
 
-ILI9341Display display;
-TestHarness th(display);
+KBox kbox;
+TestHarness th(kbox);
 
 
 void setup() {
   Serial.begin(115200);
   delay(2000);
+
+  kbox.setup();
 }
 
 void loop() {

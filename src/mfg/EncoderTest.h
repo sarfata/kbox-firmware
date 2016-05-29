@@ -22,86 +22,60 @@
   THE SOFTWARE.
 */
 
-#include <Encoder.h>
-#include <Bounce.h>
-#include "drivers/board.h"
-
+#include <KBox.h>
 #include "MfgTest.h"
 
-class EncoderTest: public MfgTest {
-  protected:
-    Encoder *e;
-    Bounce *button;
-
+class EncoderTestRotationLeft : public MfgTest {
   public:
-    EncoderTest(const String& name) : MfgTest(name, 5000) {};
-
-    virtual void setup() {
-      MfgTest::setup();
-      e = new Encoder(encoder_a, encoder_b);
-      pinMode(encoder_button, INPUT_PULLUP);
-      button = new Bounce(encoder_button, 10);
-    };
-
-    virtual void teardown() {
-      delete(e);
-      delete(button);
-      e = 0;
-      button = 0;
-    };
-
-    virtual void loop() = 0;
-};
-
-class EncoderTestRotationLeft : public EncoderTest {
-  public:
-    EncoderTestRotationLeft() : EncoderTest("EncoderTestRotationLeft") {};
+    EncoderTestRotationLeft(KBox& kbox) : MfgTest(kbox, "EncoderTestRotationLeft", 5000) { };
 
     void setup() {
-      EncoderTest::setup();
+      MfgTest::setup();
       setInstructions("Turn encoder to the left");
+      kbox.getEncoder().write(0);
     };
 
     void loop() {
-      if (e->read() < 0) {
+      if (kbox.getEncoder().read() < 0) {
         pass();
       }
-      if (e->read() > 0) {
+      if (kbox.getEncoder().read() > 0) {
         fail("Encoder reported turning to the right instead of left.");
       }
     };
 };
 
-class EncoderTestRotationRight : public EncoderTest {
+class EncoderTestRotationRight : public MfgTest {
   public:
-    EncoderTestRotationRight() : EncoderTest("EncoderTestRotationRight") {};
+    EncoderTestRotationRight(KBox& kbox) : MfgTest(kbox, "EncoderTestRotationRight", 5000) {};
 
     void setup() {
-      EncoderTest::setup();
+      MfgTest::setup();
+      kbox.getEncoder().write(0);
       setInstructions("Turn encoder to the right");
     };
 
     void loop() {
-      if (e->read() > 0) {
+      if (kbox.getEncoder().read() > 0) {
         pass();
       }
-      if (e->read() < 0) {
+      if (kbox.getEncoder().read() < 0) {
         fail("Encoder reported turning to the left instead of right.");
       }
     };
 };
 
-class EncoderTestClick : public EncoderTest {
+class EncoderTestClick : public MfgTest {
   public:
-    EncoderTestClick() : EncoderTest("EncoderTestClick") {};
+    EncoderTestClick(KBox &kbox) : MfgTest(kbox, "EncoderTestClick", 5000) {};
 
     void setup() {
-      EncoderTest::setup();
+      MfgTest::setup();
       setInstructions("Press encoder");
     };
 
     void loop() {
-      if (button->update()) {
+      if (kbox.getButton().update()) {
         pass();
       }
     };
