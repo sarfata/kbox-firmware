@@ -21,8 +21,10 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include <Arduino.h>
 
+#pragma once
+
+#include <Arduino.h>
 #include <stdint.h>
 typedef uint16_t pin_t;
 
@@ -96,5 +98,3 @@ static const pin_t supply_analog = A14;
 
 /* SDCard Interface */
 static const pin_t sdcard_cs = 15;
-
-void init_board();

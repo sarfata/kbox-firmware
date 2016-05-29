@@ -21,32 +21,26 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#pragma once
 
-#include <stdint.h>
-#include <WString.h>
+#include <KBox.h>
+#include "TestHarness.h"
+#include "EncoderTest.h"
 
-#include "Point.h"
-#include "Size.h"
-#include "Rect.h"
-#include "Color.h"
-#include "Font.h"
+KBox kbox;
+TestHarness th(kbox);
 
-/* Graphics Context offers basic drawing primitives. */
-class GC {
-  public:
-    virtual void drawText(Point a, Font font, Color color, const char *text) = 0;
-    virtual void drawText(Point a, Font font, Color color, Color bgColor, const char *text) = 0;
-    virtual void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text) = 0;
-    virtual void drawLine(Point a, Point b, Color color) = 0;
-    virtual void drawRectangle(Point orig, Size size, Color color) = 0;
-    virtual void fillRectangle(Point orig, Size size, Color color) = 0;
 
-    void drawRectangle(const Rect& rect, Color color) {
-      drawRectangle(rect.origin(), rect.size(), color);
-    };
+void setup() {
+  Serial.begin(115200);
+  delay(2000);
 
-    void fillRectangle(const Rect& rect, Color color) {
-      fillRectangle(rect.origin(), rect.size(), color);
-    };
-};
+  kbox.setup();
+}
+
+void loop() {
+  th.runAllTests();
+  while (1) {
+    yield();
+    delay(1000);
+  }
+}

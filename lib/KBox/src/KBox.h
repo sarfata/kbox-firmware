@@ -22,6 +22,8 @@
   THE SOFTWARE.
 */
 
+#pragma once
+
 #include "MFD.h"
 #include "TaskManager.h"
 #include "KMessage.h"
@@ -70,6 +72,18 @@ class KBox {
 
     void addPage(Page *p) { mfd.addPage(p); };
     void addTask(Task *t) { taskManager.addTask(t); };
+
+    Display& getDisplay() {
+      return display;
+    };
+
+    Encoder& getEncoder() {
+      return encoder;
+    };
+
+    Bounce& getButton() {
+      return button;
+    };
 
     Adafruit_NeoPixel& getNeopixels() {
       return neopixels;

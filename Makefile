@@ -23,6 +23,15 @@ runlogs: host
 logs:
 	miniterm.py --rts 0 $(PORT) 115200
 
+mfg:
+	platformio run -e mfg
+
+runmfg:
+	platformio run -e mfg -t upload
+	# Wait for the serial port to be available
+	sh -c "while [ ! -r $(PORT) ]; do sleep 0.01; done"
+	miniterm.py $(PORT) 115200
+
 test:
 	cd lib/List/test && make test
 	cd lib/KBox/test && make test

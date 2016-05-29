@@ -24,17 +24,31 @@
 
 #pragma once
 
-#include <stdint.h>
-#include "Point.h"
-#include "Size.h"
+#include <KBox.h>
+#include "MfgTest.h"
 
-class Rectangle {
+class NeopixelTest : public MfgTest {
   private:
-    Point _origin;
-    Size _size;
+    Adafruit_NeoPixel& np;
+
+    int pixelId;
 
   public:
-    Rectangle(Point origin, Size size) : _origin(origin), _size(size) {};
-    Rectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) : _origin(x1, y1), _size(x2 - x1, y2 - y1) {};
-};
+    NeopixelTest(KBox& kbox, int pixelId) : MfgTest(kbox, "Neopixel test", 5000), np(kbox.getNeopixels()), pixelId(pixelId) {};
 
+    void setup() {
+      MfgTest::setup();
+      np.setPixelColor(pixelId, 0xff, 0xff, 0xff);
+      np.show();
+      setInstructions("Press button if neopixel " + String(pixelId) + " is all white.");
+      kbox.getButton().update();
+    };
+
+    void loop() {
+      if (kbox.getButton().update()) {
+        np.setPixelColor(pixelId, 0, 0, 0);
+        np.show();
+        pass();
+      }
+    };
+};
