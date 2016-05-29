@@ -29,6 +29,7 @@
 
 #include "MfgTest.h"
 #include "EncoderTest.h"
+#include "NeopixelTest.h"
 
 void TestHarness::setup() {
   Serial.begin(115200);
@@ -79,7 +80,10 @@ void TestHarness::runTest(MfgTest &t) {
 }
 
 void TestHarness::runAllTests() {
-  MfgTest* tests[] = { new EncoderTestRotationLeft(kbox), new EncoderTestRotationRight(kbox), new EncoderTestClick(kbox) };
+  MfgTest* tests[] = {
+    new NeopixelTest(kbox, 0), new NeopixelTest(kbox, 1),
+    new EncoderTestRotationLeft(kbox), new EncoderTestRotationRight(kbox), new EncoderTestClick(kbox)
+  };
 
   Serial.println(">>>>> Starting KBox Manufacturing tests <<<<<");
 

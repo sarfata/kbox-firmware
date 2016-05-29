@@ -22,63 +22,33 @@
   THE SOFTWARE.
 */
 
+#pragma once
+
 #include <KBox.h>
 #include "MfgTest.h"
 
-class EncoderTestRotationLeft : public MfgTest {
+class NeopixelTest : public MfgTest {
+  private:
+    Adafruit_NeoPixel& np;
+
+    int pixelId;
+
   public:
-    EncoderTestRotationLeft(KBox& kbox) : MfgTest(kbox, "EncoderTestRotationLeft", 5000) { };
+    NeopixelTest(KBox& kbox, int pixelId) : MfgTest(kbox, "Neopixel test", 5000), np(kbox.getNeopixels()), pixelId(pixelId) {};
 
     void setup() {
       MfgTest::setup();
-      setInstructions("Turn encoder to the left");
-      kbox.getEncoder().write(0);
-    };
-
-    void loop() {
-      if (kbox.getEncoder().read() < 0) {
-        pass();
-      }
-      if (kbox.getEncoder().read() > 0) {
-        fail("Encoder reported turning to the right instead of left.");
-      }
-    };
-};
-
-class EncoderTestRotationRight : public MfgTest {
-  public:
-    EncoderTestRotationRight(KBox& kbox) : MfgTest(kbox, "EncoderTestRotationRight", 5000) {};
-
-    void setup() {
-      MfgTest::setup();
-      kbox.getEncoder().write(0);
-      setInstructions("Turn encoder to the right");
-    };
-
-    void loop() {
-      if (kbox.getEncoder().read() > 0) {
-        pass();
-      }
-      if (kbox.getEncoder().read() < 0) {
-        fail("Encoder reported turning to the left instead of right.");
-      }
-    };
-};
-
-class EncoderTestClick : public MfgTest {
-  public:
-    EncoderTestClick(KBox &kbox) : MfgTest(kbox, "EncoderTestClick", 5000) {};
-
-    void setup() {
-      MfgTest::setup();
-      setInstructions("Press encoder");
+      np.setPixelColor(pixelId, 0xff, 0xff, 0xff);
+      np.show();
+      setInstructions("Press button if neopixel " + String(pixelId) + " is all white.");
       kbox.getButton().update();
     };
 
     void loop() {
       if (kbox.getButton().update()) {
+        np.setPixelColor(pixelId, 0, 0, 0);
+        np.show();
         pass();
       }
     };
 };
-
