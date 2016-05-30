@@ -34,6 +34,7 @@
 #include "NMEATest.h"
 #include "N2KTest.h"
 #include "IMUTest.h"
+#include "BarometerTest.h"
 
 void TestHarness::setup() {
   Serial.begin(115200);
@@ -97,6 +98,7 @@ void TestHarness::runTest(MfgTest &t) {
 
 void TestHarness::runAllTests() {
   MfgTest* tests[] = {
+    new BarometerTest(kbox),
     new IMUTest(kbox),
     new N2KTest(kbox),
     new NMEATest("NMEA2->1", kbox, NMEA2_SERIAL, NMEA1_SERIAL), new NMEATest("NMEA1->2", kbox, NMEA1_SERIAL, NMEA2_SERIAL),
