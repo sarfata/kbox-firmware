@@ -23,7 +23,8 @@
  #include "WProgram.h"
 #endif
 
-#include <Wire.h>
+// Commented for use in KBox
+//#include <Wire.h>
 
 /*=========================================================================
     I2C ADDRESS/BITS

@@ -24,9 +24,13 @@
  #include "WProgram.h"
 #endif
 
-#include <Wire.h>
-
 #include "Adafruit_INA219.h"
+
+//#include <Wire.h>
+// Added for KBox to force I2C communication on Wire1
+#include "i2c_t3.h"
+#define Wire Wire1
+
 
 /**************************************************************************/
 /*! 
