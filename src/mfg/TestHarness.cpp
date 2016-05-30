@@ -35,6 +35,7 @@
 #include "N2KTest.h"
 #include "IMUTest.h"
 #include "BarometerTest.h"
+#include "SDCardTest.h"
 
 void TestHarness::setup() {
   Serial.begin(115200);
@@ -98,6 +99,7 @@ void TestHarness::runTest(MfgTest &t) {
 
 void TestHarness::runAllTests() {
   MfgTest* tests[] = {
+    new SDCardTest(kbox),
     new BarometerTest(kbox),
     new IMUTest(kbox),
     new N2KTest(kbox),
