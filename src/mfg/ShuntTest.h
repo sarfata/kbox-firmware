@@ -32,7 +32,7 @@ class ShuntTest : public MfgTest {
   private:
     Adafruit_INA219 ina219;
   public:
-    ShuntTest(KBox& kbox) : MfgTest(kbox, "ShuntTest", 30000) {};
+    ShuntTest(KBox& kbox) : MfgTest(kbox, "ShuntTest", 5000) {};
 
     void setup() {
       ina219.begin(ina219_address);

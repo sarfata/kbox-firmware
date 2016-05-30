@@ -69,13 +69,19 @@ void TestHarness::runTest(MfgTest &t) {
 
   String m = "";
 
-  elapsedMillis ms; 
+  elapsedMillis ms;
+  unsigned int displayedTimer = 0;
+
   while (!t.finished() && (t.getTimeout() == 0 || ms < t.getTimeout())) {
     t.loop();
     if (t.getMessage() != m) {
       m = t.getMessage();
       display.drawText(Point(5, 100), FontDefault, ColorLightGrey, ColorBlack, m);
       Serial.println("\t" + m);
+    }
+    if (displayedTimer != t.getTimeout() - ms) {
+      displayedTimer = (t.getTimeout() - ms) / 1000;
+      display.drawText(Point(300, 40), FontDefault, ColorLightGrey, ColorBlack, String(displayedTimer));
     }
 
     yield();
