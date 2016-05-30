@@ -33,6 +33,7 @@
 #include "drivers/board.h"
 #include "drivers/ili9341display.h"
 #include "drivers/esp8266.h"
+#include <ADC.h>
 
 /* Tasks */
 #include "tasks/RunningLightTask.h"
@@ -63,6 +64,7 @@ class KBox {
     ILI9341Display display = ILI9341Display();
     Encoder encoder = Encoder(encoder_a, encoder_b);
     Bounce button = Bounce(encoder_button, 10 /* ms */);
+    ADC adc;
     MFD mfd = MFD(display, encoder, button);
     TaskManager taskManager = TaskManager();
 
@@ -87,6 +89,10 @@ class KBox {
 
     Adafruit_NeoPixel& getNeopixels() {
       return neopixels;
+    };
+
+    ADC& getADC() {
+      return adc;
     };
 
     const TaskManager& getTaskManager() const {

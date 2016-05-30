@@ -30,6 +30,7 @@
 #include "MfgTest.h"
 #include "EncoderTest.h"
 #include "NeopixelTest.h"
+#include "ADCTest.h"
 
 void TestHarness::setup() {
   Serial.begin(115200);
@@ -59,8 +60,16 @@ void TestHarness::runTest(MfgTest &t) {
   // Show colorful rectangle
   updateStatus(ColorOrange, "RUNNING");
 
+  String m = "";
+
   while (!t.finished()) {
     t.loop();
+    if (t.getMessage() != m) {
+      m = t.getMessage();
+      display.drawText(Point(5, 100), FontDefault, ColorLightGrey, ColorBlack, m);
+      Serial.println("\t" + m);
+    }
+
     yield();
   }
 
@@ -81,6 +90,7 @@ void TestHarness::runTest(MfgTest &t) {
 
 void TestHarness::runAllTests() {
   MfgTest* tests[] = {
+    new ADCTest(kbox, 0), new ADCTest(kbox, 1), new ADCTest(kbox, 2), new ADCTest(kbox, 3),
     new NeopixelTest(kbox, 0), new NeopixelTest(kbox, 1),
     new EncoderTestRotationLeft(kbox), new EncoderTestRotationRight(kbox), new EncoderTestClick(kbox)
   };

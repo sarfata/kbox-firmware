@@ -25,33 +25,54 @@
 #pragma once
 
 #include <KBox.h>
+
 #include "MfgTest.h"
 
-class NeopixelTest : public MfgTest {
-  private:
-    Adafruit_NeoPixel& np;
+struct ADCTestCase {
+  String channelName;
+  int channelPin;
+};
 
-    int pixelId;
+struct ADCTestCase cases[] = {
+  { "Supply", supply_analog },
+  { "Bat1", bat1_analog },
+  { "Bat2", bat2_analog },
+  { "Bat3", bat3_analog }
+};
+
+class ADCTest : public MfgTest {
+  private:
+    ADC& adc;
+    int channel;
 
   public:
-    NeopixelTest(KBox& kbox, int pixelId) : MfgTest(kbox, "Neopixel test", 5000), np(kbox.getNeopixels()), pixelId(pixelId) {};
+    ADCTest(KBox& kbox, int chan) : MfgTest(kbox, "ADCTest(" + cases[chan].channelName + ")", 10000), adc(kbox.getADC()), channel(chan) {};
 
     void setup() {
       MfgTest::setup();
-      np.setPixelColor(pixelId, 0xff, 0xff, 0xff);
-      np.show();
-      setInstructions("Press button if neopixel " + String(pixelId) + " is all white.");
-      kbox.getButton().update();
+      setInstructions("Apply 12V to " + cases[channel].channelName + " only.");
+    };
+
+    float readVoltage(int index) {
+      int adcValue = adc.analogRead(cases[index].channelPin, ADC_0);
+      return adcValue * analog_max_voltage / adc.getMaxValue();
     };
 
     void loop() {
-      if (kbox.getButton().update()) {
+      float voltage = readVoltage(channel);
+      setMessage("Measured voltage is " + String(voltage));
+
+      // Walk through the three battery channels and make sure there are no shortcuts
+      for (int i = 1; i < 4; i++) {
+        if (i != channel) {
+          float v = readVoltage(i);
+          if (readVoltage(i) > 10) {
+            fail("Measured " + String(v) + "V on " + cases[i].channelName);
+          }
+        }
+      }
+      if (voltage > 11.9 && voltage < 12.1) {
         pass();
       }
-    };
-
-    void teardown() {
-      np.setPixelColor(pixelId, 0, 0, 0);
-      np.show();
     };
 };

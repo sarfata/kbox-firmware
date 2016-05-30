@@ -50,7 +50,7 @@ void setup() {
   NMEA2000Task *n2kTask = new NMEA2000Task();
   n2kTask->connectTo(*wifi);
 
-  ADCTask *adcTask = new ADCTask();
+  ADCTask *adcTask = new ADCTask(kbox.getADC());
 
   // Convert battery measurement into n2k messages before sending them to wifi.
   VoltageN2kConverter *voltageConverter = new VoltageN2kConverter();

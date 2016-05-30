@@ -52,6 +52,26 @@ void KBox::setup() {
   NMEA1_SERIAL.begin(38400);
   NMEA2_SERIAL.begin(38400);
 
+  // Initialize ADC
+  adc.setAveraging(1);
+  adc.setResolution(12);
+  adc.setConversionSpeed(ADC_LOW_SPEED);
+  adc.setSamplingSpeed(ADC_HIGH_SPEED);
+
+#ifndef BOARD_v1_revA
+  adc.setReference(ADC_REF_EXT, ADC_0);
+  adc.setReference(ADC_REF_EXT, ADC_1);
+#endif
+  // If you do not force the ADC later, make sure to configure ADC1 too because
+  // the ADC library might decide to use it (it round-robins read requests).
+  // Also, it seems A11 and A14 (bat1 and bat3) can only be read by ADC_0
+  // We could optimize reading speed by reading two adcs in parallel.
+  //adc.setAveraging(32, ADC_1);
+  //adc.setResolution(12, ADC_1);
+  //adc.setConversionSpeed(ADC_LOW_SPEED, ADC_1);
+  //adc.setSamplingSpeed(ADC_HIGH_SPEED, ADC_1);
+
+
   taskManager.addTask(&mfd);
   taskManager.setup();
 }

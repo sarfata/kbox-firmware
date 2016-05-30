@@ -34,6 +34,7 @@ class MfgTest {
     String _name;
     String _instructions;
     String _reason;
+    String _message;
     bool _finished;
     bool _success;
     elapsedMillis _timer;
@@ -52,6 +53,13 @@ class MfgTest {
     };
     void setInstructions(const String& instructions) {
       _instructions = instructions;
+    };
+
+    void setMessage(const String& message) {
+      _message = message;
+    };
+    const String & getMessage() const {
+      return _message;
     };
 
     bool finished() {

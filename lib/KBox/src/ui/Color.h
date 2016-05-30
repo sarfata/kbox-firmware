@@ -36,4 +36,6 @@ static const Color ColorGreen = 0x07E0;
 static const Color ColorWhite = 0xFFFF;
 static const Color ColorBlack = 0x0000;
 static const Color ColorOrange = 0xFD20;
+static const Color ColorLightGrey = 0x6D18;
+static const Color ColorDarkGrey = 0x7BEF;
 
