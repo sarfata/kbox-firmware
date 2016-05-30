@@ -37,6 +37,7 @@
 #include "BarometerTest.h"
 #include "SDCardTest.h"
 #include "ShuntTest.h"
+#include "RunningLightTest.h"
 
 void TestHarness::setup() {
   Serial.begin(115200);
@@ -100,15 +101,16 @@ void TestHarness::runTest(MfgTest &t) {
 
 void TestHarness::runAllTests() {
   MfgTest* tests[] = {
-    new EncoderTestRotationLeft(kbox), new EncoderTestRotationRight(kbox), new EncoderTestClick(kbox)
+    new RunningLightTest(kbox),
+    new EncoderTestRotationLeft(kbox), new EncoderTestRotationRight(kbox), new EncoderTestClick(kbox),
     new BarometerTest(kbox),
-    new IMUTest(kbox),
     new N2KTest(kbox),
     new NMEATest("NMEA2->1", kbox, NMEA2_SERIAL, NMEA1_SERIAL), new NMEATest("NMEA1->2", kbox, NMEA1_SERIAL, NMEA2_SERIAL),
     new ADCTest(kbox, 0), new ADCTest(kbox, 1), new ADCTest(kbox, 2), new ADCTest(kbox, 3),
     new ShuntTest(kbox),
     new NeopixelTest(kbox, 0), new NeopixelTest(kbox, 1),
     new SDCardTest(kbox),
+    new IMUTest(kbox)
   };
 
   Serial.println(">>>>> Starting KBox Manufacturing tests <<<<<");
