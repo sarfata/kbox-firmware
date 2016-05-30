@@ -37,7 +37,6 @@ class MfgTest {
     String _message;
     bool _finished;
     bool _success;
-    elapsedMillis _timer;
     unsigned int _timeout;
 
   public:
@@ -63,13 +62,7 @@ class MfgTest {
     };
 
     bool finished() {
-      if (_timeout > 0 && _timer > _timeout) {
-        fail("Timed out.");
-      }
-      if (_finished) {
-        return true;
-      }
-      return false;
+      return _finished;
     };
 
     bool successful() {
@@ -83,6 +76,10 @@ class MfgTest {
       return _reason;
     };
 
+    unsigned int getTimeout() const {
+      return _timeout;
+    };
+
     void pass() {
       _finished = true;
       _success = true;
@@ -93,11 +90,8 @@ class MfgTest {
       _reason = m;
     };
 
-    virtual void setup() {
-      _timer = 0;
-    };
-    virtual void teardown() {
-    };
+    virtual void setup() {};
+    virtual void teardown() {};
     virtual void loop() = 0;
 };
 

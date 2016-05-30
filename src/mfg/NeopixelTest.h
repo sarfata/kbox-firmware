@@ -37,7 +37,6 @@ class NeopixelTest : public MfgTest {
     NeopixelTest(KBox& kbox, int pixelId) : MfgTest(kbox, "Neopixel test", 5000), np(kbox.getNeopixels()), pixelId(pixelId) {};
 
     void setup() {
-      MfgTest::setup();
       np.setPixelColor(pixelId, 0xff, 0xff, 0xff);
       np.show();
       setInstructions("Press button if neopixel " + String(pixelId) + " is all white.");

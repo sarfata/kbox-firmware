@@ -49,7 +49,6 @@ class ADCTest : public MfgTest {
     ADCTest(KBox& kbox, int chan) : MfgTest(kbox, "ADCTest(" + cases[chan].channelName + ")", 10000), adc(kbox.getADC()), channel(chan) {};
 
     void setup() {
-      MfgTest::setup();
       setInstructions("Apply 12V to " + cases[channel].channelName + " only.");
     };
 

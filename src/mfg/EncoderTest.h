@@ -30,7 +30,6 @@ class EncoderTestRotationLeft : public MfgTest {
     EncoderTestRotationLeft(KBox& kbox) : MfgTest(kbox, "EncoderTestRotationLeft", 5000) { };
 
     void setup() {
-      MfgTest::setup();
       setInstructions("Turn encoder to the left");
       kbox.getEncoder().write(0);
     };
@@ -50,7 +49,6 @@ class EncoderTestRotationRight : public MfgTest {
     EncoderTestRotationRight(KBox& kbox) : MfgTest(kbox, "EncoderTestRotationRight", 5000) {};
 
     void setup() {
-      MfgTest::setup();
       kbox.getEncoder().write(0);
       setInstructions("Turn encoder to the right");
     };
@@ -70,7 +68,6 @@ class EncoderTestClick : public MfgTest {
     EncoderTestClick(KBox &kbox) : MfgTest(kbox, "EncoderTestClick", 5000) {};
 
     void setup() {
-      MfgTest::setup();
       setInstructions("Press encoder");
       kbox.getButton().update();
     };

@@ -33,6 +33,7 @@
 #include "ADCTest.h"
 #include "NMEATest.h"
 #include "N2KTest.h"
+#include "IMUTest.h"
 
 void TestHarness::setup() {
   Serial.begin(115200);
@@ -43,7 +44,7 @@ void TestHarness::updateStatus(Color c, const String& text) {
   static const Rect statusRect(220, 5, 100, 30);
 
   display.fillRectangle(statusRect, c);
-  display.drawText(Point(225, 10), FontDefault, ColorWhite, c, text);
+  display.drawText(Point(225, 13), FontDefault, ColorWhite, c, text);
 }
 
 void TestHarness::runTest(MfgTest &t) {
@@ -64,7 +65,8 @@ void TestHarness::runTest(MfgTest &t) {
 
   String m = "";
 
-  while (!t.finished()) {
+  elapsedMillis ms; 
+  while (!t.finished() && (t.getTimeout() == 0 || ms < t.getTimeout())) {
     t.loop();
     if (t.getMessage() != m) {
       m = t.getMessage();
@@ -73,6 +75,9 @@ void TestHarness::runTest(MfgTest &t) {
     }
 
     yield();
+  }
+  if (t.getTimeout() != 0 && ms >= t.getTimeout()) {
+    t.fail("Timeout");
   }
 
   // Report result on serial console
@@ -92,6 +97,7 @@ void TestHarness::runTest(MfgTest &t) {
 
 void TestHarness::runAllTests() {
   MfgTest* tests[] = {
+    new IMUTest(kbox),
     new N2KTest(kbox),
     new NMEATest("NMEA2->1", kbox, NMEA2_SERIAL, NMEA1_SERIAL), new NMEATest("NMEA1->2", kbox, NMEA1_SERIAL, NMEA2_SERIAL),
     new ADCTest(kbox, 0), new ADCTest(kbox, 1), new ADCTest(kbox, 2), new ADCTest(kbox, 3),
