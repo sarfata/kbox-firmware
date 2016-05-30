@@ -39,7 +39,8 @@ void ADCTask::loop() {
   bat2 = bat2_adc * analog_max_voltage / adc.getMaxValue();
   bat3 = bat3_adc * analog_max_voltage / adc.getMaxValue();
 
-  //DEBUG("ADC - Supply: %.2fV Bat1: %.2fV Bat2: %.2fV Bat3: %.2fV", supply, bat1, bat2, bat3);
+  //DEBUG("ADC - Supply: %sV Bat1: %sV Bat2: %sV Bat3: %sV", 
+      //String(supply, 2).c_str(), String(bat1, 2).c_str(), String(bat2, 2).c_str(), String(bat3, 2).c_str());
 
   // Would be nice if the indexes were configurable.
   // In the future, we will have:
