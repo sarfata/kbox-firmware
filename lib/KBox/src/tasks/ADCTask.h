@@ -29,11 +29,10 @@
 
 class ADCTask : public Task, public KGenerator {
   private:
-    ADC adc;
+    ADC& adc;
     float bat1, bat2, bat3, supply;
 
   public:
-    ADCTask() : Task("ADC") {};
-    void setup();
+    ADCTask(ADC& adc) : Task("ADC"), adc(adc) {};
     void loop();
 };

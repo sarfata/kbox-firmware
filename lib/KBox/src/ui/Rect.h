@@ -25,17 +25,19 @@
 #pragma once
 
 #include <stdint.h>
-typedef uint16_t Color;
+#include "Point.h"
+#include "Size.h"
 
-// FIXME: Color definitions change with displays. This should be made display-dependent.
-// To add more color, this is helpful: 
-// https://github.com/PaulStoffregen/ILI9341_t3/blob/master/ILI9341_t3.h#L87
-static const Color ColorBlue = 0x001F;
-static const Color ColorRed = 0xF800;
-static const Color ColorGreen = 0x07E0;
-static const Color ColorWhite = 0xFFFF;
-static const Color ColorBlack = 0x0000;
-static const Color ColorOrange = 0xFD20;
-static const Color ColorLightGrey = 0x6D18;
-static const Color ColorDarkGrey = 0x7BEF;
+class Rect {
+  private:
+    Point _origin;
+    Size _size;
+
+  public:
+    Rect(Point origin, Size size) : _origin(origin), _size(size) {};
+    Rect(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height) : _origin(x1, y1), _size(width, height) {};
+
+    const Point& origin() const { return _origin; };
+    const Size& size() const { return _size; };
+};
 

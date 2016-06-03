@@ -28,41 +28,19 @@
 #include <NMEA2000.h>
 #include <N2kMessages.h>
 
-void ADCTask::setup() {
-  DEBUG("ADCTask setup");
-  adc.setAveraging(1);
-  adc.setResolution(12);
-  adc.setConversionSpeed(ADC_LOW_SPEED);
-  adc.setSamplingSpeed(ADC_HIGH_SPEED);
-
-#ifndef BOARD_v1_revA
-  adc.setReference(ADC_REF_EXT, ADC_0);
-  adc.setReference(ADC_REF_EXT, ADC_1);
-#endif
-  // If you do not force the ADC later, make sure to configure ADC1 too because
-  // the ADC library might decide to use it (it round-robins read requests).
-  // Also, it seems A11 and A14 (bat1 and bat3) can only be read by ADC_0
-  // We could optimize reading speed by reading two adcs in parallel.
-  //adc.setAveraging(32, ADC_1);
-  //adc.setResolution(12, ADC_1);
-  //adc.setConversionSpeed(ADC_LOW_SPEED, ADC_1);
-  //adc.setSamplingSpeed(ADC_HIGH_SPEED, ADC_1);
-}
-
 void ADCTask::loop() {
   int supply_adc = adc.analogRead(supply_analog, ADC_0);
   int bat1_adc = adc.analogRead(bat1_analog, ADC_0);
   int bat2_adc = adc.analogRead(bat2_analog, ADC_0);
   int bat3_adc = adc.analogRead(bat3_analog, ADC_0);
 
-  //DEBUG("ADCs: Supply: %i Bat1: %i Bat2: %i Bat3: %i", supply_adc, bat1_adc, bat2_adc, bat3_adc);
-
   supply = supply_adc * analog_max_voltage / adc.getMaxValue();
   bat1 = bat1_adc * analog_max_voltage / adc.getMaxValue();
   bat2 = bat2_adc * analog_max_voltage / adc.getMaxValue();
   bat3 = bat3_adc * analog_max_voltage / adc.getMaxValue();
 
-  //DEBUG("ADC - Supply: %.2fV Bat1: %.2fV Bat2: %.2fV Bat3: %.2fV", supply, bat1, bat2, bat3);
+  //DEBUG("ADC - Supply: %sV Bat1: %sV Bat2: %sV Bat3: %sV", 
+      //String(supply, 2).c_str(), String(bat1, 2).c_str(), String(bat2, 2).c_str(), String(bat3, 2).c_str());
 
   // Would be nice if the indexes were configurable.
   // In the future, we will have:

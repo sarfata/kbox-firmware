@@ -13,6 +13,7 @@ To pull or push to the subtrees, start by defining remotes for all the origins:
     git remote add paul-ili9341 git@github.com:PaulStoffregen/ILI9341_t3.git
     git remote add paul-time git@github.com:PaulStoffregen/Time.git
     git remote add espasynctcp git@github.com:me-no-dev/ESPAsyncTCP.git
+    git remote add adafruit-ina219 git@github.com:adafruit/Adafruit_INA219.git
 
 To add a new subtree:
 

@@ -22,20 +22,25 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include <KBox.h>
+#include "TestHarness.h"
+#include "EncoderTest.h"
 
-#include <stdint.h>
-typedef uint16_t Color;
+KBox kbox;
+TestHarness th(kbox);
 
-// FIXME: Color definitions change with displays. This should be made display-dependent.
-// To add more color, this is helpful: 
-// https://github.com/PaulStoffregen/ILI9341_t3/blob/master/ILI9341_t3.h#L87
-static const Color ColorBlue = 0x001F;
-static const Color ColorRed = 0xF800;
-static const Color ColorGreen = 0x07E0;
-static const Color ColorWhite = 0xFFFF;
-static const Color ColorBlack = 0x0000;
-static const Color ColorOrange = 0xFD20;
-static const Color ColorLightGrey = 0x6D18;
-static const Color ColorDarkGrey = 0x7BEF;
 
+void setup() {
+  Serial.begin(115200);
+  delay(2000);
+
+  kbox.setup();
+}
+
+void loop() {
+  th.runAllTests();
+  while (1) {
+    yield();
+    delay(1000);
+  }
+}

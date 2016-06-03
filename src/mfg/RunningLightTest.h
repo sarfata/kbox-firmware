@@ -24,18 +24,23 @@
 
 #pragma once
 
-#include <stdint.h>
-typedef uint16_t Color;
+#include <KBox.h>
+#include "MfgTest.h"
 
-// FIXME: Color definitions change with displays. This should be made display-dependent.
-// To add more color, this is helpful: 
-// https://github.com/PaulStoffregen/ILI9341_t3/blob/master/ILI9341_t3.h#L87
-static const Color ColorBlue = 0x001F;
-static const Color ColorRed = 0xF800;
-static const Color ColorGreen = 0x07E0;
-static const Color ColorWhite = 0xFFFF;
-static const Color ColorBlack = 0x0000;
-static const Color ColorOrange = 0xFD20;
-static const Color ColorLightGrey = 0x6D18;
-static const Color ColorDarkGrey = 0x7BEF;
+class RunningLightTest : public MfgTest {
+  public:
+    RunningLightTest(KBox& kbox) : MfgTest(kbox, "RunningLightTest", 5000) {};
 
+    void setup() {
+      kbox.getButton().update();
+      setInstructions("Please confirm the RunningLight led is on");
+
+      digitalWrite(led_pin, true);
+    };
+
+    void loop() {
+      if (kbox.getButton().update()) {
+        pass();
+      }
+    };
+};

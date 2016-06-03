@@ -24,18 +24,33 @@
 
 #pragma once
 
-#include <stdint.h>
-typedef uint16_t Color;
+#include <KBox.h>
+#include <Adafruit_INA219.h>
+#include "MfgTest.h"
 
-// FIXME: Color definitions change with displays. This should be made display-dependent.
-// To add more color, this is helpful: 
-// https://github.com/PaulStoffregen/ILI9341_t3/blob/master/ILI9341_t3.h#L87
-static const Color ColorBlue = 0x001F;
-static const Color ColorRed = 0xF800;
-static const Color ColorGreen = 0x07E0;
-static const Color ColorWhite = 0xFFFF;
-static const Color ColorBlack = 0x0000;
-static const Color ColorOrange = 0xFD20;
-static const Color ColorLightGrey = 0x6D18;
-static const Color ColorDarkGrey = 0x7BEF;
+class ShuntTest : public MfgTest {
+  private:
+    Adafruit_INA219 ina219;
+  public:
+    ShuntTest(KBox& kbox) : MfgTest(kbox, "ShuntTest", 5000) {};
+
+    void setup() {
+      ina219.begin(ina219_address);
+      setInstructions("Connect ShuntBat to Load - Apply 12V");
+    };
+
+    void loop() {
+      float shuntVoltage = ina219.getShuntVoltage_mV();
+      float busVoltage = ina219.getBusVoltage_V();
+      float current = ina219.getCurrent_mA();
+
+      setMessage("Bus: " + String(busVoltage, 2) + "V Shunt: " + String(shuntVoltage, 2) + "mV Curent: " + String(current) + "mA");
+
+      if (busVoltage > 11.9 && busVoltage < 12.1) {
+        if (shuntVoltage < 500) {
+          pass();
+        }
+      }
+    };
+};
 

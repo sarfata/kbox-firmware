@@ -28,6 +28,7 @@
 
 #include "Point.h"
 #include "Size.h"
+#include "Rect.h"
 #include "Color.h"
 #include "Font.h"
 
@@ -40,4 +41,12 @@ class GC {
     virtual void drawLine(Point a, Point b, Color color) = 0;
     virtual void drawRectangle(Point orig, Size size, Color color) = 0;
     virtual void fillRectangle(Point orig, Size size, Color color) = 0;
+
+    void drawRectangle(const Rect& rect, Color color) {
+      drawRectangle(rect.origin(), rect.size(), color);
+    };
+
+    void fillRectangle(const Rect& rect, Color color) {
+      fillRectangle(rect.origin(), rect.size(), color);
+    };
 };
