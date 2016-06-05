@@ -61,7 +61,7 @@ class IMUTest : public MfgTest {
       eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
 
       setMessage("Calib Sys: " + String(sysCalib) + " Gyro: " + String(gyroCalib) + " Accel: " + String(accelCalib) + " Mag: " + String(magCalib) +
-          "\nX: " + eulerAngles.x() + " Y: " + eulerAngles.y() + " Z: " + eulerAngles.z());
+          "X: " + eulerAngles.x() + " Y: " + eulerAngles.y() + " Z: " + eulerAngles.z());
 
       if (sysCalib == 3 && gyroCalib == 3 && accelCalib == 3 && magCalib == 3) {
         pass();

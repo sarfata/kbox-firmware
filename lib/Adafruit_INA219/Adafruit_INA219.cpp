@@ -370,7 +370,8 @@ void Adafruit_INA219::begin(uint8_t addr) {
 }
 
 void Adafruit_INA219::begin(void) {
-  Wire.begin();    
+  // Commented out for KBox. We initialize i2c in just one place.
+  //Wire.begin();
   // Set chip to large range config values to start
   setCalibration_32V_2A();
 }

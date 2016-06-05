@@ -39,6 +39,7 @@ class N2KTest : public MfgTest {
     N2KTest(KBox& kbox) : MfgTest(kbox, "NMEA2000Test", 10000) {};
     tNMEA2000_teensy NMEA2000;
     int rxMessages = 0;
+    elapsedMillis timer;
 
     void setup() {
       pinMode(can_standby, OUTPUT);
@@ -72,11 +73,18 @@ class N2KTest : public MfgTest {
         fail("Something went wrong initializing NMEA2000 ... ");
       }
       setInstructions("Waiting for NMEA2000 packets");
+
+      // Discard packets already in rx buffer
+      // so that we have enought time to do the address claim and send a packer later.
+      NMEA2000.ParseMessages();
+      rxMessages = 0;
+      timer = 0;
     };
 
     void loop() {
       NMEA2000.ParseMessages();
-      if (rxMessages > 5) {
+      // need to wait to make sure address claim is finished.
+      if (rxMessages > 5 && timer > 8000) {
         tN2kMsg msg;
         // creeate a fake barometer message
         SetN2kPGN130311(msg, 0, N2kts_OutsideTemperature, CToKelvin(23.0),
