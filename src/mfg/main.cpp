@@ -34,6 +34,12 @@ void setup() {
   Serial.begin(115200);
   delay(2000);
 
+  char ID[32];
+  sprintf(ID, "%08lX %08lX %08lX %08lX", SIM_UIDH, SIM_UIDMH, SIM_UIDML, SIM_UIDL);
+
+  Serial.print("MCU Serial number: ");
+  Serial.println(ID);
+
   kbox.setup();
 }
 
