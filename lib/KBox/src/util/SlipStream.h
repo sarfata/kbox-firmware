@@ -21,51 +21,30 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include <Arduino.h>
-#include <KBox.h>
 
-KBox kbox;
-bool flashMode = false;
+#pragma once
 
-void setup() {
-  Serial.begin(115200);
-  Serial.setTimeout(0);
+#include "Stream.h"
 
-  kbox.setup();
-  kbox.getNeopixels().setPixelColor(0, 0x00, 0x20, 0x00);
-  kbox.getNeopixels().show();
-  esp_init();
-  esp_reboot_in_program();
+class SlipStream {
+  private:
+    Stream &_stream;
 
-  NMEA2_SERIAL.begin(115200);
-  NMEA2_SERIAL.println("Starting esp program");
+  public:
+    SlipStream(Stream &s, size_t mtu);
 
-}
+    /**
+     * Returns 0 if no complete message has been received.
+     * Returns the size of a message if a full message has been received.
+     */
+    size_t available();
 
-void loop() {
-  digitalWrite(led_pin, 1);
-  uint8_t buffer[4096];
-
-  // On most ESP, the RTS line is used to reset the module
-  // DTR is used to boot in flash - or - run program
-  if (Serial.rts() && !flashMode) {
-    kbox.getNeopixels().setPixelColor(0, 0x20, 0x00, 0x00);
-    kbox.getNeopixels().show();
-    esp_reboot_in_flasher();
-    flashMode = true;
-  }
-
-  if (Serial.available()) {
-    digitalWrite(led_pin, 0);
-    int read = Serial.readBytes((char*)buffer, sizeof(buffer));
-    Serial1.write(buffer, read);
-  }
-
-  if (Serial1.available()) {
-    digitalWrite(led_pin, 0);
-    int read = Serial1.readBytes(buffer, sizeof(buffer));
-    Serial.write(buffer, read);
-  }
-  // Fill up buffers a bit.
-  delay(1);
-}
+    /**
+     * Copies received message into given buffer and then discards it.
+     *
+     * Returns number of bytes copied in the buffer. If the buffer is too
+     * small, only the first len bytes will be copied and then the entire
+     * message will be discarded.
+     */
+    size_t read(uint8_t *ptr, size_t len);
+};
