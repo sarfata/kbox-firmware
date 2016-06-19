@@ -67,6 +67,9 @@ class StreamMock : public Stream {
     StreamMock() {};
 
     StreamMock(int count, struct rxBuffer *b) : countBuffers(count), rxBuffers(b) {
+      for (int i = 0; i < countBuffers; i++) {
+        rxBuffers[i].index = 0;
+      }
     };
 
     void advanceToNextBuffer() {
@@ -77,7 +80,7 @@ class StreamMock : public Stream {
       struct rxBuffer *b = getCurrentBuffer();
 
       if (b) {
-        return b->len;
+        return b->len - b->index;
       }
       else {
         return 0;
@@ -115,61 +118,131 @@ class StreamMock : public Stream {
     };
 };
 
-TEST_CASE("empty messages") {
-  WHEN("reading empty stream") {
-    StreamMock emptyStream(0, 0);
-    SlipStream slip(emptyStream, 100);
+uint8_t ptr[100];
 
+TEST_CASE("reading an empty stream") {
+  StreamMock emptyStream(0, 0);
+  SlipStream slip(emptyStream, 100);
+
+  THEN("available should be 0") {
     REQUIRE( slip.available() == 0 );
-
-    uint8_t ptr[100];
-    REQUIRE( slip.read(ptr, sizeof(ptr)) == 0);
   }
 
-  WHEN("reading EOM byte repeatedly") {
-    struct rxBuffer b;
-    b.len = 10;
-    b.data = (const uint8_t*)"\xc0\xc0\xc0\xc0\xc0\xc0\xc0\xc0\xc0\xc0";
+  THEN("read should return 0") {
+    uint8_t ptr[100];
+    REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 0 );
+  }
+}
 
-    StreamMock eomBytesStream(1, &b);
-    SlipStream slip(eomBytesStream, 100);
+TEST_CASE("reading EOM bytes repeatedly") {
+  struct rxBuffer b;
+  b.len = 10;
+  b.data = (const uint8_t*)"\xc0\xc0\xc0\xc0\xc0\xc0\xc0\xc0\xc0\xc0";
 
+  StreamMock eomBytesStream(1, &b);
+  SlipStream slip(eomBytesStream, 100);
+
+  THEN("available should be 0") {
     REQUIRE( slip.available() == 0 );
   }
 }
 
-TEST_CASE("data read in one read-call") {
+TEST_CASE("reading simple message") {
   uint8_t ptr[100];
 
-  WHEN("reading actual data") {
-    struct rxBuffer b;
-    b.len = 10;
-    b.data = (const uint8_t*)"1234567890";
+  struct rxBuffer b;
+  b.len = 11;
+  b.data = (const uint8_t*)"1234567890\xc0";
 
-    StreamMock eomBytesStream(1, &b);
-    SlipStream slip(eomBytesStream, 100);
+  StreamMock bytesStream(1, &b);
+  SlipStream slip(bytesStream, 100);
 
+  THEN("should be able to read 10 bytes") {
     REQUIRE( slip.available() == 10 );
-    REQUIRE( slip.read(ptr, sizeof(ptr)) == 10);
+    REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 10);
     REQUIRE( memcmp(ptr, b.data, 10) == 0 );
-  }
-
-  WHEN("reading actual data with escaping") {
-    struct rxBuffer b;
-    b.len = 9;
-    b.data = (const uint8_t*)"1:\xdb\xdc 2:\xdb\xdd";
-    const uint8_t *expected = (const uint8_t*)"1:\xc0 2:\xdb";
-
-    StreamMock eomBytesStream(1, &b);
-    SlipStream slip(eomBytesStream, 100);
-
-    REQUIRE( slip.available() == 7 );
-    REQUIRE( slip.read(ptr, sizeof(ptr)) == 7);
-    REQUIRE( memcmp(ptr, expected, 7) == 0 );
   }
 }
 
+TEST_CASE("reading simple message with escaping") {
+  struct rxBuffer b;
+  b.len = 10;
+  b.data = (const uint8_t*)"1:\xdb\xdc 2:\xdb\xdd\xc0";
+  const uint8_t *expected = (const uint8_t*)"1:\xc0 2:\xdb";
 
+  StreamMock bytesStream(1, &b);
+  SlipStream slip(bytesStream, 100);
+
+  REQUIRE( slip.available() == 7 );
+  REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 7);
+  REQUIRE( memcmp(ptr, expected, 7) == 0 );
+}
+
+TEST_CASE("reading two messages in two read calls") {
+  struct rxBuffer rxb[2];
+  rxb[0].len = 10;
+  rxb[0].data = (const uint8_t*)"123456789\xc0";
+  rxb[1].len = 4;
+  rxb[1].data = (const uint8_t*)"abc\xc0";
+
+  StreamMock bytesStream(2, rxb);
+  SlipStream slip(bytesStream, 100);
+
+  REQUIRE( slip.available() == 9 );
+  REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 9);
+  REQUIRE( memcmp(ptr, rxb[0].data, 9) == 0 );
+
+  bytesStream.advanceToNextBuffer();
+
+  REQUIRE( slip.available() == 3 );
+  REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 3 );
+  REQUIRE( memcmp(ptr, rxb[1].data, 3) == 0 );
+}
+
+TEST_CASE("messages split across multiple read-calls") {
+  struct rxBuffer rxb[2];
+  rxb[0].len = 9;
+  rxb[0].data = (const uint8_t*)"123456789";
+  rxb[1].len = 4;
+  rxb[1].data = (const uint8_t*)"abc\xc0";
+
+  StreamMock bytesStream(2, rxb);
+  SlipStream slip(bytesStream, 100);
+
+  REQUIRE( slip.available() == 0 );
+  REQUIRE( rxb[0].index == rxb[0].len );
+
+  bytesStream.advanceToNextBuffer();
+
+  REQUIRE( slip.available() == 12 );
+  REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 12);
+  REQUIRE( memcmp(ptr, rxb[0].data, 9) == 0 );
+  REQUIRE( memcmp(ptr + 9, rxb[1].data, 3) == 0 );
+}
+
+TEST_CASE("an invalid escape sequence is used") {
+  struct rxBuffer b;
+  b.len = 3;
+  b.data = (const uint8_t*)"\xdb\x42\xc0";
+
+  StreamMock bytesStream(1, &b);
+  SlipStream slip(bytesStream, 100);
+
+  REQUIRE( slip.available() == 0 );
+  REQUIRE( slip.invalidFrameErrors() == 1 );
+}
+
+TEST_CASE("a message is bigger than the mtu") {
+  struct rxBuffer b;
+  b.len = 200;
+  b.data = (uint8_t*)malloc(200);
+
+  StreamMock bytesStream(1, &b);
+  SlipStream slip(bytesStream, 100);
+
+  REQUIRE( slip.available() == 0 );
+  REQUIRE( slip.invalidFrameErrors() == 1 );
+}
 
 
 // I have not found a way to get WString.cpp to compile on a Linux box without modifying it.

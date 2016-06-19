@@ -25,14 +25,63 @@
 #include <Stream.h>
 #include "SlipStream.h"
 
-SlipStream::SlipStream(Stream &s, size_t mtu) : _stream(s) {
+SlipStream::SlipStream(Stream &s, size_t mtu) : _stream(s), _mtu(mtu) {
+  buffer = (uint8_t*)malloc(mtu);
+  index = 0;
 }
 
 size_t SlipStream::available() {
-  return 0;
+  while (_stream.available() > 0 && !messageComplete) {
+    uint8_t b = _stream.read();
+
+    if (escapeMode) {
+      if (b == 0xdc) {
+        buffer[index++] = 0xc0;
+      }
+      else if (b == 0xdd) {
+        buffer[index++] = 0xdb;
+      }
+      else {
+        // escaping error!
+        index = 0;
+        _invalidFrameErrors++;
+      }
+      escapeMode = false;
+    }
+    else {
+      if (b == 0xc0) {
+        // End of frame
+        messageComplete = true;
+      }
+      else if (b == 0xdb) {
+        escapeMode = true;
+      }
+      else {
+        buffer[index++] = b;
+      }
+    }
+  }
+
+  // Reject frames that are greater than mtu
+  if (!messageComplete && index >= _mtu) {
+    index = 0;
+    _invalidFrameErrors++;
+  }
+
+  if (messageComplete) {
+    return index;
+  } else {
+    return 0;
+  }
 }
 
-size_t SlipStream::read(uint8_t *ptr, size_t len) {
-  return 0;
+size_t SlipStream::readFrame(uint8_t *ptr, size_t len) {
+  if (len > index) {
+    len = index;
+  }
+  memcpy(ptr, buffer, len);
+  messageComplete = false;
+  index = 0;
+  return len;
 }
 

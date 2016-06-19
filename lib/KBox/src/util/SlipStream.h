@@ -29,6 +29,13 @@
 class SlipStream {
   private:
     Stream &_stream;
+    size_t _mtu;
+    uint8_t *buffer = 0;
+    uint32_t index = 0;
+    bool escapeMode = false;
+    bool messageComplete = false;
+
+    uint32_t _invalidFrameErrors = 0;
 
   public:
     SlipStream(Stream &s, size_t mtu);
@@ -46,5 +53,12 @@ class SlipStream {
      * small, only the first len bytes will be copied and then the entire
      * message will be discarded.
      */
-    size_t read(uint8_t *ptr, size_t len);
+    size_t readFrame(uint8_t *ptr, size_t len);
+
+    /**
+     * Returns the number of invalid frames that were rejected.
+     */
+    uint32_t invalidFrameErrors() const {
+      return _invalidFrameErrors;
+    }
 };
