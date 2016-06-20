@@ -164,6 +164,23 @@ TEST_CASE("reading simple message") {
   }
 }
 
+TEST_CASE("reading message with end of frame header") {
+  uint8_t ptr[100];
+
+  struct rxBuffer b;
+  b.len = 13;
+  b.data = (const uint8_t*)"\xc0\xc0\\123456789\xc0";
+
+  StreamMock bytesStream(1, &b);
+  SlipStream slip(bytesStream, 100);
+
+  THEN("should be able to read 10 bytes") {
+    REQUIRE( slip.available() == 10 );
+    REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 10);
+    REQUIRE( memcmp(ptr, b.data + 2, 10) == 0 );
+  }
+}
+
 TEST_CASE("reading simple message with escaping") {
   struct rxBuffer b;
   b.len = 10;
@@ -235,11 +252,19 @@ TEST_CASE("an invalid escape sequence is used") {
 TEST_CASE("a message is bigger than the mtu") {
   struct rxBuffer b;
   b.len = 200;
-  b.data = (uint8_t*)malloc(200);
+  uint8_t *data = (uint8_t*) malloc(200);
+  b.data = data;
+
+  data[0] = 0xc0;
+  for (int i = 1; i < 199; i++) {
+    data[i] = 0x42;
+  }
+  data[199] = 0xc0;
 
   StreamMock bytesStream(1, &b);
   SlipStream slip(bytesStream, 100);
 
+  REQUIRE( slip.available() == 0 );
   REQUIRE( slip.available() == 0 );
   REQUIRE( slip.invalidFrameErrors() == 1 );
 }

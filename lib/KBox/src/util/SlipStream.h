@@ -35,6 +35,7 @@ class SlipStream {
     bool escapeMode = false;
     bool messageComplete = false;
 
+    bool _invalidFrame = false;
     uint32_t _invalidFrameErrors = 0;
 
   public:
@@ -54,6 +55,12 @@ class SlipStream {
      * message will be discarded.
      */
     size_t readFrame(uint8_t *ptr, size_t len);
+
+    /**
+     * Writes a frame to the underlying Stream, using SLIP framing and
+     * escaping.
+     */
+    size_t writeFrame(const uint8_t *ptr, size_t len);
 
     /**
      * Returns the number of invalid frames that were rejected.
