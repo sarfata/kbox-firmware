@@ -33,6 +33,8 @@ script:
     - make test
 
 # required to get a modern version of g++ with full std-c11 support
+env:
+  CXX=g++-4.9
 addons:
   apt:
     sources:
@@ -40,5 +42,5 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     # install toolchains
-    - gcc-5
-    - g++-5
+    - gcc-4.9
+    - g++-4.9
