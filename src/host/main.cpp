@@ -25,6 +25,7 @@
 #include <Encoder.h>
 #include <i2c_t3.h>
 #include <KBox.h>
+#include "util/ESPProgrammer.h"
 
 // Those are included here to force platformio to link to them.
 // See issue github.com/platformio/platformio/issues/432 for a better way to do this.
@@ -107,9 +108,30 @@ void setup() {
   kbox.addPage(statsPage);
 
   kbox.setup();
+
+  // Reinitialize debug here because in some configurations 
+  // (like logging to nmea2 output), the kbox setup might have messed
+  // up the debug configuration.
+  DEBUG_INIT();
   DEBUG("setup done");
+
+  Serial.setTimeout(0);
+  Serial1.setTimeout(0);
+  Serial2.setTimeout(0);
+  Serial3.setTimeout(0);
 }
 
 void loop() {
-  kbox.loop();
+  if (Serial.baud() == 230400) {
+    DEBUG("Entering programmer mode");
+    ESPProgrammer programmer(kbox.getNeopixels(), Serial, Serial1);
+    while (programmer.getState() != ESPProgrammer::ProgrammerState::Done) {
+      programmer.loop();
+    }
+    DEBUG("Exiting programmer mode");
+    CPU_RESTART;
+  }
+  else {
+    kbox.loop();
+  }
 }

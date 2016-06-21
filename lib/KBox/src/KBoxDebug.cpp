@@ -36,7 +36,11 @@
 
 
 void debug_init() {
-    DebugSerial.begin(115200);
+  // The speed set here has no importance when logging to USB
+  // however, when logging via one of the real serial ports, it helps
+  // to make this as fast as possible to avoid lag due to serial port
+  // congestion.
+  DebugSerial.begin(920800);
 }
 
 static int strrpos(const char *string, char c) {

@@ -51,7 +51,8 @@ class ESPROM(object):
     ESP_FLASH_BLOCK = 0x400
 
     # Default baudrate. The ROM auto-bauds, so we can use more or less whatever we want.
-    ESP_ROM_BAUD    = 115200
+    # customized for KBox so that KBox firmware can detect a ESP image upload
+    ESP_ROM_BAUD    = 230400
 
     # First byte of the application image
     ESP_IMAGE_MAGIC = 0xe9

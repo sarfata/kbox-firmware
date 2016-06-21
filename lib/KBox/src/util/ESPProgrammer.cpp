@@ -27,9 +27,19 @@
 #include <KBoxDebug.h>
 #include "ESPProgrammer.h"
 
+/* Unless a custom DEBUG output has been configured for this build, then we
+ * do not want to log anything in the programmer because that would go straight
+ * into esptool.py on the computer and mess things up.
+ * When building the 'program-esp' environment, debug output is redirected to
+ * Serial3 for debugging.
+ */
+#ifndef DebugSerial
+#define DEBUG(...) /* nop */
+#endif
+
 ESPProgrammer::ESPProgrammer(Adafruit_NeoPixel &pixels, usb_serial_class &computerSerial, HardwareSerial &espSerial) :
   pixels(pixels), computerSerial(computerSerial), espSerial(espSerial),
-  computerConnection(Serial, bootloaderMtu), espConnection(Serial1, bootloaderMtu),
+  computerConnection(computerSerial, bootloaderMtu), espConnection(espSerial, bootloaderMtu),
   state(Disconnected)
 {
   buffer = (uint8_t*)malloc(bootloaderMtu);
@@ -46,20 +56,22 @@ void ESPProgrammer::loop() {
     currentBaudRate = newBaud;
     if (computerSerial.baud() != 0) {
       state = ByteMode;
+
       espSerial.begin(currentBaudRate);
     }
   }
 
-  if (state == ByteMode) {
-    loopByteMode();
-  }
-  else if (isFrameMode()) {
+  if (isFrameMode()) {
     loopFrameMode();
+  }
+  else {
+    loopByteMode();
   }
 
   // If we do not receive anything for more than 3 seconds then we are probably done.
-  if (timeSinceLastByte > 3000) {
-    state = ByteMode;
+  if (state != Disconnected && state != Done && timeSinceLastByte > 1000) {
+    DEBUG("programming done!");
+    state = Done;
   }
 
   // Only update 50 times per sec
@@ -170,6 +182,9 @@ void ESPProgrammer::updateColors() {
     case FrameModeFlash:
       stateColor = pixels.Color(0x20, 0x0, 0x20);
       break;
+    case Done:
+      stateColor = pixels.Color(0, 0, 0x20);
+      break;
   }
 
   // We want the color to change when data is coming rapidly
@@ -195,11 +210,12 @@ void ESPProgrammer::updateColors() {
 }
 
 bool ESPProgrammer::isFrameMode() const {
-  if (state == ByteMode) {
-    return false;
+  if (state == FrameMode || state == FrameModeMem || state == FrameModeSync
+       || state == FrameModeFlash) {
+    return true;
   }
   else {
-    return true;
+    return false;
   }
 }
 

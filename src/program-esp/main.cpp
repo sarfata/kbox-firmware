@@ -25,7 +25,7 @@
 #include <Arduino.h>
 #include <KBox.h>
 #include <util/SlipStream.h>
-#include "ESPProgrammer.h"
+#include "util/ESPProgrammer.h"
 
 KBox kbox;
 ESPProgrammer programmer(kbox.getNeopixels(), Serial, Serial1);

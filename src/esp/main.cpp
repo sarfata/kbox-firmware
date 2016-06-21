@@ -50,6 +50,10 @@ void setup() {
   Serial.setTimeout(0);
   Serial.setDebugOutput(true);
 
+  // This delay is important so that KBox can detect when firmware
+  // upload are done and restart normal operation.
+  delay(1000);
+
   DEBUG("Starting KBox WiFi module");
 }
 

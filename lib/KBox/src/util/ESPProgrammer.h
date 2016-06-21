@@ -50,27 +50,30 @@ struct ESPFrameHeader {
 /** Implements support for programming the ESP from the computer.
  */
 class ESPProgrammer {
-  enum ProgrammerState {
-    Disconnected,     // Disconnected
-    ByteMode,         // Forward every bytes as they come
-    FrameMode,        // Read complete frames and then forward them
-    FrameModeSync,    // Sync command detected
-    FrameModeMem,     // Mem command detected
-    FrameModeFlash    // Flash command detected
-  };
+  public:
+    enum ProgrammerState {
+      Disconnected,     // Disconnected
+      ByteMode,         // Forward every bytes as they come
+      FrameMode,        // Read complete frames and then forward them
+      FrameModeSync,    // Sync command detected
+      FrameModeMem,     // Mem command detected
+      FrameModeFlash,   // Flash command detected
+      Done
+    };
 
-  static const int bootloaderMtu = 4096;
-  uint8_t *buffer;
-  Adafruit_NeoPixel &pixels;
+  private:
+    static const int bootloaderMtu = 4096;
+    uint8_t *buffer;
+    Adafruit_NeoPixel &pixels;
 
-  usb_serial_class &computerSerial;
-  HardwareSerial &espSerial;
-  SlipStream computerConnection;
-  SlipStream espConnection;
+    usb_serial_class &computerSerial;
+    HardwareSerial &espSerial;
+    SlipStream computerConnection;
+    SlipStream espConnection;
 
-  ProgrammerState state;
-  elapsedMillis timeSinceLastByte;
-  unsigned int currentBaudRate = 0;
+    ProgrammerState state;
+    elapsedMillis timeSinceLastByte;
+    unsigned int currentBaudRate = 0;
 
   private:
     bool isFrameMode() const;
@@ -86,5 +89,8 @@ class ESPProgrammer {
     ESPProgrammer(Adafruit_NeoPixel &pixels, usb_serial_class &computerSerial, HardwareSerial &espSerial);
     ~ESPProgrammer();
 
+    ProgrammerState getState() const {
+      return state;
+    };
     void loop();
 };
