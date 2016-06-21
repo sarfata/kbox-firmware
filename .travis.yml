@@ -31,3 +31,14 @@ script:
     - platformio run
     # Run the few unit tests (C code running on computer)
     - make test
+
+# required to get a modern version of g++ with full std-c11 support
+addons:
+  apt:
+    sources:
+    # add PPAs with more up-to-date toolchains
+    - ubuntu-toolchain-r-test
+    packages:
+    # install toolchains
+    - gcc-5
+    - g++-5
