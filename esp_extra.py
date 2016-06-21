@@ -8,7 +8,7 @@ LOCAL_UPLOADER=os.path.join("$PROJECT_DIR","tools/esptool.py")
 env.Replace(
     LOCAL_UPLOADERFLAGS=[
         "-p", "$UPLOAD_PORT",
-        "-b", "115200",
+        "-b", "2000000",
         "write_flash", "0x0",
     ],
     UPLOADER=LOCAL_UPLOADER,

@@ -28,6 +28,7 @@
 #include "ESPBootloader.h"
 
 enum ProgrammerState {
+  Disconnected,     // Disconnected
   ByteMode,         // Forward every bytes as they come
   FrameMode,        // Read complete frames and then forward them
   FrameModeSync,    // Sync command detected
@@ -44,7 +45,9 @@ SlipStream computerConnection(Serial, 4096);
 SlipStream espConnection(Serial1, 4096);
 ProgrammerState state;
 elapsedMillis timeSinceLastByte;
+unsigned int currentBaudRate = 115200;
 
+bool lastRTS, lastDTR;
 
 bool isFrameMode(ProgrammerState state) {
   if (state == ByteMode) {
@@ -56,13 +59,12 @@ bool isFrameMode(ProgrammerState state) {
 }
 
 void setup() {
-  Serial.begin(115200);
   Serial.setTimeout(0);
   Serial1.setTimeout(0);
 
   kbox.setup();
 
-  state = ByteMode;
+  state = Disconnected;
   updateColors(state, timeSinceLastByte);
 
   esp_init();
@@ -74,18 +76,22 @@ void setup() {
 }
 
 void loop() {
-  // On most ESP, the RTS line is used to reset the module
-  // DTR is used to boot in flash - or - run program
-  if (Serial.rts() && !isFrameMode(state)) {
-    DEBUG("rts asserted - going into frame mode");
-    state = FrameMode;
-    esp_reboot_in_flasher();
+  unsigned int newBaud = Serial.baud();
+  if (newBaud != currentBaudRate) {
+    DEBUG("baud rate change detected - now %i (was %i)", newBaud, currentBaudRate);
+    currentBaudRate = newBaud;
+    if (Serial.baud() == 0) {
+      state = Disconnected;
+    }
+    else {
+      state = ByteMode;
+      Serial1.begin(currentBaudRate);
+    }
   }
-
   // When in frame mode we read frame by frame
   // this allows us to detect the end of flash mode and then
   // read byte by byte
-  if (isFrameMode(state)) {
+  else if (isFrameMode(state)) {
     if (computerConnection.available()) {
       size_t len = computerConnection.readFrame(buffer, sizeof(buffer));
       esp_debug_frame("Computer", buffer, len);
@@ -127,18 +133,29 @@ void loop() {
       timeSinceLastByte = 0;
     }
   }
-  else {
-    if (Serial.available()) {
-      int read = Serial.readBytes((char*)buffer, sizeof(buffer));
-      Serial1.write(buffer, read);
-      timeSinceLastByte = 0;
+  else if (state == ByteMode) {
+    // This is how esptool.py tells us to reboot the module
+    if (Serial.dtr() && !Serial.rts()) {
+      DEBUG("ESP Reboot requested");
+      state = FrameMode;
+      esp_reboot_in_flasher();
     }
+    else {
+      if (Serial.available()) {
+        int read = Serial.readBytes((char*)buffer, sizeof(buffer));
+        Serial1.write(buffer, read);
+        timeSinceLastByte = 0;
+      }
 
-    if (Serial1.available()) {
-      int read = Serial1.readBytes(buffer, sizeof(buffer));
-      Serial.write(buffer, read);
-      timeSinceLastByte = 0;
+      if (Serial1.available()) {
+        int read = Serial1.readBytes(buffer, sizeof(buffer));
+        Serial.write(buffer, read);
+        timeSinceLastByte = 0;
+      }
     }
+  }
+  else {
+    DEBUG("INVALID STATE! %i", state);
   }
   // Only update 50 times per sec
   static elapsedMillis rgbTimer = 0;
@@ -194,6 +211,9 @@ void updateColors(ProgrammerState state, elapsedMillis &timeSinceLastByte) {
   Adafruit_NeoPixel &strip = kbox.getNeopixels();
 
   switch (state) {
+    case Disconnected:
+      stateColor = strip.Color(0, 0, 0);
+      break;
     case ByteMode:
       stateColor = strip.Color(0, 0x20, 0);
       break;
