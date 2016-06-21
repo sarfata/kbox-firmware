@@ -25,15 +25,35 @@
 #include <Arduino.h>
 #include <KBox.h>
 #include <util/SlipStream.h>
+#include "ESPBootloader.h"
+
+enum ProgrammerState {
+  ByteMode,         // Forward every bytes as they come
+  FrameMode,        // Read complete frames and then forward them
+  FrameModeSync,    // Sync command detected
+  FrameModeMem,     // Mem command detected
+  FrameModeFlash    // Flash command detected
+};
+
+void updateColors(ProgrammerState state, elapsedMillis &timeSinceLastByte);
+
 
 KBox kbox;
-bool flashMode = false;
+uint8_t buffer[4096];
 SlipStream computerConnection(Serial, 4096);
 SlipStream espConnection(Serial1, 4096);
+ProgrammerState state;
+elapsedMillis timeSinceLastByte;
 
-#define ESP_CMD_FLASH_BEGIN 0x02
-#define ESP_CMD_FLASH_END 0x04
-#define ESP_CMD_SYNC 0x08
+
+bool isFrameMode(ProgrammerState state) {
+  if (state == ByteMode) {
+    return false;
+  }
+  else {
+    return true;
+  }
+}
 
 void setup() {
   Serial.begin(115200);
@@ -41,8 +61,10 @@ void setup() {
   Serial1.setTimeout(0);
 
   kbox.setup();
-  kbox.getNeopixels().setPixelColor(0, 0x00, 0x20, 0x00);
-  kbox.getNeopixels().show();
+
+  state = ByteMode;
+  updateColors(state, timeSinceLastByte);
+
   esp_init();
   esp_reboot_in_program();
 
@@ -51,73 +73,163 @@ void setup() {
   Serial3.setTimeout(0);
 }
 
-struct ESPFrameHeader {
-  uint8_t zero;
-  uint8_t op;
-  uint16_t size;
-  uint32_t checksum;
-};
-
-void debug_frame(const char *name, uint8_t *ptr, size_t len) {
-  static const int maxBytesDumped = 32;
-
-  if (len < sizeof(ESPFrameHeader)) {
-    DEBUG("%s: Packet is too small with %i bytes", name, len);
-    return;
-  }
-  struct ESPFrameHeader *header = (struct ESPFrameHeader*)ptr;
-
-  if (len != header->size + sizeof(struct ESPFrameHeader)) {
-    DEBUG("%s: Packet Len=%i - zero=%x op=%x size=%i checksum=%i - INVALID DATA LENGTH len should be: %i", name, len, header->zero, header->op, header->size, header->checksum, header->size + sizeof(struct ESPFrameHeader));
-  }
-}
-
 void loop() {
-  digitalWrite(led_pin, 1);
-  uint8_t buffer[4096];
-
   // On most ESP, the RTS line is used to reset the module
   // DTR is used to boot in flash - or - run program
-  if (Serial.rts() && !flashMode) {
-    DEBUG("rts asserted - going into flash mode");
-    kbox.getNeopixels().setPixelColor(0, 0x20, 0x00, 0x00);
-    kbox.getNeopixels().show();
+  if (Serial.rts() && !isFrameMode(state)) {
+    DEBUG("rts asserted - going into frame mode");
+    state = FrameMode;
     esp_reboot_in_flasher();
-    flashMode = true;
   }
 
-  if (computerConnection.available()) {
-    digitalWrite(led_pin, 0);
-    size_t len = computerConnection.readFrame(buffer, sizeof(buffer));
-    debug_frame("Computer", buffer, len);
+  // When in frame mode we read frame by frame
+  // this allows us to detect the end of flash mode and then
+  // read byte by byte
+  if (isFrameMode(state)) {
+    if (computerConnection.available()) {
+      size_t len = computerConnection.readFrame(buffer, sizeof(buffer));
+      esp_debug_frame("Computer", buffer, len);
 
-    if (len > sizeof(struct ESPFrameHeader)) {
-      struct ESPFrameHeader *header = (struct ESPFrameHeader*) buffer;
+      if (len > sizeof(struct ESPFrameHeader)) {
+        struct ESPFrameHeader *header = (struct ESPFrameHeader*) buffer;
 
-      if (header->op == ESP_CMD_SYNC) {
-        DEBUG("Sync");
-        kbox.getNeopixels().setPixelColor(0, 0x00, 0xa5, 0xa5);
-        kbox.getNeopixels().show();
+        if (header->op == ESP_CMD_SYNC) {
+          state = FrameModeSync;
+          DEBUG("Sync");
+        }
+        if (header->op == ESP_CMD_FLASH_BEGIN) {
+          state = FrameModeFlash;
+          DEBUG("Flash begin");
+        }
+        if (header->op == ESP_CMD_MEM_BEGIN) {
+          state = FrameModeMem;
+          DEBUG("Mem begin");
+        }
+        if (header->op == ESP_CMD_MEM_END) {
+          // Mem command is used to flash a "stub" of code
+          // and then run it. We need to exit frame mode.
+          state = ByteMode;
+          DEBUG("Mem end");
+        }
+        if (header->op == ESP_CMD_FLASH_END) {
+          state = ByteMode;
+          DEBUG("Flash end");
+        }
       }
-      if (header->op == ESP_CMD_FLASH_BEGIN) {
-        DEBUG("Flash begin");
-        kbox.getNeopixels().setPixelColor(0, 0xff, 0xa5, 0x00);
-        kbox.getNeopixels().show();
-      }
-      if (header->op == ESP_CMD_FLASH_END) {
-        DEBUG("Flash end");
-        kbox.getNeopixels().setPixelColor(0, 0x00, 0x20, 0x00);
-        kbox.getNeopixels().show();
-        flashMode = false;
-      }
+      espConnection.writeFrame(buffer, len);
+      timeSinceLastByte = 0;
     }
-    espConnection.writeFrame(buffer, len);
-  }
 
-  if (espConnection.available()) {
-    digitalWrite(led_pin, 0);
-    size_t len = espConnection.readFrame(buffer, sizeof(buffer));
-    debug_frame("ESP", buffer, len);
-    computerConnection.writeFrame(buffer, len);
+    if (espConnection.available()) {
+      size_t len = espConnection.readFrame(buffer, sizeof(buffer));
+      esp_debug_frame("ESP", buffer, len);
+      computerConnection.writeFrame(buffer, len);
+      timeSinceLastByte = 0;
+    }
+  }
+  else {
+    if (Serial.available()) {
+      int read = Serial.readBytes((char*)buffer, sizeof(buffer));
+      Serial1.write(buffer, read);
+      timeSinceLastByte = 0;
+    }
+
+    if (Serial1.available()) {
+      int read = Serial1.readBytes(buffer, sizeof(buffer));
+      Serial.write(buffer, read);
+      timeSinceLastByte = 0;
+    }
+  }
+  // Only update 50 times per sec
+  static elapsedMillis rgbTimer = 0;
+  if (rgbTimer > 1000 / 50) {
+    updateColors(state, timeSinceLastByte);
+    rgbTimer = 0;
+  }
+  // Blink led when data is being transmitted
+  static elapsedMillis ledTimer = 0;
+  if (ledTimer > 100) {
+    static bool ledStatus = false;
+    if (timeSinceLastByte < 100) {
+      ledStatus = !ledStatus;
+    }
+    else {
+      ledStatus = false;
+    }
+    digitalWrite(led_pin, ledStatus);
+    ledTimer = 0;
   }
 }
+
+uint32_t dimColor(uint32_t color, uint8_t maxBrightness) {
+  uint32_t r = (color & 0xff0000) >> 16;
+  uint32_t g = (color & 0xff00) >> 8;
+  uint32_t b = color & 0xff;
+
+  r = (r * maxBrightness) << 8;
+  g = (g * maxBrightness);
+  b = (b * maxBrightness) / 0xff;
+
+  return (r & 0xff0000) | (g & 0xff00) | b;
+  
+}
+
+uint32_t Wheel(byte WheelPos) {
+  Adafruit_NeoPixel &strip = kbox.getNeopixels();
+
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+   return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  } else if(WheelPos < 170) {
+    WheelPos -= 85;
+   return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  } else {
+   WheelPos -= 170;
+   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  }
+}
+
+void updateColors(ProgrammerState state, elapsedMillis &timeSinceLastByte) {
+  uint32_t stateColor = 0;
+  Adafruit_NeoPixel &strip = kbox.getNeopixels();
+
+  switch (state) {
+    case ByteMode:
+      stateColor = strip.Color(0, 0x20, 0);
+      break;
+    case FrameMode:
+      stateColor = strip.Color(0x20, 0x0, 0);
+      break;
+    case FrameModeSync:
+      stateColor = strip.Color(0x20, 0x20, 0x20);
+      break;
+    case FrameModeMem:
+      stateColor = strip.Color(0x20, 0x20, 0);
+      break;
+    case FrameModeFlash:
+      stateColor = strip.Color(0x20, 0x0, 0x20);
+      break;
+  }
+
+  // We want the color to change when data is coming rapidly
+  static uint8_t wheelIndex = 0;
+  if (timeSinceLastByte < 20) {
+    wheelIndex++;
+  }
+
+  // Intensity of color will be proportial to how recent the last byte received was
+  // After 500ms, the color will be 0
+  int dim = 0;
+  if (timeSinceLastByte < 500) {
+    // set the max to 50 because 255 really just blinds me
+    const int maxBrightness = 50;
+    dim = maxBrightness - maxBrightness * timeSinceLastByte / 500;
+  }
+
+  uint32_t dataColor = dimColor(Wheel(wheelIndex), dim);
+
+  kbox.getNeopixels().setPixelColor(0, stateColor);
+  kbox.getNeopixels().setPixelColor(1, dataColor);
+  kbox.getNeopixels().show();
+}
+
