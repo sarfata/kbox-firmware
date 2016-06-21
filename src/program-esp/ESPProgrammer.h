@@ -22,8 +22,15 @@
   THE SOFTWARE.
 */
 
+#pragma once
+
 #include <stddef.h>
 #include <stdint.h>
+#include <Adafruit_NeoPixel.h>
+#include <elapsedMillis.h>
+#include "util/SlipStream.h"
+#include "drivers/board.h"
+#include "drivers/esp8266.h"
 
 // From esptool.py - List of bootloader commands
 #define ESP_CMD_FLASH_BEGIN 0x02
@@ -40,4 +47,44 @@ struct ESPFrameHeader {
   uint32_t checksum;
 };
 
-void esp_debug_frame(const char *name, uint8_t *ptr, size_t len);
+/** Implements support for programming the ESP from the computer.
+ */
+class ESPProgrammer {
+  enum ProgrammerState {
+    Disconnected,     // Disconnected
+    ByteMode,         // Forward every bytes as they come
+    FrameMode,        // Read complete frames and then forward them
+    FrameModeSync,    // Sync command detected
+    FrameModeMem,     // Mem command detected
+    FrameModeFlash    // Flash command detected
+  };
+
+  static const int bootloaderMtu = 4096;
+  uint8_t *buffer;
+  Adafruit_NeoPixel &pixels;
+
+  usb_serial_class &computerSerial;
+  HardwareSerial &espSerial;
+  SlipStream computerConnection;
+  SlipStream espConnection;
+
+  ProgrammerState state;
+  elapsedMillis timeSinceLastByte;
+  unsigned int currentBaudRate = 0;
+
+  private:
+    bool isFrameMode() const;
+    void updateColors();
+    void loopByteMode();
+    void loopFrameMode();
+    void debugFrame(const char *name, uint8_t *ptr, size_t len);
+
+    uint32_t colorWheel(byte WheelPos);
+    uint32_t dimColor(uint32_t color, uint8_t maxBrightness);
+
+  public:
+    ESPProgrammer(Adafruit_NeoPixel &pixels, usb_serial_class &computerSerial, HardwareSerial &espSerial);
+    ~ESPProgrammer();
+
+    void loop();
+};

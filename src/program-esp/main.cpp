@@ -25,231 +25,26 @@
 #include <Arduino.h>
 #include <KBox.h>
 #include <util/SlipStream.h>
-#include "ESPBootloader.h"
-
-enum ProgrammerState {
-  Disconnected,     // Disconnected
-  ByteMode,         // Forward every bytes as they come
-  FrameMode,        // Read complete frames and then forward them
-  FrameModeSync,    // Sync command detected
-  FrameModeMem,     // Mem command detected
-  FrameModeFlash    // Flash command detected
-};
-
-void updateColors(ProgrammerState state, elapsedMillis &timeSinceLastByte);
-
+#include "ESPProgrammer.h"
 
 KBox kbox;
-uint8_t buffer[4096];
-SlipStream computerConnection(Serial, 4096);
-SlipStream espConnection(Serial1, 4096);
-ProgrammerState state;
-elapsedMillis timeSinceLastByte;
-unsigned int currentBaudRate = 115200;
-
-bool lastRTS, lastDTR;
-
-bool isFrameMode(ProgrammerState state) {
-  if (state == ByteMode) {
-    return false;
-  }
-  else {
-    return true;
-  }
-}
+ESPProgrammer programmer(kbox.getNeopixels(), Serial, Serial1);
 
 void setup() {
-  Serial.setTimeout(0);
-  Serial1.setTimeout(0);
-
   kbox.setup();
 
-  state = Disconnected;
-  updateColors(state, timeSinceLastByte);
+  DEBUG_INIT();
 
+  DEBUG("Starting esp program");
   esp_init();
   esp_reboot_in_program();
 
-  DEBUG_INIT();
-  DEBUG("Starting esp program");
+  Serial.setTimeout(0);
+  Serial1.setTimeout(0);
   Serial3.setTimeout(0);
 }
 
 void loop() {
-  unsigned int newBaud = Serial.baud();
-  if (newBaud != currentBaudRate) {
-    DEBUG("baud rate change detected - now %i (was %i)", newBaud, currentBaudRate);
-    currentBaudRate = newBaud;
-    if (Serial.baud() == 0) {
-      state = Disconnected;
-    }
-    else {
-      state = ByteMode;
-      Serial1.begin(currentBaudRate);
-    }
-  }
-  // When in frame mode we read frame by frame
-  // this allows us to detect the end of flash mode and then
-  // read byte by byte
-  else if (isFrameMode(state)) {
-    if (computerConnection.available()) {
-      size_t len = computerConnection.readFrame(buffer, sizeof(buffer));
-      esp_debug_frame("Computer", buffer, len);
-
-      if (len > sizeof(struct ESPFrameHeader)) {
-        struct ESPFrameHeader *header = (struct ESPFrameHeader*) buffer;
-
-        if (header->op == ESP_CMD_SYNC) {
-          state = FrameModeSync;
-          DEBUG("Sync");
-        }
-        if (header->op == ESP_CMD_FLASH_BEGIN) {
-          state = FrameModeFlash;
-          DEBUG("Flash begin");
-        }
-        if (header->op == ESP_CMD_MEM_BEGIN) {
-          state = FrameModeMem;
-          DEBUG("Mem begin");
-        }
-        if (header->op == ESP_CMD_MEM_END) {
-          // Mem command is used to flash a "stub" of code
-          // and then run it. We need to exit frame mode.
-          state = ByteMode;
-          DEBUG("Mem end");
-        }
-        if (header->op == ESP_CMD_FLASH_END) {
-          state = ByteMode;
-          DEBUG("Flash end");
-        }
-      }
-      espConnection.writeFrame(buffer, len);
-      timeSinceLastByte = 0;
-    }
-
-    if (espConnection.available()) {
-      size_t len = espConnection.readFrame(buffer, sizeof(buffer));
-      esp_debug_frame("ESP", buffer, len);
-      computerConnection.writeFrame(buffer, len);
-      timeSinceLastByte = 0;
-    }
-  }
-  else if (state == ByteMode) {
-    // This is how esptool.py tells us to reboot the module
-    if (Serial.dtr() && !Serial.rts()) {
-      DEBUG("ESP Reboot requested");
-      state = FrameMode;
-      esp_reboot_in_flasher();
-    }
-    else {
-      if (Serial.available()) {
-        int read = Serial.readBytes((char*)buffer, sizeof(buffer));
-        Serial1.write(buffer, read);
-        timeSinceLastByte = 0;
-      }
-
-      if (Serial1.available()) {
-        int read = Serial1.readBytes(buffer, sizeof(buffer));
-        Serial.write(buffer, read);
-        timeSinceLastByte = 0;
-      }
-    }
-  }
-  else {
-    DEBUG("INVALID STATE! %i", state);
-  }
-  // Only update 50 times per sec
-  static elapsedMillis rgbTimer = 0;
-  if (rgbTimer > 1000 / 50) {
-    updateColors(state, timeSinceLastByte);
-    rgbTimer = 0;
-  }
-  // Blink led when data is being transmitted
-  static elapsedMillis ledTimer = 0;
-  if (ledTimer > 100) {
-    static bool ledStatus = false;
-    if (timeSinceLastByte < 100) {
-      ledStatus = !ledStatus;
-    }
-    else {
-      ledStatus = false;
-    }
-    digitalWrite(led_pin, ledStatus);
-    ledTimer = 0;
-  }
-}
-
-uint32_t dimColor(uint32_t color, uint8_t maxBrightness) {
-  uint32_t r = (color & 0xff0000) >> 16;
-  uint32_t g = (color & 0xff00) >> 8;
-  uint32_t b = color & 0xff;
-
-  r = (r * maxBrightness) << 8;
-  g = (g * maxBrightness);
-  b = (b * maxBrightness) / 0xff;
-
-  return (r & 0xff0000) | (g & 0xff00) | b;
-  
-}
-
-uint32_t Wheel(byte WheelPos) {
-  Adafruit_NeoPixel &strip = kbox.getNeopixels();
-
-  WheelPos = 255 - WheelPos;
-  if(WheelPos < 85) {
-   return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  } else if(WheelPos < 170) {
-    WheelPos -= 85;
-   return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  } else {
-   WheelPos -= 170;
-   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-  }
-}
-
-void updateColors(ProgrammerState state, elapsedMillis &timeSinceLastByte) {
-  uint32_t stateColor = 0;
-  Adafruit_NeoPixel &strip = kbox.getNeopixels();
-
-  switch (state) {
-    case Disconnected:
-      stateColor = strip.Color(0, 0, 0);
-      break;
-    case ByteMode:
-      stateColor = strip.Color(0, 0x20, 0);
-      break;
-    case FrameMode:
-      stateColor = strip.Color(0x20, 0x0, 0);
-      break;
-    case FrameModeSync:
-      stateColor = strip.Color(0x20, 0x20, 0x20);
-      break;
-    case FrameModeMem:
-      stateColor = strip.Color(0x20, 0x20, 0);
-      break;
-    case FrameModeFlash:
-      stateColor = strip.Color(0x20, 0x0, 0x20);
-      break;
-  }
-
-  // We want the color to change when data is coming rapidly
-  static uint8_t wheelIndex = 0;
-  if (timeSinceLastByte < 20) {
-    wheelIndex++;
-  }
-
-  // Intensity of color will be proportial to how recent the last byte received was
-  // After 500ms, the color will be 0
-  int dim = 0;
-  if (timeSinceLastByte < 500) {
-    // set the max to 50 because 255 really just blinds me
-    const int maxBrightness = 50;
-    dim = maxBrightness - maxBrightness * timeSinceLastByte / 500;
-  }
-
-  uint32_t dataColor = dimColor(Wheel(wheelIndex), dim);
-
-  kbox.getNeopixels().setPixelColor(0, stateColor);
-  kbox.getNeopixels().setPixelColor(1, dataColor);
-  kbox.getNeopixels().show();
+  programmer.loop();
 }
 
