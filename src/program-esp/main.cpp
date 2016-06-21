@@ -103,7 +103,6 @@ void loop() {
         DEBUG("Flash begin");
         kbox.getNeopixels().setPixelColor(0, 0xff, 0xa5, 0x00);
         kbox.getNeopixels().show();
-        flashMode = false;
       }
       if (header->op == ESP_CMD_FLASH_END) {
         DEBUG("Flash end");

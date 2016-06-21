@@ -35,7 +35,7 @@ class SlipStream {
     bool escapeMode = false;
     bool messageComplete = false;
 
-    bool _invalidFrame = false;
+    bool _invalidFrame = true;
     uint32_t _invalidFrameErrors = 0;
 
   public:

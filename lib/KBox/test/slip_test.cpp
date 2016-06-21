@@ -151,8 +151,8 @@ TEST_CASE("reading simple message") {
   uint8_t ptr[100];
 
   struct rxBuffer b;
-  b.len = 11;
-  b.data = (const uint8_t*)"1234567890\xc0";
+  b.len = 12;
+  b.data = (const uint8_t*)"\xc0""1234567890\xc0";
 
   StreamMock bytesStream(1, &b);
   SlipStream slip(bytesStream, 100);
@@ -160,7 +160,7 @@ TEST_CASE("reading simple message") {
   THEN("should be able to read 10 bytes") {
     REQUIRE( slip.available() == 10 );
     REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 10);
-    REQUIRE( memcmp(ptr, b.data, 10) == 0 );
+    REQUIRE( memcmp(ptr, b.data+1, 10) == 0 );
   }
 }
 
@@ -169,7 +169,7 @@ TEST_CASE("reading message with end of frame header") {
 
   struct rxBuffer b;
   b.len = 13;
-  b.data = (const uint8_t*)"\xc0\xc0\\123456789\xc0";
+  b.data = (const uint8_t*)"\xc0\xc0""0123456789\xc0";
 
   StreamMock bytesStream(1, &b);
   SlipStream slip(bytesStream, 100);
@@ -183,8 +183,8 @@ TEST_CASE("reading message with end of frame header") {
 
 TEST_CASE("reading simple message with escaping") {
   struct rxBuffer b;
-  b.len = 10;
-  b.data = (const uint8_t*)"1:\xdb\xdc 2:\xdb\xdd\xc0";
+  b.len = 11;
+  b.data = (const uint8_t*)"\xc0""1:\xdb\xdc 2:\xdb\xdd\xc0";
   const uint8_t *expected = (const uint8_t*)"1:\xc0 2:\xdb";
 
   StreamMock bytesStream(1, &b);
@@ -197,8 +197,8 @@ TEST_CASE("reading simple message with escaping") {
 
 TEST_CASE("reading two messages in two read calls") {
   struct rxBuffer rxb[2];
-  rxb[0].len = 10;
-  rxb[0].data = (const uint8_t*)"123456789\xc0";
+  rxb[0].len = 11;
+  rxb[0].data = (const uint8_t*)"\xc0""123456789\xc0";
   rxb[1].len = 4;
   rxb[1].data = (const uint8_t*)"abc\xc0";
 
@@ -207,7 +207,7 @@ TEST_CASE("reading two messages in two read calls") {
 
   REQUIRE( slip.available() == 9 );
   REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 9);
-  REQUIRE( memcmp(ptr, rxb[0].data, 9) == 0 );
+  REQUIRE( memcmp(ptr, rxb[0].data + 1, 9) == 0 );
 
   bytesStream.advanceToNextBuffer();
 
@@ -218,8 +218,8 @@ TEST_CASE("reading two messages in two read calls") {
 
 TEST_CASE("messages split across multiple read-calls") {
   struct rxBuffer rxb[2];
-  rxb[0].len = 9;
-  rxb[0].data = (const uint8_t*)"123456789";
+  rxb[0].len = 10;
+  rxb[0].data = (const uint8_t*)"\xc0""123456789";
   rxb[1].len = 4;
   rxb[1].data = (const uint8_t*)"abc\xc0";
 
@@ -233,20 +233,22 @@ TEST_CASE("messages split across multiple read-calls") {
 
   REQUIRE( slip.available() == 12 );
   REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 12);
-  REQUIRE( memcmp(ptr, rxb[0].data, 9) == 0 );
+  REQUIRE( memcmp(ptr, rxb[0].data + 1, 9) == 0 );
   REQUIRE( memcmp(ptr + 9, rxb[1].data, 3) == 0 );
 }
 
 TEST_CASE("an invalid escape sequence is used") {
   struct rxBuffer b;
-  b.len = 3;
-  b.data = (const uint8_t*)"\xdb\x42\xc0";
+  b.len = 4;
+  b.data = (const uint8_t*)"\xc0\xdb\x42\xc0";
 
   StreamMock bytesStream(1, &b);
   SlipStream slip(bytesStream, 100);
 
   REQUIRE( slip.available() == 0 );
   REQUIRE( slip.invalidFrameErrors() == 1 );
+
+  REQUIRE( slip.available() == 0 );
 }
 
 TEST_CASE("a message is bigger than the mtu") {
@@ -265,10 +267,27 @@ TEST_CASE("a message is bigger than the mtu") {
   SlipStream slip(bytesStream, 100);
 
   REQUIRE( slip.available() == 0 );
-  REQUIRE( slip.available() == 0 );
   REQUIRE( slip.invalidFrameErrors() == 1 );
+
+  REQUIRE( slip.available() == 0 );
 }
 
+TEST_CASE("do not share crap sent before first message separator") {
+  uint8_t ptr[100];
+
+  struct rxBuffer b;
+  b.len = 16;
+  b.data = (const uint8_t*)"crap\xc0""0123456789\xc0";
+
+  StreamMock bytesStream(1, &b);
+  SlipStream slip(bytesStream, 100);
+
+  THEN("should be able to read 10 bytes") {
+    REQUIRE( slip.available() == 10 );
+    REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 10);
+    REQUIRE( memcmp(ptr, "0123456789", 10) == 0 );
+  }
+}
 
 // I have not found a way to get WString.cpp to compile on a Linux box without modifying it.
 // Would require some serious modifications because it relies on non-std functions like
