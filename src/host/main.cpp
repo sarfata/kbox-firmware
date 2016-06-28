@@ -63,7 +63,6 @@ void setup() {
   reader1->connectTo(*wifi);
   reader2->connectTo(*wifi);
 
-  // Currently disabled because it is too slow.
   IMUTask *imuTask = new IMUTask();
 
   BarometerTask *baroTask = new BarometerTask();
