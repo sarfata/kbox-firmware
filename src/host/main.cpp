@@ -109,6 +109,11 @@ void setup() {
 
   kbox.addPage(statsPage);
 
+  IMUPage *imuPage = new IMUPage();
+  imuPage->setIMUTask(imuTask);
+  imuTask->connectTo(*imuPage);
+  kbox.addPage(imuPage);
+
   kbox.setup();
   DEBUG("setup done");
 }

@@ -51,6 +51,7 @@
 /* Pages */
 #include "pages/BatteryMonitorPage.h"
 #include "pages/StatsPage.h"
+#include "pages/IMUPage.h"
 
 /* Other dependencies */
 #include <Adafruit_NeoPixel.h>

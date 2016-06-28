@@ -53,6 +53,8 @@ class MFD : public Task {
   protected:
     // Define tick duration in ms.
     static const int tickDuration = 200;
+    static const int longClickDuration = 500;
+    static const int maintainedEventPeriod = 200;
     Display &display;
     Encoder &encoder;
     Bounce &button;
@@ -60,6 +62,9 @@ class MFD : public Task {
     LinkedList<Page*>::circularIterator pageIterator;
     LinkedList<Event*> events;
     unsigned long int lastTick;
+
+    unsigned long int lastButtonDown = 0;
+    unsigned long int lastMaintainedEvent = 0;
 
     bool firstTick = true;
 

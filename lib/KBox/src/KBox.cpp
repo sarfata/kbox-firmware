@@ -31,7 +31,6 @@ void KBox::setup() {
   Wire1.begin();
   // BNO055 needs up to 1ms to read 6 registers
   Wire1.setTimeout(5000);
-  //Wire1.setOpMode(I2C_OP_MODE_IMM);
   // BNO055 only supports up to 400kHz
   Wire1.setRate(I2C_RATE_400);
 
@@ -57,6 +56,11 @@ void KBox::setup() {
   adc.setResolution(12);
   adc.setConversionSpeed(ADC_LOW_SPEED);
   adc.setSamplingSpeed(ADC_HIGH_SPEED);
+
+  // Do not configure the reset pin. this seems to cause problems.
+  //digitalWrite(imu_reset, 1);
+  //pinMode(imu_reset, OUTPUT);
+  pinMode(imu_int, INPUT);
 
 #ifndef BOARD_v1_revA
   adc.setReference(ADC_REF_EXT, ADC_0);

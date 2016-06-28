@@ -43,8 +43,8 @@ class BasePage {
     virtual void willDisappear() {};
 
     virtual bool processEvent(const ButtonEvent &e) {
-      // By default button down will force switching to the next page.
-      return !(e.clickType == ButtonEventTypePressed);
+      // By default button click will force switching to the next page.
+      return !(e.clickType == ButtonEventTypeClick);
     }
     virtual bool processEvent(const EncoderEvent &e) {
       // By default this will be ignored.
@@ -59,7 +59,7 @@ class BasePage {
     virtual ~BasePage() {};
 };
 
-/* BasePage offers a very generic paint implementation. 
+/* BasePage offers a very generic paint implementation.
  * Page assumes the use of Layers.
  *
  * Adding a layer via addLayer() will transfer ownership to the Page who will

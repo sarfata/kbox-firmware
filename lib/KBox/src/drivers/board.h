@@ -76,6 +76,11 @@ static const uint8_t ina219_address = 0x40;
 /* BMP280 Barometer */
 static const uint8_t bmp280_address = 0x76;
 
+/* BNO055 */
+static const uint8_t imu_address = 0x28;
+static const uint8_t imu_reset = 27;
+static const uint8_t imu_int = 28;
+
 /* Serial Transceiver */
 static const pin_t nmea1_out_enable = 24;
 static const pin_t nmea2_out_enable = 16;

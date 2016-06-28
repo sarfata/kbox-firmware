@@ -21,29 +21,23 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include <Adafruit_BNO055.h>
-#include "TaskManager.h"
+
+#include "MFD.h"
 #include "KMessage.h"
+#include "ui/TextLayer.h"
 
-class IMUTask : public Task, public KGenerator {
+class IMUTask;
+
+class IMUPage : public Page, public KReceiver {
   private:
-    Adafruit_BNO055 bno055;
-    uint8_t sysCalib, gyroCalib, accelCalib, magCalib;
-    imu::Vector<3> eulerAngles;
-
-    bool hasCalibData = false;
-    uint8_t calibData[NUM_BNO055_OFFSET_REGISTERS];
+    TextLayer *calibrationLayer, *courseLayer, *pitchLayer, *heelLayer;
+    IMUTask *imuTask = 0;
 
   public:
-    IMUTask() : Task("IMU") {};
-    void setup();
-    void loop();
-    void resetIMU();
-
-    int getSysCalib() const { return sysCalib; };
-    int getGyroCalib() const { return gyroCalib; };
-    int getAccelCalib() const { return accelCalib; };
-    int getMagCalib() const { return magCalib; };
-
-    bool saveCalibration();
+    IMUPage();
+    void processMessage(const KMessage& message);
+    bool processEvent(const ButtonEvent &e);
+    bool processEvent(const EncoderEvent &e);
+    void setIMUTask(IMUTask *t) { imuTask = t; };
 };
+

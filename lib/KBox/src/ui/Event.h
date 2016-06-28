@@ -40,8 +40,16 @@ class Event {
 };
 
 enum ButtonEventType {
+  // Those two events are always sent when button goes up/down
   ButtonEventTypePressed,
-  ButtonEventTypeReleased
+  ButtonEventTypeReleased,
+
+  // Those events are also sent when a single click, or a double click happen
+  ButtonEventTypeClick,
+  ButtonEventTypeLongClick,
+
+  // This event is sent multiple times, as long as button is maintained
+  ButtonEventTypeMaintained,
 };
 class ButtonEvent : public Event {
   private:

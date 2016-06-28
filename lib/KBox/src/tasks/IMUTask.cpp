@@ -23,50 +23,50 @@
 */
 #include "IMUTask.h"
 #include "KBoxDebug.h"
+#include "drivers/board.h"
 
 void IMUTask::setup() {
-  DEBUG("Initing BNO055");
+  resetIMU();
+}
+
+void IMUTask::loop() {
+  bno055.getCalibration(&sysCalib, &gyroCalib, &accelCalib, &magCalib);
+
+  eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
+  IMUMessage m(sysCalib, gyroCalib, accelCalib, magCalib, eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
+  sendMessage(m);
+}
+
+void IMUTask::resetIMU() {
+  /*
+   * Note: we could try to reset the IMU via the reset line but it seems to
+   * not wake up nicely from any type of reboot (software or hardware). There
+   * is some mystery here that we will have to investigate.
+   */
+
   if (!bno055.begin()) {
     DEBUG("Error initializing BNO055");
   }
   else {
-    DEBUG("Success!");
+    if (hasCalibData) {
+      DEBUG("BNO055 started - Loading calibration data.");
+      bno055.setSensorOffsets(calibData);
+    }
+    else {
+      DEBUG("BNO055 started - No calibration data to load.");
+    }
   }
 }
 
-void IMUTask::loop() {
-  //uint8_t system_status, self_test_status, system_error;
-  //bno055.getSystemStatus(&system_status, &self_test_status, &system_error);
-  //DEBUG("BNO055 System Status: %x Self-Test Status: %x System Error: %x", system_status, self_test_status, system_error);
+bool IMUTask::saveCalibration() {
 
-  bno055.getCalibration(&sysCalib, &gyroCalib, &accelCalib, &magCalib);
-  //DEBUG("BNO055 Calibration - Sys:%i Gyro:%i Accel:%i Mag:%i", sysCalib, gyroCalib, accelCalib, magCalib);
-
-
-  {
-    eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
-    //DEBUG("Vector Euler x=%f y=%f z=%f", eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
-    //DEBUG("Course: %.0f MAG  Pitch: %.1f  Heel: %.1f", eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
-    IMUMessage m(sysCalib, eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
-    sendMessage(m);
+  if (bno055.getSensorOffsets(calibData)) {
+    DEBUG("Saved calib data.");
+    hasCalibData = true;
   }
-  
-  //DEBUG("BNO055 temperature is %i", bno055.getTemp());
+  else {
+    DEBUG("error getting calib data");
+  }
 
-  //{
-    //imu::Vector<3> vector = bno055.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
-    //DEBUG("Vector Magnetometer x=%f y=%f z=%f", vector.x(), vector.y(), vector.z());
-  //}
-  //{
-    //imu::Vector<3> vector = bno055.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
-    //DEBUG("Vector Gyro x=%f y=%f z=%f", vector.x(), vector.y(), vector.z());
-  //}
-  //{
-    //imu::Vector<3> vector = bno055.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
-    //DEBUG("Vector Accel x=%f y=%f z=%f", vector.x(), vector.y(), vector.z());
-  //}
-  //{
-    //imu::Vector<3> vector = bno055.getVector(Adafruit_BNO055::VECTOR_GRAVITY);
-    //DEBUG("Vector Gravity x=%f y=%f z=%f", vector.x(), vector.y(), vector.z());
-  //}
+  return false;
 }

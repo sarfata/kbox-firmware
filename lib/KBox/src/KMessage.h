@@ -142,22 +142,31 @@ class NMEA2000Message: public KMessage {
 
 class IMUMessage: public KMessage {
   private:
-    int calibration;
+    uint8_t sysCalib, accelCalib, gyroCalib, magCalib;
     float course, pitch, heel;
 
   public:
-    IMUMessage(int c, float course, float pitch, float heel) : KMessage(KMessageType::IMUMessage), calibration(c), course(course), pitch(pitch), heel(heel)
+    IMUMessage(uint8_t c, uint8_t aCalib, uint8_t gCalib, uint8_t mCalib, float course, float pitch, float heel) : KMessage(KMessageType::IMUMessage), sysCalib(c), accelCalib(aCalib), gyroCalib(gCalib), magCalib(mCalib), course(course), pitch(pitch), heel(heel)
     {};
 
     String toString() const {
       char buf[100];
-      snprintf(buf, sizeof(buf), "Calibration: %i Course: %.0f MAG Pitch: %.1f Heel: %.1f", calibration, course, pitch, heel);
+      snprintf(buf, sizeof(buf), "SysCalibration: %i Course: %.0f MAG Pitch: %.1f Heel: %.1f", sysCalib, course, pitch, heel);
       return String(buf);
     };
 
     String toSignalK() const {
       return String("{ type: 'imu', value: 'not implemented yet'}");
     };
+
+    uint8_t getSysCalib() const { return sysCalib; };
+    uint8_t getAccelCalib() const { return accelCalib; };
+    uint8_t getGyroCalib() const { return gyroCalib; };
+    uint8_t getMagCalib() const { return magCalib; };
+
+    float getCourse() const { return course; };
+    float getPitch() const { return pitch; };
+    float getHeel() const { return heel; };
 };
 
 class KReceiver {

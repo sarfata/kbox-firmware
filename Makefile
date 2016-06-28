@@ -1,4 +1,4 @@
-PORT=/dev/ttyACM0
+PORT=/dev/tty.usbmodemFD131
 
 all:
 	platformio -f -c vim run --target upload
@@ -17,10 +17,11 @@ host:
 
 runlogs: host
 	platformio run -e host -t upload
-	sleep 1
+	sh -c "while [ ! -r $(PORT) ]; do sleep 0.01; done"
 	miniterm.py --rts 0 $(PORT) 115200
 
 logs:
+	sh -c "while [ ! -r $(PORT) ]; do sleep 0.01; done"
 	miniterm.py --rts 0 $(PORT) 115200
 
 mfg:
