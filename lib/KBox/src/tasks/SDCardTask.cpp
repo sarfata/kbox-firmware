@@ -44,14 +44,14 @@ void SDCardTask::setup() {
 }
 
 void SDCardTask::processMessage(const KMessage &m) {
-  if (!cardReady) {
+  if (!isLogging()) {
     return;
   }
   receivedMessages.add(Loggable("", m.toString()));
 }
 
 void SDCardTask::loop() {
-  if (!cardReady) {
+  if (!isLogging()) {
     return;
   }
   for (LinkedList<Loggable>::iterator it = receivedMessages.begin(); it != receivedMessages.end(); it++) {
@@ -133,7 +133,7 @@ SdFile* SDCardTask::createLogFile(const String& baseName) {
   String fileName = generateNewFileName(baseName);
 
   SdFile *file = new SdFile();
-  if (!file->open(fileName.c_str(), O_CREAT | O_WRITE | O_EXCL)) {
+  if (fileName == "" || !file->open(fileName.c_str(), O_CREAT | O_WRITE | O_EXCL)) {
     DEBUG("file.open");
     return NULL;
   }
