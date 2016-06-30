@@ -58,12 +58,15 @@ void setup() {
   //   (this is different than what I was getting with the full KBox taskmanager
   //   where it was possible to restart the module and talk to it)
 
+  // Suggestion for next steps:
+  // try this with the revC boards that do not have the INA219 plugged backwards on them.
+  // it might be interfering...
   for (int resetCounter = 0; resetCounter < 3; resetCounter++) {
     DEBUG("Reset IMU...");
-    digitalWrite(imu_reset, 0);
-    pinMode(imu_reset, OUTPUT);
-    delay(1);
-    digitalWrite(imu_reset, 1);
+    //digitalWrite(imu_reset, 0);
+    //pinMode(imu_reset, OUTPUT);
+    //delay(1);
+    //digitalWrite(imu_reset, 1);
 
     for (int cycles = 0; cycles < 3; cycles++) {
       DEBUG("Init IMU");
