@@ -119,6 +119,8 @@
 #include "core_pins.h"
 #include "i2c_t3.h"
 
+#include "KBoxDebug.h"
+
 // ------------------------------------------------------------------------------------------------------
 // Static inits
 //
@@ -736,6 +738,7 @@ void i2c_t3::resetBus_(struct i2cStruct* i2c, uint8_t bus)
         scl = 26;
         break;
     }
+    DEBUG("resetting bus on pins sda=%i scl=%i", sda, scl);
     if(sda && scl)
     {
         // change pin mux to digital I/O
@@ -743,7 +746,7 @@ void i2c_t3::resetBus_(struct i2cStruct* i2c, uint8_t bus)
         digitalWrite(scl,HIGH);
         pinMode(scl,OUTPUT);
 
-        while(digitalRead(sda) == 0 && count++ < 10)
+        while(/*digitalRead(sda) == 0 && */count++ < 10)
         {
             digitalWrite(scl,LOW);
             delayMicroseconds(5);       // 10us period == 100kHz

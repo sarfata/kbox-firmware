@@ -32,12 +32,63 @@
 
 #include "ClockPage.h"
 
+#define CPU_RESTART_ADDR (uint32_t *)0xE000ED0C
+#define CPU_RESTART_VAL 0x5FA0004
+#define CPU_RESTART (*CPU_RESTART_ADDR = CPU_RESTART_VAL);
+
 KBox kbox;
 
 void setup() {
   // Enable float in printf:
   // https://forum.pjrc.com/threads/27827-Float-in-sscanf-on-Teensy-3-1
   asm(".global _printf_float");
+
+  delay(3000);
+
+  DEBUG_INIT();
+  DEBUG("Init i2c");
+  Wire1.begin();
+
+  // When cold-booting and not using the reset line:
+  //   we get access to imu and its data ONCE after reboot
+  // When cold booting and using the reset line:
+  //   we never get access to imu
+  // When warm booting after a reprogram or a CPU_RESTART
+  //   we never get access to imu
+  //   (this is different than what I was getting with the full KBox taskmanager
+  //   where it was possible to restart the module and talk to it)
+
+  for (int resetCounter = 0; resetCounter < 3; resetCounter++) {
+    DEBUG("Reset IMU...");
+    digitalWrite(imu_reset, 0);
+    pinMode(imu_reset, OUTPUT);
+    delay(1);
+    digitalWrite(imu_reset, 1);
+
+    for (int cycles = 0; cycles < 3; cycles++) {
+      DEBUG("Init IMU");
+      Adafruit_BNO055 bno055;
+
+      if (bno055.begin()) {
+        uint8_t sysCalib, gyroCalib, accelCalib, magCalib;
+        imu::Vector<3> eulerAngles;
+        for (int i = 0; i < 10; i++) {
+          bno055.getCalibration(&sysCalib, &gyroCalib, &accelCalib, &magCalib);
+          eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
+          DEBUG("%x %x %x %x - %f %f %f", sysCalib, gyroCalib, accelCalib, magCalib, eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
+          delay(100);
+        }
+      }
+
+    }
+  }
+
+  DEBUG("reboot...");
+  CPU_RESTART;
+  while (1) {}
+
+
+
 
   delay(3000);
 
@@ -75,21 +126,21 @@ void setup() {
   bn2k->connectTo(*wifi);
   bn2k->connectTo(*n2kTask);
 
-  baroTask->connectTo(*bn2k);
+  //baroTask->connectTo(*bn2k);
 
   SDCardTask *sdcardTask = new SDCardTask();
   reader1->connectTo(*sdcardTask);
   reader2->connectTo(*sdcardTask);
   adcTask->connectTo(*sdcardTask);
   n2kTask->connectTo(*sdcardTask);
-  baroTask->connectTo(*sdcardTask);
+  //baroTask->connectTo(*sdcardTask);
   imuTask->connectTo(*sdcardTask);
 
   // Add all the tasks
   kbox.addTask(new IntervalTask(new RunningLightTask(), 250));
   kbox.addTask(new IntervalTask(adcTask, 1000));
-  kbox.addTask(new IntervalTask(imuTask, 50));
   kbox.addTask(new IntervalTask(baroTask, 1000));
+  kbox.addTask(new IntervalTask(imuTask, 50));
   kbox.addTask(n2kTask);
   kbox.addTask(reader1);
   kbox.addTask(reader2);

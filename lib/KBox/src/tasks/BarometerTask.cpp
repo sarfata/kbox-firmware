@@ -34,6 +34,7 @@ void BarometerTask::setup() {
     status = 1;
   }
   else {
+    DEBUG("initialized barometer t=%.2f p=%.1f", bmp280.readTemperature(), bmp280.readPressure());
     status = 0;
   }
 }

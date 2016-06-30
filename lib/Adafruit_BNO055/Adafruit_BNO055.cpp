@@ -52,6 +52,11 @@ Adafruit_BNO055::Adafruit_BNO055(int32_t sensorID, uint8_t address)
  PUBLIC FUNCTIONS
  ***************************************************************************/
 
+static void i2cdebug(char *name) {
+  DEBUG("I2C %s: I2C1_S=%x I2C1_C1=%x I2C1_C2=%x I2C1_D=%x I2C1_F=%x I2C1_SMB=%x I2C1_A1=%x I2C1_A2=%x I2C1_RA=%x",
+      name,I2C1_S, I2C1_C1, I2C1_C2, I2C1_D, I2C1_F, I2C1_SMB, I2C1_A1, I2C1_A2, I2C1_RA);
+}
+
 /**************************************************************************/
 /*!
     @brief  Sets up the HW
@@ -63,7 +68,9 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode)
   //Wire.begin();
 
   /* Make sure we have the right device */
+  i2cdebug("pre-first read");
   uint8_t id = read8(BNO055_CHIP_ID_ADDR);
+  i2cdebug("post-first read");
   if(id != BNO055_ID)
   {
     DEBUG("Waiting for BNO055 to boot ...");
@@ -71,6 +78,7 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode)
     id = read8(BNO055_CHIP_ID_ADDR);
     if(id != BNO055_ID) {
       DEBUG("Failed to see BNO055 appear after 1 sec");
+      i2cdebug("failed init");
       return false;  // still not? ok bail
     }
   }
@@ -82,15 +90,32 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode)
   // Rebooting the chip seems to cause a-lot of problems. It works once but not twice.
   // Avoiding this.
   //DEBUG("Rebooting bno055 ...");
-  //write8(BNO055_SYS_TRIGGER_ADDR, 0x20);
-  while (read8(BNO055_CHIP_ID_ADDR) != BNO055_ID)
+  i2cdebug("pre-reboot");
+
+  write8(BNO055_SYS_TRIGGER_ADDR, 0x20);
+  delay(1000);
+  int count = 0;
+  while (read8(BNO055_CHIP_ID_ADDR) != BNO055_ID && count++ < 10)
   {
+    i2cdebug("waiting");
     DEBUG("waiting ...");
+
     delay(100);
+
+    // do some noise
+    Wire.beginTransmission(0x42);
+    Wire.write(0x00);
+    Wire.endTransmission();
+    delay(100);
+  }
+  if (count >= 10) {
+    i2cdebug("failed to reboot");
+    return false;
   }
   delay(50);
 
   DEBUG("rebooted");
+  i2cdebug("rebooted");
 
   /* Set to normal power mode */
   DEBUG("going into normal power mode");

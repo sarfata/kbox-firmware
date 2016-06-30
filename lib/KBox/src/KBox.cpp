@@ -32,7 +32,7 @@ void KBox::setup() {
   // BNO055 needs up to 1ms to read 6 registers
   Wire1.setTimeout(5000);
   // BNO055 only supports up to 400kHz
-  Wire1.setRate(I2C_RATE_400);
+  //Wire1.setRate(I2C_RATE_400);
 
   // Initialize encoder pins
   pinMode(encoder_button, INPUT_PULLUP);
