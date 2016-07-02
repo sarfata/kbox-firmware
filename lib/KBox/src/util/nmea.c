@@ -36,7 +36,7 @@ bool nmea_is_valid(const char *s) {
     return csum == rsum;
   }
   else {
-    return true;
+    return false;
   }
 }
 
