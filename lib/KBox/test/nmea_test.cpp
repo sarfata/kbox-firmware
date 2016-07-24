@@ -51,13 +51,10 @@ TEST_CASE("nmea basic") {
   WHEN("sentence is a valid GGA sentence") {
     REQUIRE( nmea_is_valid("$GPGGA,003516.000,3751.6035,N,12228.8065,W,2,10,0.91,3.4,M,-25.2,M,0000,0000*5A") );
     REQUIRE( nmea_is_valid("$GPGGA,003516.000,3751.6035,N,12228.8065,W,2,10,0.91,3.4,M,-25.2,M,0000,0000*5A\r\n") );
-    REQUIRE( nmea_is_valid("$GPGGA,003516.000,3751.6035,N,12228.8065,W,2,10,0.91,3.4,M,-25.2,M,0000,0000*") );
-    REQUIRE( nmea_is_valid("$GPGGA,003516.000,3751.6035,N,12228.8065,W,2,10,0.91,3.4,M,-25.2,M,0000,0000*\r\n") );
   }
 
   WHEN("sentence is a valid AIS sentence") {
     REQUIRE( nmea_is_valid("!AIVDM,1,1,,B,ENkb9I9I7@@@@@@@@@@@@@@@@@@;V4=v:nv;h00003vP000,2*54") );
-    REQUIRE( nmea_is_valid("!AIVDM,1,1,,B,ENkb9I9I7@@@@@@@@@@@@@@@@@@;V4=v:nv;h00003vP000,2*") );
   }
 
   WHEN("sentence is invalid (hacked off one byte)") {
@@ -74,4 +71,10 @@ TEST_CASE("nmea basic") {
     REQUIRE( !nmea_is_valid("$GPGGA,003516.000,3751.6035,N,12228.8065,W,2,10,0.91,3.4,M,-25.2,M,0000,0000*5B") );
   }
 
+  WHEN("sentence is invalid (garbled)") {
+    REQUIRE( !nmea_is_valid("$IIMTW,8") );
+  }
+  WHEN("sentence is invalid (garbled - invalid chars)") {
+    REQUIRE( !nmea_is_valid("$IIRMB,V,,%çÿÝÕ_£ÿíÿuóÜ;»Õ·_ÖÿW5ÿÙ") );
+  }
 }
