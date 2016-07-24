@@ -21,47 +21,30 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #include <Arduino.h>
 #include <KBox.h>
+#include <util/SlipStream.h>
+#include "util/ESPProgrammer.h"
 
 KBox kbox;
-bool flashMode = false;
+ESPProgrammer programmer(kbox.getNeopixels(), Serial, Serial1);
 
 void setup() {
-  Serial.begin(115200);
-  Serial.setTimeout(0);
-
   kbox.setup();
-  kbox.getNeopixels().setPixelColor(0, 0x00, 0x20, 0x00);
-  kbox.getNeopixels().show();
+
+  DEBUG_INIT();
+
+  DEBUG("Starting esp program");
   esp_init();
   esp_reboot_in_program();
+
+  Serial.setTimeout(0);
+  Serial1.setTimeout(0);
+  Serial3.setTimeout(0);
 }
 
 void loop() {
-  digitalWrite(led_pin, 1);
-  uint8_t buffer[4096];
-
-  // On most ESP, the RTS line is used to reset the module
-  // DTR is used to boot in flash - or - run program
-  if (Serial.rts() && !flashMode) {
-    kbox.getNeopixels().setPixelColor(0, 0x20, 0x00, 0x00);
-    kbox.getNeopixels().show();
-    esp_reboot_in_flasher();
-    flashMode = true;
-  }
-
-  if (Serial.available()) {
-    digitalWrite(led_pin, 0);
-    int read = Serial.readBytes((char*)buffer, sizeof(buffer));
-    Serial1.write(buffer, read);
-  }
-
-  if (Serial1.available()) {
-    digitalWrite(led_pin, 0);
-    int read = Serial1.readBytes(buffer, sizeof(buffer));
-    Serial.write(buffer, read);
-  }
-  // Fill up buffers a bit.
-  delay(1);
+  programmer.loop();
 }
+

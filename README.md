@@ -161,6 +161,7 @@ separately.
    clause](https://forum.pjrc.com/threads/25996-Question-about-licensing-of-core-files).
    The KBox hardware includes [a bootloader chip sold by pjrc.com](http://www.pjrc.com/store/ic_mkl02.html)
    and supports the Teensy project.
+ - [ESPTool](https://github.com/themadinventor/esptool) is under the GPL
 
 **[Fair winds and following seas](https://en.wikipedia.org/wiki/Following_sea)
 to the authors of these libraries! Without them, this project would not have

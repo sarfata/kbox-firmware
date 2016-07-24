@@ -31,3 +31,16 @@ script:
     - platformio run
     # Run the few unit tests (C code running on computer)
     - make test
+
+# required to get a modern version of g++ with full std-c11 support
+env:
+  CXX=g++-4.9
+addons:
+  apt:
+    sources:
+    # add PPAs with more up-to-date toolchains
+    - ubuntu-toolchain-r-test
+    packages:
+    # install toolchains
+    - gcc-4.9
+    - g++-4.9

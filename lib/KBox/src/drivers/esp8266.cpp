@@ -49,6 +49,7 @@ void esp_init() {
 }
 
 void esp_reboot_in_flasher() {
+  digitalWrite(wifi_enable, 0);
   digitalWrite(wifi_rst, 0);
   digitalWrite(wifi_program, 0);
 
@@ -60,6 +61,7 @@ void esp_reboot_in_flasher() {
 }
 
 void esp_reboot_in_program() {
+  digitalWrite(wifi_enable, 0);
   digitalWrite(wifi_rst, 0);
   digitalWrite(wifi_program, 1);
 

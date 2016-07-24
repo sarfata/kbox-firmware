@@ -25,19 +25,39 @@
 #include <Arduino.h>
 #include <stdarg.h>
 
+#ifndef DebugSerial
 #ifdef ESP8266
 //#define DebugSerial Serial1
 #define DebugSerial Serial
 #else
 #define DebugSerial Serial
 #endif
+#endif
 
 
 void debug_init() {
-    DebugSerial.begin(115200);
+  // The speed set here has no importance when logging to USB
+  // however, when logging via one of the real serial ports, it helps
+  // to make this as fast as possible to avoid lag due to serial port
+  // congestion.
+  DebugSerial.begin(920800);
+}
+
+static int strrpos(const char *string, char c) {
+  int index = -1;
+  for (int i = 0; string[i] != 0; i++) {
+    if (string[i] == c) {
+      index = i;
+    }
+  }
+  return index;
 }
 
 void debug(const char *fname, int lineno, const char *fmt, ... ) {
+  int lastSlash = strrpos(fname, '/');
+  if (lastSlash > 0) {
+    fname = fname + lastSlash + 1;
+  }
   DebugSerial.print(fname);
   DebugSerial.print(":");
   DebugSerial.print(lineno);

@@ -9,8 +9,7 @@ clean:
 wifi:
 	platformio run -e esp
 	platformio run -e program-esp -t upload
-	sleep 1
-	../esptool/esptool.py --port $(PORT) write_flash 0x0 .pioenvs/esp/firmware.bin
+	platformio run -e esp -t upload
 
 host:
 	platformio run -e host -t size
