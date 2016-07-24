@@ -65,7 +65,9 @@ Color BatteryMonitorPage::colorForVoltage(float v) {
 String BatteryMonitorPage::formatMeasurement(float measure, const char *unit) {
   // extra spaces at the end needed to clear previous value completely
   // (we use a non-fixed width font)
-  return String(measure, 1) + " " + unit + "  ";
+  char s[10];
+  snprintf(s, sizeof(s), "%.1f %s  ", measure, unit);
+  return String(s);
 }
 
 void BatteryMonitorPage::processMessage(const KMessage &message) {
