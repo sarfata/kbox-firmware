@@ -175,28 +175,36 @@ void ESPProgrammer::loopFrameMode() {
 }
 
 void ESPProgrammer::updateColors() {
+  // Updates the color of the top LED to reflect where we are.
   uint32_t stateColor = 0;
 
   switch (state) {
     case Disconnected:
+      // Off when there is no active connection.
       stateColor = pixels.Color(0, 0, 0);
       break;
     case ByteMode:
+      // Green when we are in Byte Mode
       stateColor = pixels.Color(0, 0x20, 0);
       break;
     case FrameMode:
+      // Red when we are in Frame Mode
       stateColor = pixels.Color(0x20, 0x0, 0);
       break;
     case FrameModeSync:
+      // White when programmer syncing with ESP
       stateColor = pixels.Color(0x20, 0x20, 0x20);
       break;
     case FrameModeMem:
+      // Yellow when programmer reading/writing memory
       stateColor = pixels.Color(0x20, 0x20, 0);
       break;
     case FrameModeFlash:
+      // Red+Blue (?) when programmer reading/writing flash
       stateColor = pixels.Color(0x20, 0x0, 0x20);
       break;
     case Done:
+      // Blue when we are done programming the module.
       stateColor = pixels.Color(0, 0, 0x20);
       break;
   }
