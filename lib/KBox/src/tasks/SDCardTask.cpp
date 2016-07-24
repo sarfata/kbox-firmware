@@ -116,13 +116,14 @@ String SDCardTask::generateNewFileName(const String& baseName) {
     return "";
   }
 
-  char fileName[13];
-  for (int i = 0; i < 99; i++) {
+  char fileName[20];
+  for (int i = 0; i < 99999; i++) {
     snprintf(fileName, sizeof(fileName), "%s%i.log", baseName.c_str(), i);
     if (!sd->exists(fileName)) {
       return String(fileName);
     }
   }
+  DEBUG("Unable to create new file. Delete some older files!");
   return "";
 }
 
@@ -134,7 +135,7 @@ SdFile* SDCardTask::createLogFile(const String& baseName) {
 
   SdFile *file = new SdFile();
   if (fileName == "" || !file->open(fileName.c_str(), O_CREAT | O_WRITE | O_EXCL)) {
-    DEBUG("file.open");
+    DEBUG("Error while opening file '%s'", fileName.c_str());
     return NULL;
   }
   return file;
