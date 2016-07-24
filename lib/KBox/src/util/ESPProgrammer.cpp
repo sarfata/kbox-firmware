@@ -69,7 +69,7 @@ void ESPProgrammer::loop() {
   }
 
   // If we do not receive anything for more than 3 seconds then we are probably done.
-  if (state != Disconnected && state != Done && timeSinceLastByte > 1000) {
+  if (state != Disconnected && state != Done && timeSinceLastByte > 500) {
     DEBUG("programming done!");
     state = Done;
   }
