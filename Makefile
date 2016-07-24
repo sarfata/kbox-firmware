@@ -16,7 +16,8 @@ host:
 
 runlogs: host
 	platformio run -e host -t upload
-	sleep 1
+	# Wait for the serial port to be available
+	sh -c "while [ ! -r $(PORT) ]; do sleep 0.01; done"
 	miniterm.py --rts 0 $(PORT) 115200
 
 logs:
