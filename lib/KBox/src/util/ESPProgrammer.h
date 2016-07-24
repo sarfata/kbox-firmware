@@ -74,6 +74,8 @@ class ESPProgrammer {
     ProgrammerState state;
     elapsedMillis timeSinceLastByte;
     unsigned int currentBaudRate = 0;
+    bool lastDTR = true;
+    bool lastRTS = true;
 
   private:
     bool isFrameMode() const;

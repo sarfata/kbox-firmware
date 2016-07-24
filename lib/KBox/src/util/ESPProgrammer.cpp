@@ -96,11 +96,25 @@ void ESPProgrammer::loop() {
 }
 
 void ESPProgrammer::loopByteMode() {
-  // This is how esptool.py tells us to reboot the module
-  if (computerSerial.dtr() && !computerSerial.rts()) {
-    DEBUG("ESP Reboot requested");
-    state = FrameMode;
-    esp_reboot_in_flasher();
+  // We keep track of DTR and RTS because this is how esptool.py
+  // tells us to reboot the module
+  bool changed = false;
+  if (computerSerial.dtr() != lastDTR) {
+    lastDTR = !lastDTR;
+    changed = true;
+  }
+  if (computerSerial.rts() != lastRTS) {
+    lastRTS = !lastRTS;
+    changed = true;
+  }
+
+  if (changed) {
+    DEBUG("Time: %lu DTR: %s RTS: %s", millis(), lastDTR ? "T":"F", lastRTS ? "T":"F");
+    if (lastDTR && !lastRTS) {
+      DEBUG("ESP Reboot requested");
+      state = FrameMode;
+      esp_reboot_in_flasher();
+    }
   }
   else {
     if (computerSerial.available()) {

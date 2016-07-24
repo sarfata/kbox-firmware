@@ -135,8 +135,8 @@ class ESPROM(object):
             self._port.setDTR(False)
             self._port.setRTS(True)
             time.sleep(0.05)
-            self._port.setDTR(True)
             self._port.setRTS(False)
+            self._port.setDTR(True)
             time.sleep(0.05)
             self._port.setDTR(False)
 
