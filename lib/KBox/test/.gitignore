@@ -1,3 +1,4 @@
 nmea_test
 slip_test
-NMEASentenceBuilder
+NMEASentenceBuilderTest
+KMessageNMEAVisitorTest

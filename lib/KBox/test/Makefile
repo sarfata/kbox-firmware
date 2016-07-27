@@ -1,21 +1,37 @@
 FRAMEWORK=$(HOME)/.platformio/packages/framework-arduinoteensy/cores/teensy3
-CFLAGS=-g -Wall -std=c++11 -I$(FRAMEWORK) -I../../KBoxDebug/src -I../src -D_NEWLIB_VERSION=1
+CFLAGS=-g -Wall -I$(FRAMEWORK) -I../../KBoxDebug/src -I../src -I../../List/src -I../../NMEA2000 -D_NEWLIB_VERSION=1
+CPPFLAGS=$(CFLAGS) -std=c++11
+
+%.o: %.cpp Makefile
+	$(CC) $(CPPFLAGS) -c $< -o $@
+
+%.o: %.c Makefile
+	$(CC) $(CFLAGS) -c $< -o $@
 
 all: test
 
-test: nmea_test slip_test NMEASentenceBuilder
+test: nmea_test slip_test NMEASentenceBuilderTest KMessageNMEAVisitorTest
 	./nmea_test
 	./slip_test
-	./NMEASentenceBuilder
+	./NMEASentenceBuilderTest
+	./KMessageNMEAVisitorTest
 
-nmea_test: nmea_test.cpp ../src/util/nmea.h ../src/util/nmea.c
-	$(CXX) $(CFLAGS) nmea_test.cpp ../src/util/nmea.c -o nmea_test
 
-slip_test: slip_test.cpp ../src/util/SlipStream.h ../src/util/SlipStream.cpp
-	$(CXX) $(CFLAGS) slip_test.cpp ../src/util/SlipStream.cpp $(FRAMEWORK)/Print.cpp -o slip_test
+TEST_DEPS=teensy_compat.o maintest.o $(FRAMEWORK)/WString.o $(FRAMEWORK)/Print.o
 
-NMEASentenceBuilder: NMEASentenceBuilderTest.cpp ../src/util/NMEASentenceBuilder.h ../src/util/NMEASentenceBuilder.cpp ../src/util/nmea.h ../src/util/nmea.c teensy_compat.c
-	$(CXX) $(CFLAGS) NMEASentenceBuilderTest.cpp ../src/util/NMEASentenceBuilder.cpp $(FRAMEWORK)/WString.cpp teensy_compat.c ../src/util/nmea.c -o NMEASentenceBuilder
+nmea_test: nmea_test.o ../src/util/nmea.o $(TEST_DEPS)
+	$(CXX) $(CFLAGS) -o $@ $^
+
+slip_test: slip_test.cpp ../src/util/SlipStream.o $(TEST_DEPS)
+	$(CXX) $(CFLAGS) -o $@ $^
+
+NMEASentenceBuilderTest: NMEASentenceBuilderTest.o ../src/util/NMEASentenceBuilder.o ../src/util/nmea.o $(TEST_DEPS)
+	$(CXX) $(CFLAGS) -o $@ $^
+
+KMessageNMEAVisitorTest: KMessageNMEAVisitorTest.o ../src/util/NMEASentenceBuilder.o ../src/KMessage.o ../src/util/nmea.o ../src/KMessageNMEAVisitor.o $(TEST_DEPS)
+	$(CXX) $(CFLAGS) -o $@ $^
 
 clean:
-	rm -f nmea_test slip_test
+	rm -f nmea_test slip_test NMEASentenceBuilderTest
+	find .. -name '*.o' |xargs rm -v
+

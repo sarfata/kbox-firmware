@@ -22,37 +22,36 @@
   THE SOFTWARE.
 */
 
-#include "KBoxTest.h"
+#include "KMessageNMEAVisitor.h"
 #include "util/NMEASentenceBuilder.h"
 
-TEST_CASE("generating an empty sentence") {
-  NMEASentenceBuilder sb("GG", "ABC", 0);
-  REQUIRE( sb.toNMEA() == "$GGABC*40" );
+#include <stdio.h>
+
+void KMessageNMEAVisitor::visit(const NMEASentence& s) {
+  nmeaContent += s.getSentence() + "\r\n";
 }
 
-TEST_CASE("generating a sentence with one string and one float") {
-  NMEASentenceBuilder sb("GG", "ABC", 2);
-  sb.setField(1, 1.03403303, 5);
-  sb.setField(2, "toto");
-
-  REQUIRE( sb.toNMEA() == "$GGABC,1.03403,toto*6B" );
+void KMessageNMEAVisitor::visit(const BarometerMeasurement &bm) {
+  // XDR is not a very well defined sentence. Can be used for lots of things
+  // apparently but that is better than nothing.
+  NMEASentenceBuilder sb("II", "XDR", 8);
+  sb.setField(1, "P");
+  sb.setField(2, bm.getPressure(), 5);
+  sb.setField(3, "B");
+  sb.setField(4, "Barometer");
+  sb.setField(5, "T");
+  sb.setField(6, bm.getTemperature());
+  sb.setField(7, "C");
+  sb.setField(8, "TempAir");
+  nmeaContent += sb.toNMEA() + "\r\n";
 }
 
-TEST_CASE("test a real nmea sentence to make sure the checksum is properly generated") {
-  NMEASentenceBuilder sb("GP", "RMC", 12);
-
-  sb.setField(1, "003516.000");
-  sb.setField(2, "A");
-  sb.setField(3, "3751.6035");
-  sb.setField(4, "N");
-  sb.setField(5, "12228.8065");
-  sb.setField(6, "W");
-  sb.setField(7, "0.01");
-  sb.setField(8, "0.00");
-  sb.setField(9, "030416");
-  sb.setField(10, "");
-  sb.setField(11, "");
-  sb.setField(12, "D");
-
-  REQUIRE( sb.toNMEA() == "$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79" );
+void KMessageNMEAVisitor::visit(const VoltageMeasurement &vm) {
 }
+
+void KMessageNMEAVisitor::visit(const NMEA2000Message &n2km) {
+}
+
+void KMessageNMEAVisitor::visit(const IMUMessage &imu) {
+}
+

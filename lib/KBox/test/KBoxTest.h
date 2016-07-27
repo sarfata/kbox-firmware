@@ -22,37 +22,16 @@
   THE SOFTWARE.
 */
 
-#include "KBoxTest.h"
-#include "util/NMEASentenceBuilder.h"
+#include "catch.hpp"
 
-TEST_CASE("generating an empty sentence") {
-  NMEASentenceBuilder sb("GG", "ABC", 0);
-  REQUIRE( sb.toNMEA() == "$GGABC*40" );
+#include <stdarg.h>
+#define DEBUG(...) debug(__FILE__, __LINE__, __VA_ARGS__)
+
+#include <WString.h>
+
+// This is required so that Catch.hpp can print Teensy Strings
+std::ostream& operator << ( std::ostream& os, String const& value ) {
+    os << value.c_str();
+    return os;
 }
 
-TEST_CASE("generating a sentence with one string and one float") {
-  NMEASentenceBuilder sb("GG", "ABC", 2);
-  sb.setField(1, 1.03403303, 5);
-  sb.setField(2, "toto");
-
-  REQUIRE( sb.toNMEA() == "$GGABC,1.03403,toto*6B" );
-}
-
-TEST_CASE("test a real nmea sentence to make sure the checksum is properly generated") {
-  NMEASentenceBuilder sb("GP", "RMC", 12);
-
-  sb.setField(1, "003516.000");
-  sb.setField(2, "A");
-  sb.setField(3, "3751.6035");
-  sb.setField(4, "N");
-  sb.setField(5, "12228.8065");
-  sb.setField(6, "W");
-  sb.setField(7, "0.01");
-  sb.setField(8, "0.00");
-  sb.setField(9, "030416");
-  sb.setField(10, "");
-  sb.setField(11, "");
-  sb.setField(12, "D");
-
-  REQUIRE( sb.toNMEA() == "$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79" );
-}

@@ -21,24 +21,8 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
 
-
-#include <stdarg.h>
-#define DEBUG(...) debug(__FILE__, __LINE__, __VA_ARGS__)
-
-void debug(const char *fname, int lineno, const char *fmt, ... ) {
-  printf("%s: %i ", fname, lineno);
-  char tmp[128]; // resulting string limited to 128 chars
-  va_list args;
-  va_start (args, fmt );
-  vsnprintf(tmp, 128, fmt, args);
-  va_end (args);
-  printf("%s\n", tmp);
-}
-
-
+#include "KBoxTest.h"
 #include "util/nmea.h"
 
 TEST_CASE("nmea basic") {
