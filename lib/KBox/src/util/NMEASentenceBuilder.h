@@ -35,17 +35,7 @@ class NMEASentenceBuilder {
     NMEASentenceBuilder(String talkerId, String sentenceId, int numFields);
     ~NMEASentenceBuilder();
 
-    NMEASentenceBuilder& operator=(const NMEASentenceBuilder& other) {
-      talkerId = other.talkerId;
-      sentenceId = other.sentenceId;
-      numFields = other.numFields;
-
-      fields = new String[numFields];
-      for (int i = 0; i < numFields; i++) {
-        fields[i] = other.fields[i];
-      }
-      return *this;
-    };
+    NMEASentenceBuilder& operator=(const NMEASentenceBuilder& other);
 
     /* Note that fields are numbered from 1 so as to match the NMEA reference:
      * http://catb.org/gpsd/NMEA.html

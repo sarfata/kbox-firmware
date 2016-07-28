@@ -37,6 +37,20 @@ NMEASentenceBuilder::~NMEASentenceBuilder() {
   delete[] fields;
 }
 
+NMEASentenceBuilder& NMEASentenceBuilder::operator=(const NMEASentenceBuilder& other) {
+  talkerId = other.talkerId;
+  sentenceId = other.sentenceId;
+  numFields = other.numFields;
+
+  delete[] fields;
+
+  fields = new String[numFields];
+  for (int i = 0; i < numFields; i++) {
+    fields[i] = other.fields[i];
+  }
+  return *this;
+}
+
 void NMEASentenceBuilder::setField(int fieldId, String v) {
   if (fieldId > 0 && fieldId <= numFields) {
     fields[fieldId - 1] = v;
