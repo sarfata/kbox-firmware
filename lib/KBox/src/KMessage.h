@@ -64,6 +64,7 @@ class NMEASentence : public KMessage {
 class BarometerMeasurement : public KMessage {
   private:
     float temperature;
+    // Stored in Pa which is the SI standard
     float pressure;
 
   public:
