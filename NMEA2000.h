@@ -59,6 +59,7 @@ address anymore. See also method ReadResetAddressChanged().
 #define Max_N2kDevices 1
 
 #define Max_N2kMsgBuf_Time 100
+#define N2kMessageGroups 2
 
 class tDeviceInformation {
 protected:
@@ -140,6 +141,8 @@ protected:
   static const int FwdModeBit_SystemMessages    = B00000010; // System messages will be forwarded
   static const int FwdModeBit_OnlyKnownMessages = B00000100; // Only known messages will be forwarded. System messages will be forwarded according its own bit.
   static const int FwdModeBit_OwnMessages       = B00001000; // Forward also all messages, what this device will send
+
+  static const int HandleModeBit_OnlyKnownMessages       = B00010000; // Only known messages will be handled.
                
 protected:
     tDebugMode dbMode; // Default dm_None
@@ -161,16 +164,18 @@ protected:
     const tProductInformation *ProductInformation;
     tProductInformation *LocalProductInformation;
     
-    const unsigned long *SingleFrameMessages;
-    const unsigned long *FastPacketMessages;
+    const unsigned long *SingleFrameMessages[N2kMessageGroups];
+    const unsigned long *FastPacketMessages[N2kMessageGroups];
     
 protected:
     // Buffer for received messages.
     tN2kCANMsg *N2kCANMsgBuf;
     unsigned char MaxN2kCANMsgs;
 
-    // Handler callback
-    void (*MsgHandler)(const tN2kMsg &N2kMsg);
+    // Handler callbacks
+    void (*MsgHandler)(const tN2kMsg &N2kMsg);                  // Normal messages
+    bool (*ISORqstHandler)(unsigned long RequestedPGN, unsigned char Requester, int DeviceIndex);                 // 'ISORequest' messages
+    
     
 protected:
     // Virtual functions for different interfaces. Currently there are own classes
@@ -184,6 +189,7 @@ protected:
     bool CheckKnownMessage(unsigned long PGN, bool &SystemMessage, bool &FastPacket);
     bool HandleReceivedSystemMessage(int MsgIndex);
     void ForwardMessage(const tN2kMsg &N2kMsg);
+    void ForwardMessage(const tN2kCANMsg &N2kCanMsg);
     void HandleISORequest(const tN2kMsg &N2kMsg);
     void HandleISOAddressClaim(const tN2kMsg &N2kMsg);
     void GetNextAddress(int DeviceIndex);
@@ -194,6 +200,7 @@ protected:
     bool ForwardSystemMessages() const { return ((ForwardMode&FwdModeBit_SystemMessages)>0); }
     bool ForwardOnlyKnownMessages() const { return ((ForwardMode&FwdModeBit_OnlyKnownMessages)>0); }
     bool ForwardOwnMessages() const { return ((ForwardMode&FwdModeBit_OwnMessages)>0); }
+    bool HandleOnlyKnownMessages() const { return ((ForwardMode&HandleModeBit_OnlyKnownMessages)>0); }
 public:
     tNMEA2000();
     
@@ -220,7 +227,15 @@ public:
     // Note that I have not yet found a way to test is pointer in PROGMEM or not, so this does not work, if you define
     // tProductInformation to RAM.
     void SetProductInformation(const tProductInformation *_ProductInformation);  
-
+    
+    // Call these if you wish to override the default message packets supported.  Pointers must be in PROGMEM
+    void SetSingleFrameMessages(const unsigned long *_SingleFrameMessages);
+    void SetFastPacketMessages (const unsigned long *_FastPacketMessages);
+    // Call these if you wish to add own list of supported message packets.  Pointers must be in PROGMEM
+    // Note that currently subsequent calls will override previously set list.
+    void ExtendSingleFrameMessages(const unsigned long *_SingleFrameMessages);
+    void ExtendFastPacketMessages (const unsigned long *_FastPacketMessages);
+ 
     // Set default device information.
     // For keeping defaults use 0xffff/0xff for int/char values and nul ptr for pointers.
     // Note that ManufacturerCode and UniqueNumber should give unic result on any network.
@@ -271,7 +286,9 @@ public:
     void ParseMessages();
 
     // Set the message handler for incoming N2kMessages.
-    void SetMsgHandler(void (*_MsgHandler)(const tN2kMsg &N2kMsg));
+    void SetMsgHandler(void (*_MsgHandler)(const tN2kMsg &N2kMsg));             // Normal messages
+    void SetISORqstHandler(bool(*ISORequestHandler)(unsigned long RequestedPGN, unsigned char Requester, int DeviceIndex));           // ISORequest messages
+
     
     // Read address for current device.
     // Multidevice support is under construction.
@@ -296,6 +313,9 @@ public:
       }
     void SetForwardOwnMessages(bool v=true) {  
         if (v) { ForwardMode |= FwdModeBit_OwnMessages;  } else { ForwardMode &= ~FwdModeBit_OwnMessages; }
+      }
+    void SetHandleOnlyKnownMessages(bool v=true) {  
+        if (v) { ForwardMode |= HandleModeBit_OnlyKnownMessages;  } else { ForwardMode &= ~HandleModeBit_OnlyKnownMessages; }
       }
 
     void SetDebugMode(tDebugMode _dbMode);
@@ -339,6 +359,13 @@ inline void SetN2kProductInformation(tN2kMsg &N2kMsg, unsigned int N2kVersion, u
   SetN2kPGN126996(N2kMsg,N2kVersion,ProductCode,
                   ModelID,SwCode,ModelVersion,ModelSerialCode,
                   SertificationLevel,LoadEquivalency);
+}
+
+
+void SetN2kPGN59904(tN2kMsg &N2kMsg, uint8_t Destination, unsigned long RequestedPGN);
+
+inline void SetN2kPGNISORequest(tN2kMsg &N2kMsg, uint8_t Destination, unsigned long RequestedPGN) {
+  SetN2kPGN59904(N2kMsg,Destination,RequestedPGN);
 }
 
 bool ParseN2kPGN59904(const tN2kMsg &N2kMsg, unsigned long &RequestedPGN);
