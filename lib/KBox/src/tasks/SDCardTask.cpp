@@ -25,6 +25,7 @@
 #include "KBoxDebug.h"
 #include "SDCardTask.h"
 #include "drivers/board.h"
+#include "KMessageNMEAVisitor.h"
 
 SDCardTask::SDCardTask() : Task("SDCard") {
   DEBUG("init sdcard ...");
@@ -47,7 +48,11 @@ void SDCardTask::processMessage(const KMessage &m) {
   if (!isLogging()) {
     return;
   }
-  receivedMessages.add(Loggable("", m.toString()));
+
+  // FIXME: Should probably implement a custom visitor for logging.
+  KMessageNMEAVisitor v;
+  m.accept(v);
+  receivedMessages.add(Loggable("", v.toNMEA()));
 }
 
 void SDCardTask::loop() {

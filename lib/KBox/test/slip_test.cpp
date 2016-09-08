@@ -53,7 +53,7 @@ class StreamMock : public Stream {
     StreamMock() {};
 
     StreamMock(int count, struct rxBuffer *b) : countBuffers(count), rxBuffers(b) {
-      for (int i = 0; i < countBuffers; i++) {
+      for (unsigned int i = 0; i < countBuffers; i++) {
         rxBuffers[i].index = 0;
       }
     };

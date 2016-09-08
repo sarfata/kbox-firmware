@@ -1,5 +1,5 @@
 FRAMEWORK=$(HOME)/.platformio/packages/framework-arduinoteensy/cores/teensy3
-CFLAGS=-g -Wall -I$(FRAMEWORK) -I../../KBoxDebug/src -I../src -I../../List/src -I../../NMEA2000 -D_NEWLIB_VERSION=1
+CFLAGS=-g -Wall -Iarduinomock/ --I$(FRAMEWORK) -I../../KBoxDebug/src -I../../List/src -I../../NMEA2000 -I../src -D_NEWLIB_VERSION=1
 CPPFLAGS=$(CFLAGS) -std=c++11
 
 %.o: %.cpp Makefile
@@ -28,7 +28,7 @@ slip_test: slip_test.cpp ../src/util/SlipStream.o $(TEST_DEPS)
 NMEASentenceBuilderTest: NMEASentenceBuilderTest.o ../src/util/NMEASentenceBuilder.o ../src/util/nmea.o $(TEST_DEPS)
 	$(CXX) $(CFLAGS) -o $@ $^
 
-KMessageNMEAVisitorTest: KMessageNMEAVisitorTest.o ../src/util/NMEASentenceBuilder.o ../src/KMessage.o ../src/util/nmea.o ../src/KMessageNMEAVisitor.o $(TEST_DEPS)
+KMessageNMEAVisitorTest: KMessageNMEAVisitorTest.o ../src/util/NMEASentenceBuilder.o ../src/KMessage.o ../src/util/nmea.o ../src/KMessageNMEAVisitor.o ../../NMEA2000/N2kMsg.o $(TEST_DEPS)
 	$(CXX) $(CFLAGS) -o $@ $^
 
 clean:

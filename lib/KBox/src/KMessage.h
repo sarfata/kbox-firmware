@@ -25,39 +25,50 @@
 
 #include <List.h>
 #include <WString.h>
-#include "NMEA2000.h"
+#include "N2kMsg.h"
 #include "util/nmea.h"
 
-enum class KMessageType { NMEASentence, BarometerMeasurement, VoltageMeasurement, NMEA2000Message, IMUMessage };
+class KVisitor;
+class NMEASentence;
+class BarometerMeasurement;
+class VoltageMeasurement;
+class NMEA2000Message;
+class IMUMessage;
 
 class KMessage {
   private:
-    KMessageType _type;
   public:
-    KMessage(KMessageType type) : _type(type) {};
-    const KMessageType& getMessageType() const {
-      return _type;
-    };
-    virtual String toString() const = 0;
-    virtual String toSignalK() const = 0;
+    virtual ~KMessage() {};
+
+    virtual void accept(KVisitor& v) const {};
+};
+
+
+class KVisitor {
+  public:
+    virtual void visit(const NMEASentence &) {};
+    virtual void visit(const BarometerMeasurement &) {};
+    virtual void visit(const VoltageMeasurement &) {};
+    virtual void visit(const NMEA2000Message &) {};
+    virtual void visit(const IMUMessage &) {};
 };
 
 class NMEASentence : public KMessage {
   private:
     String sentence;
   public:
-    NMEASentence(const char *s) : KMessage(KMessageType::NMEASentence), sentence(s) {};
+    NMEASentence(const char *s) : sentence(s) {};
 
     bool isValid() const {
       return nmea_is_valid(sentence.c_str());
     };
 
-    String toString() const {
+    const String& getSentence() const {
       return sentence;
     };
 
-    String toSignalK() const {
-      return "{ type: 'nmea', value: 'not implemented yet' }";
+    void accept(KVisitor &v) const {
+      v.visit(*this);
     };
 };
 
@@ -68,24 +79,19 @@ class BarometerMeasurement : public KMessage {
     float pressure;
 
   public:
-    BarometerMeasurement(float t, float p) : KMessage(KMessageType::BarometerMeasurement), temperature(t), pressure(p) {};
+    BarometerMeasurement(float t, float p) : temperature(t), pressure(p) {};
 
     float getTemperature() const {
       return temperature;
     };
 
+    /* Pressure in Bar. 1 bar = 1000 hPa */
     float getPressure() const {
       return pressure;
     };
 
-    String toString() const {
-      String s("Current pressure is: ");
-      s.append(String(pressure));
-      return s;
-    };
-
-    String toSignalK() const {
-      return String("{ type: 'pressure', value: 'not implemented yet'}");
+    void accept(KVisitor &v) const {
+      v.visit(*this);
     };
 };
 
@@ -96,19 +102,7 @@ class VoltageMeasurement: public KMessage {
     float voltage;
 
   public:
-    VoltageMeasurement(int index, String label, float voltage) : KMessage(KMessageType::VoltageMeasurement), index(index), label(label), voltage(voltage) {};
-
-    String toString() const {
-      String s("Voltage '");
-      s.append(label);
-      s.append("': ");
-      s.append(voltage);
-      return s;
-    };
-
-    String toSignalK() const {
-      return String("{ type: 'voltage', value: 'not implemented yet'}");
-    };
+    VoltageMeasurement(int index, String label, float voltage) : index(index), label(label), voltage(voltage) {};
 
     String getLabel() const {
       return label;
@@ -121,23 +115,31 @@ class VoltageMeasurement: public KMessage {
     float getVoltage() const {
       return voltage;
     };
+
+    void accept(KVisitor &v) const {
+      v.visit(*this);
+    };
 };
 
 class NMEA2000Message: public KMessage {
   private:
     tN2kMsg msg;
+    unsigned long int received_ms;
 
   public:
-    NMEA2000Message(tN2kMsg m) : KMessage(KMessageType::NMEA2000Message), msg(m) {};
+    NMEA2000Message(tN2kMsg m) : NMEA2000Message(m, 0) {};
+    NMEA2000Message(tN2kMsg m, uint32_t received_ms) : msg(m), received_ms(received_ms) {};
 
     const tN2kMsg& getN2kMsg() const {
       return msg;
     };
 
-    String toString() const;
+    uint32_t getReceivedMillis() const {
+      return received_ms;
+    };
 
-    String toSignalK() const {
-      return String("{ type: 'n2k', value: 'n2k not implemented yet'}");
+    void accept(KVisitor &v) const {
+      v.visit(*this);
     };
 };
 
@@ -147,18 +149,34 @@ class IMUMessage: public KMessage {
     float course, pitch, heel;
 
   public:
-    IMUMessage(int c, float course, float pitch, float heel) : KMessage(KMessageType::IMUMessage), calibration(c), course(course), pitch(pitch), heel(heel)
+    IMUMessage(int c, float course, float pitch, float heel) : calibration(c), course(course), pitch(pitch), heel(heel)
     {};
 
-    String toString() const {
-      char buf[100];
-      snprintf(buf, sizeof(buf), "Calibration: %i Course: %.0f MAG Pitch: %.1f Heel: %.1f", calibration, course, pitch, heel);
-      return String(buf);
+    void accept(KVisitor &v) const {
+      v.visit(*this);
     };
 
-    String toSignalK() const {
-      return String("{ type: 'imu', value: 'not implemented yet'}");
+    int getCalibration() const {
+      return calibration;
     };
+
+    float getCourse() const {
+      return course;
+    };
+
+    float getPitch() const {
+      return pitch;
+    };
+
+    float getHeel() const {
+      return heel;
+    };
+
+    //String toString() const {
+      //char buf[100];
+      //snprintf(buf, sizeof(buf), "Calibration: %i Course: %.0f MAG Pitch: %.1f Heel: %.1f", calibration, course, pitch, heel);
+      //return String(buf);
+    //};
 };
 
 class KReceiver {

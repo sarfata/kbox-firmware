@@ -21,11 +21,27 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "KMessage.h"
 
-class BarometerN2kConverter : public KReceiver, public KGenerator, public KVisitor {
-  public:
-    void processMessage(const KMessage&m);
-    void visit(const BarometerMeasurement &);
+
+/*
+ * This file is a mock of the official Arduino.h so that the tests compile
+ * (including their libraries) but without the ARM specific code.
+ *
+ * This is obviously very limited. Expand as needed.
+ */
+
+#include <Stream.h>
+#include <Print.h>
+#include <inttypes.h>
+#include <math.h>
+
+#define byte uint8_t
+#define lowByte(x) (x&0xff)
+#define highByte(x) ((x<<8)&0xff)
+
+
+static uint32_t millis(void) __attribute__((unused));
+
+static uint32_t millis(void) { 
+  return 42; 
 };
-

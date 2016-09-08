@@ -29,7 +29,7 @@
 #include <TaskManager.h>
 #include "KMessage.h"
 
-class NMEA2000Task : public Task, public KGenerator, public KReceiver {
+class NMEA2000Task : public Task, public KGenerator, public KReceiver, public KVisitor {
   private:
     tNMEA2000_teensy NMEA2000;
     unsigned int _rxValid, _txValid, _txErrors;
@@ -43,6 +43,7 @@ class NMEA2000Task : public Task, public KGenerator, public KReceiver {
     void publishN2kMessage(const tN2kMsg& msg);
 
     void processMessage(const KMessage&);
+    void visit(const NMEA2000Message&);
 
     unsigned int getRxValidCounter() const {
       return _rxValid;
