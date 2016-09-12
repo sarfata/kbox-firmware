@@ -146,10 +146,12 @@ class NMEA2000Message: public KMessage {
 class IMUMessage: public KMessage {
   private:
     int calibration;
-    float course, pitch, heel;
+    double course, yaw, pitch, roll;
 
   public:
-    IMUMessage(int c, float course, float pitch, float heel) : calibration(c), course(course), pitch(pitch), heel(heel)
+    static const int IMU_CALIBRATED = 3;
+
+    IMUMessage(int c, double course, double yaw, double pitch, double roll) : calibration(c), yaw(yaw), course(course), pitch(pitch), roll(roll)
     {};
 
     void accept(KVisitor &v) const {
@@ -160,23 +162,33 @@ class IMUMessage: public KMessage {
       return calibration;
     };
 
-    float getCourse() const {
+    /*
+     * Heading in Radians
+     */
+    double getCourse() const {
       return course;
     };
 
-    float getPitch() const {
+    /*
+     * Difference between vessel orientation and course over water.
+     */
+    double getYaw() const {
+      return yaw;
+    };
+
+    /*
+     * Pitch in radians. Positive when bow rises.
+     */
+    double getPitch() const {
       return pitch;
     };
 
-    float getHeel() const {
-      return heel;
+    /*
+     * Roll in radians. Positive when tilted right.
+     */
+    double getRoll() const {
+      return roll;
     };
-
-    //String toString() const {
-      //char buf[100];
-      //snprintf(buf, sizeof(buf), "Calibration: %i Course: %.0f MAG Pitch: %.1f Heel: %.1f", calibration, course, pitch, heel);
-      //return String(buf);
-    //};
 };
 
 class KReceiver {

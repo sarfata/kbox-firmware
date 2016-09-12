@@ -93,6 +93,13 @@ void NMEA2000Task::visit(const NMEA2000Message &m) {
   }
 }
 
+void NMEA2000Task::visit(const IMUMessage &m) {
+  if (m.getCalibration() == IMU_CALIBRATED) {
+    tN2kMsg n2kmessage;
+    SetN2kPGN127257(n2kmessage, _imuSequence++, m.getYaw(), m.getPitch(), m.getRoll());
+  }
+}
+
 void NMEA2000Task::processMessage(const KMessage &m) {
   m.accept(*this);
 }
