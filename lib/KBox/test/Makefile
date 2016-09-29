@@ -1,5 +1,5 @@
 FRAMEWORK=$(HOME)/.platformio/packages/framework-arduinoteensy/cores/teensy3
-CFLAGS=-g -Wall -std=c++11 -I$(FRAMEWORK) -I../src
+CFLAGS=-g -Wall -std=c++11 -I$(FRAMEWORK) -I../../KBoxDebug/src -I../src
 
 all: test
 
