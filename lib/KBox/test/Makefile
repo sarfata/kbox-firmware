@@ -15,7 +15,7 @@ CPPFLAGS := $(CFLAGS) -std=c++11
 
 # Transformation rules for C and CPP files
 %.o: %.cpp Makefile
-	$(CC) $(CPPFLAGS) -c $< -o $@
+	$(CXX) $(CPPFLAGS) -c $< -o $@
 
 %.o: %.c Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -36,7 +36,7 @@ nmea_test: nmea_test.o ../src/util/nmea.o $(TEST_DEPS)
 	$(CXX) $(CFLAGS) -o $@ $^
 
 # Test the SLIP encapsulation code
-slip_test: slip_test.cpp ../src/util/SlipStream.o $(TEST_DEPS)
+slip_test: slip_test.o ../src/util/SlipStream.o $(TEST_DEPS)
 	$(CXX) $(CFLAGS) -o $@ $^
 
 # Test the NMEASentenceBuilder
