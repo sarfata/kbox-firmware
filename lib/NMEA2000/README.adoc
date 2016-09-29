@@ -32,6 +32,34 @@ Actisense message format handling I have learned from OpenSkipper project.
 I also thank for anybody who has extended library with new PGNs or processor support.
 
 == Changes ==
+19.09.2016 Lot of testing behind - hopefully works now better.
+
+- NOTE! New method SetN2kCANSendFrameBufSize. Added buffer for frames to be sent. This takes more RAM and may be critical for low RAM systems. 
+
+- If frame sending fails, system now buffers frames to be sent automatically and tries to resend them on next call for ParseMessages.
+With this feature it solved my problem that time to time my MFD could not receive important GNSS or SOG/GOG messages and informed error.
+
+- System now also has more reliable response to the Product Information ISO request (PGN 126998). Unfortunately if your system does not poll often
+enough incoming messages (ParseMessages), you still may loose the request itself. This is specially the case if you system spends some time reading
+sensors like 1-wire system. Even with 1-wire asynchronous read, it may spend 10 ms interrupts disabled. Within 10 ms there may be about 30 messages on bus.
+
+- New methods SetConfigurationInformation and SetProgmemConfigurationInformation. System can now also handle Configuration Information ISO request to 
+(PGN 126998). Default configuration information is saved to PROGMEM.
+
+- NOTE! Reload also NMEA2000_due!
+
+17.09.2016 Temporary fix for problem to respond product information ISO request.
+
+12.09.2016 Thanks for people (usauerbrey, OzOns), who noted below problems 
+
+- NOTE! If you are using NMEA2000_can, remember to update that too!
+
+- Fix for ISORequest handling. Now responds allways also for broadcasts.
+
+- Some fixes to avoid compiler warnings.
+
+- Fix for parsing PGN 127257/Attitude
+
 09.08.2016 NOTE! Fixed PGN 130310, PGN 130311 and added SetHandleOnlyKnownMessages(), which effects backward compatibility. See below.
 
 - NOTE! On PGN 130310 and PGN 130311 description says that "Atmospheric pressure in Pascals. Use function mBarToPascal". There was scaling
