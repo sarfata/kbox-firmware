@@ -23,7 +23,7 @@
 */
 
 #include <Stream.h>
-#include "KBoxDebug.h"
+#include <KBoxDebug.h>
 #include "SlipStream.h"
 
 SlipStream::SlipStream(Stream &s, size_t mtu) : _stream(s), _mtu(mtu) {
