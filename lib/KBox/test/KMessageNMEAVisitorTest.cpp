@@ -25,6 +25,8 @@
 #include "KBoxTest.h"
 #include "KMessageNMEAVisitor.h"
 
+static inline double DegToRad(double v) { return v/180.0*3.1415926535897932384626433832795; }
+
 TEST_CASE("Visiting a BarometerMeasurement object") {
   BarometerMeasurement bm(21.52, 1.02421);
 
@@ -62,18 +64,19 @@ TEST_CASE("Visiting a IMU object") {
 TEST_CASE("Visiting a NMEA2000 object") {
   tN2kMsg N2kMsg;
 
-  // From n2kmessages.cpp SetN2kPGN127488
-  N2kMsg.SetPGN(127488L);
-  N2kMsg.Priority=3;
-  N2kMsg.AddByte(0x01);
-  N2kMsg.Add2ByteDouble(0x0100,0.25);
-  N2kMsg.Add2ByteUDouble(0x0, 100);
-  N2kMsg.AddByte(0x0);
-  N2kMsg.AddByte(0xff); // Reserved
+  // PGN127257 - "Attitude"
+  // SID: 42 - YAW: 1 degrees - Pitch: 10 degrees - Roll: 30 degrees
+  N2kMsg.SetPGN(127257L);
+  N2kMsg.Priority=2;
+  N2kMsg.AddByte(42);
+  N2kMsg.Add2ByteDouble(DegToRad(1),0.0001);
+  N2kMsg.Add2ByteDouble(DegToRad(10),0.0001);
+  N2kMsg.Add2ByteDouble(DegToRad(30),0.0001);
   N2kMsg.AddByte(0xff); // Reserved
 
   NMEA2000Message m(N2kMsg);
   KMessageNMEAVisitor v;
   m.accept(v);
-  CHECK( v.toNMEA() == "$PCDIN,01F200,00000000,0F,010004000000FFFF*56\r\n" );
+  // Confirmed with canboat-analyzer that this matches the packet above.
+  CHECK( v.toNMEA() == "$PCDIN,01F119,00000000,0F,2AAF00D1067414FF*59\r\n" );
 }
