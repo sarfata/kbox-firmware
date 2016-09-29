@@ -22,6 +22,9 @@
  #include "WProgram.h"
 #endif
 
+// Required for KBox so we can use Wire1 instead of Wire
+#include <i2c_t3.h>
+
 //#include <Adafruit_Sensor.h>
 
 //#ifdef __AVR_ATtiny85__

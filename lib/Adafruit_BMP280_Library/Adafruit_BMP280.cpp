@@ -19,7 +19,6 @@
 #include "Adafruit_BMP280.h"
 
 // Added for KBox to force I2C communication on Wire1
-#include "i2c_t3.h"
 #define Wire Wire1
 
 /***************************************************************************
