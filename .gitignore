@@ -1,7 +1,10 @@
 .pioenvs
+.piolibdeps
 .clang_complete
 .gcc-flags.json
 .DS_Store
+.sconsign.dblite
 *.dSYM
 *.pyc
+*.o
 tags

@@ -28,6 +28,7 @@
 
 #include "Adafruit_BNO055.h"
 
+// Added for KBox
 #include <i2c_t3.h>
 #define Wire Wire1
 
