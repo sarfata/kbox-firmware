@@ -75,5 +75,5 @@ TEST_CASE("Visiting a NMEA2000 object") {
   NMEA2000Message m(N2kMsg);
   KMessageNMEAVisitor v;
   m.accept(v);
-  CHECK( v.toNMEA() == "$PCDIN,01F200,0000002A,0F,010004000000FFFF*25\r\n" );
+  CHECK( v.toNMEA() == "$PCDIN,01F200,00000000,0F,010004000000FFFF*56\r\n" );
 }
