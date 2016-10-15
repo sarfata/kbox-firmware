@@ -21,41 +21,16 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-
 #pragma once
 
-#include <N2kMessages.h>
-#include <NMEA2000_teensy.h>
-#include <TaskManager.h>
-#include "KMessage.h"
+#include "N2kMsg.h"
 
-class NMEA2000Task : public Task, public KGenerator, public KReceiver, public KVisitor {
-  private:
-    tNMEA2000_teensy NMEA2000;
-    unsigned int _rxValid, _txValid, _txErrors;
-    unsigned int _imuSequence;
+/** Allocates a new buffer and writes a NMEA2000 message in PCDIN format into
+ * this buffer.
+ *
+ * @param msg A NMEA2000 message to encode.
+ * @param timestamp The time when the message was received (unix timestamp ???).
+ * @return a newly malloc'd buffer terminated by "\r\n\0" that must be free()
+ */
+char *nmea_pcdin_sentence_for_n2kmsg(const tN2kMsg msg, unsigned long timestamp);
 
-    void sendN2kMessage(const tN2kMsg& msg);
-
-  public:
-    NMEA2000Task() : Task("NMEA2000"), _rxValid(0), _txValid(0), _txErrors(0), _imuSequence(0) {};
-    void setup();
-    void loop();
-
-    // Helper for the handler who is not a part of this class
-    void publishN2kMessage(const tN2kMsg& msg);
-
-    void processMessage(const KMessage&);
-    void visit(const NMEA2000Message&);
-    void visit(const IMUMessage&);
-
-    unsigned int getRxValidCounter() const {
-      return _rxValid;
-    };
-    unsigned int getTxValidCounter() const {
-      return _txValid;
-    };
-    unsigned int getTxErrors() const {
-      return _txErrors;
-    };
-};

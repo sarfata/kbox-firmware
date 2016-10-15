@@ -44,7 +44,7 @@ NMEASentenceBuilderTest: NMEASentenceBuilderTest.o ../src/util/NMEASentenceBuild
 	$(CXX) $(CFLAGS) -o $@ $^
 
 # Test the visitor that converts KMessage into NMEA
-KMessageNMEAVisitorTest: KMessageNMEAVisitorTest.o ../src/util/NMEASentenceBuilder.o ../src/KMessage.o ../src/util/nmea.o ../src/KMessageNMEAVisitor.o ../../NMEA2000/N2kMsg.o $(TEST_DEPS)
+KMessageNMEAVisitorTest: KMessageNMEAVisitorTest.o ../src/util/NMEASentenceBuilder.o ../src/KMessage.o ../src/util/nmea.o ../src/util/nmea2000.o ../src/KMessageNMEAVisitor.o ../../NMEA2000/N2kMsg.o $(TEST_DEPS)
 	$(CXX) $(CFLAGS) -o $@ $^
 
 clean:
