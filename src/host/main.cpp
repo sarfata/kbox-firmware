@@ -69,6 +69,7 @@ void setup() {
   reader2->connectTo(*wifi);
 
   IMUTask *imuTask = new IMUTask();
+  imuTask->connectTo(*n2kTask);
 
   BarometerTask *baroTask = new BarometerTask();
 

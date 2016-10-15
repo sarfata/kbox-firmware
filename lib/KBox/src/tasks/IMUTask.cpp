@@ -47,7 +47,7 @@ void IMUTask::loop() {
     eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
     //DEBUG("Vector Euler x=%f y=%f z=%f", eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
     //DEBUG("Course: %.0f MAG  Pitch: %.1f  Heel: %.1f", eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
-    IMUMessage m(sysCalib, eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
+    IMUMessage m(sysCalib, eulerAngles.x(), /* yaw?*/ 0, eulerAngles.y(), eulerAngles.z());
     sendMessage(m);
   }
   
