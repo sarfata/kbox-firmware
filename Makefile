@@ -23,6 +23,9 @@ runlogs: host
 logs:
 	miniterm.py --rts 0 $(PORT) 115200
 
+logs-n2kanalyzer:
+	miniterm.py --rts 0 $(PORT) 115200 | grep 'TX: $$PCDIN' |perl -pe 's/.*TX: //' |analyzer -json
+
 mfg:
 	platformio run -e mfg
 

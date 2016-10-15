@@ -151,7 +151,7 @@ class IMUMessage: public KMessage {
   public:
     static const int IMU_CALIBRATED = 3;
 
-    IMUMessage(int c, double course, double yaw, double pitch, double roll) : calibration(c), yaw(yaw), course(course), pitch(pitch), roll(roll)
+    IMUMessage(int c, double course, double yaw, double pitch, double roll) : calibration(c), course(course), yaw(yaw), pitch(pitch), roll(roll)
     {};
 
     void accept(KVisitor &v) const {
@@ -170,7 +170,7 @@ class IMUMessage: public KMessage {
     };
 
     /*
-     * Difference between vessel orientation and course over water.
+     * Difference between vessel orientation and course over water in radians.
      */
     double getYaw() const {
       return yaw;

@@ -54,11 +54,12 @@ TEST_CASE("Visiting a NMEA0183 sentence message") {
 }
 
 TEST_CASE("Visiting a IMU object") {
-  IMUMessage m(3, 232.423, 10.122331, 29.028);
+  IMUMessage m(3, 232.423, 4.19, 10.122331, 29.028);
 
   KMessageNMEAVisitor v;
   m.accept(v);
-  CHECK( v.toNMEA() == "$IIXDR,A,29.0,D,Heel,A,10.1,D,Pitch,A,232.4,D,Course,,3,,Calibration*4F\r\n" );
+  CHECK( v.toNMEA() == "$IIXDR,A,4.2,D,Yaw,A,10.1,D,Pitch,A,29.0,D,Roll,,3,,Calibration*25\r\n"
+                       "$IIHDM,232.42,M*17\r\n" );
 }
 
 TEST_CASE("Visiting a NMEA2000 object") {

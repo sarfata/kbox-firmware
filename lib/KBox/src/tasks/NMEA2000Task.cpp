@@ -24,6 +24,7 @@
 #include "../drivers/board.h"
 #include "NMEA2000Task.h"
 #include "KBoxDebug.h"
+#include "util/nmea2000.h"
 
 static NMEA2000Task *handlerContext;
 
@@ -75,15 +76,16 @@ void NMEA2000Task::setup() {
   }
 }
 
-void NMEA2000Task::loop() {
-  NMEA2000.ParseMessages();
-}
+void NMEA2000Task::sendN2kMessage(const tN2kMsg& msg) {
+  bool result = NMEA2000.SendMsg(msg);
 
-void NMEA2000Task::visit(const NMEA2000Message &m) {
-  bool result = NMEA2000.SendMsg(m.getN2kMsg());
-  DEBUG("Sending message on n2k bus - pgn=%i prio=%i src=%i dst=%i len=%i result=%s", m.getN2kMsg().PGN, m.getN2kMsg().Priority,
-      m.getN2kMsg().Source,
-      m.getN2kMsg().Destination, m.getN2kMsg().DataLen, result ? "success":"fail");
+  DEBUG("Sending message on n2k bus - pgn=%i prio=%i src=%i dst=%i len=%i result=%s", msg.PGN, msg.Priority,
+      msg.Source,
+      msg.Destination, msg.DataLen, result ? "success":"fail");
+
+  char *pcdin = nmea_pcdin_sentence_for_n2kmsg(msg, 0);
+  DEBUG("TX: %s", pcdin);
+  free(pcdin);
 
   if (result) {
     _txValid++;
@@ -93,10 +95,24 @@ void NMEA2000Task::visit(const NMEA2000Message &m) {
   }
 }
 
+void NMEA2000Task::loop() {
+  NMEA2000.ParseMessages();
+}
+
+void NMEA2000Task::visit(const NMEA2000Message &m) {
+  sendN2kMessage(m.getN2kMsg());
+}
+
 void NMEA2000Task::visit(const IMUMessage &m) {
-  if (m.getCalibration() == IMU_CALIBRATED) {
+  if (m.getCalibration() == IMUMessage::IMU_CALIBRATED) {
     tN2kMsg n2kmessage;
-    SetN2kPGN127257(n2kmessage, _imuSequence++, m.getYaw(), m.getPitch(), m.getRoll());
+    SetN2kPGN127257(n2kmessage, _imuSequence, m.getYaw(), m.getPitch(), m.getRoll());
+    sendN2kMessage(n2kmessage);
+
+    SetN2kPGN127250(n2kmessage, _imuSequence, m.getCourse(), /* Deviation */ N2kDoubleNA, /* Variation */ N2kDoubleNA, N2khr_magnetic);
+    sendN2kMessage(n2kmessage);
+
+    _imuSequence++;
   }
 }
 
