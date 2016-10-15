@@ -28,7 +28,7 @@
 uint8_t neopixel_pin = 4;
 
 Adafruit_NeoPixel rgb = Adafruit_NeoPixel(1, neopixel_pin, NEO_GRB + NEO_KHZ800);
-NetServer server(4242);
+NetServer server(10110);
 
 static const uint32_t connectedColor = rgb.Color(0x00, 0xff, 0x00);
 static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0xff);
