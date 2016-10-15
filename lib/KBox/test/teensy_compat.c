@@ -21,11 +21,54 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "KMessage.h"
 
-class BarometerN2kConverter : public KReceiver, public KGenerator, public KVisitor {
-  public:
-    void processMessage(const KMessage&m);
-    void visit(const BarometerMeasurement &);
-};
+/* Very quick and dirty implementation of some functions that are included in
+ * GCC for AVR and ARM but not x86.
+ * This is so that we can compile parts of the teensy framework when building
+ * the tests.
+ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdio.h>
+
+char * ultoa(unsigned int val, char *buf, int radix) {
+  if (radix == 8) {
+    sprintf(buf, "%o", val);
+  }
+  else if (radix == 10) {
+    sprintf(buf, "%u", val);
+  }
+  else if (radix == 16) {
+    sprintf(buf, "%x", val);
+  }
+  return buf;
+}
+
+char * ltoa(int val, char *buf, int radix) {
+  if (radix == 8) {
+    sprintf(buf, "%o", val);
+  }
+  else if (radix == 10) {
+    sprintf(buf, "%u", val);
+  }
+  else if (radix == 16) {
+    sprintf(buf, "%x", val);
+  }
+  return buf;
+}
+
+char *dtostrf(float val, int width, unsigned int precision, char *buf) {
+  char format[10];
+  snprintf(format, sizeof(format), "%%%i.%if", width, precision);
+
+  sprintf(buf, format, val);
+  return buf;
+}
+
+#ifdef __cplusplus
+}
+#endif
 

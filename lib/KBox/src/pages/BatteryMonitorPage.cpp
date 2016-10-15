@@ -71,21 +71,21 @@ String BatteryMonitorPage::formatMeasurement(float measure, const char *unit) {
 }
 
 void BatteryMonitorPage::processMessage(const KMessage &message) {
-  if (message.getMessageType() == KMessageType::VoltageMeasurement) {
-    const VoltageMeasurement *vm = static_cast<const VoltageMeasurement*>(&message);
+  message.accept(*this);
+}
 
-    if (vm->getLabel() == "house") {
-      houseVoltage->setText(formatMeasurement(vm->getVoltage(), "V"));
-      houseVoltage->setColor(colorForVoltage(vm->getVoltage()));
-    }
-    if (vm->getLabel() == "supply") {
-      supplyVoltage->setText(formatMeasurement(vm->getVoltage(), "V"));
-      supplyVoltage->setColor(colorForVoltage(vm->getVoltage()));
-    }
-    if (vm->getLabel() == "starter") {
-      starterVoltage->setText(formatMeasurement(vm->getVoltage(), "V"));
-      starterVoltage->setColor(colorForVoltage(vm->getVoltage()));
-    }
+void BatteryMonitorPage::visit(const VoltageMeasurement &vm) {
+if (vm.getLabel() == "house") {
+    houseVoltage->setText(formatMeasurement(vm.getVoltage(), "V"));
+    houseVoltage->setColor(colorForVoltage(vm.getVoltage()));
+  }
+  if (vm.getLabel() == "supply") {
+    supplyVoltage->setText(formatMeasurement(vm.getVoltage(), "V"));
+    supplyVoltage->setColor(colorForVoltage(vm.getVoltage()));
+  }
+  if (vm.getLabel() == "starter") {
+    starterVoltage->setText(formatMeasurement(vm.getVoltage(), "V"));
+    starterVoltage->setColor(colorForVoltage(vm.getVoltage()));
   }
 }
 

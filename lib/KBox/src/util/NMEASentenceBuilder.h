@@ -21,11 +21,27 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "KMessage.h"
 
-class BarometerN2kConverter : public KReceiver, public KGenerator, public KVisitor {
+#include <WString.h>
+
+class NMEASentenceBuilder {
+  private:
+    String talkerId;
+    String sentenceId;
+    int numFields = 0;
+    String *fields;
+
   public:
-    void processMessage(const KMessage&m);
-    void visit(const BarometerMeasurement &);
-};
+    NMEASentenceBuilder(String talkerId, String sentenceId, int numFields);
+    ~NMEASentenceBuilder();
 
+    NMEASentenceBuilder& operator=(const NMEASentenceBuilder& other);
+
+    /* Note that fields are numbered from 1 so as to match the NMEA reference:
+     * http://catb.org/gpsd/NMEA.html
+     */
+    void setField(int fieldId, String s);
+    void setField(int fieldId, float v, int precision);
+
+    String toNMEA();
+};

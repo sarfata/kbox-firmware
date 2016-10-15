@@ -25,6 +25,7 @@
 #include "KBoxDebug.h"
 #include "../drivers/board.h"
 #include "../drivers/esp8266.h"
+#include "KMessageNMEAVisitor.h"
 
 void WiFiTask::setup() {
   esp_init();
@@ -91,7 +92,9 @@ void WiFiTask::loop() {
 }
 
 void WiFiTask::processMessage(const KMessage &m) {
-  sendQueue.add(m.toString() + "\r\n");
+  KMessageNMEAVisitor v;
+  m.accept(v);
+  sendQueue.add(v.toNMEA());
 }
 
 

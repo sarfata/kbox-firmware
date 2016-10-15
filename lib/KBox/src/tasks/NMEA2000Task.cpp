@@ -79,19 +79,20 @@ void NMEA2000Task::loop() {
   NMEA2000.ParseMessages();
 }
 
-void NMEA2000Task::processMessage(const KMessage &m) {
-  if (m.getMessageType() == KMessageType::NMEA2000Message) {
-    const NMEA2000Message& n2km = static_cast<const NMEA2000Message&>(m);
-    bool result = NMEA2000.SendMsg(n2km.getN2kMsg());
-    DEBUG("Sending message on n2k bus - pgn=%i prio=%i src=%i dst=%i len=%i result=%s", n2km.getN2kMsg().PGN, n2km.getN2kMsg().Priority,
-        n2km.getN2kMsg().Source,
-        n2km.getN2kMsg().Destination, n2km.getN2kMsg().DataLen, result ? "success":"fail");
+void NMEA2000Task::visit(const NMEA2000Message &m) {
+  bool result = NMEA2000.SendMsg(m.getN2kMsg());
+  DEBUG("Sending message on n2k bus - pgn=%i prio=%i src=%i dst=%i len=%i result=%s", m.getN2kMsg().PGN, m.getN2kMsg().Priority,
+      m.getN2kMsg().Source,
+      m.getN2kMsg().Destination, m.getN2kMsg().DataLen, result ? "success":"fail");
 
-    if (result) {
-      _txValid++;
-    }
-    else {
-      _txErrors++;
-    }
+  if (result) {
+    _txValid++;
   }
+  else {
+    _txErrors++;
+  }
+}
+
+void NMEA2000Task::processMessage(const KMessage &m) {
+  m.accept(*this);
 }

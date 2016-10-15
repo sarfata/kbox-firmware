@@ -25,14 +25,15 @@
 #include <N2kMessages.h>
 
 void BarometerN2kConverter::processMessage(const KMessage &m) {
-  if (m.getMessageType() == KMessageType::BarometerMeasurement) {
-    const BarometerMeasurement &bm = static_cast<const BarometerMeasurement&>(m);
-    tN2kMsg n2km;
-    static int sid = 0;
-    // Seems the i70 display will only show sea or outside temperature and
-    // outside humidity.
-    SetN2kPGN130311(n2km, sid++, N2kts_OutsideTemperature, CToKelvin(bm.getTemperature()),
-        N2khs_OutsideHumidity, 42, bm.getPressure());
-    sendMessage(NMEA2000Message(n2km));
-  }
+  m.accept(*this);
+}
+
+void BarometerN2kConverter::visit(const BarometerMeasurement &bm) {
+  tN2kMsg n2km;
+  static int sid = 0;
+  // Seems the i70 display will only show sea or outside temperature and
+  // outside humidity.
+  SetN2kPGN130311(n2km, sid++, N2kts_OutsideTemperature, CToKelvin(bm.getTemperature()),
+      N2khs_OutsideHumidity, 42, bm.getPressure());
+  sendMessage(NMEA2000Message(n2km));
 }

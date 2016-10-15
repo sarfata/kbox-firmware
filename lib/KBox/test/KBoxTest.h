@@ -21,11 +21,17 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "KMessage.h"
 
-class BarometerN2kConverter : public KReceiver, public KGenerator, public KVisitor {
-  public:
-    void processMessage(const KMessage&m);
-    void visit(const BarometerMeasurement &);
-};
+#include "catch.hpp"
+
+#include <stdarg.h>
+#define DEBUG(...) debug(__FILE__, __LINE__, __VA_ARGS__)
+
+#include <WString.h>
+
+// This is required so that Catch.hpp can print Teensy Strings
+std::ostream& operator << ( std::ostream& os, String const& value ) {
+    os << value.c_str();
+    return os;
+}
 

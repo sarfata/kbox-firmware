@@ -21,11 +21,32 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #include "KMessage.h"
 
-class BarometerN2kConverter : public KReceiver, public KGenerator, public KVisitor {
-  public:
-    void processMessage(const KMessage&m);
-    void visit(const BarometerMeasurement &);
-};
+/**
+ * Converts KMessage objects into NMEA equivalents which are added
+ * to nmeaContent.
+ * Call getNMEAContent() to retrieve a string containing one or more
+ * NMEA strings.
+ * Call clearNMEAContent() to start fresh again.
+ */
+class KMessageNMEAVisitor : public KVisitor {
+  private:
+    String nmeaContent;
 
+  public:
+    void visit(const NMEASentence& s);
+    void visit(const BarometerMeasurement &bm);
+    void visit(const VoltageMeasurement &vm);
+    void visit(const NMEA2000Message &n2km);
+    void visit(const IMUMessage &imu);
+
+    String toNMEA() const {
+      return nmeaContent;
+    };
+
+    void clearNMEAContent() {
+      nmeaContent = "";
+    };
+};

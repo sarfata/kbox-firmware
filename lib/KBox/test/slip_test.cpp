@@ -22,22 +22,8 @@
   THE SOFTWARE.
 */
 
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
 
-#include <stdarg.h>
-#define DEBUG(...) debug(__FILE__, __LINE__, __VA_ARGS__)
-
-void debug(const char *fname, int lineno, const char *fmt, ... ) {
-  printf("%s: %i ", fname, lineno);
-  char tmp[128]; // resulting string limited to 128 chars
-  va_list args;
-  va_start (args, fmt );
-  vsnprintf(tmp, 128, fmt, args);
-  va_end (args);
-  printf("%s\n", tmp);
-}
-
+#include "KBoxTest.h"
 #include "util/SlipStream.h"
 
 struct rxBuffer {
@@ -67,7 +53,7 @@ class StreamMock : public Stream {
     StreamMock() {};
 
     StreamMock(int count, struct rxBuffer *b) : countBuffers(count), rxBuffers(b) {
-      for (int i = 0; i < countBuffers; i++) {
+      for (unsigned int i = 0; i < countBuffers; i++) {
         rxBuffers[i].index = 0;
       }
     };
@@ -287,24 +273,5 @@ TEST_CASE("do not share crap sent before first message separator") {
     REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 10);
     REQUIRE( memcmp(ptr, "0123456789", 10) == 0 );
   }
-}
-
-// I have not found a way to get WString.cpp to compile on a Linux box without modifying it.
-// Would require some serious modifications because it relies on non-std functions like
-// itoa, utoa, etc that are AVR specific apparently and not available here.
-// like itoa, utoa, etc.
-// So it's a lot simpler to copy here the one function we need.
-
-void String::getBytes(unsigned char *buf, unsigned int bufsize, unsigned int index) const
-{
-  if (!bufsize || !buf) return;
-  if (index >= len) {
-    buf[0] = 0;
-    return;
-  }
-  unsigned int n = bufsize - 1;
-  if (n > len - index) n = len - index;
-  strncpy((char *)buf, buffer + index, n);
-  buf[n] = 0;
 }
 

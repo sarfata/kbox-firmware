@@ -26,7 +26,7 @@
 #include "KMessage.h"
 #include "ui/TextLayer.h"
 
-class BatteryMonitorPage : public Page, public KReceiver {
+class BatteryMonitorPage : public Page, public KReceiver, public KVisitor {
   private:
     TextLayer *houseVoltage, *houseCurrent, *starterVoltage, *supplyVoltage;
 
@@ -37,4 +37,5 @@ class BatteryMonitorPage : public Page, public KReceiver {
     BatteryMonitorPage();
 
     void processMessage(const KMessage& message);
+    void visit(const VoltageMeasurement&);
 };

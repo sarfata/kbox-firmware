@@ -45,33 +45,3 @@ static int appendWord(char *s, uint32_t i) {
   return 8;
 }
 
-String NMEA2000Message::toString() const {
-  // $PCDIN,<PGN 6>,<Timestamp 8>,<src 2>,<data>*20
-  char *buffer = (char*)malloc(6+1+6+1+8+1+2+1+msg.DataLen*2+1+1+2 + 1);
-
-  char *s = buffer;
-
-  strcpy(buffer, "$PCDIN,");
-  buffer += 7;
-  buffer += appendByte(buffer, msg.PGN >> 16);
-  buffer += append2Bytes(buffer, msg.PGN & 0xffff);
-  *buffer++ = ',';
-  buffer += appendWord(buffer, millis());
-  *buffer++ = ',';
-  buffer += appendByte(buffer, msg.Source);
-  *buffer++ = ',';
-
-  for (int i = 0; i < msg.DataLen; i++) {
-    buffer += appendByte(buffer, msg.Data[i]);
-  }
-
-  *buffer++ = '*';
-  buffer += appendByte(buffer, nmea_compute_checksum(s));
-  *buffer = 0;
-
-  String str(s);
-  free(s);
-  return str;
-}
-
-
