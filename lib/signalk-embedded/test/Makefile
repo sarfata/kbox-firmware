@@ -18,10 +18,11 @@ CFLAGS := $(CFLAGS) -std=c11
 
 all: test
 
-test: signalk-test skkv-test signalk-path-test
+test: signalk-test skkv-test signalk-path-test signalk-json-test
 	./signalk-path-test
 	./skkv-test
 	./signalk-test
+	./signalk-json-test
 
 # Object dependencies of the tests. Without them tests cannot run.
 TEST_DEPS=maintest.o
@@ -35,7 +36,13 @@ skkv-test: skkv-test.o ../src/skkv.o ../src/signalk.o ../src/signalk-path.o $(TE
 signalk-test: signalk-test.o ../src/signalk.o ../src/skkv.o ../src/signalk-path.o $(TEST_DEPS)
 	$(CXX) $(CFLAGS) -o $@ $^
 
+signalk-json-test: signalk-json-test.o ../src/signalk-json.o ../src/signalk.o ../src/skkv.o ../src/signalk-path.o $(TEST_DEPS)
+	$(CXX) $(CFLAGS) -o $@ $^
+
 clean:
+	rm -f signalk-path-test
+	rm -f skkv-test
 	rm -f signalk-test
+	rm -f signalk-json-test
 	find .. -name '*.o' |xargs rm -v
 
