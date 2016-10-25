@@ -43,7 +43,7 @@ bool tNMEA2000_teensy::CANSendFrame(unsigned long id, unsigned char len, const u
   out.len = len;
   out.timeout = (wait_sent?DefTimeOut:0);
   
-  for (int i=1; i<len && i<8; i++) out.buf[i] = buf[i];
+  for (int i=0; i<len && i<8; i++) out.buf[i] = buf[i];
 
   return CANbus->write(out) == 1;
 
