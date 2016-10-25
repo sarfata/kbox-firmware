@@ -7,8 +7,6 @@ clean:
 	platformio -f -c vim run --target clean
 
 wifi:
-	platformio run -e esp
-	platformio run -e program-esp -t upload
 	platformio run -e esp -t upload
 
 host:
