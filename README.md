@@ -1,6 +1,7 @@
 # KBox Firmware
 
 [![Travis status](https://api.travis-ci.org/sarfata/kbox-firmware.svg)](https://travis-ci.org/sarfata/kbox-firmware)
+[![I sell on Tindie](https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-smalls.png)](https://www.tindie.com/stores/sarfata/?ref=offsite_badges&utm_source=sellers_sarfata&utm_medium=badges&utm_campaign=badge_small)
 
 ## What is KBox?
 
@@ -35,10 +36,15 @@ schematics and build it yourself. We also intend to get a few batches
 manufactured by a professional board assembly house. If you are interested, put
 your name in our form!
 
-[I am interested in an early manufacturing batch](http://goo.gl/forms/y78AeACvyr).
-
 [Find more news about KBox on
 hackaday.io](https://hackaday.io/project/11055-kbox).
+
+## How to get a KBox?
+
+You can now [order KBox on
+tindie.com](https://www.tindie.com/products/sarfata/kbox-open-source-boat-gateway/).
+Supply is limited so use the "Join Waitlist" button to help me figure out how
+many I need to order and build.
 
 ## What can I do with KBox?
 
