@@ -1,9 +1,8 @@
 # KBox Firmware
 
 [![Travis status](https://api.travis-ci.org/sarfata/kbox-firmware.svg)](https://travis-ci.org/sarfata/kbox-firmware)
-<div align="float: right;">
-[![I sell on Tindie](https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-smalls.png)](https://www.tindie.com/stores/sarfata/?ref=offsite_badges&utm_source=sellers_sarfata&utm_medium=badges&utm_campaign=badge_small)
-</div>
+ - [Get yours on
+Tindie!](https://www.tindie.com/products/sarfata/kbox-open-source-boat-gateway/)
 
 ## What is KBox?
 
