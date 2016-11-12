@@ -42,14 +42,9 @@ void ADCTask::loop() {
   //DEBUG("ADC - Supply: %sV Bat1: %sV Bat2: %sV Bat3: %sV", 
       //String(supply, 2).c_str(), String(bat1, 2).c_str(), String(bat2, 2).c_str(), String(bat3, 2).c_str());
 
-  // Would be nice if the indexes were configurable.
-  // In the future, we will have:
-  //  0: INA191 measured service battery voltage (+current)
-  //  1: nmea2000 supply
-  //  2/3/4: adc inputs - We could re-label them on the board
-  VoltageMeasurement mSupply(1, "supply", supply);
-  VoltageMeasurement m1(2, "house", bat1);
-  VoltageMeasurement m2(3, "starter", bat2);
+  VoltageMeasurement m1(0, "house", bat1);
+  VoltageMeasurement m2(1, "starter", bat2);
+  VoltageMeasurement mSupply(3, "supply", supply);
   VoltageMeasurement m3(4, "bat3", bat3);
 
   sendMessage(m1);
