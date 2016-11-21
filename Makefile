@@ -19,6 +19,7 @@ runlogs: host
 	miniterm.py --rts 0 $(PORT) 115200
 
 logs:
+	sh -c "while [ ! -r $(PORT) ]; do sleep 0.01; done"
 	miniterm.py --rts 0 $(PORT) 115200
 
 logs-n2kanalyzer:
