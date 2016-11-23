@@ -16,6 +16,38 @@
   MIT license, all text above must be included in any redistribution
  ****************************************************/
 
+// <SoftEgg>
+
+//Additional graphics routines by Tim Trzepacz, SoftEgg LLC added December 2015
+//(And then accidentally deleted and rewritten March 2016. Oops!)
+//Gradient support
+//----------------
+//		fillRectVGradient	- fills area with vertical gradient
+//		fillRectHGradient	- fills area with horizontal gradient
+//		fillScreenVGradient - fills screen with vertical gradient
+// 	fillScreenHGradient - fills screen with horizontal gradient
+
+//Additional Color Support
+//------------------------
+//		color565toRGB		- converts 565 format 16 bit color to RGB
+//		color565toRGB14		- converts 16 bit 565 format color to 14 bit RGB (2 bits clear for math and sign)
+//		RGB14tocolor565		- converts 14 bit RGB back to 16 bit 565 format color
+
+//Low Memory Bitmap Support
+//-------------------------
+// 		writeRect8BPP - 	write 8 bit per pixel paletted bitmap
+// 		writeRect4BPP - 	write 4 bit per pixel paletted bitmap
+// 		writeRect2BPP - 	write 2 bit per pixel paletted bitmap
+// 		writeRect1BPP - 	write 1 bit per pixel paletted bitmap
+
+//TODO: transparent bitmap writing routines for sprites
+
+//String Pixel Length support
+//---------------------------
+//		strPixelLen			- gets pixel length of given ASCII string
+
+// <\SoftEgg>
+
 #include "ILI9341_t3.h"
 #include <SPI.h>
 
@@ -44,6 +76,7 @@ ILI9341_t3::ILI9341_t3(uint8_t cs, uint8_t dc, uint8_t rst, uint8_t mosi, uint8_
 	textcolor = textbgcolor = 0xFFFF;
 	wrap      = true;
 	setClipRect();
+	setOrigin();
 	font      = NULL;
 }
 
@@ -63,8 +96,9 @@ void ILI9341_t3::pushColor(uint16_t color)
 }
 
 void ILI9341_t3::drawPixel(int16_t x, int16_t y, uint16_t color) {
-
-	if((x < _clipx1) ||(x >= _clipx2) || (y < _clipy1) || (y >= _clipy2)) return;
+	x += _originx;
+	y += _originy;
+	if((x < _displayclipx1) ||(x >= _displayclipx2) || (y < _displayclipy1) || (y >= _displayclipy2)) return;
 
 	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
 	setAddr(x, y, x, y);
@@ -75,10 +109,12 @@ void ILI9341_t3::drawPixel(int16_t x, int16_t y, uint16_t color) {
 
 void ILI9341_t3::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
 {
+	x+=_originx;
+	y+=_originy;
 	// Rectangular clipping
-	if((x < _clipx1) || (x >= _clipx2) || (y >= _clipy2)) return;
-	if(y < _clipy1) { h = h - (_clipy1 - y); y = _clipy1;}
-	if((y+h-1) >= _clipy2) h = _clipy2-y;
+	if((x < _displayclipx1) || (x >= _displayclipx2) || (y >= _displayclipy2)) return;
+	if(y < _displayclipy1) { h = h - (_displayclipy1 - y); y = _displayclipy1;}
+	if((y+h-1) >= _displayclipy2) h = _displayclipy2-y;
 	if(h<1) return;
 
 	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
@@ -89,15 +125,17 @@ void ILI9341_t3::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
 	}
 	writedata16_last(color);
 	SPI.endTransaction();
-
 }
 
 void ILI9341_t3::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
 {
+	x+=_originx;
+	y+=_originy;
+
 	// Rectangular clipping
-	if((y < _clipy1) || (x >= _clipx2) || (y >= _clipy2)) return;
-	if(x<_clipx1) { w = w - (_clipx1 - x); x = _clipx1; }
-	if((x+w-1) >= _clipx2)  w = _clipx2-x;
+	if((y < _displayclipy1) || (x >= _displayclipx2) || (y >= _displayclipy2)) return;
+	if(x<_displayclipx1) { w = w - (_displayclipx1 - x); x = _displayclipx1; }
+	if((x+w-1) >= _displayclipx2)  w = _displayclipx2-x;
 	if (w<1) return;
 
 	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
@@ -110,20 +148,68 @@ void ILI9341_t3::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
 	SPI.endTransaction();
 }
 
+void ILI9341_t3::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t* colors)
+{
+	x+=_originx;
+	y+=_originy;
+	// Rectangular clipping
+	if((x < _displayclipx1) || (x >= _displayclipx2) || (y >= _displayclipy2)) return;
+	if(y < _displayclipy1) { h = h - (_displayclipy1 - y); y = _displayclipy1;}
+	if((y+h-1) >= _displayclipy2) h = _displayclipy2-y;
+	if(h<1) return;
+
+	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
+	setAddr(x, y, x, y+h-1);
+	writecommand_cont(ILI9341_RAMWR);
+	int16_t i = 0;
+	while (i < (h-1)) {
+		writedata16_cont(colors[i]);
+		i++;
+	}
+	writedata16_last(colors[i]);
+	SPI.endTransaction();
+}
+
+void ILI9341_t3::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t* colors)
+{
+	x+=_originx;
+	y+=_originy;
+
+	// Rectangular clipping
+	if((y < _displayclipy1) || (x >= _displayclipx2) || (y >= _displayclipy2)) return;
+	if(x<_displayclipx1) { w = w - (_displayclipx1 - x); x = _displayclipx1; }
+	if((x+w-1) >= _displayclipx2)  w = _displayclipx2-x;
+	if (w<1) return;
+
+	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
+	setAddr(x, y, x+w-1, y);
+	writecommand_cont(ILI9341_RAMWR);
+	int16_t i = 0;
+	while (i < (w-1)) {
+		writedata16_cont(colors[i]);
+		i++;
+	}
+	writedata16_last(colors[i]);
+	SPI.endTransaction();
+}
+
 void ILI9341_t3::fillScreen(uint16_t color)
 {
-	fillRect(_clipx1, _clipy1, _clipx2, _clipy2, color);
+	fillRect(0, 0, _width, _height, color);
 }
 
 // fill a rectangle
 void ILI9341_t3::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 {
+	x+=_originx;
+	y+=_originy;
+
 	// Rectangular clipping (drawChar w/big text requires this)
-	if((x >= _clipx2) || (y >= _clipy2)) return;
-	if((x + w - 1) >= _clipx2)  w = _clipx2  - x;
-	if((y + h - 1) >= _clipy2) h = _clipy2 - y;
-	if(x < _clipx1) x = _clipx1;
-	if(y < _clipy1) y = _clipy1;
+	if((x >= _displayclipx2) || (y >= _displayclipy2)) return;
+	if((x + w - 1) >= _displayclipx2)  w = _displayclipx2  - x;
+	if((y + h - 1) >= _displayclipy2) h = _displayclipy2 - y;
+	if(x < _displayclipx1) x = _displayclipx1;
+	if(y < _displayclipy1) y = _displayclipy1;
 
 	// TODO: this can result in a very long transaction time
 	// should break this into multiple transactions, even though
@@ -144,6 +230,91 @@ void ILI9341_t3::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t c
 	SPI.endTransaction();
 }
 
+// fillRectVGradient	- fills area with vertical gradient
+void ILI9341_t3::fillRectVGradient(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color1, uint16_t color2)
+{
+	// rudimentary clipping (drawChar w/big text requires this)
+	if((x >= _width) || (y >= _height)) return;
+	if((x + w - 1) >= _width)  w = _width  - x;
+	if((y + h - 1) >= _height) h = _height - y;
+
+	int16_t r1, g1, b1, r2, g2, b2, dr, dg, db, r, g, b;
+	color565toRGB14(color1,r1,g1,b1);
+	color565toRGB14(color2,r2,g2,b2);
+	dr=(r2-r1)/h; dg=(g2-g1)/h; db=(b2-b1)/h;
+	r=r1;g=g1;b=b1;
+
+	// TODO: this can result in a very long transaction time
+	// should break this into multiple transactions, even though
+	// it'll cost more overhead, so we don't stall other SPI libs
+	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
+	setAddr(x, y, x+w-1, y+h-1);
+	writecommand_cont(ILI9341_RAMWR);
+	for(y=h; y>0; y--) {
+		uint16_t color = RGB14tocolor565(r,g,b);
+
+		for(x=w; x>1; x--) {
+			writedata16_cont(color);
+		}
+		writedata16_last(color);
+		if (y > 1 && (y & 1)) {
+			SPI.endTransaction();
+			SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
+		}
+		r+=dr;g+=dg; b+=db;
+	}
+	SPI.endTransaction();
+}
+
+// fillRectHGradient	- fills area with horizontal gradient
+void ILI9341_t3::fillRectHGradient(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color1, uint16_t color2)
+{
+	// rudimentary clipping (drawChar w/big text requires this)
+	if((x >= _width) || (y >= _height)) return;
+	if((x + w - 1) >= _width)  w = _width  - x;
+	if((y + h - 1) >= _height) h = _height - y;
+
+	int16_t r1, g1, b1, r2, g2, b2, dr, dg, db, r, g, b;
+	color565toRGB14(color1,r1,g1,b1);
+	color565toRGB14(color2,r2,g2,b2);
+	dr=(r2-r1)/h; dg=(g2-g1)/h; db=(b2-b1)/h;
+	r=r1;g=g1;b=b1;
+
+	// TODO: this can result in a very long transaction time
+	// should break this into multiple transactions, even though
+	// it'll cost more overhead, so we don't stall other SPI libs
+	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
+	setAddr(x, y, x+w-1, y+h-1);
+	writecommand_cont(ILI9341_RAMWR);
+	for(y=h; y>0; y--) {
+		uint16_t color;
+		for(x=w; x>1; x--) {
+			color = RGB14tocolor565(r,g,b);
+			writedata16_cont(color);
+			r+=dr;g+=dg; b+=db;
+		}
+		color = RGB14tocolor565(r,g,b);
+		writedata16_last(color);
+		if (y > 1 && (y & 1)) {
+			SPI.endTransaction();
+			SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
+		}
+		r=r1;g=g1;b=b1;
+	}
+	SPI.endTransaction();
+}
+
+// fillScreenVGradient - fills screen with vertical gradient
+void ILI9341_t3::fillScreenVGradient(uint16_t color1, uint16_t color2)
+{
+	fillRectVGradient(0,0,_width,_height,color1,color2);
+}
+
+// fillScreenHGradient - fills screen with horizontal gradient
+void ILI9341_t3::fillScreenHGradient(uint16_t color1, uint16_t color2)
+{
+	fillRectHGradient(0,0,_width,_height,color1,color2);
+}
 
 
 #define MADCTL_MY  0x80
@@ -183,10 +354,9 @@ void ILI9341_t3::setRotation(uint8_t m)
 	}
 	SPI.endTransaction();
 	setClipRect();
+	setOrigin();
 	cursor_x = 0;
 	cursor_y = 0;
-	origin_x = 0;
-	origin_y = 0;
 }
 
 void ILI9341_t3::setScroll(uint16_t offset)
@@ -385,6 +555,100 @@ void ILI9341_t3::writeRect(int16_t x, int16_t y, int16_t w, int16_t h, const uin
 	SPI.endTransaction();
 }
 
+// writeRect8BPP - 	write 8 bit per pixel paletted bitmap
+//					bitmap data in array at pixels, one byte per pixel
+//					color palette data in array at palette
+void ILI9341_t3::writeRect8BPP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *pixels, const uint16_t * palette )
+{
+   	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
+	setAddr(x, y, x+w-1, y+h-1);
+	writecommand_cont(ILI9341_RAMWR);
+	for(y=h; y>0; y--) {
+		for(x=w; x>1; x--) {
+			writedata16_cont(palette[*pixels++]);
+		}
+		writedata16_last(palette[*pixels++]);
+	}
+	SPI.endTransaction();
+}
+
+// writeRect4BPP - 	write 4 bit per pixel paletted bitmap
+//					bitmap data in array at pixels, 4 bits per pixel
+//					color palette data in array at palette
+//					width must be at least 2 pixels
+void ILI9341_t3::writeRect4BPP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *pixels, const uint16_t * palette )
+{
+   	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
+	setAddr(x, y, x+w-1, y+h-1);
+	writecommand_cont(ILI9341_RAMWR);
+	for(y=h; y>0; y--) {
+		for(x=w; x>2; x-=2) {
+			writedata16_cont(palette[((*pixels)>>4)&0xF]);
+			writedata16_cont(palette[(*pixels++)&0xF]);
+		}
+		writedata16_cont(palette[((*pixels)>>4)&0xF]);
+		writedata16_last(palette[(*pixels++)&0xF]);
+	}
+	SPI.endTransaction();
+}
+
+// writeRect2BPP - 	write 2 bit per pixel paletted bitmap
+//					bitmap data in array at pixels, 4 bits per pixel
+//					color palette data in array at palette
+//					width must be at least 4 pixels
+void ILI9341_t3::writeRect2BPP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *pixels, const uint16_t * palette )
+{
+   	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
+	setAddr(x, y, x+w-1, y+h-1);
+	writecommand_cont(ILI9341_RAMWR);
+	for(y=h; y>0; y--) {
+		for(x=w; x>4; x-=4) {
+			//unrolled loop might be faster?
+			writedata16_cont(palette[((*pixels)>>6)&0x3]);
+			writedata16_cont(palette[((*pixels)>>4)&0x3]);
+			writedata16_cont(palette[((*pixels)>>2)&0x3]);
+			writedata16_cont(palette[(*pixels++)&0x3]);
+		}
+		writedata16_cont(palette[((*pixels)>>6)&0x3]);
+		writedata16_cont(palette[((*pixels)>>4)&0x3]);
+		writedata16_cont(palette[((*pixels)>>2)&0x3]);
+		writedata16_last(palette[(*pixels++)&0x3]);
+	}
+	SPI.endTransaction();
+}
+
+// writeRect1BPP - 	write 1 bit per pixel paletted bitmap
+//					bitmap data in array at pixels, 4 bits per pixel
+//					color palette data in array at palette
+//					width must be at least 8 pixels
+void ILI9341_t3::writeRect1BPP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *pixels, const uint16_t * palette )
+{
+   	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
+	setAddr(x, y, x+w-1, y+h-1);
+	writecommand_cont(ILI9341_RAMWR);
+	for(y=h; y>0; y--) {
+		for(x=w; x>8; x-=8) {
+			//unrolled loop might be faster?
+			writedata16_cont(palette[((*pixels)>>7)&0x1]);
+			writedata16_cont(palette[((*pixels)>>6)&0x1]);
+			writedata16_cont(palette[((*pixels)>>5)&0x1]);
+			writedata16_cont(palette[((*pixels)>>4)&0x1]);
+			writedata16_cont(palette[((*pixels)>>3)&0x1]);
+			writedata16_cont(palette[((*pixels)>>2)&0x1]);
+			writedata16_cont(palette[((*pixels)>>1)&0x1]);
+			writedata16_cont(palette[(*pixels++)&0x1]);
+		}
+		writedata16_cont(palette[((*pixels)>>7)&0x1]);
+		writedata16_cont(palette[((*pixels)>>6)&0x1]);
+		writedata16_cont(palette[((*pixels)>>5)&0x1]);
+		writedata16_cont(palette[((*pixels)>>4)&0x1]);
+		writedata16_cont(palette[((*pixels)>>3)&0x1]);
+		writedata16_cont(palette[((*pixels)>>2)&0x1]);
+		writedata16_cont(palette[((*pixels)>>1)&0x1]);
+		writedata16_last(palette[(*pixels++)&0x1]);
+	}
+	SPI.endTransaction();
+}
 
 
 static const uint8_t init_commands[] = {
@@ -409,13 +673,19 @@ static const uint8_t init_commands[] = {
 		0x4E, 0xF1, 0x37, 0x07, 0x10, 0x03, 0x0E, 0x09, 0x00, // Set Gamma
 	16, ILI9341_GMCTRN1, 0x00, 0x0E, 0x14, 0x03, 0x11, 0x07,
 		0x31, 0xC1, 0x48, 0x08, 0x0F, 0x0C, 0x31, 0x36, 0x0F, // Set Gamma
+	3, 0xb1, 0x00, 0x10, // FrameRate Control 119Hz
 	0
 };
 
 void ILI9341_t3::begin(void)
 {
     // verify SPI pins are valid;
+    #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
+    if ((_mosi == 11 || _mosi == 7 || _mosi == 28) && (_miso == 12 || _miso == 8 || _miso == 39)
+    		&& (_sclk == 13 || _sclk == 14 || _sclk == 27)) {
+	#else
     if ((_mosi == 11 || _mosi == 7) && (_miso == 12 || _miso == 8) && (_sclk == 13 || _sclk == 14)) {
+    #endif
         SPI.setMOSI(_mosi);
         SPI.setMISO(_miso);
         SPI.setSCK(_sclk);
@@ -907,7 +1177,7 @@ size_t ILI9341_t3::write(uint8_t c)
 {
 	if (font) {
 		if (c == '\n') {
-			//cursor_y += ??
+			cursor_y += font->line_space; // Fix linefeed. Added by T.T., SoftEgg
 			cursor_x = 0;
 		} else {
 			drawFontChar(c);
@@ -921,7 +1191,7 @@ size_t ILI9341_t3::write(uint8_t c)
 		} else {
 			drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize);
 			cursor_x += textsize*6;
-		if (wrap && (cursor_x > (_clipx2 - textsize*6))) {
+			if (wrap && (cursor_x > (_clipx2 - textsize*6))) {
 				cursor_y += textsize*8;
 				cursor_x = _clipx1;
 			}
@@ -1018,11 +1288,15 @@ void ILI9341_t3::drawChar(int16_t x, int16_t y, unsigned char c,
 			}
 		}
 	} else {
+
+		x+=_originx;
+		y+=_originy;
+
 		// Rectangular clipping
-		if((x >= _clipx2)            || // Clip right
-			 (y >= _clipy2)           || // Clip bottom
-			 ((x + 6 * size - 1) < _clipx1) || // Clip left  TODO: this is not correct
-			 ((y + 8 * size - 1) < _clipy1))   // Clip top   TODO: this is not correct
+		if((x >= _displayclipx2)            || // Clip right
+			 (y >= _displayclipy2)           || // Clip bottom
+			 ((x + 6 * size - 1) < _displayclipx1) || // Clip left  TODO: this is not correct
+			 ((y + 8 * size - 1) < _displayclipy1))   // Clip top   TODO: this is not correct
 			return;
 
 		// This solid background approach is about 5 time faster
@@ -1146,6 +1420,8 @@ void ILI9341_t3::measureChar(unsigned char c, uint16_t* w, uint16_t* h) {
 
 void ILI9341_t3::drawFontChar(unsigned int c)
 {
+	if (_invisible) return;
+
 	uint32_t bitoffset;
 	const uint8_t *data;
 
@@ -1212,11 +1488,9 @@ void ILI9341_t3::drawFontChar(unsigned int c)
 	// TODO: compute top skip and number of lines
 	int32_t linecount = height;
 	//uint32_t loopcount = 0;
-	uint32_t y = origin_y;
+	int32_t y = origin_y;
 	bool opaque = (textbgcolor != textcolor);
 	if (opaque) {
-//		Serial.printf("cursor_x %d, cursor_y %d, delta %d, line_space %d, width %d, height %d\n",
-//									 cursor_x   , cursor_y   , delta,    font->line_space, width, height);
 		int header = origin_y-cursor_y;
 		// clear above character
 		fillRect(cursor_x-delta,cursor_y,delta,header, textbgcolor);
@@ -1237,11 +1511,7 @@ void ILI9341_t3::drawFontChar(unsigned int c)
 				uint32_t xsize = width - x;
 				if (xsize > 32) xsize = 32;
 				uint32_t bits = fetchbits_unsigned(data, bitoffset, xsize);
-				if (!opaque) {
-					drawFontBits(bits, xsize, origin_x + x, y, 1);
-				} else {
-					drawFontBitsOpaque(bits, xsize, origin_x + x, y, 1);
-				}
+				drawFontBits(opaque, bits, xsize, origin_x + x, y, 1);
 				bitoffset += xsize;
 				x += xsize;
 			} while (x < width);
@@ -1261,15 +1531,11 @@ void ILI9341_t3::drawFontChar(unsigned int c)
 			bitoffset += 3;
 			uint32_t x = 0;
 			do {
-				uint32_t xsize = width - x;
+				int32_t xsize = width - x;
 				if (xsize > 32) xsize = 32;
 				//Serial.printf("    multi line %d\n", n);
 				uint32_t bits = fetchbits_unsigned(data, bitoffset, xsize);
-				if (!opaque) {
-					drawFontBits(bits, xsize, origin_x + x, y, n);
-				} else {
-					drawFontBitsOpaque(bits, xsize, origin_x + x, y, n);
-				}
+				drawFontBits(opaque, bits, xsize, origin_x + x, y, n);
 				bitoffset += xsize;
 				x += xsize;
 			} while (x < width);
@@ -1289,33 +1555,110 @@ void ILI9341_t3::drawFontChar(unsigned int c)
 	}
 }
 
-void ILI9341_t3::drawFontBits(uint32_t bits, uint32_t numbits, uint32_t x, uint32_t y, uint32_t repeat)
+//strPixelLen			- gets pixel length of given ASCII string
+int16_t ILI9341_t3::strPixelLen(char * str)
 {
-#if 0
-	// TODO: replace this *slow* code with something fast...
-	//Serial.printf("      %d bits at %d,%d: %X\n", numbits, x, y, bits);
-	if (bits == 0) return;
-	do {
-		uint32_t x1 = x;
-		uint32_t n = numbits;
-		do {
-			n--;
-			if (bits & (1 << n)) {
-				drawPixel(x1, y, textcolor);
-				//Serial.printf("        pixel at %d,%d\n", x1, y);
+//	Serial.printf("strPixelLen %s\n", str);
+	if (!str) return(0);
+	uint16_t len=0, maxlen=0;
+	while (*str)
+	{
+		if (*str=='\n')
+		{
+			if ( len > maxlen )
+			{
+				maxlen=len;
+				len=0;
 			}
-			x1++;
-		} while (n > 0);
-		y++;
-		repeat--;
-	} while (repeat);
-#endif
-#if 1
+		}
+		else
+		{
+			if (!font)
+			{
+				len+=textsize*6;
+			}
+			else
+			{
+
+				uint32_t bitoffset;
+				const uint8_t *data;
+				uint16_t c = *str;
+
+//				Serial.printf("char %c(%d)\n", c,c);
+
+				if (c >= font->index1_first && c <= font->index1_last) {
+					bitoffset = c - font->index1_first;
+					bitoffset *= font->bits_index;
+				} else if (c >= font->index2_first && c <= font->index2_last) {
+					bitoffset = c - font->index2_first + font->index1_last - font->index1_first + 1;
+					bitoffset *= font->bits_index;
+				} else if (font->unicode) {
+					continue;
+				} else {
+					continue;
+				}
+				//Serial.printf("  index =  %d\n", fetchbits_unsigned(font->index, bitoffset, font->bits_index));
+				data = font->data + fetchbits_unsigned(font->index, bitoffset, font->bits_index);
+
+				uint32_t encoding = fetchbits_unsigned(data, 0, 3);
+				if (encoding != 0) continue;
+//				uint32_t width = fetchbits_unsigned(data, 3, font->bits_width);
+//				Serial.printf("  width =  %d\n", width);
+				bitoffset = font->bits_width + 3;
+				bitoffset += font->bits_height;
+
+//				int32_t xoffset = fetchbits_signed(data, bitoffset, font->bits_xoffset);
+//				Serial.printf("  xoffset =  %d\n", xoffset);
+				bitoffset += font->bits_xoffset;
+				bitoffset += font->bits_yoffset;
+
+				uint32_t delta = fetchbits_unsigned(data, bitoffset, font->bits_delta);
+				bitoffset += font->bits_delta;
+//				Serial.printf("  delta =  %d\n", delta);
+
+				len += delta;//+width-xoffset;
+//				Serial.printf("  len =  %d\n", len);
+				if ( len > maxlen )
+				{
+					maxlen=len;
+//					Serial.printf("  maxlen =  %d\n", maxlen);
+				}
+
+			}
+		}
+		str++;
+	}
+//	Serial.printf("Return  maxlen =  %d\n", maxlen);
+	return( maxlen );
+}
+
+#if 0
+// todo: make this draw opaqe
+void ILI9341_t3::drawFontBits(uint32_t bits, uint32_t numbits, int32_t x, int32_t y, uint32_t repeat)
+{
+	x+=_originx;
+	y+=_originy;
+
+	if(
+		(x < _displayclipx1) ||
+		(x >= _displayclipx2) ||
+		(y < _displayclipy1) ||
+		(y >= _displayclipy2))
+			return;
+
+	if ((x+(int32_t)numbits) > _displayclipx2) {
+		numbits -= ((x+numbits) - _displayclipx2);
+	}
+
+	if (y+(int32_t)repeat > _displayclipy2) {
+		repeat -= ((y+repeat) - _displayclipy2);
+	}
+
 	if (bits == 0) return;
 	SPI.beginTransaction(SPISettings(SPICLOCK, MSBFIRST, SPI_MODE0));
 	int w = 0;
 	do {
-		uint32_t x1 = x;
+		int32_t x1 = x;
 		uint32_t n = numbits;
 
 		writecommand_cont(ILI9341_PASET); // Row addr set
@@ -1358,22 +1701,24 @@ void ILI9341_t3::drawFontBits(uint32_t bits, uint32_t numbits, uint32_t x, uint3
 		repeat--;
 	} while (repeat);
 	SPI.endTransaction();
-#endif
 }
+#endif
 
-void ILI9341_t3::drawFontBitsOpaque(uint32_t bits, uint32_t numbits, uint32_t x, uint32_t y, uint32_t repeat)
+
+void ILI9341_t3::drawFontBits(bool opaque, uint32_t bits, uint32_t numbits, int32_t x, int32_t y, uint32_t repeat)
 {
-	// TODO: replace this *slow* code with something fast...
 	if (bits == 0) {
-		while (repeat) {
-			drawFastHLine(x,y++, numbits, textbgcolor);
-			repeat--;
-		};
+		if (opaque) {
+			while (repeat) {
+				drawFastHLine(x,y++, numbits, textbgcolor);
+				repeat--;
+			};
+		}
 		return;
 	}
 
 	do {
-		uint32_t x1 = x;
+		int32_t x1 = x;
 		uint32_t n = numbits;
 		int w;
 		int bgw;
@@ -1385,7 +1730,9 @@ void ILI9341_t3::drawFontBitsOpaque(uint32_t bits, uint32_t numbits, uint32_t x,
 			n--;
 			if (bits & (1 << n)) {
 				if (bgw>0) {
-					drawFastHLine(x1 - bgw, y, bgw, textbgcolor);
+					if (opaque) {
+						drawFastHLine(x1 - bgw, y, bgw, textbgcolor);
+					}
 					bgw=0;
 				}
 				w++;
@@ -1404,7 +1751,9 @@ void ILI9341_t3::drawFontBitsOpaque(uint32_t bits, uint32_t numbits, uint32_t x,
 		}
 
 		if (bgw > 0) {
-			drawFastHLine(x1 - bgw, y, bgw, textbgcolor);
+			if (opaque) {
+				drawFastHLine(x1 - bgw, y, bgw, textbgcolor);
+			}
 		}
 
 		y++;
@@ -1419,6 +1768,11 @@ void ILI9341_t3::setCursor(int16_t x, int16_t y) {
 	if (y < 0) y = 0;
 	else if (y >= _height) y = _height - 1;
 	cursor_y = y;
+}
+
+void ILI9341_t3::getCursor(int16_t *x, int16_t *y) {
+  *x = cursor_x;
+  *y = cursor_y;
 }
 
 void ILI9341_t3::setTextSize(uint8_t s) {
@@ -1441,7 +1795,7 @@ void ILI9341_t3::setTextColor(uint16_t c, uint16_t b) {
 }
 
 void ILI9341_t3::setTextWrap(boolean w) {
-	wrap = w;
+  wrap = w;
 }
 
 boolean ILI9341_t3::getTextWrap()
@@ -1462,7 +1816,8 @@ void ILI9341_t3::drawText(const char* text, const char* wrapChars) {
         // don't wrap to the left, wrap to the original spot
         if (wrap && text[i] == '\n') {
           cursor_x = origx;
-          cursor_y += fontLineSpace();
+          // disable this here, write() now moves down
+          // cursor_y += fontLineSpace();
         }
         i++;
       }
