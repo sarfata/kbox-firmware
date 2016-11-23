@@ -1,4 +1,12 @@
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Linux)
 PORT=/dev/ttyACM0
+endif
+ifeq ($(UNAME), Darwin)
+PORT=/dev/tty.usbmodem1411
+endif
+
 
 all:
 	platformio -f -c vim run --target upload
