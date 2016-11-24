@@ -8,7 +8,7 @@
 FRAMEWORK := $(HOME)/.platformio/packages/framework-arduinoteensy/cores/teensy3
 
 # Build flags - Including all dependencies of the test
-CFLAGS := -g -Wall -D_NEWLIB_VERSION=1
+CFLAGS := -g -Wall
 CFLAGS := $(CFLAGS) -Iarduinomock/ -I$(FRAMEWORK) -I../../KBoxDebug/src
 CFLAGS := $(CFLAGS) -I../../List/src -I../../NMEA2000 -I../src
 CPPFLAGS := $(CFLAGS) -std=c++11
@@ -30,6 +30,11 @@ test: nmea_test slip_test NMEASentenceBuilderTest KMessageNMEAVisitorTest
 
 # Object dependencies of the tests. Without them tests cannot run.
 TEST_DEPS=teensy_compat.o maintest.o $(FRAMEWORK)/WString.o $(FRAMEWORK)/Print.o
+
+$(FRAMEWORK)/WString.o: $(FRAMEWORK)/WString.cpp
+	# Add the _NEWLIB_VERSION define when building WString to include
+	# itoa, utoa, etc (see avr_functions.h in the teensy framework).
+	$(CXX) $(CPPFLAGS) -D_NEWLIB_VERSION=1 -c $^ -o $@
 
 # Test the NMEA helper functions
 nmea_test: nmea_test.o ../src/util/nmea.o $(TEST_DEPS)
