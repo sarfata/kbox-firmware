@@ -57,6 +57,18 @@ class SlipStream {
     size_t readFrame(uint8_t *ptr, size_t len);
 
     /**
+     * Allows caller to peek at current frame and get access to the internal
+     * buffer where it is stored.
+     * Caller needs to call readFrame() afterwards to discard the frame and
+     * start receiving another one. Note that readFrame(0,0) is valid.
+     *
+     * @param out ptr: Pointer will be updated to point to internal buffer.
+     * @return number of bytes that can be read in buffer or 0 if buffer is
+     * invalid.
+     */
+    size_t peekFrame(uint8_t **ptr);
+
+    /**
      * Writes a frame to the underlying Stream, using SLIP framing and
      * escaping.
      */

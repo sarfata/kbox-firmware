@@ -87,10 +87,17 @@ size_t SlipStream::readFrame(uint8_t *ptr, size_t len) {
   if (len > index) {
     len = index;
   }
-  memcpy(ptr, buffer, len);
+  if (len > 0) {
+    memcpy(ptr, buffer, len);
+  }
   messageComplete = false;
   index = 0;
   return len;
+}
+
+size_t SlipStream::peekFrame(uint8_t **ptr) {
+  *ptr = buffer;
+  return index;
 }
 
 size_t SlipStream::writeFrame(const uint8_t *ptr, size_t len) {
