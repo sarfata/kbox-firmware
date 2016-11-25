@@ -13,6 +13,7 @@ all:
 
 clean:
 	platformio -f -c vim run --target clean
+	find . -name '*.d' |xargs rm
 
 wifi:
 	platformio run -e esp -t upload
