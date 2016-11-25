@@ -36,7 +36,7 @@
 #include "ClockPage.h"
 
 ILI9341_t3 *display;
-SlipStream slip(Serial, 4096);
+SlipStream slip(Serial, 32768);
 
 void setup() {
   // Reinitialize debug here because in some configurations
@@ -54,7 +54,7 @@ void setup() {
   display->setRotation(display_rotation);
 }
 
-typedef enum {
+typedef enum : uint16_t {
   CommandSync = 0,
   CommandReset = 1,
   CommandDrawPixels = 2,
@@ -75,44 +75,45 @@ struct CommandDrawPixels {
   uint16_t pixels[];
 };
 
+struct CommandAck {
+  uint16_t ackedCommand;
+  uint16_t errorCode;
+  uint64_t elapsedUs;
+} __attribute__((__packed__));
+
 struct Command {
   struct CommandHeader h;
   union {
     uint8_t data[];
     struct CommandDrawPixels cdp;
+    struct CommandAck ack;
   };
 };
 
-void ackCommand(Command *cmd) {
-  CommandHeader ack;
-  ack.command = CommandAck;
-  ack.len = 0;
+void ackCommand(Command *cmd, uint32_t errorCode, uint64_t elapsedUs) {
+  Command ack;
+  ack.h.command = CommandAck;
+  ack.h.len = sizeof(struct CommandAck);
+  ack.ack.ackedCommand = cmd->h.command;
+  ack.ack.errorCode = errorCode;
+  ack.ack.elapsedUs = elapsedUs;
 
-  slip.writeFrame((uint8_t*)&ack, sizeof(CommandHeader));
+  slip.writeFrame((uint8_t*)&ack, sizeof(CommandHeader) + ack.h.len);
 }
 
 void handleCommand(Command *cmd) {
   switch (cmd->h.command) {
     case CommandSync:
-      ackCommand(cmd);
       break;
     case CommandReset:
       display->fillScreen(ILI9341_BLACK);
-      ackCommand(cmd);
       break;
     case CommandDrawPixels:
       {
-        for (int y = 0; y < cmd->cdp.height; y++) {
-          for (int x = 0; x < cmd->cdp.width; x++) {
-            display->drawPixel(cmd->cdp.x + x, cmd->cdp.y + y, 
-                cmd->cdp.pixels[x + y * cmd->cdp.width]);
-          }
-        }
-        ackCommand(cmd);
+        display->writeRect(cmd->cdp.x, cmd->cdp.y, cmd->cdp.width, cmd->cdp.height, 
+            cmd->cdp.pixels);
       }
       break;
-    default:
-      DEBUG("Unknown command.");
   };
 }
 
@@ -155,8 +156,14 @@ void readCommand() {
 
     size_t len = slip.peekFrame((uint8_t**) &cmd);
 
+    elapsedMicros e;
+
     if (validateCommand(cmd, len)) {
       handleCommand(cmd);
+      ackCommand(cmd, 0x00, e);
+    }
+    else {
+      ackCommand(cmd, 0xff01, e);
     }
 
     // Discard frame and wait for next one

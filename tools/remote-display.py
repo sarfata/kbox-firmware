@@ -5,6 +5,7 @@ import argparse
 import struct
 import time
 import png
+import timeit
 
 """ Courtesy of esptool.py - GPL """
 def slip_reader(port):
@@ -61,13 +62,18 @@ class FatalError(RuntimeError):
         return FatalError(message % ", ".join(hex(ord(x)) for x in result))
 
 class RemoteDisplay(object):
+    CMD_SYNC = 0
     CMD_RESET = 1
     CMD_DRAW_PIXELS = 2
+    CMD_ACK = 3
 
     def __init__(self, port):
         self._port = serial.Serial(port)
         self._port.baudrate = 115200
         self._slip_reader = slip_reader(self._port)
+        self._width = 320
+        self._height = 240
+        self._mtu = 32768 / 1;
 
     def read(self):
         return self._slip_reader.next()
@@ -83,18 +89,38 @@ class RemoteDisplay(object):
         self._port.write(buf)
 
     def command(self, command, data = ""):
+        print("Sending cmd {} len {}".format(command, len(data)))
+        t0 = time.time()
         pkt = struct.pack('<HH', command, len(data)) + data
         self.write(pkt)
+        t1 = time.time()
 
-        try:
-            resp = self.read()
-            (cmd, length) = struct.unpack('<HH', resp)
-            print "Received cmd={} length={} data={}".format(cmd, length, resp[4:])
-        except StopIteration:
-            pass
-        except FatalError as e:
-            print "Error :/" + e.message
-            pass
+        acked = False
+
+        while not acked:
+            try:
+                resp = self.read()
+                print("RX: {}".format(", ".join(hex(ord(x)) for x in resp)))
+                if len(resp) >= 4:
+                    (cmd, length) = struct.unpack('<HH', resp[:4])
+                    print("Received cmd={} length={}".format(cmd, length))
+                if cmd == RemoteDisplay.CMD_ACK and length == 12:
+                    print("Data length {}".format(len(resp[4:])))
+                    (ackedCommand, errorCode, elapsedUs) = struct.unpack('<HHQ', resp[4:])
+                    if ackedCommand == command:
+                        acked = True
+                        t2 = time.time()
+                        print("Acked. Return {} in {}us - TX={:.3f}ms RX={:.3f}ms Total={:.3f}ms".format(errorCode, elapsedUs, (t1-t0)*1000, (t2-t1)*1000, (t2-t0)*1000))
+                    else:
+                        print("Received an ack for another command {} - Return {} in {}us".format(ackedCommand, errorCode, elapsedUs))
+            except StopIteration:
+                pass
+            except FatalError as e:
+                print "Error :/" + e.message
+                pass
+
+    def sync(self):
+        self.command(RemoteDisplay.CMD_SYNC)
 
     def reset(self):
         self.command(RemoteDisplay.CMD_RESET)
@@ -113,32 +139,34 @@ class RemoteDisplay(object):
 
         self.command(RemoteDisplay.CMD_DRAW_PIXELS, struct.pack('<HHHH', x, y, width, height) + "".join(pixels))
 
-    def line(self, y, pixels):
-        """
-        Draws a line of pixels on the screen. Pixels should be no more than the width
-        of the screen.
-        Pixels should be an array of 32bits integers. Colors will be converted to 565.
-        """
-
-        print "Line at {} with {} pixels".format(y, len(pixels))
-
-        self.draw_pixels(0, y, len(pixels), 1, pixels)
-
     def png(self, pngFile):
         """
-        Opens a PNG and draws it on the screen. Note that it should be small enough to fit
-        in our SLIP packet - otherwise this will fail.
+        Opens a PNG and draws it on the screen. 
         """
 
         (w, h, pixels, metadata) = png.Reader(pngFile).read()
  
         print "PNG w={} h={} metadata={}".format(w, h, metadata)
+
+        if w > self._width:
+            w = self._width
+        if h > self._height:
+            h = self._height
+
         x = (320 - w) / 2
         y = (240 - h) / 2
 
-        i = 0
+
+        # Calculate how many lines to send per slip frame
+        overhead = 8
+        bytes_per_line = self._width * 2
+        lines_per_frame = (self._mtu - overhead) / bytes_per_line
+
+        print("Will attempt {} lines per frame ({} bytes)".format(lines_per_frame, overhead+bytes_per_line * lines_per_frame))
+
+        data = []
+        lines_in_frame = 0
         for line in pixels:
-            data = []
             # Convert into rgb
             while len(line) >= metadata['planes']:
                 (r, g, b) = (0, 0, 0)
@@ -149,8 +177,16 @@ class RemoteDisplay(object):
                     (r, g, b) = line[:3]
                     line = line[3:]
                 data.append((r << 16) + (g << 8) + b)
-            self.draw_pixels(x, y + i, w, 1, data)
-            i = i + 1
+            lines_in_frame = lines_in_frame + 1
+            if lines_in_frame >= lines_per_frame:
+                self.draw_pixels(x, y, w, lines_in_frame, data)
+                y = y + lines_in_frame
+                lines_in_frame = 0
+                data = []
+        # push whatever is left in pipe
+        if len(data) > 0:
+            self.draw_pixels(x, y, w, lines_in_frame, data)
+
 
     @staticmethod
     def color565(rgb):
@@ -160,35 +196,31 @@ class RemoteDisplay(object):
 
         return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
 
-def demo(display):
-    display.reset()
-
-    display.line(10, [ 0xff0000 ] * 100 )
-    display.line(30, [ 0xff00 ] * 100 )
-    display.line(50, [ 0xff ] * 200 )
-    for y in range(0, 10):
-        display.line(y, [ 0xff0000 ] * 240)
-
-    for y in range(10, 40):
-        display.line(y, [ 0xff00 ] * 240)
-
-    for y in range(60, 100):
-        display.line(y, [ 0xff ] * 240)
+def png_wrapper(display, png):
+    def wrapped():
+        display.png(png)
+    return wrapped
 
 def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--port", help = "USB Serial Port connected to KBox", default = "/dev/tty.usbmodem1411")
+    parser.add_argument("--time", action="store_true", help = "Measure time taken")
+
     parser.add_argument("png")
 
     args = parser.parse_args()
 
     d = RemoteDisplay(args.port)
 
-    # demo(d)
+    d.sync()
 
     d.reset()
-    d.png(args.png)
+    if (args.time):
+        t = timeit.timeit(png_wrapper(d, args.png), number = 1)
+        print("PNG Drawing took {}s".format(t))
+    else:
+        d.png(args.png)
 
 if __name__ == '__main__':
     main()
