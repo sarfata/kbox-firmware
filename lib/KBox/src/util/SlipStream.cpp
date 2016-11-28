@@ -24,6 +24,7 @@
 
 #include <Stream.h>
 #include <KBoxDebug.h>
+#include <Arduino.h>
 #include "SlipStream.h"
 
 SlipStream::SlipStream(Stream &s, size_t mtu) : _stream(s), _mtu(mtu) {
@@ -116,6 +117,7 @@ size_t SlipStream::writeFrame(const uint8_t *ptr, size_t len) {
     }
   }
   _stream.write(0xc0);
+  Serial.send_now();
   return len;
 }
 

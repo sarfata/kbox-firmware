@@ -28,6 +28,8 @@
 //#include "util/ESPProgrammer.h"
 
 #include <ChibiOS_ARM.h>
+#include <KBox.h>
+#include "SerialCommander.h"
 
 // Those are included here to force platformio to link to them.
 // See issue github.com/platformio/platformio/issues/432 for a better way to do this.
@@ -36,6 +38,7 @@
 const uint8_t LED_PIN = 13;
 
 volatile uint32_t count = 0;
+ILI9341_t3 *display;
 
 void mainThread();
 
@@ -62,43 +65,70 @@ static THD_FUNCTION(Thread1 ,arg) {
     chThdSleepMilliseconds(150);
   }
 }
+
+// FIXME: copy/paste from commander.cpp ....
+struct CommandDrawPixels {
+  uint16_t x;
+  uint16_t y;
+  uint16_t width;
+  uint16_t height;
+  uint16_t pixels[];
+};
+
+struct CommandDrawPixels *cdp = 0;
+
+#define NUM_COMMANDS 3
+static msg_t draw_commands_queue[NUM_COMMANDS];
+static mailbox_t draw_commands;
+
+//------------------------------------------------------------------------------
+static THD_WORKING_AREA(waThreadSerialCommander, 512);
+
+static THD_FUNCTION(ThreadSerialCommander, arg) {
+  SerialCommander serialCommander(Serial, 16768, display, &draw_commands);
+  Serial.println("SerialCommander starting.");
+
+  // Will never return
+  serialCommander.loop();
+}
 //------------------------------------------------------------------------------
 // thread 2 - print main thread count every second
 // 100 byte stack beyond task switch and interrupt needs
-static THD_WORKING_AREA(waThread2, 100);
+static THD_WORKING_AREA(waThreadDisplay, 100);
 
-static THD_FUNCTION(Thread2 ,arg) {
 
-  // print count every second
-  while (1) {
-    // Sleep for one second.
-    chThdSleepMilliseconds(1000);
+static THD_FUNCTION(ThreadDisplay ,arg) {
+  display = new ILI9341_t3(display_cs, display_dc, 255 /* rst unused */, display_mosi, display_sck, display_miso);
 
-    // Print count for previous second.
-    Serial.print("Count: ");
-    Serial.print(count);
+  analogWrite(display_backlight, BacklightIntensityMax);
+  display->begin();
+  display->fillScreen(ILI9341_BLUE);
+  display->setRotation(display_rotation);
 
-    // Print unused stack for threads.
-    Serial.print(", Unused Stack: ");
-    Serial.print(chUnusedStack(waThread1, sizeof(waThread1)));
-    Serial.print(' ');
-    Serial.print(chUnusedStack(waThread2, sizeof(waThread2)));
-    Serial.print(' ');
-    Serial.println(chUnusedHeapMain());
+  DEBUG("Display thread started - time quantum=%i", CH_CFG_TIME_QUANTUM);
+  while (true) {
+    /* Wait until there is graphics data available */
+    struct CommandDrawPixels *cdp;
+    msg_t msg = chMBFetch(&draw_commands, (msg_t*)&cdp, TIME_INFINITE);
 
-    // Zero count.
-    count = 0;
+    if (msg == MSG_OK) {
+      if (cdp != 0) {
+        display->writeRect(cdp->x, cdp->y, cdp->width, cdp->height, cdp->pixels);
+        free(cdp);
+      }
+    }
   }
 }
+
 //------------------------------------------------------------------------------
 void setup() {
   Serial.begin(9600);
   // wait for USB Serial
-  while (!Serial) {}
+  //while (!Serial) {}
 
   // read any input
-  delay(200);
-  while (Serial.read() >= 0) {}
+  //delay(2000);
+  //while (Serial.read() >= 0) {}
 
   chBegin(mainThread);
   // chBegin never returns, main thread continues with mainThread()
@@ -107,15 +137,18 @@ void setup() {
 //------------------------------------------------------------------------------
 // main thread runs at NORMALPRIO
 void mainThread() {
+  chMBObjectInit(&draw_commands, draw_commands_queue, NUM_COMMANDS);
 
-  // start blink thread
   chThdCreateStatic(waThread1, sizeof(waThread1),
-                          NORMALPRIO + 2, Thread1, NULL);
+                          NORMALPRIO + 3, Thread1, NULL);
 
-  // start print thread
-  chThdCreateStatic(waThread2, sizeof(waThread2),
-                          NORMALPRIO + 1, Thread2, NULL);
+  chThdCreateStatic(waThreadDisplay, sizeof(waThreadDisplay),
+                          NORMALPRIO + 1, ThreadDisplay, NULL);
 
+  chThdCreateStatic(waThreadSerialCommander, sizeof(waThreadSerialCommander),
+                          NORMALPRIO + 2, ThreadSerialCommander, NULL);
+
+  Serial.println("Main thread started");
   // increment counter
   while (1) {
     // must insure increment is atomic in case of context switch for print
