@@ -221,7 +221,7 @@ def png_wrapper(display, png):
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--port", help = "USB Serial Port connected to KBox", default = "/dev/tty.usbmodem1411")
+    parser.add_argument("--port", help = "USB Serial Port connected to KBox", default = "/dev/tty.usbmodem1461")
     parser.add_argument("--time", action="store_true", help = "Measure time taken")
 
     parser.add_argument("png")
