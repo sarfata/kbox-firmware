@@ -72,7 +72,7 @@ class KBox {
     void setup();
     void loop();
 
-    void addPage(Page *p) { mfd.addPage(p); };
+    void addPage(BasePage *p) { mfd.addPage(p); };
     void addTask(Task *t) { taskManager.addTask(t); };
 
     Display& getDisplay() {

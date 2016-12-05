@@ -49,7 +49,18 @@ void ILI9341Display::setBacklight(BacklightIntensity intensity) {
 
 // TODO: delete me when everything has been updated to provide bgColor
 void ILI9341Display::drawText(Point a, Font font, Color color, const char *text) {
-  this->drawText(a, font, color, ColorBlue, text);
+  display->setCursor(a.x(), a.y());
+  display->setTextColor(color);
+
+  switch (font) {
+    case FontDefault:
+      display->setFont(DroidSans_12);
+      break;
+    case FontLarge:
+      display->setFont(DroidSans_32);
+      break;
+  };
+  display->println(text);
 }
 
 void ILI9341Display::drawText(Point a, Font font, Color color, Color bgColor, const char *text) {

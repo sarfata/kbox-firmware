@@ -56,8 +56,8 @@ class MFD : public Task {
     Display &display;
     Encoder &encoder;
     Bounce &button;
-    LinkedList<Page*> pages;
-    LinkedList<Page*>::circularIterator pageIterator;
+    LinkedList<BasePage*> pages;
+    LinkedList<BasePage*>::circularIterator pageIterator;
     LinkedList<Event*> events;
     unsigned long int lastTick;
 
@@ -73,7 +73,7 @@ class MFD : public Task {
     void setup() {};
     void loop();
 
-    void addPage(Page *p) {
+    void addPage(BasePage *p) {
       pages.add(p);
     };
 };

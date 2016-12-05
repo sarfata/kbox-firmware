@@ -31,7 +31,7 @@
 // See issue github.com/platformio/platformio/issues/432 for a better way to do this.
 #include <Bounce.h>
 
-#include "ClockPage.h"
+#include "PaintCodePage.h"
 
 KBox kbox;
 
@@ -40,76 +40,9 @@ void setup() {
   // https://forum.pjrc.com/threads/27827-Float-in-sscanf-on-Teensy-3-1
   asm(".global _printf_float");
 
-  delay(3000);
 
-  DEBUG_INIT();
-  DEBUG("Starting");
-
-
-  digitalWrite(led_pin, 1);
-
-  // Create all the receiver task first
-  WiFiTask *wifi = new WiFiTask();
-
-  // Create all the generating tasks and connect them
-  NMEA2000Task *n2kTask = new NMEA2000Task();
-  n2kTask->connectTo(*wifi);
-
-  ADCTask *adcTask = new ADCTask(kbox.getADC());
-
-  // Convert battery measurement into n2k messages before sending them to wifi.
-  VoltageN2kConverter *voltageConverter = new VoltageN2kConverter();
-  adcTask->connectTo(*voltageConverter);
-  voltageConverter->connectTo(*wifi);
-  voltageConverter->connectTo(*n2kTask);
-
-  NMEAReaderTask *reader1 = new NMEAReaderTask(NMEA1_SERIAL);
-  NMEAReaderTask *reader2 = new NMEAReaderTask(NMEA2_SERIAL);
-  reader1->connectTo(*wifi);
-  reader2->connectTo(*wifi);
-
-  IMUTask *imuTask = new IMUTask();
-  imuTask->connectTo(*n2kTask);
-
-  BarometerTask *baroTask = new BarometerTask();
-
-  BarometerN2kConverter *bn2k = new BarometerN2kConverter();
-  bn2k->connectTo(*wifi);
-  bn2k->connectTo(*n2kTask);
-
-  baroTask->connectTo(*bn2k);
-
-  SDCardTask *sdcardTask = new SDCardTask();
-  reader1->connectTo(*sdcardTask);
-  reader2->connectTo(*sdcardTask);
-  adcTask->connectTo(*sdcardTask);
-  n2kTask->connectTo(*sdcardTask);
-  baroTask->connectTo(*sdcardTask);
-  imuTask->connectTo(*sdcardTask);
-
-  // Add all the tasks
-  kbox.addTask(new IntervalTask(new RunningLightTask(), 250));
-  kbox.addTask(new IntervalTask(adcTask, 1000));
-  kbox.addTask(new IntervalTask(imuTask, 50));
-  kbox.addTask(new IntervalTask(baroTask, 1000));
-  kbox.addTask(n2kTask);
-  kbox.addTask(reader1);
-  kbox.addTask(reader2);
-  kbox.addTask(wifi);
-  kbox.addTask(sdcardTask);
-
-  BatteryMonitorPage *batPage = new BatteryMonitorPage();
-  adcTask->connectTo(*batPage);
-  kbox.addPage(batPage);
-
-  StatsPage *statsPage = new StatsPage();
-  statsPage->setNmea1Task(reader1);
-  statsPage->setNmea2Task(reader2);
-  statsPage->setNMEA2000Task(n2kTask);
-  statsPage->setTaskManager(&(kbox.getTaskManager()));
-  statsPage->setSDCardTask(sdcardTask);
-
-  kbox.addPage(statsPage);
+  PaintCodePage *paintCodePage = new PaintCodePage();
+  kbox.addPage(paintCodePage);
 
   kbox.setup();
 
