@@ -30,8 +30,11 @@ class PaintCodePage : public BasePage {
     bool needsPainting = true;
   public:
     void paint(GC &context) {
-      PaintCodeContext ctx = PaintCodeContext(context);
-      drawBatteryScreen3(ctx, 12.4, 2.3, 11.2, 17.8);
+      if (needsPainting) {
+        PaintCodeContext ctx = PaintCodeContext(context);
+        drawBatteryScreen3(ctx, 12.4, 2.3, 11.2, 17.8);
+        needsPainting = false;
+      }
     }
 
     void drawBatteryScreen3(PaintCodeContext& canvas, double houseVoltageValue, double houseCurrentValue, double engineVoltageValue, double solarVoltageValue, PCRect frame = {}, String resizing = "");

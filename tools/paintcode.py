@@ -91,10 +91,17 @@ def convert(jsfile, classname):
     pattern = re.compile("font\s+=\s\"(\d+)px (\w+).*\"");
     match = re.search(pattern, text);
     while match:
-        fontDefine = match.group(2).upper() + "_" + match.group(1)
-        text = text.replace(match.group(0), "font = " + fontDefine)
+        fontName = "Font" + match.group(2) + "_" + match.group(1)
+        text = text.replace(match.group(0), "font = " + fontName)
         match = re.search(pattern, text)
 
+    # Find text alignment
+    pattern = re.compile("textAlign\s+=\s\"(\w+)\"");
+    match = re.search(pattern, text);
+    while match:
+        style = "GC::TextAlign" + match.group(1).capitalize()
+        text = text.replace(match.group(0), "textAlign = " + style)
+        match = re.search(pattern, text)
 
     # Try to fix the indentation
     text = re.sub(r'^' + ' ' * 12, ' ' * 4, text, flags = re.MULTILINE)

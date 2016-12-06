@@ -48,10 +48,7 @@ void ILI9341Display::setBacklight(BacklightIntensity intensity) {
 }
 
 // TODO: delete me when everything has been updated to provide bgColor
-void ILI9341Display::drawText(Point a, Font font, Color color, const char *text) {
-  display->setCursor(a.x(), a.y());
-  display->setTextColor(color);
-
+void ILI9341Display::drawText(Point a, Font font, Color color, const char *text, TextAlign textAlign) {
   switch (font) {
     case FontDefault:
       display->setFont(DroidSans_12);
@@ -59,7 +56,37 @@ void ILI9341Display::drawText(Point a, Font font, Color color, const char *text)
     case FontLarge:
       display->setFont(DroidSans_32);
       break;
+    case FontHelveticaNeue_14:
+      display->setFont(DroidSans_14);
+      break;
+    case FontHelveticaNeue_22:
+      display->setFont(DroidSans_22);
+      break;
+    case FontHelveticaNeue_34:
+      display->setFont(DroidSans_34);
+      break;
+    case FontHelveticaNeue_40:
+      display->setFont(DroidSans_40);
+      break;
   };
+
+  int x = a.x();
+  int textWidth = display->measureTextWidth(text);
+  if (textAlign == TextAlignCenter) {
+    x -= textWidth / 2;
+  }
+  else if (textAlign == TextAlignRight) {
+    x -= textWidth;
+  }
+
+  int y = a.y();
+  //FIXME: we need a true (or as close as can be) equivalent to "alphabetic" mode
+  //y -= DroidSans_40.cap_height;
+  //y -= display->measureTextHeight(text);
+
+  display->setCursor(x, y);
+  display->setTextColor(color);
+
   display->println(text);
 }
 
@@ -77,6 +104,18 @@ void ILI9341Display::drawText(const Point &a, const Font &font, const Color &col
       break;
     case FontLarge:
       display->setFont(DroidSans_32);
+      break;
+    case FontHelveticaNeue_14:
+      display->setFont(DroidSans_14);
+      break;
+    case FontHelveticaNeue_22:
+      display->setFont(DroidSans_22);
+      break;
+    case FontHelveticaNeue_34:
+      display->setFont(DroidSans_34);
+      break;
+    case FontHelveticaNeue_40:
+      display->setFont(DroidSans_40);
       break;
   };
   display->println(text);

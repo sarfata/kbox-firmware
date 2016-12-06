@@ -26,6 +26,10 @@
 
 enum Font {
   FontDefault,
-  FontLarge
+  FontLarge,
+  FontHelveticaNeue_14,
+  FontHelveticaNeue_22,
+  FontHelveticaNeue_34,
+  FontHelveticaNeue_40
 };
 

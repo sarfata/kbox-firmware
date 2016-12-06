@@ -35,7 +35,13 @@
 /* Graphics Context offers basic drawing primitives. */
 class GC {
   public:
-    virtual void drawText(Point a, Font font, Color color, const char *text) = 0;
+    enum TextAlign {
+      TextAlignLeft,
+      TextAlignCenter,
+      TextAlignRight
+    };
+
+    virtual void drawText(Point a, Font font, Color color, const char *text, TextAlign textAlign = TextAlignLeft) = 0;
     virtual void drawText(Point a, Font font, Color color, Color bgColor, const char *text) = 0;
     virtual void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text) = 0;
     virtual void drawLine(Point a, Point b, Color color) = 0;

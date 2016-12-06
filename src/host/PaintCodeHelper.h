@@ -42,7 +42,7 @@ class PaintCodeContext {
   public:
     String fillStyle;
     Font font;
-    String textAlign;
+    GC::TextAlign textAlign = GC::TextAlignLeft;
 
     PaintCodeContext(GC &gc) : gc(gc) {};
 
@@ -51,16 +51,13 @@ class PaintCodeContext {
     };
 
     void fillText(const char *text, float x, float y, float maxWidth = 0) {
-      DEBUG("fillText(\"%s\", %f, %f, %f", text, x, y, maxWidth);
-      Font f = fontFromString(font);
+      DEBUG("fillText(\"%s\", %.1f (%.1f), %.1f (%.1f), %f", text, x, x + translateX, y, y + translateY, maxWidth);
       Color c = colorFromString(fillStyle);
-      // TODO: textalign
-      gc.drawText(Point(x + translateX, y + translateY), f, c, text);
+      gc.drawText(Point(x + translateX, y + translateY), font, c, text, textAlign);
     };
 
 
   private:
-
     struct PathPoint { float x; float y; };
     static const int MAX_POINTS = 10;
     PathPoint path[MAX_POINTS];
@@ -122,11 +119,15 @@ class PaintCodeContext {
 
 
     void restore() {
+        DEBUG("restore()");
         translateX = translateY = 0;
     };
-    void save() {};
+    void save() {
+        DEBUG("save()");
+    };
     void clip() {};
     void translate(float x, float y) {
+        DEBUG("translate(%f, %f)", x, y);
         translateX = x;
         translateY = y;
     };
@@ -136,10 +137,6 @@ class PaintCodeContext {
     };
 
   private:
-    Font fontFromString(String fontString) {
-      return FontDefault;
-    };
-
     Color colorFromString(String colorString) {
       return ColorWhite;
     };
