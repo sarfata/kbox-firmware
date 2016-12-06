@@ -23,12 +23,20 @@
 */
 
 #include <KBox.h>
+#include "PaintCodeHelper.h"
 
 class PaintCodePage : public BasePage {
   private:
     bool needsPainting = true;
   public:
-    void paint(GC &context);
+    void paint(GC &context) {
+      PaintCodeContext ctx = PaintCodeContext(context);
+      drawBatteryScreen3(ctx, 12.4, 2.3, 11.2, 17.8);
+    }
+
+    void drawBatteryScreen3(PaintCodeContext& canvas, double houseVoltageValue, double houseCurrentValue, double engineVoltageValue, double solarVoltageValue, PCRect frame = {}, String resizing = "");
+    void drawScalar2(PaintCodeContext& context, PCRect frame, String unitText, double value, double noValueValue, String noValueText, double lowThresholdValue, double highThresholdValue, bool isNoValueLow);
+    void drawScale2(PaintCodeContext& context, double value, double noValueValue, double lowThresholdValue, double highThresholdValue, bool isNoValueLow, double scaleLowValue, String scaleLowValueCustomText, double scaleHighValue, String scaleHighValueCustomText, double scaleWidthValue, PCRect targetFrame, String resizing);
 
     ~PaintCodePage() {};
 };
