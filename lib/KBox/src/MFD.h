@@ -29,7 +29,7 @@
 #include <Bounce.h>
 #include <Encoder.h>
 #include <List.h>
-#include "KBoxDebug.h"
+#include <KBoxLogging.h>
 
 #include "ui/GC.h"
 #include "drivers/Display.h"

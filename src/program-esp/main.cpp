@@ -33,7 +33,10 @@ ESPProgrammer programmer(kbox.getNeopixels(), Serial, Serial1);
 void setup() {
   kbox.setup();
 
-  DEBUG_INIT();
+  // Use Serial3 as the Debug output to avoid trashing the communication
+  // with the programmer program running on host.
+  Serial3.begin(920800);
+  KBoxLogging.setOutputStream(&Serial3);
 
   DEBUG("Starting esp program");
   esp_init();

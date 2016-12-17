@@ -22,8 +22,8 @@
   THE SOFTWARE.
 */
 
+#include <KBoxLogging.h>
 #include "TaskManager.h"
-#include "KBoxDebug.h"
 
 void TaskManager::addTask(Task* task) {
   if (running) {

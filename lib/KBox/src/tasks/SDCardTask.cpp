@@ -22,7 +22,7 @@
   THE SOFTWARE.
 */
 
-#include "KBoxDebug.h"
+#include <KBoxLogging.h>
 #include "SDCardTask.h"
 #include "drivers/board.h"
 #include "KMessageNMEAVisitor.h"

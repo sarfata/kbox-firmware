@@ -24,18 +24,8 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <KBoxDebug.h>
+#include <KBoxLogging.h>
 #include "ESPProgrammer.h"
-
-/* Unless a custom DEBUG output has been configured for this build, then we
- * do not want to log anything in the programmer because that would go straight
- * into esptool.py on the computer and mess things up.
- * When building the 'program-esp' environment, debug output is redirected to
- * Serial3 for debugging.
- */
-#ifndef DebugSerial
-#define DEBUG(...) /* nop */
-#endif
 
 ESPProgrammer::ESPProgrammer(Adafruit_NeoPixel &pixels, usb_serial_class &computerSerial, HardwareSerial &espSerial) :
   pixels(pixels), computerSerial(computerSerial), espSerial(espSerial),

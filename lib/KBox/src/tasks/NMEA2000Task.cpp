@@ -21,9 +21,10 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
+#include <KBoxLogging.h>
 #include "../drivers/board.h"
 #include "NMEA2000Task.h"
-#include "KBoxDebug.h"
 #include "util/nmea2000.h"
 
 static NMEA2000Task *handlerContext;

@@ -21,10 +21,11 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
+#include <KBoxLogging.h>
 #include <Arduino.h>
 #include <List.h>
 #include "NMEAReaderTask.h"
-#include "KBoxDebug.h"
 
 
 // Linked list used to buffer messages

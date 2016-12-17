@@ -21,8 +21,9 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
+#include <KBoxLogging.h>
 #include "WiFiTask.h"
-#include "KBoxDebug.h"
 #include "../drivers/board.h"
 #include "../drivers/esp8266.h"
 #include "KMessageNMEAVisitor.h"

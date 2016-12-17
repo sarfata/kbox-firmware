@@ -22,8 +22,8 @@
   THE SOFTWARE.
 */
 
+#include <KBoxLogging.h>
 #include "Page.h"
-#include "KBoxDebug.h"
 
 bool BasePage::processEvent(const Event &e) {
   switch (e.getEventType()) {

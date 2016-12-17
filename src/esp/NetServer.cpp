@@ -21,7 +21,8 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "ESPDebug.h"
+
+#include <KBoxLogging.h>
 #include "NetServer.h"
 
 NetServer::NetServer(int port) : server(port) {

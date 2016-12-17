@@ -21,8 +21,9 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
+#include <KBoxLogging.h>
 #include <Adafruit_NeoPixel.h>
-#include "ESPDebug.h"
 #include "NetServer.h"
 
 uint8_t neopixel_pin = 4;
@@ -37,7 +38,8 @@ static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0xff);
 #include <ESP8266WiFi.h>
 
 void setup() {
-  DEBUG_INIT();
+  Serial1.begin(115200);
+  KBoxLogging.setOutputStream(&Serial1);
 
   rgb.begin();
   rgb.setPixelColor(0, 0, 0, 0xff);

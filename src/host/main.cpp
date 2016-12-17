@@ -42,7 +42,9 @@ void setup() {
 
   delay(3000);
 
-  DEBUG_INIT();
+  Serial.begin(115200);
+  KBoxLogging.setOutputStream(&Serial);
+
   DEBUG("Starting");
 
 
@@ -113,12 +115,6 @@ void setup() {
 
   kbox.setup();
 
-  // Reinitialize debug here because in some configurations 
-  // (like logging to nmea2 output), the kbox setup might have messed
-  // up the debug configuration.
-  DEBUG_INIT();
-  DEBUG("setup done");
-
   Serial.setTimeout(0);
   Serial1.setTimeout(0);
   Serial2.setTimeout(0);
@@ -128,6 +124,8 @@ void setup() {
 void loop() {
   if (Serial.baud() == 230400) {
     DEBUG("Entering programmer mode");
+    // Disable all debug messages going to USB while re-programming the wifi module.
+    KBoxLogging.setOutputStream(0);
     ESPProgrammer programmer(kbox.getNeopixels(), Serial, Serial1);
     while (programmer.getState() != ESPProgrammer::ProgrammerState::Done) {
       programmer.loop();

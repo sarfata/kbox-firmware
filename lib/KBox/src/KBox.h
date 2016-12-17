@@ -24,10 +24,11 @@
 
 #pragma once
 
+#include <KBoxLogging.h>
 #include "MFD.h"
 #include "TaskManager.h"
 #include "KMessage.h"
-#include "KBoxDebug.h"
+
 
 /* Drivers */
 #include "drivers/board.h"

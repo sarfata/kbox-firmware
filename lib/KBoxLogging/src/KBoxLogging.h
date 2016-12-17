@@ -24,8 +24,34 @@
 
 #pragma once
 
-#define DEBUG_INIT() debug_init()
-#define DEBUG(...) debug(__FILE__, __LINE__, __VA_ARGS__)
+#include <Stream.h>
 
-void debug_init();
-void debug(const char *fname, int lineno, const char *fmt, ... );
+class KBoxLoggingClass {
+  private:
+    Stream *oStream;
+
+    const char logLevelPrefixes[3] = { 'D', 'I', 'E' };
+
+  public:
+    enum KBoxLogging {
+      KBoxLoggingDebug,
+      KBoxLoggingInfo,
+      KBoxLoggingError
+    };
+
+    KBoxLoggingClass() : oStream(0) { };
+
+    void log(enum KBoxLogging level, const char* filename, int lineNumber, const char *fmt, ...);
+
+    /**
+     * Change the log output stream.
+     */
+    void setOutputStream(Stream *stream);
+};
+
+extern class KBoxLoggingClass KBoxLogging;
+
+#define DEBUG(...) KBoxLogging.log(KBoxLoggingClass::KBoxLoggingDebug, __FILE__, __LINE__, __VA_ARGS__)
+#define INFO(...) KBoxLogging.log(KBoxLoggingClass::KBoxLoggingInfo, __FILE__, __LINE__, __VA_ARGS__)
+#define ERROR(...) KBoxLogging.log(KBoxLoggingClass::KBoxLoggingError, __FILE__, __LINE__, __VA_ARGS__)
+
