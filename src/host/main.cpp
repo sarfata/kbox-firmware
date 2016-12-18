@@ -105,10 +105,6 @@ void setup() {
   kbox.addPage(batPage);
 
   StatsPage *statsPage = new StatsPage();
-  statsPage->setNmea1Task(reader1);
-  statsPage->setNmea2Task(reader2);
-  statsPage->setNMEA2000Task(n2kTask);
-  statsPage->setTaskManager(&(kbox.getTaskManager()));
   statsPage->setSDCardTask(sdcardTask);
 
   kbox.addPage(statsPage);

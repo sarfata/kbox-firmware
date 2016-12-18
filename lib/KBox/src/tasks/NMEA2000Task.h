@@ -32,13 +32,12 @@
 class NMEA2000Task : public Task, public KGenerator, public KReceiver, public KVisitor {
   private:
     tNMEA2000_teensy NMEA2000;
-    unsigned int _rxValid, _txValid, _txErrors;
     unsigned int _imuSequence;
 
     void sendN2kMessage(const tN2kMsg& msg);
 
   public:
-    NMEA2000Task() : Task("NMEA2000"), _rxValid(0), _txValid(0), _txErrors(0), _imuSequence(0) {};
+    NMEA2000Task() : Task("NMEA2000"), _imuSequence(0) {};
     void setup();
     void loop();
 
@@ -48,14 +47,4 @@ class NMEA2000Task : public Task, public KGenerator, public KReceiver, public KV
     void processMessage(const KMessage&);
     void visit(const NMEA2000Message&);
     void visit(const IMUMessage&);
-
-    unsigned int getRxValidCounter() const {
-      return _rxValid;
-    };
-    unsigned int getTxValidCounter() const {
-      return _txValid;
-    };
-    unsigned int getTxErrors() const {
-      return _txErrors;
-    };
 };

@@ -148,9 +148,6 @@ class TaskManager {
     void addTask(Task *t);
     void restartStats();
     void displayStats();
-    const RunStat& getRunStat() const {
-      return loopStats;
-    };
 
     void setup();
     void loop();

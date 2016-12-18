@@ -24,8 +24,9 @@
 
 #include <malloc.h>
 #include "StatsPage.h"
+#include "util/KBoxMetrics.h"
 
-StatsPage::StatsPage() : taskManager(0), reader1(0), reader2(0), nmea2000Task(0) {
+StatsPage::StatsPage() {
   loadView();
 }
 
@@ -99,22 +100,23 @@ int getUsedRam() {
 }
 
 bool StatsPage::processEvent(const TickEvent &e) {
-  if (taskManager) {
-    avgLoopTime->setText(String(taskManager->getRunStat().avgTime() / 1000).append(" ms"));
+  double avgLoopTimeUS = KBoxMetrics.averageMetric(KBoxMetricTaskManagerLoopUS);
+  if (avgLoopTimeUS > 10000) {
+    avgLoopTime->setText(String(avgLoopTimeUS / 1000, 2).append(" ms"));
   }
-  if (reader1) {
-    nmea1Rx->setText(String(reader1->getRxValidCounter()));
-    nmea1Errors->setText(String(reader1->getRxErrorCounter()));
+  else {
+    avgLoopTime->setText(String(avgLoopTimeUS, 0).append(" us"));
   }
-  if (reader2) {
-    nmea2Rx->setText(String(reader2->getRxValidCounter()));
-    nmea2Errors->setText(String(reader2->getRxErrorCounter()));
-  }
-  if (nmea2000Task) {
-    canRx->setText(String(nmea2000Task->getRxValidCounter()));
-    canTx->setText(String(nmea2000Task->getTxValidCounter()));
-    canTxErrors->setText(String(nmea2000Task->getTxErrors()));
-  }
+
+  nmea1Rx->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA1RX)));
+  nmea1Errors->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA1RXError)));
+
+  nmea2Rx->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA2RX)));
+  nmea2Errors->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA2RXError)));
+
+  canRx->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA2000MessageReceived)));
+  canTx->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA2000MessageSent)));
+  canTxErrors->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA2000MessageSendError)));
 
   freeRam->setText(String(getFreeRam()));
   usedRam->setText(String(getUsedRam()));

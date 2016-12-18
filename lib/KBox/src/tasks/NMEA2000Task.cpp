@@ -25,6 +25,7 @@
 #include <KBoxLogging.h>
 #include "../drivers/board.h"
 #include "NMEA2000Task.h"
+#include "util/KBoxMetrics.h"
 #include "util/nmea2000.h"
 
 static NMEA2000Task *handlerContext;
@@ -35,7 +36,7 @@ static void handler(const tN2kMsg &msg) {
 }
 
 void NMEA2000Task::publishN2kMessage(const tN2kMsg& msg) {
-  _rxValid++;
+  KBoxMetrics.event(KBoxEventNMEA2000MessageReceived);
   NMEA2000Message m(msg);
   sendMessage(m);
 }
@@ -89,10 +90,10 @@ void NMEA2000Task::sendN2kMessage(const tN2kMsg& msg) {
   free(pcdin);
 
   if (result) {
-    _txValid++;
+    KBoxMetrics.event(KBoxEventNMEA2000MessageSent);
   }
   else {
-    _txErrors++;
+    KBoxMetrics.event(KBoxEventNMEA2000MessageSendError);
   }
 }
 

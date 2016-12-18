@@ -25,6 +25,7 @@
 #include <KBoxLogging.h>
 #include <Arduino.h>
 #include <List.h>
+#include "util/KBoxMetrics.h"
 #include "NMEAReaderTask.h"
 
 
@@ -44,6 +45,7 @@ void serialEvent2() {
 
   // 64 is the RX_BUFFER_SIZE defined in serial2.c (teensy3 framework)
   if (Serial2.available() == 64) {
+    KBoxMetrics.event(KBoxEventNMEA1RXBufferOverflow);
     DEBUG("serialEvent2 found a full rx buffer - we probably lost some data");
   }
 
@@ -85,6 +87,7 @@ void serialEvent3() {
 
   // 64 is the RX_BUFFER_SIZE defined in serial3.c (teensy3 framework)
   if (Serial3.available() == 64) {
+    KBoxMetrics.event(KBoxEventNMEA2RXBufferOverflow);
     DEBUG("serialEvent3 found a full rx buffer - we probably lost some data");
   }
 
@@ -120,10 +123,14 @@ NMEAReaderTask::NMEAReaderTask(HardwareSerial &s) : Task("NMEA Reader"), stream(
   if (&s == &Serial2) {
     received2 = &receiveQueue;
     _taskName = "NMEA Reader1";
+    rxValidEvent = KBoxEventNMEA1RX;
+    rxErrorEvent = KBoxEventNMEA1RXError;
   }
   if (&s == &Serial3) {
     received3 = &receiveQueue;
     _taskName = "NMEA Reader2";
+    rxValidEvent = KBoxEventNMEA2RX;
+    rxErrorEvent = KBoxEventNMEA2RXError;
   }
 }
 
@@ -139,11 +146,11 @@ void NMEAReaderTask::loop() {
   DEBUG("Found %i sentences waiting", receiveQueue.size());
   for (LinkedList<NMEASentence>::iterator it = receiveQueue.begin(); it != receiveQueue.end(); it++) {
     if (it->isValid()) {
-      rxValidCounter++;
+      KBoxMetrics.countEvent(rxValidEvent);
       this->sendMessage(*it);
     }
     else {
-      rxErrorCounter++;
+      KBoxMetrics.countEvent(rxErrorEvent);
     }
   }
   // FIXME: the current linked list implementation would probably continue to

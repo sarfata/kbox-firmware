@@ -21,25 +21,51 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#pragma once
 
-#include "TaskManager.h"
-#include "KMessage.h"
-#include "util/KBoxMetrics.h"
+#include "KBoxMetrics.h"
 
-// completely arbitrary value. "ought to be enough..."
-#define MAX_NMEA_SENTENCE_LENGTH 200
+// Instantiate singleton
+KBoxMetricsClass KBoxMetrics;
 
-class NMEAReaderTask : public Task, public KGenerator {
-  private:
-    HardwareSerial& stream;
-    LinkedList<NMEASentence> receiveQueue;
-    enum KBoxEvent rxValidEvent, rxErrorEvent;
+KBoxMetricsClass::KBoxMetricsClass() {
+  reset();
+}
 
-  public:
-    NMEAReaderTask(HardwareSerial&s);
+void KBoxMetricsClass::reset() {
+  for (int i = 0; i < KBoxEventCountDistinctEvents; i++) {
+    eventOccurences[i] = 0;
+  }
 
-    void setup();
-    void loop();
-};
+  for (int i = 0; i < KBoxMetricCountDistinctMetrics; i++) {
+    metricLastValues[i] = 0;
+    metricCounts[i] = 0;
+    metricSums[i] = 0;
+    metricMinimums[i] = 0;
+    metricMaximums[i] = 0;
+  }
+}
 
+void KBoxMetricsClass::event(enum KBoxEvent e) {
+  eventOccurences[e]++;
+}
+
+uint32_t KBoxMetricsClass::countEvent(const enum KBoxEvent e) const {
+  return eventOccurences[e];
+}
+
+void KBoxMetricsClass::metric(enum KBoxMetric m, double value) {
+  metricLastValues[m] = value;
+  metricSums[m] += value;
+  metricCounts[m]++;
+
+  if (value < metricMinimums[m]) {
+    metricMinimums[m] = value;
+  }
+  if (value > metricMaximums[m]) {
+    metricMaximums[m] = value;
+  }
+}
+
+double KBoxMetricsClass::averageMetric(const KBoxMetric m) const {
+  return metricSums[m] / metricCounts[m];
+}

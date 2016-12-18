@@ -27,8 +27,6 @@
 #include "ui/Page.h"
 #include "ui/TextLayer.h"
 
-#include "tasks/NMEAReaderTask.h"
-#include "tasks/NMEA2000Task.h"
 #include "tasks/SDCardTask.h"
 
 class StatsPage : public Page {
@@ -38,9 +36,6 @@ class StatsPage : public Page {
     TextLayer *usedRam, *freeRam, *avgLoopTime;
     TextLayer *logName, *logSize, *freeSpace;
 
-    const TaskManager *taskManager = 0;
-    const NMEAReaderTask *reader1 = 0, *reader2 = 0;
-    const NMEA2000Task *nmea2000Task = 0;
     const SDCardTask *sdcardTask = 0;
 
     void loadView();
@@ -49,22 +44,6 @@ class StatsPage : public Page {
   public:
     StatsPage();
     bool processEvent(const TickEvent &e);
-    
-    void setTaskManager(const TaskManager *t) {
-      taskManager = t;
-    };
-
-    void setNmea1Task(const NMEAReaderTask *t) {
-      reader1 = t;
-    };
-
-    void setNmea2Task(const NMEAReaderTask *t) {
-      reader2 = t;
-    };
-
-    void setNMEA2000Task(const NMEA2000Task *t) {
-      nmea2000Task = t;
-    };
 
     void setSDCardTask(const SDCardTask *t) {
       sdcardTask = t;

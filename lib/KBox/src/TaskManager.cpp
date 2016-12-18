@@ -24,6 +24,7 @@
 
 #include <KBoxLogging.h>
 #include "TaskManager.h"
+#include "util/KBoxMetrics.h"
 
 void TaskManager::addTask(Task* task) {
   if (running) {
@@ -54,6 +55,7 @@ void TaskManager::loop() {
     }
   }
   loopStats.recordRun(loopTimer);
+  KBoxMetrics.metric(KBoxMetricTaskManagerLoopUS, loopTimer);
 
   if (statDisplayTimer > statDisplayInterval) {
     displayStats();
@@ -62,6 +64,7 @@ void TaskManager::loop() {
 }
 
 void TaskManager::displayStats() {
+  // FIXME: Should upgrade all of this to use KBoxMetrics instead.
   DEBUG("-------------------------------------------------------------------------------------");
   int i = 0;
   DEBUG("%2s %16s %10s %10s %9s %9s %9s", "ID", "TaskName", "Runs", "Total (ms)", "Average (us)", "Min (us)", "Max (us)");
