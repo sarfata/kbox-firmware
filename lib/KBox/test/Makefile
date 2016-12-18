@@ -9,7 +9,7 @@ FRAMEWORK := $(HOME)/.platformio/packages/framework-arduinoteensy/cores/teensy3
 
 # Build flags - Including all dependencies of the test
 CFLAGS := -g -Wall
-CFLAGS := $(CFLAGS) -Iarduinomock/ -I$(FRAMEWORK) -I../../KBoxDebug/src
+CFLAGS := $(CFLAGS) -Iarduinomock/ -I$(FRAMEWORK) -I../../KBoxLogging/src
 CFLAGS := $(CFLAGS) -I../../List/src -I../../NMEA2000 -I../src
 CPPFLAGS := $(CFLAGS) -std=c++11
 
