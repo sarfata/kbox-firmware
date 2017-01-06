@@ -29,7 +29,7 @@
 #include "util/ESPProgrammer.h"
 #include "util/Kommand.h"
 
-USBService::USBService() : Task("USBService"), _slip(Serial, 2048), _streamLogger(KBoxLoggerStream(Serial)), _state(ConnectedDebug) {
+USBService::USBService() : Task("USBService"), _slip(Serial, 2048), _streamLogger(KBoxLoggerStream(Serial)), _kommandContext(_slip, KBox.getDisplay()), _state(ConnectedDebug) {
 }
 
 void USBService::setup() {
@@ -95,7 +95,7 @@ void USBService::loopConnectedFrame() {
     uint8_t *frame;
     size_t len = _slip.peekFrame(&frame);
 
-    //kommandContext.process(frame, len);
+    _kommandContext.process(frame, len);
 
     // Discard the frame.
     _slip.readFrame(0, 0);

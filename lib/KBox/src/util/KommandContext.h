@@ -24,37 +24,42 @@
 
 #pragma once
 
-#include <KBoxLogging.h>
-#include <KBoxLoggerStream.h>
-#include "util/SlipStream.h"
-#include "util/Task.h"
-#include "util/KommandContext.h"
+#include <stdint.h>
+#include <stddef.h>
+#include "ui/GC.h"
+#include "SlipStream.h"
+#include "Kommand.h"
 
-class USBService : public Task, public KBoxLogger {
+/**
+ * Interprets command (Kommand) sent as frame from the USB host or the WiFi
+ * controller.
+ */
+class KommandContext {
   private:
-    static const size_t MaxLogFrameSize = 256;
+    SlipStream& _slip;
+    GC& _gc;
 
-    SlipStream _slip;
-    KBoxLoggerStream _streamLogger;
-    KommandContext _kommandContext;
+    void sendErrorFrame();
 
-    enum USBConnectionState{
-      ConnectedDebug,
-      ConnectedFrame,
-      ConnectedESPProgramming
-    };
-    USBConnectionState _state;
-
-    void loopConnectedFrame();
-    void loopConnectedESPProgramming();
-
-    void sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs);
+    void sendScreenshot(int y);
 
   public:
-    USBService();
-    ~USBService() {};
+    KommandContext(SlipStream& slipStream, GC& gc);
 
-    void setup();
-    void loop();
-    virtual void log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list args);
+    /**
+     * Process an incoming frame in the current context.
+     *
+     * If the context is available to run more commands, this one will be
+     * executed. If the context is busy with another command, an error will
+     * be sent upstream.
+     *
+     * The data can also be continuation to a currently running command.
+     */
+    void process(const uint8_t *bytes, size_t len);
+
+    void processPing(const uint8_t *data, size_t len);
+
+    void processScreenshot(const uint8_t *data, size_t len);
 };
+
+

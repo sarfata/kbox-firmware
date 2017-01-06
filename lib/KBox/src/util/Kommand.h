@@ -46,6 +46,16 @@ template <uint16_t maxSize> class Kommand {
       append16(id);
     };
 
+    void append32(uint32_t w) {
+      if (_index + 4 > maxSize) {
+        return;
+      }
+      _bytes[_index++] = w & 0xff;
+      _bytes[_index++] = (w>>8) & 0xff;
+      _bytes[_index++] = (w>>16) & 0xff;
+      _bytes[_index++] = (w>>24) & 0xff;
+    }
+
     void append16(uint16_t w) {
       if (_index + 2 > maxSize) {
         return;
@@ -82,6 +92,14 @@ template <uint16_t maxSize> class Kommand {
     void captureBuffer(uint8_t **ptr, size_t **index) {
       *ptr = _bytes;
       *index = &_index;
+    }
+
+    const uint8_t* getBytes() const {
+      return _bytes;
+    }
+
+    size_t getSize() const {
+      return _index;
     }
 };
 

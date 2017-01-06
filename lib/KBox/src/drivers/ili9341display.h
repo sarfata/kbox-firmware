@@ -50,4 +50,5 @@ class ILI9341Display : public Display {
     void drawLine(Point a, Point b, Color color);
     void drawRectangle(Point orig, Size size, Color color);
     void fillRectangle(Point orig, Size size, Color color);
+    void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
 };

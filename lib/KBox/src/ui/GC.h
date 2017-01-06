@@ -42,6 +42,8 @@ class GC {
     virtual void drawRectangle(Point orig, Size size, Color color) = 0;
     virtual void fillRectangle(Point orig, Size size, Color color) = 0;
 
+    virtual void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors) = 0;
+
     void drawRectangle(const Rect& rect, Color color) {
       drawRectangle(rect.origin(), rect.size(), color);
     };

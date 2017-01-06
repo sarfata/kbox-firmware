@@ -63,7 +63,7 @@ class FatalError(RuntimeError):
         RuntimeError.__init__(self, message)
 
     @staticmethod
-    def WithResult(message, result):
+    def WithFrame(message, result):
         """
         Return a fatal error object that includes the hex values of
         'result' as a string formatted argument.
@@ -107,23 +107,28 @@ class KBox(object):
         while True:
             frame = self.read()
             if len(frame) < 2:
-                raise FatalError("Frame is too short to be valid", frame)
+                raise FatalError.WithFrame("Frame is too short to be valid (%s)", frame)
 
             (cmd,) = struct.unpack('<H', frame[0:2])
 
             if cmd == command:
                 return frame[2:]
             elif cmd == KBox.KommandLog:
+                # Keep printing log messages while waiting
                 self.processLogFrame(frame[2:])
             else:
                 print("Got unexpected command with id {}".format(cmd))
 
     def processLogFrame(self, data):
+        logLevels = { 0: "D", 1: "I", 2: "E" }
         (level, lineno, fnamelen) = struct.unpack('<HHH', data[0:6])
         fname = data[6:6+fnamelen]
+        
+        if "/" in fname:
+            fname = fname.split("/")[-1]
         log = data[6+fnamelen:]
 
-        print("> {} {}:{} {}".format(level, fname, lineno, log))
+        print("> {} {}:{} {}".format(logLevels[level], fname, lineno, log))
 
 
     def ping(self, pingId):
@@ -148,6 +153,7 @@ def main():
     parser.add_argument("--port", help = "USB Serial Port connected to KBox", default = "/dev/tty.usbmodem1441")
     subparsers = parser.add_subparsers(dest = "command")
     subparsers.add_parser("ping")
+    subparsers.add_parser("logs")
     args = parser.parse_args()
 
     kbox = KBox(args.port)
@@ -160,9 +166,6 @@ def main():
             ready = True
         except FatalError as e:
             print e
-        except StopIteration as e:
-            print e
-
 
     if args.command == "ping":
         i = 0
@@ -170,8 +173,12 @@ def main():
             kbox.ping(i)
             i = i + 1
             time.sleep(1)
-
-
+    elif args.command == "logs":
+        while True:
+            # just keep waiting for a packet that does not exist
+            # log messages will be printed automatically
+            log = kbox.readCommand(KBox.KommandLog)
+            kbox.processLogFrame(log)
 
 if __name__ == '__main__':
     main()

@@ -83,3 +83,6 @@ void ILI9341Display::fillRectangle(Point orig, Size size, Color color) {
   display->fillRect(orig.x(), orig.y(), size.width(), size.height(), color);
 }
 
+void ILI9341Display::readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors) {
+  display->readRect(x, y, w, h, pcolors);
+}
