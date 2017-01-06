@@ -27,38 +27,7 @@
 #include <stdint.h>
 #include <limits.h>
 #include "List.h"
-
-class Task {
-  protected:
-    const char *_taskName;
-
-  public:
-    Task(const char *taskName) : _taskName(taskName) {};
-    virtual ~Task() {};
-
-    virtual const char *getTaskName() const {
-      return _taskName;
-    };
-
-    /**
-     * Performs initial setup of the task. It is ok to take some time
-     * to perform the initial setup (especially when initializing hardware,
-     * etc)
-     */
-    virtual void setup() {};
-
-    /**
-     * Perform your work as fast as possible, do not block.
-     */
-    virtual void loop() = 0;
-
-    /**
-     * Whether the task is ready to run.
-     */
-    virtual bool ready() {
-      return true;
-    };
-};
+#include "tasks/Task.h"
 
 class IntervalTask : public Task {
   private:
