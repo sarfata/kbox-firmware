@@ -22,39 +22,41 @@
   THE SOFTWARE.
 */
 
-#include "USBTask.h"
+#include "USBService.h"
 #include <Arduino.h>
 #include <KBoxLogging.h>
 #include <KBox.h>
 #include "util/ESPProgrammer.h"
+#include "util/Kommand.h"
 
-USBTask::USBTask() : Task("USBTask"), _slip(Serial, 2048), _streamLogger(KBoxLoggerStream(Serial)), _state(ConnectedDebug) {
+USBService::USBService() : Task("USBService"), _slip(Serial, 2048), _streamLogger(KBoxLoggerStream(Serial)), _state(ConnectedDebug) {
 }
 
-void USBTask::setup() {
+void USBService::setup() {
 }
 
-void USBTask::log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs) {
-  if (_state == ConnectedDebug) {
-    _streamLogger.log(level, fname, lineno, fmt, fmtargs);
+void USBService::log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs) {
+  switch (_state) {
+    case ConnectedDebug:
+      _streamLogger.log(level, fname, lineno, fmt, fmtargs);
+      break;
+    case ConnectedFrame:
+      sendLogFrame(level, fname, lineno, fmt, fmtargs);
+      break;
+    case ConnectedESPProgramming:
+      /* Discard all logs when in ESP programming mode. */
+      break;
   }
 }
 
-void USBTask::loop() {
-  switch (_state) {
-    case ConnectedDebug:
-      loopConnectedDebug();
-      break;
-    case ConnectedFrame:
-      loopConnectedFrame();
-      break;
-    case ConnectedESPProgramming:
-      loopConnectedESPProgramming();
-      break;
-  };
-}
+void USBService::loop() {
+  /* Switching serial port to 230400 on computer signals that the host
+   * wants to go into default debugging mode.
+   */
+  if (Serial.baud() == 115200) {
+    _state = ConnectedDebug;
+  }
 
-void USBTask::loopConnectedDebug() {
   /* Switching serial port to 230400 on computer signals that the host
    * wants to go into ESP Programming mode.
    */
@@ -68,6 +70,18 @@ void USBTask::loopConnectedDebug() {
   if (Serial.baud() == 1000000) {
     _state = ConnectedFrame;
   }
+
+  switch (_state) {
+    case ConnectedDebug:
+      /* nop */
+      break;
+    case ConnectedFrame:
+      loopConnectedFrame();
+      break;
+    case ConnectedESPProgramming:
+      loopConnectedESPProgramming();
+      break;
+  };
 }
 
 /**
@@ -76,7 +90,7 @@ void USBTask::loopConnectedDebug() {
  * similar to commands that can be received via WiFi module so the same
  * @class KommandContext is used to receive and process them.
  */
-void USBTask::loopConnectedFrame() {
+void USBService::loopConnectedFrame() {
   if (_slip.available()) {
     uint8_t *frame;
     size_t len = _slip.peekFrame(&frame);
@@ -96,7 +110,7 @@ void USBTask::loopConnectedFrame() {
  * switch speed half-way through so we need to read the first packets to follow
  * that (see @class ESPProgrammer).
  */
-void USBTask::loopConnectedESPProgramming() {
+void USBService::loopConnectedESPProgramming() {
   ESPProgrammer programmer(KBox.getNeopixels(), Serial, Serial1);
   while (programmer.getState() != ESPProgrammer::ProgrammerState::Done) {
     programmer.loop();
@@ -105,3 +119,22 @@ void USBTask::loopConnectedESPProgramming() {
   CPU_RESTART;
 }
 
+/**
+ * Sends a frame with a logging message.
+ */
+void USBService::sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs) {
+  Kommand<MaxLogFrameSize> logKmd(KommandLog);
+  logKmd.append16(level);
+  logKmd.append16(lineno);
+  logKmd.append16(strlen(fname));
+  logKmd.appendNullTerminatedString(fname);
+
+  uint8_t *bytes;
+  size_t *index;
+
+  logKmd.captureBuffer(&bytes, &index);
+
+  *index += vsnprintf((char*)bytes + *index, MaxLogFrameSize - *index, fmt, fmtargs);
+
+  _slip.writeFrame(bytes, *index);
+}

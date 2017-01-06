@@ -26,7 +26,7 @@
 
 #include <KBoxLogging.h>
 #include "MFD.h"
-#include "TaskManager.h"
+#include "util/TaskManager.h"
 #include "KMessage.h"
 
 
@@ -36,14 +36,14 @@
 #include "drivers/esp8266.h"
 #include <ADC.h>
 
-/* Tasks */
+/* Services (was Tasks) */
+#include "services/USBService.h"
 #include "tasks/RunningLightTask.h"
 #include "tasks/BarometerTask.h"
 #include "tasks/ADCTask.h"
 #include "tasks/NMEA2000Task.h"
 #include "tasks/IMUTask.h"
 #include "tasks/NMEAReaderTask.h"
-#include "tasks/USBTask.h"
 #include "tasks/WiFiTask.h"
 
 /* Converters */

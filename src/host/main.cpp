@@ -35,6 +35,8 @@
 MFD mfd(KBox.getDisplay(), KBox.getEncoder(), KBox.getButton());
 TaskManager taskManager;
 
+USBService usbService;
+
 void setup() {
   // Enable float in printf:
   // https://forum.pjrc.com/threads/27827-Float-in-sscanf-on-Teensy-3-1
@@ -46,8 +48,7 @@ void setup() {
   delay(3000);
 
   Serial.begin(115200);
-  USBTask *usbTask = new USBTask();
-  KBoxLogging.setLogger(usbTask);
+  KBoxLogging.setLogger(&usbService);
 
   DEBUG("Starting");
 
@@ -104,7 +105,7 @@ void setup() {
   taskManager.addTask(reader2);
   taskManager.addTask(wifi);
   taskManager.addTask(sdcardTask);
-  taskManager.addTask(usbTask);
+  taskManager.addTask(&usbService);
 
   BatteryMonitorPage *batPage = new BatteryMonitorPage();
   adcTask->connectTo(*batPage);

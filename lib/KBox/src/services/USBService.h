@@ -27,27 +27,30 @@
 #include <KBoxLogging.h>
 #include <KBoxLoggerStream.h>
 #include "util/SlipStream.h"
-#include "Task.h"
+#include "util/Task.h"
 
-class USBTask : public Task, public KBoxLogger {
+class USBService : public Task, public KBoxLogger {
   private:
+    static const size_t MaxLogFrameSize = 256;
+
     SlipStream _slip;
     KBoxLoggerStream _streamLogger;
 
-    enum USBTaskState {
+    enum USBConnectionState{
       ConnectedDebug,
       ConnectedFrame,
       ConnectedESPProgramming
     };
-    USBTaskState _state;
+    USBConnectionState _state;
 
-    void loopConnectedDebug();
     void loopConnectedFrame();
     void loopConnectedESPProgramming();
 
+    void sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs);
+
   public:
-    USBTask();
-    ~USBTask() {};
+    USBService();
+    ~USBService() {};
 
     void setup();
     void loop();
