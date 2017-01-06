@@ -70,7 +70,7 @@ class MFD : public Task {
   public:
     MFD(Display &display, Encoder &enc, Bounce &but);
 
-    void setup() {};
+    void setup();
     void loop();
 
     void addPage(Page *p) {

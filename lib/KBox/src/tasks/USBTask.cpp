@@ -32,12 +32,9 @@ USBTask::USBTask() : Task("USBTask"), _slip(Serial, 2048), _streamLogger(KBoxLog
 }
 
 void USBTask::setup() {
-
 }
 
 void USBTask::log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs) {
-  static const char logLevelPrefixes[3] = { 'D', 'I', 'E' };
-
   if (_state == ConnectedDebug) {
     _streamLogger.log(level, fname, lineno, fmt, fmtargs);
   }

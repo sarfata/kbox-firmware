@@ -28,6 +28,9 @@
 #define DEBUG(...) /* */
 
 MFD::MFD(Display & d, Encoder &e, Bounce &b) : Task("MFD"), display(d), encoder(e), button(b), pageIterator(pages.circularBegin()) {
+}
+
+void MFD::setup() {
   display.fillRectangle(Origin, display.getSize(), ColorBlack);
   lastTick = 0;
 }

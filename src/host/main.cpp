@@ -40,14 +40,16 @@ void setup() {
   // https://forum.pjrc.com/threads/27827-Float-in-sscanf-on-Teensy-3-1
   asm(".global _printf_float");
 
-  Serial.begin(115200);
+  // Clears the screen
+  mfd.setup();
+
   delay(3000);
 
+  Serial.begin(115200);
   USBTask *usbTask = new USBTask();
   KBoxLogging.setLogger(usbTask);
 
   DEBUG("Starting");
-
 
   digitalWrite(led_pin, 1);
 
