@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,31 +22,38 @@
   THE SOFTWARE.
 */
 
-#include <Arduino.h>
-#include <KBox.h>
-#include <util/SlipStream.h>
-#include <util/ESPProgrammer.h>
-#include <KBoxLoggerStream.h>
+#include "KBoxLoggerStream.h"
 
-ESPProgrammer programmer(KBox.getNeopixels(), Serial, Serial1);
-
-
-void setup() {
-  // Use Serial3 as the Debug output to avoid trashing the communication
-  // with the programmer program running on host.
-  Serial3.begin(920800);
-  KBoxLogging.setLogger(new KBoxLoggerStream(Serial3));
-
-  DEBUG("Starting esp program");
-  esp_init();
-  esp_reboot_in_program();
-
-  Serial.setTimeout(0);
-  Serial1.setTimeout(0);
-  Serial3.setTimeout(0);
+static int strrpos(const char *string, char c) {
+  int index = -1;
+  int i = 0;
+  for (i = 0; string[i] != 0; i++) {
+    if (string[i] == c) {
+      index = i;
+    }
+  }
+  return index;
 }
 
-void loop() {
-  programmer.loop();
+KBoxLoggerStream::KBoxLoggerStream(Stream &s) : _stream(s) {
 }
 
+void KBoxLoggerStream::log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs) {
+  static const char logLevelPrefixes[3] = { 'D', 'I', 'E' };
+
+  int lastSlash = strrpos(fname, '/');
+  if (lastSlash > 0) {
+    fname = fname + lastSlash + 1;
+  }
+  _stream.print(logLevelPrefixes[level]);
+  _stream.print(" ");
+  _stream.print(fname);
+  _stream.print(":");
+  _stream.print(lineno);
+  _stream.print(" ");
+
+  char tmp[128];
+  vsnprintf(tmp, sizeof(tmp), fmt, fmtargs);
+
+  _stream.println(tmp);
+};

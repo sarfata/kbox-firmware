@@ -24,34 +24,41 @@
 
 #pragma once
 
-#include <Stream.h>
+#include <stdarg.h>
+
+class KBoxLogger;
+
+enum KBoxLoggingLevel {
+  KBoxLoggingLevelDebug,
+  KBoxLoggingLevelInfo,
+  KBoxLoggingLevelError
+};
+
+class KBoxLogger {
+  public:
+    virtual void log(enum KBoxLoggingLevel level, const char* filename, int lineNumber, const char *fmt, va_list fmtargs) = 0;
+};
 
 class KBoxLoggingClass {
   private:
-    Stream *oStream;
-
-    const char logLevelPrefixes[3] = { 'D', 'I', 'E' };
+    KBoxLogger *_logger;
 
   public:
-    enum KBoxLogging {
-      KBoxLoggingDebug,
-      KBoxLoggingInfo,
-      KBoxLoggingError
-    };
 
-    KBoxLoggingClass() : oStream(0) { };
+    KBoxLoggingClass() : _logger(0) { };
 
-    void log(enum KBoxLogging level, const char* filename, int lineNumber, const char *fmt, ...);
+    void log(enum KBoxLoggingLevel level, const char* filename, int lineNumber, const char *fmt, ...);
 
     /**
-     * Change the log output stream.
+     * Change the logger.
      */
-    void setOutputStream(Stream *stream);
+    void setLogger(KBoxLogger *logger);
 };
 
 extern class KBoxLoggingClass KBoxLogging;
 
-#define DEBUG(...) KBoxLogging.log(KBoxLoggingClass::KBoxLoggingDebug, __FILE__, __LINE__, __VA_ARGS__)
-#define INFO(...) KBoxLogging.log(KBoxLoggingClass::KBoxLoggingInfo, __FILE__, __LINE__, __VA_ARGS__)
-#define ERROR(...) KBoxLogging.log(KBoxLoggingClass::KBoxLoggingError, __FILE__, __LINE__, __VA_ARGS__)
+
+#define DEBUG(...) KBoxLogging.log(KBoxLoggingLevelDebug, __FILE__, __LINE__, __VA_ARGS__)
+#define INFO(...) KBoxLogging.log(KBoxLoggingLevelInfo, __FILE__, __LINE__, __VA_ARGS__)
+#define ERROR(...) KBoxLogging.log(KBoxLoggingLevelError, __FILE__, __LINE__, __VA_ARGS__)
 

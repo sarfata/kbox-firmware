@@ -30,42 +30,18 @@
 // Instantiate the shared instance that will be used.
 KBoxLoggingClass KBoxLogging;
 
-static int strrpos(const char *string, char c) {
-  int index = -1;
-  for (int i = 0; string[i] != 0; i++) {
-    if (string[i] == c) {
-      index = i;
-    }
-  }
-  return index;
+void KBoxLoggingClass::setLogger(KBoxLogger *logger) {
+  _logger = logger;
 }
 
-void KBoxLoggingClass::setOutputStream(Stream *stream) {
-  oStream = stream;
-}
-
-void KBoxLoggingClass::log(enum KBoxLogging level, const char *fname, int lineno, const char *fmt, ... ) {
-  if (!oStream) {
+void KBoxLoggingClass::log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, ... ) {
+  if (!_logger) {
     return;
   }
-
-  int lastSlash = strrpos(fname, '/');
-  if (lastSlash > 0) {
-    fname = fname + lastSlash + 1;
+  else {
+    va_list fmtargs;
+    va_start(fmtargs, fmt);
+    _logger->log(level, fname, lineno, fmt, fmtargs);
+    va_end(fmtargs);
   }
-  oStream->print(logLevelPrefixes[level]);
-  oStream->print(" ");
-  oStream->print(fname);
-  oStream->print(":");
-  oStream->print(lineno);
-  oStream->print(" ");
-
-  // resulting string limited to 128 chars
-  char tmp[128];
-  va_list args;
-  va_start (args, fmt );
-  vsnprintf(tmp, 128, fmt, args);
-  va_end (args);
-
-  oStream->println(tmp);
 }

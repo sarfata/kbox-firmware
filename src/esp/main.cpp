@@ -23,6 +23,7 @@
 */
 
 #include <KBoxLogging.h>
+#include <KBoxLoggerStream.h>
 #include <Adafruit_NeoPixel.h>
 #include "NetServer.h"
 
@@ -39,7 +40,7 @@ static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0xff);
 
 void setup() {
   Serial1.begin(115200);
-  KBoxLogging.setOutputStream(&Serial1);
+  KBoxLogging.setLogger(new KBoxLoggerStream(Serial1));
 
   rgb.begin();
   rgb.setPixelColor(0, 0, 0, 0xff);

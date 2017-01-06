@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,31 +22,17 @@
   THE SOFTWARE.
 */
 
-#include <Arduino.h>
-#include <KBox.h>
-#include <util/SlipStream.h>
-#include <util/ESPProgrammer.h>
-#include <KBoxLoggerStream.h>
+#pragma once
 
-ESPProgrammer programmer(KBox.getNeopixels(), Serial, Serial1);
+#include <Stream.h>
+#include "KBoxLogging.h"
 
+class KBoxLoggerStream: public KBoxLogger {
+  private:
+    Stream &_stream;
 
-void setup() {
-  // Use Serial3 as the Debug output to avoid trashing the communication
-  // with the programmer program running on host.
-  Serial3.begin(920800);
-  KBoxLogging.setLogger(new KBoxLoggerStream(Serial3));
+  public:
+    KBoxLoggerStream(Stream &s);
 
-  DEBUG("Starting esp program");
-  esp_init();
-  esp_reboot_in_program();
-
-  Serial.setTimeout(0);
-  Serial1.setTimeout(0);
-  Serial3.setTimeout(0);
-}
-
-void loop() {
-  programmer.loop();
-}
-
+    void log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs);
+};

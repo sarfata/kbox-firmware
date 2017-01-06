@@ -40,10 +40,11 @@ void setup() {
   // https://forum.pjrc.com/threads/27827-Float-in-sscanf-on-Teensy-3-1
   asm(".global _printf_float");
 
+  Serial.begin(115200);
   delay(3000);
 
-  Serial.begin(115200);
-  KBoxLogging.setOutputStream(&Serial);
+  USBTask *usbTask = new USBTask();
+  KBoxLogging.setLogger(usbTask);
 
   DEBUG("Starting");
 
@@ -89,7 +90,6 @@ void setup() {
   baroTask->connectTo(*sdcardTask);
   imuTask->connectTo(*sdcardTask);
 
-  USBTask *usbTask = new USBTask();
 
   // Add all the tasks
   taskManager.addTask(&mfd);
