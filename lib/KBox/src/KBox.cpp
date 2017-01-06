@@ -24,7 +24,9 @@
 #include "KBox.h"
 #include <i2c_t3.h>
 
-void KBox::setup() {
+KBoxClass KBox;
+
+KBoxClass::KBoxClass() {
   pinMode(led_pin, OUTPUT);
 
   // Initialize our I2C bus
@@ -70,12 +72,4 @@ void KBox::setup() {
   //adc.setResolution(12, ADC_1);
   //adc.setConversionSpeed(ADC_LOW_SPEED, ADC_1);
   //adc.setSamplingSpeed(ADC_HIGH_SPEED, ADC_1);
-
-
-  taskManager.addTask(&mfd);
-  taskManager.setup();
-}
-
-void KBox::loop() {
-  taskManager.loop();
 }

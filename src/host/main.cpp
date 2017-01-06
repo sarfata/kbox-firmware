@@ -25,7 +25,6 @@
 #include <Encoder.h>
 #include <i2c_t3.h>
 #include <KBox.h>
-#include "util/ESPProgrammer.h"
 
 // Those are included here to force platformio to link to them.
 // See issue github.com/platformio/platformio/issues/432 for a better way to do this.
@@ -33,7 +32,8 @@
 
 #include "ClockPage.h"
 
-KBox kbox;
+MFD mfd(KBox.getDisplay(), KBox.getEncoder(), KBox.getButton());
+TaskManager taskManager;
 
 void setup() {
   // Enable float in printf:
@@ -57,7 +57,7 @@ void setup() {
   NMEA2000Task *n2kTask = new NMEA2000Task();
   n2kTask->connectTo(*wifi);
 
-  ADCTask *adcTask = new ADCTask(kbox.getADC());
+  ADCTask *adcTask = new ADCTask(KBox.getADC());
 
   // Convert battery measurement into n2k messages before sending them to wifi.
   VoltageN2kConverter *voltageConverter = new VoltageN2kConverter();
@@ -89,27 +89,29 @@ void setup() {
   baroTask->connectTo(*sdcardTask);
   imuTask->connectTo(*sdcardTask);
 
+  USBTask *usbTask = new USBTask();
+
   // Add all the tasks
-  kbox.addTask(new IntervalTask(new RunningLightTask(), 250));
-  kbox.addTask(new IntervalTask(adcTask, 1000));
-  kbox.addTask(new IntervalTask(imuTask, 50));
-  kbox.addTask(new IntervalTask(baroTask, 1000));
-  kbox.addTask(n2kTask);
-  kbox.addTask(reader1);
-  kbox.addTask(reader2);
-  kbox.addTask(wifi);
-  kbox.addTask(sdcardTask);
+  taskManager.addTask(&mfd);
+  taskManager.addTask(new IntervalTask(new RunningLightTask(), 250));
+  taskManager.addTask(new IntervalTask(adcTask, 1000));
+  taskManager.addTask(new IntervalTask(imuTask, 50));
+  taskManager.addTask(new IntervalTask(baroTask, 1000));
+  taskManager.addTask(n2kTask);
+  taskManager.addTask(reader1);
+  taskManager.addTask(reader2);
+  taskManager.addTask(wifi);
+  taskManager.addTask(sdcardTask);
+  taskManager.addTask(usbTask);
 
   BatteryMonitorPage *batPage = new BatteryMonitorPage();
   adcTask->connectTo(*batPage);
-  kbox.addPage(batPage);
+  mfd.addPage(batPage);
 
   StatsPage *statsPage = new StatsPage();
   statsPage->setSDCardTask(sdcardTask);
 
-  kbox.addPage(statsPage);
-
-  kbox.setup();
+  mfd.addPage(statsPage);
 
   Serial.setTimeout(0);
   Serial1.setTimeout(0);
@@ -118,18 +120,5 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.baud() == 230400) {
-    DEBUG("Entering programmer mode");
-    // Disable all debug messages going to USB while re-programming the wifi module.
-    KBoxLogging.setOutputStream(0);
-    ESPProgrammer programmer(kbox.getNeopixels(), Serial, Serial1);
-    while (programmer.getState() != ESPProgrammer::ProgrammerState::Done) {
-      programmer.loop();
-    }
-    DEBUG("Exiting programmer mode");
-    CPU_RESTART;
-  }
-  else {
-    kbox.loop();
-  }
+  taskManager.loop();
 }

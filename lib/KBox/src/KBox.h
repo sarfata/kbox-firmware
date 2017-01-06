@@ -43,6 +43,7 @@
 #include "tasks/NMEA2000Task.h"
 #include "tasks/IMUTask.h"
 #include "tasks/NMEAReaderTask.h"
+#include "tasks/USBTask.h"
 #include "tasks/WiFiTask.h"
 
 /* Converters */
@@ -58,23 +59,19 @@
 #include <Bounce.h>
 #include <font_DroidSans.h>
 
-/* KBox class to represent all the hardware */
-class KBox {
+/**
+ * KBox class to represent all the hardware. This class is statically allocated in
+ * @file KBox.cpp */
+class KBoxClass {
   private:
     Adafruit_NeoPixel neopixels = Adafruit_NeoPixel(2, neopixel_pin, NEO_GRB + NEO_KHZ800);
     ILI9341Display display = ILI9341Display();
     Encoder encoder = Encoder(encoder_a, encoder_b);
     Bounce button = Bounce(encoder_button, 10 /* ms */);
     ADC adc;
-    MFD mfd = MFD(display, encoder, button);
-    TaskManager taskManager = TaskManager();
 
   public:
-    void setup();
-    void loop();
-
-    void addPage(Page *p) { mfd.addPage(p); };
-    void addTask(Task *t) { taskManager.addTask(t); };
+    KBoxClass();
 
     Display& getDisplay() {
       return display;
@@ -95,8 +92,6 @@ class KBox {
     ADC& getADC() {
       return adc;
     };
-
-    const TaskManager& getTaskManager() const {
-      return taskManager;
-    };
 };
+
+extern KBoxClass KBox;
