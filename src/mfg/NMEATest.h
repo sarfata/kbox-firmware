@@ -39,7 +39,7 @@ class NMEATest : public MfgTest {
     size_t writeIndex = 0;
 
   public:
-    NMEATest(String name, KBox& kbox, HardwareSerial& out, HardwareSerial& in) : MfgTest(kbox, name, 3000), output(out), input(in) {};
+    NMEATest(String name, HardwareSerial& out, HardwareSerial& in) : MfgTest(name, 3000), output(out), input(in) {};
 
     void setup() {
       setInstructions("Testing NMEA ports");

@@ -29,11 +29,10 @@
 
 class TestHarness {
   private:
-    KBox& kbox;
     Display& display;
 
   public:
-    TestHarness(KBox& k) : kbox(k), display(kbox.getDisplay()) {};
+    TestHarness() : display(KBox.getDisplay()) {};
 
     void runTest(MfgTest &t);
     void runAllTests();

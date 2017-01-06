@@ -46,7 +46,7 @@ class ADCTest : public MfgTest {
     int channel;
 
   public:
-    ADCTest(KBox& kbox, int chan) : MfgTest(kbox, "ADCTest(" + cases[chan].channelName + ")", 10000), adc(kbox.getADC()), channel(chan) {};
+    ADCTest(int chan) : MfgTest("ADCTest(" + cases[chan].channelName + ")", 10000), adc(KBox.getADC()), channel(chan) {};
 
     void setup() {
       setInstructions("Apply 12V to " + cases[channel].channelName + " only.");

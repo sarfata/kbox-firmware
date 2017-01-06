@@ -27,18 +27,18 @@
 
 class EncoderTestRotationLeft : public MfgTest {
   public:
-    EncoderTestRotationLeft(KBox& kbox) : MfgTest(kbox, "EncoderTestRotationLeft", 5000) { };
+    EncoderTestRotationLeft() : MfgTest("EncoderTestRotationLeft", 5000) { };
 
     void setup() {
       setInstructions("Turn encoder to the left");
-      kbox.getEncoder().write(0);
+      KBox.getEncoder().write(0);
     };
 
     void loop() {
-      if (kbox.getEncoder().read() < 0) {
+      if (KBox.getEncoder().read() < 0) {
         pass();
       }
-      if (kbox.getEncoder().read() > 0) {
+      if (KBox.getEncoder().read() > 0) {
         fail("Encoder reported turning to the right instead of left.");
       }
     };
@@ -46,18 +46,18 @@ class EncoderTestRotationLeft : public MfgTest {
 
 class EncoderTestRotationRight : public MfgTest {
   public:
-    EncoderTestRotationRight(KBox& kbox) : MfgTest(kbox, "EncoderTestRotationRight", 5000) {};
+    EncoderTestRotationRight() : MfgTest("EncoderTestRotationRight", 5000) {};
 
     void setup() {
-      kbox.getEncoder().write(0);
+      KBox.getEncoder().write(0);
       setInstructions("Turn encoder to the right");
     };
 
     void loop() {
-      if (kbox.getEncoder().read() > 0) {
+      if (KBox.getEncoder().read() > 0) {
         pass();
       }
-      if (kbox.getEncoder().read() < 0) {
+      if (KBox.getEncoder().read() < 0) {
         fail("Encoder reported turning to the left instead of right.");
       }
     };
@@ -65,15 +65,15 @@ class EncoderTestRotationRight : public MfgTest {
 
 class EncoderTestClick : public MfgTest {
   public:
-    EncoderTestClick(KBox &kbox) : MfgTest(kbox, "EncoderTestClick", 5000) {};
+    EncoderTestClick() : MfgTest("EncoderTestClick", 5000) {};
 
     void setup() {
       setInstructions("Press encoder");
-      kbox.getButton().update();
+      KBox.getButton().update();
     };
 
     void loop() {
-      if (kbox.getButton().update()) {
+      if (KBox.getButton().update()) {
         pass();
       }
     };

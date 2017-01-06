@@ -34,7 +34,7 @@ class SDCardTest : public MfgTest {
     SdFile *logFile = 0;
 
   public:
-    SDCardTest(KBox& kbox) : MfgTest(kbox, "SDCard test", 10000) {
+    SDCardTest() : MfgTest("SDCard test", 10000) {
     };
 
     void setup() {

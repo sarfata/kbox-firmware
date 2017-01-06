@@ -26,14 +26,10 @@
 #include "TestHarness.h"
 #include "EncoderTest.h"
 
-KBox kbox;
-TestHarness th(kbox);
-
+TestHarness th;
 
 void setup() {
   Serial.begin(115200);
-
-  kbox.setup();
 }
 
 void loop() {

@@ -107,17 +107,18 @@ void TestHarness::runTest(MfgTest &t) {
 
 void TestHarness::runAllTests() {
   MfgTest* tests[] = {
-    new EncoderTestClick(kbox),
-    new RunningLightTest(kbox),
-    new EncoderTestRotationLeft(kbox), new EncoderTestRotationRight(kbox), 
-    new BarometerTest(kbox),
-    new N2KTest(kbox),
-    new NMEATest("NMEA2->1", kbox, NMEA2_SERIAL, NMEA1_SERIAL), new NMEATest("NMEA1->2", kbox, NMEA1_SERIAL, NMEA2_SERIAL),
-    new ADCTest(kbox, 0), new ADCTest(kbox, 1), new ADCTest(kbox, 2), new ADCTest(kbox, 3),
-    new ShuntTest(kbox),
-    new NeopixelTest(kbox, 0), new NeopixelTest(kbox, 1),
-    new SDCardTest(kbox),
-    new IMUTest(kbox)
+    new EncoderTestClick(),
+    new RunningLightTest(),
+    new EncoderTestRotationLeft(), new EncoderTestRotationRight(), 
+    new BarometerTest(),
+    new N2KTest(),
+    new NMEATest("NMEA2->1", NMEA2_SERIAL, NMEA1_SERIAL), 
+    new NMEATest("NMEA1->2", NMEA1_SERIAL, NMEA2_SERIAL),
+    new ADCTest(0), new ADCTest(1), new ADCTest(2), new ADCTest(3),
+    new ShuntTest(),
+    new NeopixelTest(0), new NeopixelTest(1),
+    new SDCardTest(),
+    new IMUTest()
   };
 
   Serial.println(">>>>> Starting KBox Manufacturing tests <<<<<");
