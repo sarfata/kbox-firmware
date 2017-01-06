@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <limits.h>
 #include "List.h"
-#include "tasks/Task.h"
+#include "util/Task.h"
 
 class IntervalTask : public Task {
   private:

@@ -23,7 +23,7 @@
 */
 #pragma once
 
-#include "TaskManager.h"
+#include "util/Task.h"
 #include "KMessage.h"
 
 class WiFiTask : public Task, public KReceiver {

@@ -22,7 +22,7 @@
   THE SOFTWARE.
 */
 #include <Adafruit_BNO055.h>
-#include "TaskManager.h"
+#include "util/Task.h"
 #include "KMessage.h"
 
 class IMUTask : public Task, public KGenerator {

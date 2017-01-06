@@ -21,8 +21,11 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
+#pragma once
+
 #include <Adafruit_BMP280.h>
-#include "TaskManager.h"
+#include "util/Task.h"
 #include "KMessage.h"
 
 class BarometerTask : public Task, public KGenerator {

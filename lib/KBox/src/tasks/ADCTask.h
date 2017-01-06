@@ -21,10 +21,11 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
 
 #include <ADC.h>
-#include "TaskManager.h"
+#include "util/Task.h"
 #include "KMessage.h"
 
 class ADCTask : public Task, public KGenerator {

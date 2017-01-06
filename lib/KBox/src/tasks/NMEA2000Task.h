@@ -26,7 +26,7 @@
 
 #include <N2kMessages.h>
 #include <NMEA2000_teensy.h>
-#include <TaskManager.h>
+#include "util/Task.h"
 #include "KMessage.h"
 
 class NMEA2000Task : public Task, public KGenerator, public KReceiver, public KVisitor {

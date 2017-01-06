@@ -21,7 +21,10 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "TaskManager.h"
+
+#pragma once
+
+#include "util/Task.h"
 
 class RunningLightTask : public Task {
   private:
