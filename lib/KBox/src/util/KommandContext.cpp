@@ -23,6 +23,7 @@
 */
 
 #include <stdlib.h>
+#include <KBoxLogging.h>
 #include "KommandContext.h"
 
 KommandContext::KommandContext(SlipStream& slipStream, GC& gc) : _slip(slipStream), _gc(gc) {
@@ -94,13 +95,31 @@ void KommandContext::processPing(const uint8_t *data, size_t len) {
 void KommandContext::processScreenshot(const uint8_t *data, size_t len) {
   // First byte is optional and can be where to start from.
   int y = 0;
-  if (len > 0) {
-    y = data[0];
+  if (len == 2) {
+    y = data[0] + (data[1] >> 8);
   }
 
+  DEBUG("Screenshot datalen=%i from y=%i", len, y);
+
+  // Allocating 320*5*2 = 3.2kB on stack. Ouch!
   static const int16_t lineWidth = 320;
   static const int16_t linePerFrame = 5;
 
+  Kommand<2 + lineWidth * linePerFrame * 2> captureFrame(KommandScreenshotData);
+  captureFrame.append16(y);
+
+  uint8_t *bytes;
+  size_t *index;
+  captureFrame.captureBuffer(&bytes, &index);
+
+  uint16_t *pixelData = (uint16_t*) (bytes + *index);
+
+  _gc.readRect(0, y, lineWidth, linePerFrame, pixelData);
+  *index += lineWidth * linePerFrame *2;
+
+  _slip.writeFrame(captureFrame.getBytes(), captureFrame.getSize());
+
+/*
   size_t replyLen = 2 + 2 * (lineWidth * linePerFrame);
   uint8_t *reply = (uint8_t*) malloc(replyLen);
 
@@ -115,4 +134,5 @@ void KommandContext::processScreenshot(const uint8_t *data, size_t len) {
     _slip.writeFrame(reply, replyLen);
     free(reply);
   }
+  */
 }

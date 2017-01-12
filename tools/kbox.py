@@ -113,6 +113,8 @@ class KBox(object):
 
             if cmd == command:
                 return frame[2:]
+            elif cmd == KBox.KommandErr:
+                raise FatalError("KBox responded with an error")
             elif cmd == KBox.KommandLog:
                 # Keep printing log messages while waiting
                 self.processLogFrame(frame[2:])
@@ -148,12 +150,51 @@ class KBox(object):
         pkt = struct.pack('<H', command) + data
         self.write(pkt)
 
+    def captureScreen(self, startY = 0):
+        """
+        Sends a command to capture screen from line startY. The number of lines
+        returned is decided by the KBox.
+
+        Returns a tuple (firstLineIndex, pixelData)
+        """
+        self.command(KBox.KommandScreenshot, struct.pack('<H', startY))
+        data = self.readCommand(KBox.KommandScreenshotData)
+        print("Got reply of length {}".format(len(data)))
+        (y,) = struct.unpack('<H', data[0:2])
+        pixelData = data[2:]
+        pixels = [ KBox.convertToRgb(struct.unpack('<H', pixelData[i:i+2])[0]) for i in range(0, len(pixelData), 2) ]
+        print "Got capture starting at offset: {} and length: {} ({} lines)".format(y, len(pixelData), len(pixels) / 320)
+
+        return (y, pixels)
+
+    def takeScreenshot(self):
+        capturedLines = 0
+        pixels = []
+        while capturedLines < 240:
+            (y, rect) = self.captureScreen(capturedLines)
+            capturedLines = capturedLines + len(rect) / 320
+            pixels.append(rect)
+
+        print "Screenshot has {} lines and {} pixels".format(capturedLines, pixels)
+        png.from_array(pixels, 'RGB').save('screenshot.png')
+
+    @staticmethod
+    def convertToRgb(pixel):
+        r = (pixel>>8)&0x00F8
+        g = (pixel>>3)&0x00FC
+        b = (pixel<<3)&0x00F8
+        return (r,g,b)
+
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", help = "USB Serial Port connected to KBox", default = "/dev/tty.usbmodem1441")
     subparsers = parser.add_subparsers(dest = "command")
     subparsers.add_parser("ping")
     subparsers.add_parser("logs")
+    subparsers.add_parser("screenshot")
+
     args = parser.parse_args()
 
     kbox = KBox(args.port)
@@ -179,6 +220,8 @@ def main():
             # log messages will be printed automatically
             log = kbox.readCommand(KBox.KommandLog)
             kbox.processLogFrame(log)
+    elif args.command == "screenshot":
+        capture = kbox.takeScreenshot()
 
 if __name__ == '__main__':
     main()
