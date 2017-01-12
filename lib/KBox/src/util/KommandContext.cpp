@@ -99,8 +99,6 @@ void KommandContext::processScreenshot(const uint8_t *data, size_t len) {
     y = data[0] + (data[1] >> 8);
   }
 
-  DEBUG("Screenshot datalen=%i from y=%i", len, y);
-
   // Allocating 320*5*2 = 3.2kB on stack. Ouch!
   static const int16_t lineWidth = 320;
   static const int16_t linePerFrame = 5;

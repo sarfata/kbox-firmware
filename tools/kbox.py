@@ -159,23 +159,23 @@ class KBox(object):
         """
         self.command(KBox.KommandScreenshot, struct.pack('<H', startY))
         data = self.readCommand(KBox.KommandScreenshotData)
-        print("Got reply of length {}".format(len(data)))
         (y,) = struct.unpack('<H', data[0:2])
         pixelData = data[2:]
         pixels = [ KBox.convertToRgb(struct.unpack('<H', pixelData[i:i+2])[0]) for i in range(0, len(pixelData), 2) ]
-        print "Got capture starting at offset: {} and length: {} ({} lines)".format(y, len(pixelData), len(pixels) / 320)
+        pixelsByLine = [ pixels[i:i+320] for i in range(0, len(pixels), 320) ]
 
-        return (y, pixels)
+        return (y, pixelsByLine)
 
     def takeScreenshot(self):
+        t0 = time.time()
         capturedLines = 0
         pixels = []
         while capturedLines < 240:
             (y, rect) = self.captureScreen(capturedLines)
-            capturedLines = capturedLines + len(rect) / 320
-            pixels.append(rect)
+            capturedLines = capturedLines + len(rect)
+            pixels.extend(rect)
 
-        print "Screenshot has {} lines and {} pixels".format(capturedLines, pixels)
+        print "Captured screenshot with {} lines in {:.0f} ms".format(len(pixels), (time.time() - t0)*1000)
         png.from_array(pixels, 'RGB').save('screenshot.png')
 
     @staticmethod
