@@ -55,7 +55,7 @@ void setup() {
   digitalWrite(led_pin, 1);
 
   // Create all the receiver task first
-  WiFiTask *wifi = new WiFiTask();
+  WiFiService *wifi = new WiFiService();
 
   // Create all the generating tasks and connect them
   NMEA2000Task *n2kTask = new NMEA2000Task();

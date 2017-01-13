@@ -23,18 +23,20 @@
 */
 #pragma once
 
+#include "KBox.h"
 #include "util/Task.h"
 #include "KMessage.h"
+#include "util/Kommand.h"
+#include "util/KommandContext.h"
+#include "util/SlipStream.h"
 
-class WiFiTask : public Task, public KReceiver {
+class WiFiService : public Task, public KReceiver {
+  private:
+    SlipStream _slip;
+    KommandContext _kommandContext;
+
   public:
-    WiFiTask() : Task("WiFi") {};
-
-    char rxBuf[1024];
-    size_t rxIndex = 0;
-
-    LinkedList<String> sendQueue;
-    String leftoverToSend;
+    WiFiService();
 
     void setup();
     void loop();

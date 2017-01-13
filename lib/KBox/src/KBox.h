@@ -44,7 +44,7 @@
 #include "tasks/NMEA2000Task.h"
 #include "tasks/IMUTask.h"
 #include "tasks/NMEAReaderTask.h"
-#include "tasks/WiFiTask.h"
+#include "services/WiFiService.h"
 
 /* Converters */
 #include "converters/VoltageN2kConverter.h"
