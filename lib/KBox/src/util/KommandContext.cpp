@@ -30,26 +30,6 @@ KommandContext::KommandContext(SlipStream& slipStream, GC& gc) : _slip(slipStrea
 }
 
 void KommandContext::process(const uint8_t *bytes, size_t len) {
-  /*
-   * Frame format:
-   * <identifier> <data>
-   * 0x00: KMD_PING => No data. Respond with PONG frame.
-   * 0x01: KMD_PONG => No data. Sent in response to PING command.
-   *
-   * 0x0F: KMD_ERR => Error (frame not understood in current context).
-   *
-   * 0x20: KMD_READFILE => Start reading file. data is the path to the data to read.
-   * 0x21: KMD_READFILE_DATA => Response used to send file data back <filesize 4bytes> <data>
-   * 0x22: KMD_READFILE_CONT(x 4 bytes) => Continue reading from offset x
-   * 0x2F: KMD_READFILE_ERR => Error reading file. <error code 1byte> <error message string>
-   *
-   * 0x30: KMD_SCREENSHOT => Start a screenshot.
-   * 0x31: KMD_SCREENSHOT_DATA => send screenshot data: <y coordinate 1byte> <pixel data in 16bit per pixels>
-   * 0x32: KMD_SCREENSHOT_CONT(y 1 byte) => Continue screenshot from offset y
-   *
-   * 0x33: KMD_SCREENPUSH => Start pushing data to screen
-   * 0x34: KMD_SCREENPUSH_DATA => screenshot data: <y coordinate 1 byte> <pixel data in 16bit per pixels>
-   */
   if (len == 0) {
     // should never happen because empty slip frames cannot be transmitted.
     return;
@@ -73,7 +53,7 @@ void KommandContext::process(const uint8_t *bytes, size_t len) {
 };
 
 void KommandContext::sendErrorFrame() {
-  Kommand<2> errorFrame(KommandErr);
+  Kommand<0> errorFrame(KommandErr);
 
   _slip.writeFrame(errorFrame.getBytes(), errorFrame.getSize());
 }
@@ -87,7 +67,7 @@ void KommandContext::processPing(const uint8_t *data, size_t len) {
 
   uint32_t pingId = *((uint32_t*) data);
 
-  Kommand<6> pongFrame(KommandPong);
+  Kommand<4> pongFrame(KommandPong);
   pongFrame.append32(pingId);
   _slip.writeFrame(pongFrame.getBytes(), pongFrame.getSize());
 }
@@ -103,7 +83,7 @@ void KommandContext::processScreenshot(const uint8_t *data, size_t len) {
   static const int16_t lineWidth = 320;
   static const int16_t linePerFrame = 5;
 
-  Kommand<2 + lineWidth * linePerFrame * 2> captureFrame(KommandScreenshotData);
+  Kommand<lineWidth * linePerFrame * 2> captureFrame(KommandScreenshotData);
   captureFrame.append16(y);
 
   uint8_t *bytes;
@@ -116,21 +96,4 @@ void KommandContext::processScreenshot(const uint8_t *data, size_t len) {
   *index += lineWidth * linePerFrame *2;
 
   _slip.writeFrame(captureFrame.getBytes(), captureFrame.getSize());
-
-/*
-  size_t replyLen = 2 + 2 * (lineWidth * linePerFrame);
-  uint8_t *reply = (uint8_t*) malloc(replyLen);
-
-  if (reply == 0) {
-    sendErrorFrame();
-  }
-  else {
-    reply[0] = KommandScreenshotData;
-    reply[1] = y;
-    uint16_t *pcolors = (uint16_t*) (reply + 2);
-    _gc.readRect(0, y, lineWidth, linePerFrame, pcolors);
-    _slip.writeFrame(reply, replyLen);
-    free(reply);
-  }
-  */
 }

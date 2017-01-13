@@ -35,10 +35,16 @@ enum KommandIdentifier {
   KommandLog = 0x10,
   KommandScreenshot = 0x30,
   KommandScreenshotData = 0x31,
+  KommandNMEASentence = 0x40,
 };
 
-template <uint16_t maxSize> class Kommand {
-  uint8_t _bytes[maxSize];
+/**
+ * Creates a Kommand object ready to hold at most maxDataSize of data. A few 
+ * extra bytes will be automatically added for header.
+ */
+template <uint16_t maxDataSize> class Kommand {
+  // Need 2 extra bytes for the command id
+  uint8_t _bytes[2 + maxDataSize];
   size_t _index;
 
   public:
@@ -47,7 +53,7 @@ template <uint16_t maxSize> class Kommand {
     };
 
     void append32(uint32_t w) {
-      if (_index + 4 > maxSize) {
+      if (_index + 4 > maxDataSize) {
         return;
       }
       _bytes[_index++] = w & 0xff;
@@ -57,7 +63,7 @@ template <uint16_t maxSize> class Kommand {
     }
 
     void append16(uint16_t w) {
-      if (_index + 2 > maxSize) {
+      if (_index + 2 > maxDataSize) {
         return;
       }
       _bytes[_index++] = w & 0xff;
@@ -65,7 +71,7 @@ template <uint16_t maxSize> class Kommand {
     }
 
     void append8(uint8_t b) {
-      if (_index + 1 > maxSize) {
+      if (_index + 1 > maxDataSize) {
         return;
       }
       _bytes[_index++] = b;
@@ -75,8 +81,8 @@ template <uint16_t maxSize> class Kommand {
       int len = strlen(s);
 
       // We want to have space for the string content + the terminating \0
-      if (len > maxSize - _index - 1) {
-        len = maxSize - _index - 1;
+      if (len > maxDataSize - _index - 1) {
+        len = maxDataSize - _index - 1;
       }
       if (len <= 0) {
         return;
