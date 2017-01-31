@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Stream.h"
+#include <Stream.h>
 
 class SlipStream {
   private:
