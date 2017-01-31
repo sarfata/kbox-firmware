@@ -26,8 +26,8 @@
 #include <Arduino.h> // for millis()
 #include <stdint.h>
 #include <limits.h>
-#include "List.h"
-#include "util/Task.h"
+#include <List.h>
+#include "Task.h"
 
 class IntervalTask : public Task {
   private:

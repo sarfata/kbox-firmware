@@ -23,8 +23,8 @@
 */
 
 #include "KMessageNMEAVisitor.h"
-#include "util/NMEASentenceBuilder.h"
-#include "util/nmea2000.h"
+#include "nmea/NMEASentenceBuilder.h"
+#include "nmea/nmea2000.h"
 
 void KMessageNMEAVisitor::visit(const NMEASentence& s) {
   nmeaContent += s.getSentence() + "\r\n";

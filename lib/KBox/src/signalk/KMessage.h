@@ -25,8 +25,8 @@
 
 #include <List.h>
 #include <WString.h>
-#include "N2kMsg.h"
-#include "util/nmea.h"
+#include <N2kMsg.h>
+#include "nmea/nmea.h"
 
 class KVisitor;
 class NMEASentence;

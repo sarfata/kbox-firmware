@@ -32,12 +32,10 @@
 #include <KBoxLogging.h>
 
 #include "ui/GC.h"
-#include "drivers/Display.h"
-#include "drivers/ili9341display.h"
-#include "util/Task.h"
 #include "ui/Page.h"
 #include "ui/Event.h"
 #include "ui/Page.h"
+#include "os/Task.h"
 
 /*
  * MFD or MultiFunctionDisplay manages multiple pages of information.
@@ -53,7 +51,7 @@ class MFD : public Task {
   protected:
     // Define tick duration in ms.
     static const int tickDuration = 200;
-    Display &display;
+    GC &gc;
     Encoder &encoder;
     Bounce &button;
     LinkedList<Page*> pages;
@@ -68,7 +66,7 @@ class MFD : public Task {
     bool processEvent(Event *e);
 
   public:
-    MFD(Display &display, Encoder &enc, Bounce &but);
+    MFD(GC &gc, Encoder &enc, Bounce &but);
 
     void setup();
     void loop();

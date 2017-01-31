@@ -21,27 +21,26 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "KMessage.h"
-#include "nmea/nmea.h"
 
-/* Some helper functions to generate hex-serialized NMEA messages */
-static const char *hex = "0123456789ABCDEF";
+class ILI9341_t3;
 
-static int appendByte(char *s, uint8_t byte) {
-  s[0] = hex[byte >> 4];
-  s[1] = hex[byte & 0xf];
-  return 2;
-}
+#include "GC.h"
 
-static int append2Bytes(char *s, uint16_t i) {
-  appendByte(s, i >> 8);
-  appendByte(s + 2, i & 0xff);
-  return 4;
-}
+/**
+ * This class implements all the GC primitives with the ILI9341_t3 driver.
+ */
+class ILI9341GC : public GC {
+  private:
+    ILI9341_t3 &display;
 
-static int appendWord(char *s, uint32_t i) {
-  append2Bytes(s, i >> 16);
-  append2Bytes(s + 4, i & 0xffff);
-  return 8;
-}
+  public:
+    ILI9341GC(ILI9341_t3 &display);
 
+    void drawText(Point a, Font font, Color color, const char *text);
+    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
+    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
+    void drawLine(Point a, Point b, Color color);
+    void drawRectangle(Point orig, Size size, Color color);
+    void fillRectangle(Point orig, Size size, Color color);
+    void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
+};

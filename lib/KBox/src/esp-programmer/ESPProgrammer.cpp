@@ -103,7 +103,7 @@ void ESPProgrammer::loopByteMode() {
     if (lastDTR && !lastRTS) {
       DEBUG("ESP Reboot requested");
       state = FrameMode;
-      esp_reboot_in_flasher();
+      KBox.espRebootInFlasher();
     }
   }
   else {

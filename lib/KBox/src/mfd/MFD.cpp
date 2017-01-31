@@ -27,11 +27,11 @@
 #undef DEBUG
 #define DEBUG(...) /* */
 
-MFD::MFD(Display & d, Encoder &e, Bounce &b) : Task("MFD"), display(d), encoder(e), button(b), pageIterator(pages.circularBegin()) {
+MFD::MFD(GC &gc, Encoder &e, Bounce &b) : Task("MFD"), gc(gc), encoder(e), button(b), pageIterator(pages.circularBegin()) {
 }
 
 void MFD::setup() {
-  display.fillRectangle(Origin, display.getSize(), ColorBlack);
+  gc.fillRectangle(Origin, gc.getSize(), ColorBlack);
   lastTick = 0;
 }
 
@@ -101,6 +101,6 @@ void MFD::loop() {
   }
   events.clear();
 
-  (*pageIterator)->paint(display);
+  (*pageIterator)->paint(gc);
 }
 

@@ -28,9 +28,8 @@
 #include <stdint.h>
 #include <Adafruit_NeoPixel.h>
 #include <elapsedMillis.h>
-#include "util/SlipStream.h"
-#include "drivers/board.h"
-#include "drivers/esp8266.h"
+#include <KBoxHardware.h>
+#include "comms/SlipStream.h"
 
 // From esptool.py - List of bootloader commands
 #define ESP_CMD_FLASH_BEGIN 0x02
