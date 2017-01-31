@@ -7,4 +7,5 @@
 *.dSYM
 *.pyc
 *.o
+*.d
 tags

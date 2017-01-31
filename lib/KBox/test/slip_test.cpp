@@ -118,6 +118,11 @@ TEST_CASE("reading an empty stream") {
     uint8_t ptr[100];
     REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 0 );
   }
+
+  THEN("peek should return 0") {
+    uint8_t *ptr;
+    REQUIRE( slip.peekFrame(&ptr) == 0 );
+  }
 }
 
 TEST_CASE("reading EOM bytes repeatedly") {
@@ -143,11 +148,32 @@ TEST_CASE("reading simple message") {
   StreamMock bytesStream(1, &b);
   SlipStream slip(bytesStream, 100);
 
+  THEN("should be able to peek 10 bytes") {
+    uint8_t *ptr;
+    REQUIRE( slip.available() == 10 );
+    REQUIRE( slip.peekFrame(&ptr) == 10 );
+    REQUIRE( memcmp(ptr, b.data+1, 10) == 0 );
+
+    THEN("packet should still be available after peek") {
+      REQUIRE( slip.available() == 10 );
+
+      THEN("packet should be discarded after a readFrame(0,0)") {
+        slip.readFrame(0, 0);
+        REQUIRE( slip.available() == 0 );
+      }
+    }
+  }
+
   THEN("should be able to read 10 bytes") {
     REQUIRE( slip.available() == 10 );
     REQUIRE( slip.readFrame(ptr, sizeof(ptr)) == 10);
     REQUIRE( memcmp(ptr, b.data+1, 10) == 0 );
+
+    THEN("message should be discarded after calling readFrame") {
+      REQUIRE( slip.available() == 0 );
+    }
   }
+
 }
 
 TEST_CASE("reading message with end of frame header") {
@@ -159,6 +185,17 @@ TEST_CASE("reading message with end of frame header") {
 
   StreamMock bytesStream(1, &b);
   SlipStream slip(bytesStream, 100);
+
+  THEN("should be able to peek 10 bytes") {
+    uint8_t *p;
+    REQUIRE( slip.available() == 10 );
+    REQUIRE( slip.peekFrame(&p) == 10);
+    REQUIRE( memcmp(p, b.data+2, 10) == 0 );
+
+    THEN("packet should still be available after peek") {
+      REQUIRE( slip.available() == 10 );
+    }
+  }
 
   THEN("should be able to read 10 bytes") {
     REQUIRE( slip.available() == 10 );
