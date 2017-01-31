@@ -53,6 +53,6 @@ KMessageNMEAVisitorTest: KMessageNMEAVisitorTest.o ../src/util/NMEASentenceBuild
 	$(CXX) $(CFLAGS) -o $@ $^
 
 clean:
-	rm -f nmea_test slip_test NMEASentenceBuilderTest
+	rm -f nmea_test slip_test NMEASentenceBuilderTest KMessageNMEAVisitorTest
 	find .. -name '*.o' |xargs rm -v
 
