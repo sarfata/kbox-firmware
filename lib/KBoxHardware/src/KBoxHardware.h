@@ -25,53 +25,32 @@
 #pragma once
 
 #include <KBoxLogging.h>
-#include "MFD.h"
-#include "util/TaskManager.h"
-#include "KMessage.h"
-
-
-/* Drivers */
-#include "drivers/board.h"
-#include "drivers/ili9341display.h"
-#include "drivers/esp8266.h"
-#include <ADC.h>
-
-/* Services (was Tasks) */
-#include "services/USBService.h"
-#include "tasks/RunningLightTask.h"
-#include "tasks/BarometerTask.h"
-#include "tasks/ADCTask.h"
-#include "tasks/NMEA2000Task.h"
-#include "tasks/IMUTask.h"
-#include "tasks/NMEAReaderTask.h"
-#include "services/WiFiService.h"
-
-/* Converters */
-#include "converters/VoltageN2kConverter.h"
-#include "converters/BarometerN2kConverter.h"
-
-/* Pages */
-#include "pages/BatteryMonitorPage.h"
-#include "pages/StatsPage.h"
-
-/* Other dependencies */
 #include <Adafruit_NeoPixel.h>
+#include <ADC.h>
 #include <Bounce.h>
-#include <font_DroidSans.h>
+#include <Encoder.h>
+
+#include "board.h"
+
+
+/* Backlight intensity control */
+typedef uint16_t BacklightIntensity;
+const BacklightIntensity BacklightIntensityMax = 255;
+const BacklightIntensity BacklightIntensityOff = 0;
 
 /**
  * KBox class to represent all the hardware. This class is statically allocated in
  * @file KBox.cpp */
-class KBoxClass {
+class KBoxHardware {
   private:
     Adafruit_NeoPixel neopixels = Adafruit_NeoPixel(2, neopixel_pin, NEO_GRB + NEO_KHZ800);
-    ILI9341Display display = ILI9341Display();
     Encoder encoder = Encoder(encoder_a, encoder_b);
     Bounce button = Bounce(encoder_button, 10 /* ms */);
+    ILI9341_t3 display = ILI9341_t3(display_cs, display_dc, 255 /* rst unused */, display_mosi, display_sck, display_miso);
     ADC adc;
 
   public:
-    KBoxClass();
+    KBoxHardware();
 
     Display& getDisplay() {
       return display;
@@ -92,6 +71,12 @@ class KBoxClass {
     ADC& getADC() {
       return adc;
     };
+
+    void setBacklight(BacklightIntensity intensity);
+
+    void espInit();
+    void espRebootInFlasher();
+    void espRebootInProgram();
 };
 
 extern KBoxClass KBox;

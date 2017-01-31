@@ -21,12 +21,13 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "KBox.h"
+
 #include <i2c_t3.h>
+#include "KBoxHardware.h"
 
-KBoxClass KBox;
+KBoxHardware KBox;
 
-KBoxClass::KBoxClass() {
+KBoxHardware::KBoxHardware() {
   pinMode(led_pin, OUTPUT);
 
   // Initialize our I2C bus
@@ -72,4 +73,70 @@ KBoxClass::KBoxClass() {
   //adc.setResolution(12, ADC_1);
   //adc.setConversionSpeed(ADC_LOW_SPEED, ADC_1);
   //adc.setSamplingSpeed(ADC_HIGH_SPEED, ADC_1);
+
+  display.begin();
+  display.fillScreen(ILI9341_BLUE);
+  display.setRotation(display_rotation);
+
+  setBacklight(BacklightIntensityMax);
 }
+
+void KBoxHardware::setBacklight(BacklightIntensity intensity) {
+  if (backlightPin) {
+    if (intensity > 0) {
+      analogWrite(backlightPin, intensity);
+    }
+    else {
+      analogWrite(backlightPin, 0);
+    }
+  }
+}
+
+void KBoxHardwar::espInit() {
+  WiFiSerial.begin(115200);
+  WiFiSerial.setTimeout(0);
+
+  digitalWrite(wifi_enable, 0);
+  digitalWrite(wifi_rst, 0);
+
+  // wifi_program is gpio0, wifi_cs is gpio15
+  // gpio2 is pulled up in hardware
+  digitalWrite(wifi_program, 0);
+  digitalWrite(wifi_cs, 0);
+
+  pinMode(wifi_enable, OUTPUT);
+  pinMode(wifi_rst, OUTPUT);
+  pinMode(wifi_program, OUTPUT);
+
+  if (wifi_cs > 0) {
+    digitalWrite(wifi_cs, 0);
+    pinMode(wifi_cs, OUTPUT);
+  }
+
+}
+
+void KBoxHardware::espRebootInFlasher() {
+  digitalWrite(wifi_enable, 0);
+  digitalWrite(wifi_rst, 0);
+  digitalWrite(wifi_program, 0);
+
+  delay(10);
+
+  // Boot the ESP module
+  digitalWrite(wifi_enable, 1);
+  digitalWrite(wifi_rst, 1);
+}
+
+void KBoxHardware::espRebootInProgram() {
+  digitalWrite(wifi_enable, 0);
+  digitalWrite(wifi_rst, 0);
+  digitalWrite(wifi_program, 1);
+
+  delay(10);
+
+  // Boot the ESP module
+  digitalWrite(wifi_enable, 1);
+  digitalWrite(wifi_rst, 1);
+}
+
+
