@@ -1,31 +1,34 @@
-/* 
-NMEA2000_teensy.cpp
+/*
+  The MIT License
 
-2015 Copyright (c) Thomas Sarlandie  All right reserved.
-  
-Author: Thomas Sarlandie
+  Copyright (c) 2015-2017 Thomas Sarlandie thomas@sarlandie.net
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-
-  1301  USA
-  
-Inherited NMEA2000 object for Teensy internal CAN
-based setup. See also NMEA2000 library. 
-Requires FlexCAN library.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
 */
 
-#include <NMEA2000_teensy.h> 
+/*
+  Inherited NMEA2000 object for Teensy internal CAN
+  based setup. See also NMEA2000 library.
+  Requires FlexCAN library.
+*/
+
+#include <NMEA2000_teensy.h>
 #include <FlexCAN.h>
 #include <kinetis_flexcan.h>
 
@@ -42,7 +45,7 @@ bool tNMEA2000_teensy::CANSendFrame(unsigned long id, unsigned char len, const u
   out.ext = 1;
   out.len = len;
   out.timeout = (wait_sent?DefTimeOut:0);
-  
+
   for (int i=0; i<len && i<8; i++) out.buf[i] = buf[i];
 
   return CANbus->write(out) == 1;
@@ -59,7 +62,7 @@ bool tNMEA2000_teensy::CANSendFrame(unsigned long id, unsigned char len, const u
 
 //*****************************************************************************
 bool tNMEA2000_teensy::CANOpen() {
-  CANbus->begin();  
+  CANbus->begin();
   return true;
 }
 
@@ -68,7 +71,7 @@ bool tNMEA2000_teensy::CANGetFrame(unsigned long &id, unsigned char &len, unsign
   CAN_message_t incoming;
 
   if (CANbus->available() > 0) {
-    CANbus->read(incoming); 
+    CANbus->read(incoming);
     id = incoming.id;
     len = incoming.len;
     for (int i = 0; i < len && i < 8; i++) {
