@@ -158,9 +158,10 @@ separately.
  - [i2c_t3](https://github.com/nox771/i2c_t3) is under the LGPL
  - [ILI9341_t3](https://github.com/PaulStoffregen/ILI9341_t3) is under the MIT
    license
- - [NMEA2000](https://github.com/ttlappalainen/NMEA2000/) is under the LGPL
+ - [NMEA2000](https://github.com/ttlappalainen/NMEA2000/) is under the MIT
+   license
  - [NMEA2000_teensy](https://github.com/sarfata/NMEA2000_teensy) is under the
-   LGPL
+   MIT license
  - [Time](https://github.com/PaulStoffregen/Time) is under the LGPL
  - [SdFat](https://github.com/greiman/SdFat) is under the GPL
  - [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP) is under the LGPL

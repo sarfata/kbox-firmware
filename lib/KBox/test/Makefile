@@ -11,7 +11,7 @@ FRAMEWORK := $(HOME)/.platformio/packages/framework-arduinoteensy/cores/teensy3
 CFLAGS := -g -Wall
 CFLAGS := $(CFLAGS) -Iarduinomock/ -I$(FRAMEWORK) -I../../KBoxDebug/src
 CFLAGS := $(CFLAGS) -I../../List/src -I../../NMEA2000 -I../src
-CPPFLAGS := $(CFLAGS) -std=c++11
+CPPFLAGS := $(CFLAGS) -std=c++11 -DARDUINO
 
 # Transformation rules for C and CPP files
 %.o: %.cpp Makefile
@@ -49,7 +49,7 @@ NMEASentenceBuilderTest: NMEASentenceBuilderTest.o ../src/util/NMEASentenceBuild
 	$(CXX) $(CFLAGS) -o $@ $^
 
 # Test the visitor that converts KMessage into NMEA
-KMessageNMEAVisitorTest: KMessageNMEAVisitorTest.o ../src/util/NMEASentenceBuilder.o ../src/KMessage.o ../src/util/nmea.o ../src/util/nmea2000.o ../src/KMessageNMEAVisitor.o ../../NMEA2000/N2kMsg.o $(TEST_DEPS)
+KMessageNMEAVisitorTest: KMessageNMEAVisitorTest.o ../src/util/NMEASentenceBuilder.o ../src/KMessage.o ../src/util/nmea.o ../src/util/nmea2000.o ../src/KMessageNMEAVisitor.o ../../NMEA2000/N2kMsg.o ../../NMEA2000/N2kStream.cpp $(TEST_DEPS)
 	$(CXX) $(CFLAGS) -o $@ $^
 
 clean:
