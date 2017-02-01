@@ -23,7 +23,6 @@
 */
 #pragma once
 
-#include <KBox.h>
 #include <ui/GC.h>
 #include <os/Task.h>
 #include <signalk/KMessage.h>
