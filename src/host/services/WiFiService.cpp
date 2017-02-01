@@ -24,9 +24,9 @@
 
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
+#include <signalk/KMessageNMEAVisitor.h>
 
 #include "WiFiService.h"
-#include <signalk/KMessageNMEAVisitor.h>
 
 WiFiService::WiFiService(GC &gc) : Task("WiFi"), _slip(WiFiSerial, 2048), _kommandContext(_slip, gc) {
 }
