@@ -22,7 +22,7 @@
   THE SOFTWARE.
 */
 
-#include <KBox.h>
+#include <KBoxHardware.h>
 #include "MfgTest.h"
 
 class EncoderTestRotationLeft : public MfgTest {

@@ -24,8 +24,10 @@
 
 #pragma once
 
-#include <KBox.h>
+#include <KBoxHardware.h>
 #include <NMEA2000.h>
+#include <NMEA2000_teensy.h>
+#include <N2kMessages.h>
 #include "MfgTest.h"
 
 class N2KTest;

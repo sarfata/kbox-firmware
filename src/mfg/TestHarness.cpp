@@ -25,8 +25,6 @@
 #include <Arduino.h>
 #include "TestHarness.h"
 
-#include "drivers/ili9341display.h"
-
 #include "MfgTest.h"
 #include "EncoderTest.h"
 #include "NeopixelTest.h"
@@ -47,7 +45,7 @@ void TestHarness::setup() {
 void TestHarness::updateStatus(Color c, const String& text) {
   static const Rect statusRect(220, 5, 100, 30);
 
-  display.fillRectangle(statusRect, c);
+  display.fillRectangle(statusRect.origin(), statusRect.size(), c);
   display.drawText(Point(225, 13), FontDefault, ColorWhite, c, text);
 }
 

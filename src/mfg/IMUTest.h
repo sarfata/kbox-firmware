@@ -22,7 +22,7 @@
   THE SOFTWARE.
 */
 
-#include <KBox.h>
+#include <KBoxHardware.h>
 #include <Adafruit_BNO055.h>
 #include "MfgTest.h"
 

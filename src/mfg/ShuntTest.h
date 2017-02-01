@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <KBox.h>
+#include <KBoxHardware.h>
 #include <Adafruit_INA219.h>
 #include "MfgTest.h"
 

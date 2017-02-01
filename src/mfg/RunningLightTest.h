@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <KBox.h>
+#include <KBoxHardware.h>
 #include "MfgTest.h"
 
 class RunningLightTest : public MfgTest {

@@ -24,15 +24,16 @@
 
 #pragma once
 
-#include <KBox.h>
+#include <KBoxHardware.h>
 #include "MfgTest.h"
+#include "ILI9341_t3.h"
 
 class TestHarness {
   private:
-    Display& display;
+    ILI9341_t3 display;
 
   public:
-    TestHarness() : display(KBox.getDisplay()) {};
+    TestHarness() {};
 
     void runTest(MfgTest &t);
     void runAllTests();
