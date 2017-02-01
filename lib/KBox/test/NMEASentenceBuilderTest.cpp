@@ -23,7 +23,7 @@
 */
 
 #include "KBoxTest.h"
-#include "util/NMEASentenceBuilder.h"
+#include "nmea/NMEASentenceBuilder.h"
 
 TEST_CASE("generating an empty sentence") {
   NMEASentenceBuilder sb("GG", "ABC", 0);

@@ -23,7 +23,7 @@
 */
 
 #include "KBoxTest.h"
-#include "KMessageNMEAVisitor.h"
+#include "signalk/KMessageNMEAVisitor.h"
 
 static inline double DegToRad(double v) { return v/180.0*3.1415926535897932384626433832795; }
 

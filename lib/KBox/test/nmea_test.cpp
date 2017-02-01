@@ -23,7 +23,7 @@
 */
 
 #include "KBoxTest.h"
-#include "util/nmea.h"
+#include "nmea/nmea.h"
 
 TEST_CASE("nmea basic") {
   WHEN("sentence is empty") {

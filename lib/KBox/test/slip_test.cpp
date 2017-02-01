@@ -24,7 +24,7 @@
 
 
 #include "KBoxTest.h"
-#include "util/SlipStream.h"
+#include "comms/SlipStream.h"
 
 struct rxBuffer {
   size_t len;

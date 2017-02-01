@@ -37,19 +37,19 @@ $(FRAMEWORK)/WString.o: $(FRAMEWORK)/WString.cpp
 	$(CXX) $(CPPFLAGS) -D_NEWLIB_VERSION=1 -c $^ -o $@
 
 # Test the NMEA helper functions
-nmea_test: nmea_test.o ../src/util/nmea.o $(TEST_DEPS)
+nmea_test: nmea_test.o ../src/nmea/nmea.o $(TEST_DEPS)
 	$(CXX) $(CFLAGS) -o $@ $^
 
 # Test the SLIP encapsulation code
-slip_test: slip_test.o ../src/util/SlipStream.o $(TEST_DEPS)
+slip_test: slip_test.o ../src/comms/SlipStream.o $(TEST_DEPS)
 	$(CXX) $(CFLAGS) -o $@ $^
 
 # Test the NMEASentenceBuilder
-NMEASentenceBuilderTest: NMEASentenceBuilderTest.o ../src/util/NMEASentenceBuilder.o ../src/util/nmea.o $(TEST_DEPS)
+NMEASentenceBuilderTest: NMEASentenceBuilderTest.o ../src/nmea/NMEASentenceBuilder.o ../src/nmea/nmea.o $(TEST_DEPS)
 	$(CXX) $(CFLAGS) -o $@ $^
 
 # Test the visitor that converts KMessage into NMEA
-KMessageNMEAVisitorTest: KMessageNMEAVisitorTest.o ../src/util/NMEASentenceBuilder.o ../src/KMessage.o ../src/util/nmea.o ../src/util/nmea2000.o ../src/KMessageNMEAVisitor.o ../../NMEA2000/N2kMsg.o $(TEST_DEPS)
+KMessageNMEAVisitorTest: KMessageNMEAVisitorTest.o ../src/nmea/NMEASentenceBuilder.o ../src/signalk/KMessage.o ../src/nmea/nmea.o ../src/nmea/nmea2000.o ../src/signalk/KMessageNMEAVisitor.o ../../NMEA2000/N2kMsg.o $(TEST_DEPS)
 	$(CXX) $(CFLAGS) -o $@ $^
 
 clean:
