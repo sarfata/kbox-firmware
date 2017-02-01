@@ -27,9 +27,9 @@
 #include <KBoxLogging.h>
 #include "ESPProgrammer.h"
 
-ESPProgrammer::ESPProgrammer(Adafruit_NeoPixel &pixels, usb_serial_class &computerSerial, HardwareSerial &espSerial) :
-  pixels(pixels), computerSerial(computerSerial), espSerial(espSerial),
-  computerConnection(computerSerial, bootloaderMtu), espConnection(espSerial, bootloaderMtu),
+ESPProgrammer::ESPProgrammer(Adafruit_NeoPixel &pixels, usb_serial_class &computerSerial, ESPProxy &espProxy) :
+  pixels(pixels), espProxy(espProxy), computerSerial(computerSerial), espSerial(espProxy.getSerialPort()),
+  computerConnection(computerSerial, bootloaderMtu), espConnection(espProxy.getSerialPort(), bootloaderMtu),
   state(Disconnected)
 {
   buffer = (uint8_t*)malloc(bootloaderMtu);
@@ -103,7 +103,7 @@ void ESPProgrammer::loopByteMode() {
     if (lastDTR && !lastRTS) {
       DEBUG("ESP Reboot requested");
       state = FrameMode;
-      KBox.espRebootInFlasher();
+      espProxy.rebootInFlasher();
     }
   }
   else {
