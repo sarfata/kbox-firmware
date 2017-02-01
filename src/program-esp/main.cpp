@@ -23,13 +23,21 @@
 */
 
 #include <Arduino.h>
-#include <KBox.h>
-#include <util/SlipStream.h>
-#include <util/ESPProgrammer.h>
+#include <KBoxHardware.h>
+#include <KBoxLogging.h>
 #include <KBoxLoggerStream.h>
+#include <comms/SlipStream.h>
+#include "../host/esp-programmer/ESPProgrammer.h"
 
-ESPProgrammer programmer(KBox.getNeopixels(), Serial, Serial1);
+class ESPProgrammerDelegateImpl : public ESPProgrammerDelegate {
+  void rebootInFlasher() {
+    KBox.espRebootInFlasher();
+  };
+};
 
+ESPProgrammerDelegateImpl delegate;
+
+ESPProgrammer programmer(KBox.getNeopixels(), Serial, Serial1, delegate);
 
 void setup() {
   // Use Serial3 as the Debug output to avoid trashing the communication
@@ -38,8 +46,8 @@ void setup() {
   KBoxLogging.setLogger(new KBoxLoggerStream(Serial3));
 
   DEBUG("Starting esp program");
-  esp_init();
-  esp_reboot_in_program();
+  KBox.espInit();
+  KBox.espRebootInProgram();
 
   Serial.setTimeout(0);
   Serial1.setTimeout(0);
