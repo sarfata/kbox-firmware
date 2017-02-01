@@ -23,10 +23,10 @@
 */
 #pragma once
 
-#include <Arduino.h> // for millis()
 #include <stdint.h>
 #include <limits.h>
 #include <List.h>
+#include <elapsedMillis.h>
 #include "Task.h"
 
 class IntervalTask : public Task {

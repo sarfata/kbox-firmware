@@ -39,7 +39,7 @@ void KMessageNMEAVisitor::visit(const BarometerMeasurement &bm) {
   sb.setField(3, "B");
   sb.setField(4, "Barometer");
   sb.setField(5, "T");
-  sb.setField(6, bm.getTemperature());
+  sb.setField(6, bm.getTemperature(), 2);
   sb.setField(7, "C");
   sb.setField(8, "TempAir");
   nmeaContent += sb.toNMEA() + "\r\n";
@@ -81,14 +81,14 @@ void KMessageNMEAVisitor::visit(const IMUMessage &imu) {
   sb.setField(12, "Roll");
 
   sb.setField(13, "");
-  sb.setField(14, imu.getCalibration());
+  sb.setField(14, String(imu.getCalibration()));
   sb.setField(15, "");
   sb.setField(16, "Calibration");
 
   nmeaContent += sb.toNMEA() + "\r\n";
 
   NMEASentenceBuilder sb2("II", "HDM", 2);
-  sb2.setField(1, imu.getCourse());
+  sb2.setField(1, imu.getCourse(), 1);
   sb2.setField(2, "M");
 
   nmeaContent += sb2.toNMEA() + "\r\n";

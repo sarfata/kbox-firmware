@@ -37,7 +37,7 @@ static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0xff);
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <util/SlipStream.h>
+#include <comms/SlipStream.h>
 //#include <util/KommandContext.h>
 
 SlipStream slip(Serial, 2048);
