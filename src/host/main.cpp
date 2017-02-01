@@ -53,6 +53,8 @@ void setup() {
   // https://forum.pjrc.com/threads/27827-Float-in-sscanf-on-Teensy-3-1
   asm(".global _printf_float");
 
+  KBox.setup();
+
   // Clears the screen
   mfd.setup();
 

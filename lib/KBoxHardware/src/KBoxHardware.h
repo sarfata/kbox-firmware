@@ -51,7 +51,7 @@ class KBoxHardware {
     ADC adc;
 
   public:
-    KBoxHardware();
+    void setup();
 
     ILI9341_t3& getDisplay() {
       return display;

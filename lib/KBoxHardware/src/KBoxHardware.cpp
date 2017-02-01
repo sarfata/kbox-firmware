@@ -27,7 +27,7 @@
 
 KBoxHardware KBox;
 
-KBoxHardware::KBoxHardware() {
+void KBoxHardware::setup() {
   pinMode(led_pin, OUTPUT);
 
   // Initialize our I2C bus

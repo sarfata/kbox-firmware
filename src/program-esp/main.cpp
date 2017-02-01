@@ -40,6 +40,8 @@ ESPProgrammerDelegateImpl delegate;
 ESPProgrammer programmer(KBox.getNeopixels(), Serial, Serial1, delegate);
 
 void setup() {
+  KBox.setup();
+
   // Use Serial3 as the Debug output to avoid trashing the communication
   // with the programmer program running on host.
   Serial3.begin(920800);
