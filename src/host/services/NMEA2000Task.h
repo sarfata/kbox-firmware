@@ -24,10 +24,10 @@
 
 #pragma once
 
-#include <N2kMessages.h>
+#include <N2kMsg.h>
 #include <NMEA2000_teensy.h>
-#include "util/Task.h"
-#include "KMessage.h"
+#include <os/Task.h>
+#include <signalk/KMessage.h>
 
 class NMEA2000Task : public Task, public KGenerator, public KReceiver, public KVisitor {
   private:

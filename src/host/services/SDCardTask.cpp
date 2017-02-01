@@ -23,9 +23,10 @@
 */
 
 #include <KBoxLogging.h>
+#include <KBoxHardware.h>
+#include <signalk/KMessageNMEAVisitor.h>
+
 #include "SDCardTask.h"
-#include "drivers/board.h"
-#include "KMessageNMEAVisitor.h"
 
 SDCardTask::SDCardTask() : Task("SDCard") {
   DEBUG("init sdcard ...");

@@ -21,21 +21,32 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include <SPI.h>
-#include <Encoder.h>
-#include <i2c_t3.h>
-#include <KBox.h>
 
-// Those are included here to force platformio to link to them.
-// See issue github.com/platformio/platformio/issues/432 for a better way to do this.
-#include <Bounce.h>
+#include <KBoxHardware.h>
+#include <os/TaskManager.h>
+#include <os/Task.h>
+#include "drivers/ILI9341GC.h"
+#include "pages/BatteryMonitorPage.h"
+#include "pages/StatsPage.h"
+#include "services/ADCTask.h"
+#include "services/BarometerN2kConverter.h"
+#include "services/BarometerTask.h"
+#include "services/IMUTask.h"
+#include "services/MFD.h"
+#include "services/NMEA2000Task.h"
+#include "services/NMEAReaderTask.h"
+#include "services/RunningLightTask.h"
+#include "services/SDCardTask.h"
+#include "services/USBService.h"
+#include "services/VoltageN2kConverter.h"
+#include "services/WiFiService.h"
 
-#include "ClockPage.h"
-
-MFD mfd(KBox.getDisplay(), KBox.getEncoder(), KBox.getButton());
+Size gcSize(320, 240);
+ILI9341GC gc(KBox.getDisplay(), gcSize);
+MFD mfd(gc, KBox.getEncoder(), KBox.getButton());
 TaskManager taskManager;
 
-USBService usbService;
+USBService usbService(gc);
 
 void setup() {
   // Enable float in printf:
@@ -55,7 +66,7 @@ void setup() {
   digitalWrite(led_pin, 1);
 
   // Create all the receiver task first
-  WiFiService *wifi = new WiFiService();
+  WiFiService *wifi = new WiFiService(gc);
 
   // Create all the generating tasks and connect them
   NMEA2000Task *n2kTask = new NMEA2000Task();

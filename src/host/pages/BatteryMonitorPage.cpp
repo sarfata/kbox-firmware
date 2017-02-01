@@ -22,8 +22,8 @@
   THE SOFTWARE.
 */
 
-#include "BatteryMonitorPage.h"
 #include <stdio.h>
+#include "BatteryMonitorPage.h"
 
 BatteryMonitorPage::BatteryMonitorPage() {
   static const int col1 = 5;

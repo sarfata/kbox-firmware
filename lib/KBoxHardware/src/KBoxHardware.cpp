@@ -82,17 +82,17 @@ KBoxHardware::KBoxHardware() {
 }
 
 void KBoxHardware::setBacklight(BacklightIntensity intensity) {
-  if (backlightPin) {
+  if (display_backlight) {
     if (intensity > 0) {
-      analogWrite(backlightPin, intensity);
+      analogWrite(display_backlight, intensity);
     }
     else {
-      analogWrite(backlightPin, 0);
+      analogWrite(display_backlight, 0);
     }
   }
 }
 
-void KBoxHardwar::espInit() {
+void KBoxHardware::espInit() {
   WiFiSerial.begin(115200);
   WiFiSerial.setTimeout(0);
 

@@ -29,6 +29,7 @@
 #include <ADC.h>
 #include <Bounce.h>
 #include <Encoder.h>
+#include <ILI9341_t3.h>
 
 #include "board.h"
 
@@ -52,7 +53,7 @@ class KBoxHardware {
   public:
     KBoxHardware();
 
-    Display& getDisplay() {
+    ILI9341_t3& getDisplay() {
       return display;
     };
 
@@ -79,4 +80,4 @@ class KBoxHardware {
     void espRebootInProgram();
 };
 
-extern KBoxClass KBox;
+extern KBoxHardware KBox;

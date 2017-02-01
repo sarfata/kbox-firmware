@@ -21,7 +21,8 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "KMessage.h"
+
+#include "signalk/KMessage.h"
 
 class BarometerN2kConverter : public KReceiver, public KGenerator, public KVisitor {
   public:

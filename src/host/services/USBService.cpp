@@ -22,14 +22,18 @@
   THE SOFTWARE.
 */
 
-#include "USBService.h"
 #include <Arduino.h>
 #include <KBoxLogging.h>
-#include <KBox.h>
-#include "util/ESPProgrammer.h"
-#include "util/Kommand.h"
+#include <KBoxHardware.h>
+#include <comms/Kommand.h>
+#include "../esp-programmer/ESPProgrammer.h"
+#include "../drivers/ILI9341GC.h"
 
-USBService::USBService() : Task("USBService"), _slip(Serial, 2048), _streamLogger(KBoxLoggerStream(Serial)), _kommandContext(_slip, KBox.getDisplay()), _state(ConnectedDebug) {
+#include "USBService.h"
+
+USBService::USBService(GC &gc) : Task("USBService"), _slip(Serial, 2048),
+  _streamLogger(KBoxLoggerStream(Serial)),
+  _kommandContext(_slip, gc), _state(ConnectedDebug) {
 }
 
 void USBService::setup() {
@@ -102,6 +106,12 @@ void USBService::loopConnectedFrame() {
   }
 }
 
+class ESPProgrammerDelegateImpl : public ESPProgrammerDelegate {
+  void rebootInFlasher() {
+    KBox.espRebootInFlasher();
+  };
+};
+
 /**
  * Forwards all messages between host computer and ESP8266 module so that a
  * standard ESP8266 program can be used.
@@ -111,7 +121,9 @@ void USBService::loopConnectedFrame() {
  * that (see @class ESPProgrammer).
  */
 void USBService::loopConnectedESPProgramming() {
-  ESPProgrammer programmer(KBox.getNeopixels(), Serial, Serial1);
+  ESPProgrammerDelegateImpl delegate;
+  ESPProgrammer programmer(KBox.getNeopixels(), Serial, Serial1, delegate);
+
   while (programmer.getState() != ESPProgrammer::ProgrammerState::Done) {
     programmer.loop();
   }

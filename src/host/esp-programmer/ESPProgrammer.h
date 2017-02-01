@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include <Adafruit_NeoPixel.h>
 #include <elapsedMillis.h>
-#include "comms/SlipStream.h"
+#include <comms/SlipStream.h>
 
 // From esptool.py - List of bootloader commands
 #define ESP_CMD_FLASH_BEGIN 0x02
@@ -47,14 +47,12 @@ struct ESPFrameHeader {
 
 /**
  * ESPProgrammer needs to know how to talk to the ESP module and how to reboot
- * it. The user must implement ESPProxy and provide it when initializing the
- * class.
+ * it. The user must implement ESPProgrammerDelegate and provide it when 
+ * initializing the class.
  */
-class ESPProxy {
+class ESPProgrammerDelegate {
   public:
-    virtual HardwareSerial& getSerialPort() = 0;
     virtual void rebootInFlasher() = 0;
-    virtual void rebootInProgram() = 0;
 };
 
 /** Implements support for programming the ESP from the computer.
@@ -76,7 +74,7 @@ class ESPProgrammer {
     uint8_t *buffer;
     Adafruit_NeoPixel &pixels;
 
-    ESPProxy &espProxy;
+    ESPProgrammerDelegate &delegate;
     usb_serial_class &computerSerial;
     HardwareSerial &espSerial;
     SlipStream computerConnection;
@@ -99,7 +97,7 @@ class ESPProgrammer {
     uint32_t dimColor(uint32_t color, uint8_t maxBrightness);
 
   public:
-    ESPProgrammer(Adafruit_NeoPixel &pixels, usb_serial_class &computerSerial, ESPProxy &espProxy);
+    ESPProgrammer(Adafruit_NeoPixel &pixels, usb_serial_class &computerSerial, HardwareSerial &espSerial, ESPProgrammerDelegate &espDelegate);
     ~ESPProgrammer();
 
     ProgrammerState getState() const {

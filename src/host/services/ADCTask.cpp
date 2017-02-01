@@ -23,11 +23,9 @@
 */
 
 #include <KBoxLogging.h>
-#include "ADCTask.h"
-#include "../drivers/board.h"
+#include <KBoxHardware.h>
 
-#include <NMEA2000.h>
-#include <N2kMessages.h>
+#include "ADCTask.h"
 
 void ADCTask::loop() {
   int supply_adc = adc.analogRead(supply_analog, ADC_0);
@@ -41,7 +39,7 @@ void ADCTask::loop() {
   bat3 = bat3_adc * analog_max_voltage / adc.getMaxValue();
 
   //DEBUG("ADC - Supply: %sV Bat1: %sV Bat2: %sV Bat3: %sV", 
-      //String(supply, 2).c_str(), String(bat1, 2).c_str(), String(bat2, 2).c_str(), String(bat3, 2).c_str());
+  //String(supply, 2).c_str(), String(bat1, 2).c_str(), String(bat2, 2).c_str(), String(bat3, 2).c_str());
 
   VoltageMeasurement m1(0, "house", bat1);
   VoltageMeasurement m2(1, "starter", bat2);

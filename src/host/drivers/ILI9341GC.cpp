@@ -22,11 +22,10 @@
   THE SOFTWARE.
 */
 
-#include <ILI9341_t3.h>
 #include <font_DroidSans.h>
 #include "ILI9341GC.h"
 
-ILI9341GC::ILI9341GC(ILI9341_t3 &display) : display(display) {
+ILI9341GC::ILI9341GC(ILI9341_t3 &display, Size &size) : display(display), size(size) {
 };
 
 // TODO: delete me when everything has been updated to provide bgColor
@@ -39,32 +38,36 @@ void ILI9341GC::drawText(Point a, Font font, Color color, Color bgColor, const c
 }
 
 void ILI9341GC::drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text) {
-  display->setCursor(a.x(), a.y());
-  display->setTextColor(color, bgColor);
+  display.setCursor(a.x(), a.y());
+  display.setTextColor(color, bgColor);
 
   switch (font) {
     case FontDefault:
-      display->setFont(DroidSans_12);
+      display.setFont(DroidSans_12);
       break;
     case FontLarge:
-      display->setFont(DroidSans_32);
+      display.setFont(DroidSans_32);
       break;
   };
-  display->println(text);
+  display.println(text);
 }
 
 void ILI9341GC::drawLine(Point a, Point b, Color color) {
-  display->drawLine(a.x(), a.y(), b.x(), b.y(), color);
+  display.drawLine(a.x(), a.y(), b.x(), b.y(), color);
 }
 
 void ILI9341GC::drawRectangle(Point orig, Size size, Color color) {
-  display->drawRect(orig.x(), orig.y(), size.width(), size.height(), color);
+  display.drawRect(orig.x(), orig.y(), size.width(), size.height(), color);
 }
 
 void ILI9341GC::fillRectangle(Point orig, Size size, Color color) {
-  display->fillRect(orig.x(), orig.y(), size.width(), size.height(), color);
+  display.fillRect(orig.x(), orig.y(), size.width(), size.height(), color);
 }
 
 void ILI9341GC::readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors) {
-  display->readRect(x, y, w, h, pcolors);
+  display.readRect(x, y, w, h, pcolors);
+}
+
+const Size& ILI9341GC::getSize() const {
+  return size;
 }

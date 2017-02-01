@@ -27,9 +27,14 @@
 #include <KBoxLogging.h>
 #include "ESPProgrammer.h"
 
-ESPProgrammer::ESPProgrammer(Adafruit_NeoPixel &pixels, usb_serial_class &computerSerial, ESPProxy &espProxy) :
-  pixels(pixels), espProxy(espProxy), computerSerial(computerSerial), espSerial(espProxy.getSerialPort()),
-  computerConnection(computerSerial, bootloaderMtu), espConnection(espProxy.getSerialPort(), bootloaderMtu),
+#include <board.h> // From KBoxHardware - For led_pin definition
+
+ESPProgrammer::ESPProgrammer(Adafruit_NeoPixel &pixels, 
+    usb_serial_class &computerSerial, 
+    HardwareSerial &espSerial, 
+    ESPProgrammerDelegate &espDelegate) :
+  pixels(pixels), delegate(espDelegate), computerSerial(computerSerial), espSerial(espSerial),
+  computerConnection(computerSerial, bootloaderMtu), espConnection(espSerial, bootloaderMtu),
   state(Disconnected)
 {
   buffer = (uint8_t*)malloc(bootloaderMtu);
@@ -103,7 +108,7 @@ void ESPProgrammer::loopByteMode() {
     if (lastDTR && !lastRTS) {
       DEBUG("ESP Reboot requested");
       state = FrameMode;
-      espProxy.rebootInFlasher();
+      delegate.rebootInFlasher();
     }
   }
   else {

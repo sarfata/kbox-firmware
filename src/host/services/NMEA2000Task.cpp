@@ -23,10 +23,11 @@
 */
 
 #include <KBoxLogging.h>
-#include "../drivers/board.h"
+#include <KBoxHardware.h>
+#include <stats/KBoxMetrics.h>
+#include <nmea/nmea2000.h>
+#include <N2kMessages.h>
 #include "NMEA2000Task.h"
-#include "util/KBoxMetrics.h"
-#include "util/nmea2000.h"
 
 static NMEA2000Task *handlerContext;
 

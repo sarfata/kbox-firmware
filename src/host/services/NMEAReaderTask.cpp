@@ -25,7 +25,7 @@
 #include <KBoxLogging.h>
 #include <Arduino.h>
 #include <List.h>
-#include "util/KBoxMetrics.h"
+#include <stats/KBoxMetrics.h>
 #include "NMEAReaderTask.h"
 
 

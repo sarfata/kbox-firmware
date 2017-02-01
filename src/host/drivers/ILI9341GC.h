@@ -22,9 +22,8 @@
   THE SOFTWARE.
 */
 
-class ILI9341_t3;
-
-#include "GC.h"
+#include <ILI9341_t3.h>
+#include <ui/GC.h>
 
 /**
  * This class implements all the GC primitives with the ILI9341_t3 driver.
@@ -32,9 +31,10 @@ class ILI9341_t3;
 class ILI9341GC : public GC {
   private:
     ILI9341_t3 &display;
+    Size &size;
 
   public:
-    ILI9341GC(ILI9341_t3 &display);
+    ILI9341GC(ILI9341_t3 &display, Size &size);
 
     void drawText(Point a, Font font, Color color, const char *text);
     void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
@@ -43,4 +43,5 @@ class ILI9341GC : public GC {
     void drawRectangle(Point orig, Size size, Color color);
     void fillRectangle(Point orig, Size size, Color color);
     void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
+    const Size& getSize() const;
 };

@@ -21,9 +21,10 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #include <Adafruit_BNO055.h>
-#include "util/Task.h"
-#include "KMessage.h"
+#include <os/Task.h>
+#include <signalk/KMessage.h>
 
 class IMUTask : public Task, public KGenerator {
   private:

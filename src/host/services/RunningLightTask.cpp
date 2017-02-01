@@ -21,7 +21,8 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "../drivers/board.h"
+
+#include <KBoxHardware.h>
 #include "RunningLightTask.h"
 
 void RunningLightTask::setup() {

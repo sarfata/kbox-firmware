@@ -22,8 +22,8 @@
   THE SOFTWARE.
 */
 
-#include "MFD.h"
-#include "KMessage.h"
+#include "signalk/KMessage.h"
+#include "ui/Page.h"
 #include "ui/TextLayer.h"
 
 class BatteryMonitorPage : public Page, public KReceiver, public KVisitor {

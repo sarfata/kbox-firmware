@@ -24,7 +24,7 @@
 
 #include <malloc.h>
 #include "StatsPage.h"
-#include "util/KBoxMetrics.h"
+#include "stats/KBoxMetrics.h"
 
 StatsPage::StatsPage() {
   loadView();

@@ -23,18 +23,18 @@
 */
 
 #include <KBoxLogging.h>
-#include "WiFiService.h"
-#include "../drivers/board.h"
-#include "../drivers/esp8266.h"
-#include "KMessageNMEAVisitor.h"
+#include <KBoxHardware.h>
 
-WiFiService::WiFiService() : Task("WiFi"), _slip(WiFiSerial, 2048), _kommandContext(_slip, KBox.getDisplay()) {
+#include "WiFiService.h"
+#include <signalk/KMessageNMEAVisitor.h>
+
+WiFiService::WiFiService(GC &gc) : Task("WiFi"), _slip(WiFiSerial, 2048), _kommandContext(_slip, gc) {
 }
 
 void WiFiService::setup() {
-  esp_init();
+  KBox.espInit();
   DEBUG("booting ESP!");
-  esp_reboot_in_program();
+  KBox.espRebootInProgram();
 }
 
 void WiFiService::loop() {

@@ -23,11 +23,10 @@
 */
 
 #include <KBoxLogging.h>
-#include "BarometerTask.h"
-#include "i2c_t3.h"
-#include "../drivers/board.h"
+#include <KBoxHardware.h>
+#include <Adafruit_BMP280.h>
 
-#include "Adafruit_BMP280.h"
+#include "BarometerTask.h"
 
 void BarometerTask::setup() {
   if (!bmp280.begin(bmp280_address)) {

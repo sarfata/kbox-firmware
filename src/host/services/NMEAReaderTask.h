@@ -23,9 +23,9 @@
 */
 #pragma once
 
-#include "util/Task.h"
-#include "KMessage.h"
-#include "util/KBoxMetrics.h"
+#include <os/Task.h>
+#include <signalk/KMessage.h>
+#include <stats/KBoxMetrics.h>
 
 // completely arbitrary value. "ought to be enough..."
 #define MAX_NMEA_SENTENCE_LENGTH 200

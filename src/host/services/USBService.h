@@ -26,9 +26,10 @@
 
 #include <KBoxLogging.h>
 #include <KBoxLoggerStream.h>
-#include "util/SlipStream.h"
-#include "util/Task.h"
-#include "util/KommandContext.h"
+#include <comms/SlipStream.h>
+#include <comms/KommandContext.h>
+#include <os/Task.h>
+#include <ui/GC.h>
 
 class USBService : public Task, public KBoxLogger {
   private:
@@ -51,7 +52,7 @@ class USBService : public Task, public KBoxLogger {
     void sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs);
 
   public:
-    USBService();
+    USBService(GC &gc);
     ~USBService() {};
 
     void setup();

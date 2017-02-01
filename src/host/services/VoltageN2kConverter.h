@@ -21,7 +21,10 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "../KMessage.h"
+
+#pragma once
+
+#include <signalk/KMessage.h>
 
 class VoltageN2kConverter : public KReceiver, public KGenerator {
   public:

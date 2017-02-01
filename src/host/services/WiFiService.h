@@ -23,12 +23,13 @@
 */
 #pragma once
 
-#include "KBox.h"
-#include "util/Task.h"
-#include "KMessage.h"
-#include "util/Kommand.h"
-#include "util/KommandContext.h"
-#include "util/SlipStream.h"
+#include <KBox.h>
+#include <ui/GC.h>
+#include <os/Task.h>
+#include <signalk/KMessage.h>
+#include <comms/Kommand.h>
+#include <comms/KommandContext.h>
+#include <comms/SlipStream.h>
 
 class WiFiService : public Task, public KReceiver {
   private:
@@ -36,7 +37,7 @@ class WiFiService : public Task, public KReceiver {
     KommandContext _kommandContext;
 
   public:
-    WiFiService();
+    WiFiService(GC &gc);
 
     void setup();
     void loop();
