@@ -88,7 +88,7 @@ void KMessageNMEAVisitor::visit(const IMUMessage &imu) {
   nmeaContent += sb.toNMEA() + "\r\n";
 
   NMEASentenceBuilder sb2("II", "HDM", 2);
-  sb2.setField(1, imu.getCourse(), 1);
+  sb2.setField(1, imu.getCourse(), 2);
   sb2.setField(2, "M");
 
   nmeaContent += sb2.toNMEA() + "\r\n";
