@@ -41,8 +41,7 @@
 #include "services/VoltageN2kConverter.h"
 #include "services/WiFiService.h"
 
-Size gcSize(320, 240);
-ILI9341GC gc(KBox.getDisplay(), gcSize);
+ILI9341GC gc(KBox.getDisplay(), Size(320, 240));
 MFD mfd(gc, KBox.getEncoder(), KBox.getButton());
 TaskManager taskManager;
 

@@ -31,10 +31,10 @@
 class ILI9341GC : public GC {
   private:
     ILI9341_t3 &display;
-    Size &size;
+    Size size;
 
   public:
-    ILI9341GC(ILI9341_t3 &display, Size &size);
+    ILI9341GC(ILI9341_t3 &display, Size size);
 
     void drawText(Point a, Font font, Color color, const char *text);
     void drawText(Point a, Font font, Color color, Color bgColor, const char *text);

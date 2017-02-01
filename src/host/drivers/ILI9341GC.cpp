@@ -25,7 +25,7 @@
 #include <font_DroidSans.h>
 #include "ILI9341GC.h"
 
-ILI9341GC::ILI9341GC(ILI9341_t3 &display, Size &size) : display(display), size(size) {
+ILI9341GC::ILI9341GC(ILI9341_t3 &display, Size size) : display(display), size(size) {
 };
 
 // TODO: delete me when everything has been updated to provide bgColor
