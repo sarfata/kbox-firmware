@@ -28,7 +28,7 @@
 
 #include <Bounce.h>
 #include <Encoder.h>
-#include <List.h>
+#include "algo/List.h"
 #include <KBoxLogging.h>
 
 #include "ui/GC.h"

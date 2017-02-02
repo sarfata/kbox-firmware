@@ -45,4 +45,3 @@ runmfg:
 test:
 	platformio run -e test
 	.pioenvs/test/program
-	cd lib/List/test && make test

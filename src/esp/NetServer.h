@@ -25,7 +25,7 @@
 
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
-#include <List.h>
+#include "algo/List.h"
 
 /*
  * Used to build a buffer (with a LinkedList<NetMessage>) of 
