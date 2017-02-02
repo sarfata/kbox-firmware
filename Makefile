@@ -43,5 +43,6 @@ runmfg:
 	miniterm.py $(PORT) 115200
 
 test:
+	platformio run -e test
+	.pioenvs/test/program
 	cd lib/List/test && make test
-	cd lib/KBox/test && make test
