@@ -25,7 +25,7 @@
 #include <Arduino.h>
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
-#include <comms/Kommand.h>
+#include "comms/Kommand.h"
 #include "../esp-programmer/ESPProgrammer.h"
 #include "../drivers/ILI9341GC.h"
 

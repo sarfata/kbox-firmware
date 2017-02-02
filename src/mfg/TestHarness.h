@@ -26,14 +26,14 @@
 
 #include <KBoxHardware.h>
 #include "MfgTest.h"
-#include "ILI9341_t3.h"
+#include "../host/drivers/ILI9341GC.h"
 
 class TestHarness {
   private:
-    ILI9341_t3 display;
+    ILI9341GC display;
 
   public:
-    TestHarness() {};
+    TestHarness() : display(KBox.getDisplay(), Size(320, 240)) {};
 
     void runTest(MfgTest &t);
     void runAllTests();

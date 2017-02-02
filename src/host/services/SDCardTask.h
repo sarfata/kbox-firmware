@@ -25,8 +25,8 @@
 #pragma once
 
 #include <SdFat.h>
-#include <os/Task.h>
-#include <signalk/KMessage.h>
+#include "os/Task.h"
+#include "signalk/KMessage.h"
 
 class Loggable {
   public:

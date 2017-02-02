@@ -26,7 +26,7 @@
 #include <KBoxHardware.h>
 #include <KBoxLogging.h>
 #include <KBoxLoggerStream.h>
-#include <comms/SlipStream.h>
+#include "comms/SlipStream.h"
 #include "../host/esp-programmer/ESPProgrammer.h"
 
 class ESPProgrammerDelegateImpl : public ESPProgrammerDelegate {

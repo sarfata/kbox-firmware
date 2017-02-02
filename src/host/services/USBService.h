@@ -26,10 +26,10 @@
 
 #include <KBoxLogging.h>
 #include <KBoxLoggerStream.h>
-#include <comms/SlipStream.h>
-#include <comms/KommandContext.h>
-#include <os/Task.h>
-#include <ui/GC.h>
+#include "comms/SlipStream.h"
+#include "comms/KommandContext.h"
+#include "os/Task.h"
+#include "ui/GC.h"
 
 class USBService : public Task, public KBoxLogger {
   private:

@@ -23,8 +23,8 @@
 */
 
 #include <KBoxHardware.h>
-#include <os/TaskManager.h>
-#include <os/Task.h>
+#include "os/TaskManager.h"
+#include "os/Task.h"
 #include "drivers/ILI9341GC.h"
 #include "pages/BatteryMonitorPage.h"
 #include "pages/StatsPage.h"

@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include <Adafruit_NeoPixel.h>
 #include <elapsedMillis.h>
-#include <comms/SlipStream.h>
+#include "comms/SlipStream.h"
 
 // From esptool.py - List of bootloader commands
 #define ESP_CMD_FLASH_BEGIN 0x02

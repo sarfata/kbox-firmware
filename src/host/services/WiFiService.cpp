@@ -24,7 +24,7 @@
 
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
-#include <signalk/KMessageNMEAVisitor.h>
+#include "signalk/KMessageNMEAVisitor.h"
 
 #include "WiFiService.h"
 

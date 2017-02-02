@@ -29,6 +29,7 @@
 TestHarness th;
 
 void setup() {
+  KBox.setup();
   Serial.begin(115200);
 }
 

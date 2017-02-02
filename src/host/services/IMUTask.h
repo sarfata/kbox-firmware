@@ -23,8 +23,8 @@
 */
 
 #include <Adafruit_BNO055.h>
-#include <os/Task.h>
-#include <signalk/KMessage.h>
+#include "os/Task.h"
+#include "signalk/KMessage.h"
 
 class IMUTask : public Task, public KGenerator {
   private:

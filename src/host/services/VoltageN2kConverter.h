@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <signalk/KMessage.h>
+#include "signalk/KMessage.h"
 
 class VoltageN2kConverter : public KReceiver, public KGenerator {
   public:

@@ -23,7 +23,7 @@
 */
 
 #include <ILI9341_t3.h>
-#include <ui/GC.h>
+#include "ui/GC.h"
 
 /**
  * This class implements all the GC primitives with the ILI9341_t3 driver.

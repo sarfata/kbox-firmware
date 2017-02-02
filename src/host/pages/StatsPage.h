@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include <ui/Page.h>
-#include <ui/TextLayer.h>
+#include "ui/Page.h"
+#include "ui/TextLayer.h"
 
 #include "../services/SDCardTask.h"
 

@@ -24,8 +24,8 @@
 
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
-#include <stats/KBoxMetrics.h>
-#include <nmea/nmea2000.h>
+#include "stats/KBoxMetrics.h"
+#include "nmea/nmea2000.h"
 #include <N2kMessages.h>
 #include "NMEA2000Task.h"
 

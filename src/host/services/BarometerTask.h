@@ -25,8 +25,8 @@
 #pragma once
 
 #include <Adafruit_BMP280.h>
-#include <os/Task.h>
-#include <signalk/KMessage.h>
+#include "os/Task.h"
+#include "signalk/KMessage.h"
 
 class BarometerTask : public Task, public KGenerator {
   private:
