@@ -128,6 +128,8 @@ void setup() {
 
   mfd.addPage(statsPage);
 
+  taskManager.setup();
+
   Serial.setTimeout(0);
   Serial1.setTimeout(0);
   Serial2.setTimeout(0);
