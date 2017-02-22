@@ -33,7 +33,10 @@ void BarometerN2kConverter::visit(const BarometerMeasurement &bm) {
   static int sid = 0;
   // Seems the i70 display will only show sea or outside temperature and
   // outside humidity.
-  SetN2kPGN130311(n2km, sid++, N2kts_OutsideTemperature, CToKelvin(bm.getTemperature()),
-      N2khs_OutsideHumidity, 42, bm.getPressure());
+  SetN2kPGN130311(n2km, sid++,
+    N2kts_OutsideTemperature, CToKelvin(bm.getTemperature()),
+    N2khs_Undef, N2kDoubleNA,
+    bm.getPressure()
+  );
   sendMessage(NMEA2000Message(n2km));
 }
