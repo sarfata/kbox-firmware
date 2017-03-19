@@ -31,7 +31,12 @@ class KBoxLogger;
 enum KBoxLoggingLevel {
   KBoxLoggingLevelDebug,
   KBoxLoggingLevelInfo,
-  KBoxLoggingLevelError
+  KBoxLoggingLevelError,
+
+  // Following levels are used when relaying logs received from WiFi module by host
+  KBoxLoggingLevelESPDebug,
+  KBoxLoggingLevelESPInfo,
+  KBoxLoggingLevelESPError
 };
 
 class KBoxLogger {

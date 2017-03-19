@@ -57,6 +57,26 @@ uint32_t KommandReader::read32() {
   return w;
 }
 
+const char *KommandReader::readNullTerminatedString() {
+  char *s = (char*)buffer + index;
+
+  // Make sure there is a 0 termination before end of buffer
+  // At the same time, advance index to next element in buffer.
+  while (index < size && buffer[index] != 0) {
+    index++;
+  }
+
+  // Check that the string is properly null-terminated
+  if (buffer[index] != 0) {
+    return 0;
+  }
+
+  // Skip the null terminating byte (this may move index beyond the buffer)
+  index++;
+
+  return s;
+}
+
 void KommandReader::reset() {
   index = 2;
 }

@@ -32,20 +32,50 @@ uint8_t neopixel_pin = 4;
 Adafruit_NeoPixel rgb = Adafruit_NeoPixel(1, neopixel_pin, NEO_GRB + NEO_KHZ800);
 NetServer server(10110);
 
-static const uint32_t connectedColor = rgb.Color(0x00, 0xff, 0x00);
-static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0xff);
+static const uint32_t connectedColor = rgb.Color(0x00, 0x40, 0x00);
+static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0x40);
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <KBoxLoggerStream.h>
 #include "comms/SlipStream.h"
-//#include "util/KommandContext.h"
+#include "comms/KommandHandler.h"
+#include "comms/KommandHandlerPing.h"
+#include "stats/KBoxMetrics.h"
 
 SlipStream slip(Serial, 2048);
-//KommandContext KommandContext(slip, 0);
+KommandHandlerPing pingHandler;
+
+class ESPDebugLogger : public KBoxLogger {
+  private:
+    SlipStream &_slipStream;
+    static const size_t MaxLogFrameSize = 512;
+
+  public:
+    ESPDebugLogger(SlipStream &slipStream) : _slipStream(slipStream) {};
+
+    void log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs) {
+      FixedSizeKommand<MaxLogFrameSize> logKmd(KommandLog);
+      logKmd.append16(level);
+      logKmd.append16(lineno);
+      logKmd.append16(strlen(fname));
+      logKmd.appendNullTerminatedString(fname);
+
+      uint8_t *bytes;
+      size_t *index;
+
+      logKmd.captureBuffer(&bytes, &index);
+
+      *index += vsnprintf((char*)bytes + *index, MaxLogFrameSize - *index, fmt, fmtargs);
+      (*index)++; // for the null-terminating byte
+
+      _slipStream.writeFrame(bytes, *index);
+    };
+};
 
 void setup() {
   Serial1.begin(115200);
-  KBoxLogging.setLogger(new KBoxLoggerStream(Serial1));
+  KBoxLogging.setLogger(new ESPDebugLogger(slip));
 
   rgb.begin();
   rgb.setPixelColor(0, 0, 0, 0xff);
@@ -77,17 +107,20 @@ void loop() {
 
   server.loop();
 
-  while (Serial.available()) {
-    buffer[rxIndex++] = Serial.read();
+  while (slip.available()) {
+    uint8_t *frame;
+    size_t len = slip.peekFrame(&frame);
 
-    if (buffer[rxIndex - 1] == '\n') {
-      server.writeAll(buffer, rxIndex);
-      rxIndex = 0;
+    KommandReader kr = KommandReader(frame, len);
+
+    KommandHandler *handlers[] = { &pingHandler, 0 };
+    if (KommandHandler::handleKommandWithHandlers(handlers, kr, slip)) {
+      KBoxMetrics.event(KBoxEventESPValidKommand);
     }
-    if (rxIndex == sizeof(buffer)) {
-      DEBUG("Buffer overflow. Clearing buffer.");
-      rxIndex = 0;
+    else {
+      KBoxMetrics.event(KBoxEventESPInvalidKommand);
     }
+    slip.readFrame(0, 0);
   }
 
   if (server.clientsCount() > 0) {

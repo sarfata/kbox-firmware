@@ -127,7 +127,7 @@ class KBox(object):
                 print("Got unexpected command with id {}".format(cmd))
 
     def processLogFrame(self, data):
-        logLevels = { 0: "D", 1: "I", 2: "E" }
+        logLevels = { 0: "hD", 1: "hI", 2: "hE", 3: "wD", 4: "wI", 5: "wE" }
         (level, lineno, fnamelen) = struct.unpack('<HHH', data[0:6])
         fname = data[6:6+fnamelen]
 

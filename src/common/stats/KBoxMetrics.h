@@ -46,6 +46,13 @@ enum KBoxEvent {
   KBoxEventUSBValidKommand,
   KBoxEventUSBInvalidKommand,
 
+  KBoxEventWiFiValidKommand,
+  KBoxEventWiFiInvalidKommand,
+
+  // Events used by the ESP module
+  KBoxEventESPValidKommand,
+  KBoxEventESPInvalidKommand,
+
   // Used to get a count of the number of events
   KBoxEventCountDistinctEvents
 };

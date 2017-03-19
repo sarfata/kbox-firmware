@@ -28,10 +28,14 @@
 #include "signalk/KMessage.h"
 #include "comms/Kommand.h"
 #include "comms/SlipStream.h"
+#include "comms/KommandHandlerPing.h"
+#include "comms/KommandHandlerWiFiLog.h"
 
 class WiFiService : public Task, public KReceiver {
   private:
     SlipStream _slip;
+    KommandHandlerPing _pingHandler;
+    KommandHandlerWiFiLog _wifiLogHandler;
 
   public:
     WiFiService(GC &gc);

@@ -25,6 +25,7 @@
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
 #include "signalk/KMessageNMEAVisitor.h"
+#include "stats/KBoxMetrics.h"
 
 #include "WiFiService.h"
 
@@ -42,7 +43,15 @@ void WiFiService::loop() {
     uint8_t *frame;
     size_t len = _slip.peekFrame(&frame);
 
-    //_kommandContext.process(frame, len);
+    KommandReader kr = KommandReader(frame, len);
+
+    KommandHandler *handlers[] = { &_pingHandler, &_wifiLogHandler, 0 };
+    if (KommandHandler::handleKommandWithHandlers(handlers, kr, _slip)) {
+      KBoxMetrics.event(KBoxEventWiFiValidKommand);
+    }
+    else {
+      KBoxMetrics.event(KBoxEventWiFiInvalidKommand);
+    }
 
     _slip.readFrame(0, 0);
   }

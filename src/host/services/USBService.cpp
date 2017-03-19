@@ -159,6 +159,7 @@ void USBService::sendLogFrame(KBoxLoggingLevel level, const char *fname, int lin
   logKmd.captureBuffer(&bytes, &index);
 
   *index += vsnprintf((char*)bytes + *index, MaxLogFrameSize - *index, fmt, fmtargs);
+  (*index)++; // for the null-terminating byte
 
   _slip.writeFrame(bytes, *index);
 }

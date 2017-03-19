@@ -71,6 +71,14 @@ class KommandReader {
     uint32_t read32();
 
     /**
+     * Read null-terminated string and advance pointer to end of string.
+     *
+     * @return a null terminated string or NULL if there was no null terminated
+     * string in buffer.
+     */
+    const char *readNullTerminatedString();
+
+    /**
      * Start reading from the beginning of the packet again.
      * (The first byte after the KommandIdentifier header.
      */
