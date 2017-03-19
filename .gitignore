@@ -9,3 +9,4 @@
 *.o
 *.d
 tags
+.gdb_history
