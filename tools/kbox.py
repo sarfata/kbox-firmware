@@ -78,13 +78,14 @@ class KBox(object):
     KommandScreenshot = 0x30
     KommandScreenshotData = 0x31
 
-    def __init__(self, port):
+    def __init__(self, port, debug = False):
         self._port = serial.Serial(port)
         self._port.baudrate = 1000000
         self._slip_reader = slip_reader(self._port)
         self._width = 320
         self._height = 240
         self._mtu = 15000;
+        self._debug = debug
 
     def read(self):
         return self._slip_reader.next()
@@ -106,6 +107,10 @@ class KBox(object):
 
         while True:
             frame = self.read()
+
+            if self._debug:
+                print "> ({}) {}".format(len(frame), " ".join("{:02x}".format(ord(c)) for c in frame))
+
             if len(frame) < 2:
                 raise FatalError.WithFrame("Frame is too short to be valid (%s)", frame)
 
@@ -125,7 +130,7 @@ class KBox(object):
         logLevels = { 0: "D", 1: "I", 2: "E" }
         (level, lineno, fnamelen) = struct.unpack('<HHH', data[0:6])
         fname = data[6:6+fnamelen]
-        
+
         if "/" in fname:
             fname = fname.split("/")[-1]
         log = data[6+fnamelen:]
@@ -140,9 +145,12 @@ class KBox(object):
         ponged = False
         while not ponged:
             resp = self.readCommand(KBox.KommandPong)
-            (data) = struct.unpack('<I', resp)
-            print("PONG {} in {} ms".format(data, (time.time() - t0) * 1000))
-            ponged = True
+            if len(resp) != 4:
+                raise FatalError("KBox ponged with wrong size frame ({} instead of 4)".format(len(resp)))
+            else:
+                (data) = struct.unpack('<I', resp)
+                print("PONG {} in {} ms".format(data, (time.time() - t0) * 1000))
+                ponged = True
 
     def command(self, command, data = ""):
         print("Sending cmd {} len {}".format(command, len(data)))
@@ -190,6 +198,7 @@ class KBox(object):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", help = "USB Serial Port connected to KBox", default = "/dev/tty.usbmodem1441")
+    parser.add_argument("--debug", action = "store_true", help = "Show all incoming packets")
     subparsers = parser.add_subparsers(dest = "command")
     subparsers.add_parser("ping")
     subparsers.add_parser("logs")
@@ -197,7 +206,7 @@ def main():
 
     args = parser.parse_args()
 
-    kbox = KBox(args.port)
+    kbox = KBox(args.port, args.debug)
 
     # Wait until we can read one valid packet
     ready = False

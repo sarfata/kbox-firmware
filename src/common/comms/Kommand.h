@@ -38,40 +38,47 @@ enum KommandIdentifier {
   KommandNMEASentence = 0x40,
 };
 
+class Kommand {
+  public:
+    virtual const uint8_t* getBytes() const = 0;
+    virtual const size_t getSize() const = 0;
+};
+
 /**
- * Creates a Kommand object ready to hold at most maxDataSize of data. A few 
+ * Creates a Kommand object ready to hold at most maxDataSize of data. A few
  * extra bytes will be automatically added for header.
  */
-template <uint16_t maxDataSize> class Kommand {
+template <uint16_t maxDataSize> class FixedSizeKommand : public Kommand {
   // Need 2 extra bytes for the command id
-  uint8_t _bytes[2 + maxDataSize];
+  static const uint16_t bufferSize = maxDataSize + 2;
+  uint8_t _bytes[bufferSize];
   size_t _index;
 
   public:
-    Kommand(KommandIdentifier id) : _index(0) {
+    FixedSizeKommand(KommandIdentifier id) : _index(0) {
       append16(id);
-    };
+    }
 
     void append32(uint32_t w) {
-      if (_index + 4 > maxDataSize) {
+      if (_index + 4 > bufferSize) {
         return;
       }
       _bytes[_index++] = w & 0xff;
       _bytes[_index++] = (w>>8) & 0xff;
       _bytes[_index++] = (w>>16) & 0xff;
       _bytes[_index++] = (w>>24) & 0xff;
-    }
+    };
 
     void append16(uint16_t w) {
-      if (_index + 2 > maxDataSize) {
+      if (_index + 2 > bufferSize) {
         return;
       }
       _bytes[_index++] = w & 0xff;
       _bytes[_index++] = (w>>8) & 0xff;
-    }
+    };
 
     void append8(uint8_t b) {
-      if (_index + 1 > maxDataSize) {
+      if (_index + 1 > bufferSize) {
         return;
       }
       _bytes[_index++] = b;
@@ -81,8 +88,8 @@ template <uint16_t maxDataSize> class Kommand {
       int len = strlen(s);
 
       // We want to have space for the string content + the terminating \0
-      if (len > maxDataSize - _index - 1) {
-        len = maxDataSize - _index - 1;
+      if (len > bufferSize - _index - 1) {
+        len = bufferSize - _index - 1;
       }
       if (len <= 0) {
         return;
@@ -93,19 +100,19 @@ template <uint16_t maxDataSize> class Kommand {
 
       // Always add 0 because strncpy(a,b, strlen(s)) will not!
       append8((uint8_t) 0);
-    }
+    };
 
     void captureBuffer(uint8_t **ptr, size_t **index) {
       *ptr = _bytes;
       *index = &_index;
-    }
+    };
 
-    const uint8_t* getBytes() const {
+    const uint8_t* getBytes() const override {
       return _bytes;
-    }
+    };
 
-    size_t getSize() const {
+    const size_t getSize() const override {
       return _index;
-    }
+    };
 };
 

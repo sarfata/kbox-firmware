@@ -24,41 +24,15 @@
 
 #pragma once
 
-#include <KBoxLogging.h>
-#include <KBoxLoggerStream.h>
-#include "comms/SlipStream.h"
-#include "os/Task.h"
+#include "KommandHandler.h"
 #include "ui/GC.h"
-#include "comms/KommandHandlerPing.h"
-#include "comms/KommandHandlerScreenshot.h"
 
-class USBService : public Task, public KBoxLogger {
+class KommandHandlerScreenshot : public KommandHandler {
   private:
-    static const size_t MaxLogFrameSize = 256;
-
-    SlipStream _slip;
-    KBoxLoggerStream _streamLogger;
-    KommandHandlerPing _pingHandler;
-    KommandHandlerScreenshot _screenshotHandler;
-    KommandHandler *_handlers[2];
-
-    enum USBConnectionState{
-      ConnectedDebug,
-      ConnectedFrame,
-      ConnectedESPProgramming
-    };
-    USBConnectionState _state;
-
-    void loopConnectedFrame();
-    void loopConnectedESPProgramming();
-
-    void sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs);
+    GC &_gc;
 
   public:
-    USBService(GC &gc);
-    ~USBService() {};
-
-    void setup();
-    void loop();
-    virtual void log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list args);
+    KommandHandlerScreenshot(GC &gc);
+    bool handleKommand(KommandReader &kreader, SlipStream &replyStream) override;
 };
+

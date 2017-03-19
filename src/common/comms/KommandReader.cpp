@@ -22,43 +22,50 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "KommandReader.h"
 
-#include <KBoxLogging.h>
-#include <KBoxLoggerStream.h>
-#include "comms/SlipStream.h"
-#include "os/Task.h"
-#include "ui/GC.h"
-#include "comms/KommandHandlerPing.h"
-#include "comms/KommandHandlerScreenshot.h"
+KommandReader::KommandReader(const uint8_t *buffer, size_t size) : buffer(buffer), size(size) {
+  reset();
+}
 
-class USBService : public Task, public KBoxLogger {
-  private:
-    static const size_t MaxLogFrameSize = 256;
+uint16_t KommandReader::getKommandIdentifier() const {
+  return buffer[0] + (buffer[1] << 8);
+}
 
-    SlipStream _slip;
-    KBoxLoggerStream _streamLogger;
-    KommandHandlerPing _pingHandler;
-    KommandHandlerScreenshot _screenshotHandler;
-    KommandHandler *_handlers[2];
+uint8_t KommandReader::read8() {
+  if (index >= size) {
+    return 0;
+  }
+  return buffer[index++];
+}
 
-    enum USBConnectionState{
-      ConnectedDebug,
-      ConnectedFrame,
-      ConnectedESPProgramming
-    };
-    USBConnectionState _state;
+uint16_t KommandReader::read16() {
+  if (index + 1 >= size) {
+    return 0;
+  }
+  uint16_t w = buffer[index] + (buffer[index + 1] << 8);
+  buffer += 2;
+  return w;
+}
 
-    void loopConnectedFrame();
-    void loopConnectedESPProgramming();
+uint32_t KommandReader::read32() {
+  if (index + 3 >= size) {
+    return 0;
+  }
+  uint32_t w = buffer[index] + (buffer[index +1 ] << 8) + (buffer[index + 2] << 16) + (buffer[index + 3] << 24);
+  index += 4;
+  return w;
+}
 
-    void sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs);
+void KommandReader::reset() {
+  index = 2;
+}
 
-  public:
-    USBService(GC &gc);
-    ~USBService() {};
-
-    void setup();
-    void loop();
-    virtual void log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list args);
-};
+size_t KommandReader::dataSize() const {
+  if (size > 2) {
+    return size - 2;
+  }
+  else {
+    return 0;
+  }
+}

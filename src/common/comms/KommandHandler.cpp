@@ -22,44 +22,5 @@
   THE SOFTWARE.
 */
 
-#pragma once
-
-#include <stdint.h>
-#include <stddef.h>
-#include "ui/GC.h"
-#include "SlipStream.h"
-#include "Kommand.h"
-
-/**
- * Interprets command (Kommand) sent as frame from the USB host or the WiFi
- * controller.
- */
-class KommandContext {
-  private:
-    SlipStream& _slip;
-    GC& _gc;
-
-    void sendErrorFrame();
-
-    void sendScreenshot(int y);
-
-  public:
-    KommandContext(SlipStream& slipStream, GC& gc);
-
-    /**
-     * Process an incoming frame in the current context.
-     *
-     * If the context is available to run more commands, this one will be
-     * executed. If the context is busy with another command, an error will
-     * be sent upstream.
-     *
-     * The data can also be continuation to a currently running command.
-     */
-    void process(const uint8_t *bytes, size_t len);
-
-    void processPing(const uint8_t *data, size_t len);
-
-    void processScreenshot(const uint8_t *data, size_t len);
-};
-
+#include "KommandHandler.h"
 

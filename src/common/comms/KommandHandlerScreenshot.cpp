@@ -22,68 +22,27 @@
   THE SOFTWARE.
 */
 
-#include <stdlib.h>
-#include <KBoxLogging.h>
-#include "KommandContext.h"
+#include "KommandHandlerScreenshot.h"
 
-KommandContext::KommandContext(SlipStream& slipStream, GC& gc) : _slip(slipStream), _gc(gc) {
+KommandHandlerScreenshot::KommandHandlerScreenshot(GC &gc) : _gc(gc) {
 }
 
-void KommandContext::process(const uint8_t *bytes, size_t len) {
-  if (len == 0) {
-    // should never happen because empty slip frames cannot be transmitted.
-    return;
+bool KommandHandlerScreenshot::handleKommand(KommandReader &kreader, SlipStream &replyStream) {
+  if (kreader.getKommandIdentifier() != KommandScreenshot) {
+    return false;
   }
 
-  uint16_t identifier = bytes[0] + (bytes[1]<<8);
-  bytes = bytes + 2;
-  len = len - 2;
-
-  switch (identifier) {
-    case KommandPing:
-      processPing(bytes, len);
-      break;
-    case KommandScreenshot:
-      processScreenshot(bytes, len);
-      break;
-    default:
-      // Send error frame.
-      sendErrorFrame();
-  };
-};
-
-void KommandContext::sendErrorFrame() {
-  Kommand<0> errorFrame(KommandErr);
-
-  _slip.writeFrame(errorFrame.getBytes(), errorFrame.getSize());
-}
-
-void KommandContext::processPing(const uint8_t *data, size_t len) {
-  /* data here should be a 4 bytes packet identfier that we will include in the reply. */
-  if (len != 4) {
-    sendErrorFrame();
-    return;
-  }
-
-  uint32_t pingId = *((uint32_t*) data);
-
-  Kommand<4> pongFrame(KommandPong);
-  pongFrame.append32(pingId);
-  _slip.writeFrame(pongFrame.getBytes(), pongFrame.getSize());
-}
-
-void KommandContext::processScreenshot(const uint8_t *data, size_t len) {
   // First byte is optional and can be where to start from.
   int y = 0;
-  if (len == 2) {
-    y = data[0] + (data[1] >> 8);
+  if (kreader.dataSize() >= 2) {
+    y = kreader.read16();
   }
 
   // Allocating 320*5*2 = 3.2kB on stack. Ouch!
   static const int16_t lineWidth = 320;
   static const int16_t linePerFrame = 5;
 
-  Kommand<lineWidth * linePerFrame * 2> captureFrame(KommandScreenshotData);
+  FixedSizeKommand<lineWidth * linePerFrame * 2> captureFrame(KommandScreenshotData);
   captureFrame.append16(y);
 
   uint8_t *bytes;
@@ -95,5 +54,6 @@ void KommandContext::processScreenshot(const uint8_t *data, size_t len) {
   _gc.readRect(0, y, lineWidth, linePerFrame, pixelData);
   *index += lineWidth * linePerFrame *2;
 
-  _slip.writeFrame(captureFrame.getBytes(), captureFrame.getSize());
+  replyStream.writeFrame(captureFrame.getBytes(), captureFrame.getSize());
+  return true;
 }

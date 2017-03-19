@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,43 +22,31 @@
   THE SOFTWARE.
 */
 
-#pragma once
-
+#include "KommandHandlerPing.h"
 #include <KBoxLogging.h>
-#include <KBoxLoggerStream.h>
-#include "comms/SlipStream.h"
-#include "os/Task.h"
-#include "ui/GC.h"
-#include "comms/KommandHandlerPing.h"
-#include "comms/KommandHandlerScreenshot.h"
 
-class USBService : public Task, public KBoxLogger {
-  private:
-    static const size_t MaxLogFrameSize = 256;
+bool KommandHandlerPing::handleKommand(KommandReader &kreader, SlipStream &replyStream) {
+  /* data here should be a 4 bytes packet identfier that we will include in the reply. */
+  if (kreader.dataSize() != 4) {
+    return false;
+  }
 
-    SlipStream _slip;
-    KBoxLoggerStream _streamLogger;
-    KommandHandlerPing _pingHandler;
-    KommandHandlerScreenshot _screenshotHandler;
-    KommandHandler *_handlers[2];
+  DEBUG("About to read!");
 
-    enum USBConnectionState{
-      ConnectedDebug,
-      ConnectedFrame,
-      ConnectedESPProgramming
-    };
-    USBConnectionState _state;
 
-    void loopConnectedFrame();
-    void loopConnectedESPProgramming();
+  uint32_t pingId = kreader.read32();
 
-    void sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs);
+  DEBUG("About to send");
+  FixedSizeKommand<4> pongFrame(KommandPong);
+  pongFrame.append32(pingId);
 
-  public:
-    USBService(GC &gc);
-    ~USBService() {};
+  // Works if we return true here.
+  DEBUG("pongFrame.getSize() == %u", pongFrame.getSize());
+  replyStream.writeFrame(pongFrame.getBytes(), pongFrame.getSize());
 
-    void setup();
-    void loop();
-    virtual void log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list args);
-};
+  // crashes in sendReply. The reference to _slip is not valid.
+  DEBUG("sent");
+
+  return true;
+}
+

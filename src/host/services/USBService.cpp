@@ -31,9 +31,14 @@
 
 #include "USBService.h"
 
+
 USBService::USBService(GC &gc) : Task("USBService"), _slip(Serial, 2048),
   _streamLogger(KBoxLoggerStream(Serial)),
-  _kommandContext(_slip, gc), _state(ConnectedDebug) {
+  _pingHandler(), _screenshotHandler(gc),
+  _state(ConnectedDebug) {
+
+  _handlers[0] = &_pingHandler;
+  _handlers[1] = &_screenshotHandler;
 }
 
 void USBService::setup() {
@@ -99,7 +104,21 @@ void USBService::loopConnectedFrame() {
     uint8_t *frame;
     size_t len = _slip.peekFrame(&frame);
 
-    _kommandContext.process(frame, len);
+    KommandReader kr = KommandReader(frame, len);
+
+    bool processed = false;
+
+    for (unsigned int i = 0; i < sizeof(_handlers) / sizeof(KommandHandler*); i++) {
+      if (_handlers[i]->handleKommand(kr, _slip)) {
+        processed = true;
+        break;
+      }
+    }
+
+    if (!processed) {
+      FixedSizeKommand<0> errorFrame(KommandErr);
+      _slip.writeFrame(errorFrame.getBytes(), errorFrame.getSize());
+    }
 
     // Discard the frame.
     _slip.readFrame(0, 0);
@@ -135,7 +154,7 @@ void USBService::loopConnectedESPProgramming() {
  * Sends a frame with a logging message.
  */
 void USBService::sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs) {
-  Kommand<MaxLogFrameSize> logKmd(KommandLog);
+  FixedSizeKommand<MaxLogFrameSize> logKmd(KommandLog);
   logKmd.append16(level);
   logKmd.append16(lineno);
   logKmd.append16(strlen(fname));

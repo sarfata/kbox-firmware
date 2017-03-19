@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,41 +24,11 @@
 
 #pragma once
 
-#include <KBoxLogging.h>
-#include <KBoxLoggerStream.h>
-#include "comms/SlipStream.h"
-#include "os/Task.h"
-#include "ui/GC.h"
-#include "comms/KommandHandlerPing.h"
-#include "comms/KommandHandlerScreenshot.h"
+#include "KommandHandler.h"
+#include "KommandReader.h"
 
-class USBService : public Task, public KBoxLogger {
-  private:
-    static const size_t MaxLogFrameSize = 256;
-
-    SlipStream _slip;
-    KBoxLoggerStream _streamLogger;
-    KommandHandlerPing _pingHandler;
-    KommandHandlerScreenshot _screenshotHandler;
-    KommandHandler *_handlers[2];
-
-    enum USBConnectionState{
-      ConnectedDebug,
-      ConnectedFrame,
-      ConnectedESPProgramming
-    };
-    USBConnectionState _state;
-
-    void loopConnectedFrame();
-    void loopConnectedESPProgramming();
-
-    void sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs);
-
+class KommandHandlerPing : public KommandHandler {
   public:
-    USBService(GC &gc);
-    ~USBService() {};
-
-    void setup();
-    void loop();
-    virtual void log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list args);
+    KommandHandlerPing() {};
+    bool handleKommand(KommandReader &kreader, SlipStream &replyStream) override;
 };

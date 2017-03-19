@@ -28,7 +28,7 @@
 
 #include "WiFiService.h"
 
-WiFiService::WiFiService(GC &gc) : Task("WiFi"), _slip(WiFiSerial, 2048), _kommandContext(_slip, gc) {
+WiFiService::WiFiService(GC &gc) : Task("WiFi"), _slip(WiFiSerial, 2048) {
 }
 
 void WiFiService::setup() {
@@ -42,7 +42,7 @@ void WiFiService::loop() {
     uint8_t *frame;
     size_t len = _slip.peekFrame(&frame);
 
-    _kommandContext.process(frame, len);
+    //_kommandContext.process(frame, len);
 
     _slip.readFrame(0, 0);
   }
@@ -57,7 +57,7 @@ void WiFiService::processMessage(const KMessage &m) {
   // TODO
   // Should not limit like this to only 256 because there could be many nmea lines in this message.
   // Let's figure this out when we pass SignalK data.
-  Kommand<256> k(KommandNMEASentence);
+  FixedSizeKommand<256> k(KommandNMEASentence);
   k.appendNullTerminatedString(data.c_str());
 
   _slip.writeFrame(k.getBytes(), k.getSize());

@@ -27,13 +27,11 @@
 #include "os/Task.h"
 #include "signalk/KMessage.h"
 #include "comms/Kommand.h"
-#include "comms/KommandContext.h"
 #include "comms/SlipStream.h"
 
 class WiFiService : public Task, public KReceiver {
   private:
     SlipStream _slip;
-    KommandContext _kommandContext;
 
   public:
     WiFiService(GC &gc);
