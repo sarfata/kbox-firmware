@@ -24,3 +24,19 @@
 
 #include "KommandHandler.h"
 
+bool KommandHandler::handleKommandWithHandlers(KommandHandler *handlers[], KommandReader &kreader, SlipStream &replyStream, bool sendError) {
+  bool processed = false;
+
+  for (unsigned int i = 0; handlers[i] != 0; i++) {
+    if (handlers[i]->handleKommand(kreader, replyStream)) {
+      processed = true;
+      break;
+    }
+  }
+  if (!processed && sendError) {
+    FixedSizeKommand<0> errorFrame(KommandErr);
+    replyStream.writeFrame(errorFrame.getBytes(), errorFrame.getSize());
+  }
+
+  return processed;
+}

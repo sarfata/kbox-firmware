@@ -26,6 +26,7 @@
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
 #include "comms/Kommand.h"
+#include "stats/KBoxMetrics.h"
 #include "../esp-programmer/ESPProgrammer.h"
 #include "../drivers/ILI9341GC.h"
 
@@ -37,8 +38,6 @@ USBService::USBService(GC &gc) : Task("USBService"), _slip(Serial, 2048),
   _pingHandler(), _screenshotHandler(gc),
   _state(ConnectedDebug) {
 
-  _handlers[0] = &_pingHandler;
-  _handlers[1] = &_screenshotHandler;
 }
 
 void USBService::setup() {
@@ -106,18 +105,12 @@ void USBService::loopConnectedFrame() {
 
     KommandReader kr = KommandReader(frame, len);
 
-    bool processed = false;
-
-    for (unsigned int i = 0; i < sizeof(_handlers) / sizeof(KommandHandler*); i++) {
-      if (_handlers[i]->handleKommand(kr, _slip)) {
-        processed = true;
-        break;
-      }
+    KommandHandler *handlers[] = { &_pingHandler, &_screenshotHandler, 0 };
+    if (KommandHandler::handleKommandWithHandlers(handlers, kr, _slip)) {
+      KBoxMetrics.event(KBoxEventUSBValidKommand);
     }
-
-    if (!processed) {
-      FixedSizeKommand<0> errorFrame(KommandErr);
-      _slip.writeFrame(errorFrame.getBytes(), errorFrame.getSize());
+    else {
+      KBoxMetrics.event(KBoxEventUSBInvalidKommand);
     }
 
     // Discard the frame.

@@ -43,6 +43,9 @@ enum KBoxEvent {
   KBoxEventNMEA2000MessageSent,
   KBoxEventNMEA2000MessageSendError,
 
+  KBoxEventUSBValidKommand,
+  KBoxEventUSBInvalidKommand,
+
   // Used to get a count of the number of events
   KBoxEventCountDistinctEvents
 };

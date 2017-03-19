@@ -39,4 +39,18 @@ class KommandHandler {
      * or false to pass the Kommand to the next handler.
      */
     virtual bool handleKommand(KommandReader &kreader, SlipStream &replyStream) = 0;
+
+    /**
+     * Static helper function to go through a list of KommandHandler and stop when the Kommand
+     * has been processed.
+     *
+     * @param handlers a null-terminated list of KommandHandler
+     * @param kreader a KommandReader initialized with the Kommand to process
+     * @param replyStream a SlipStream to use to reply to that message
+     * @param sendError indicates whether function should send an error on replyStream if no
+     *    appropriate handler is found.
+     * @return true if the kommand was processed by an handler, false otherwise
+     */
+    static bool handleKommandWithHandlers(KommandHandler *handlers[], KommandReader &kreader, SlipStream &replyStream, bool sendError = true);
 };
+

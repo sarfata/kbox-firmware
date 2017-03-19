@@ -40,7 +40,6 @@ class USBService : public Task, public KBoxLogger {
     KBoxLoggerStream _streamLogger;
     KommandHandlerPing _pingHandler;
     KommandHandlerScreenshot _screenshotHandler;
-    KommandHandler *_handlers[2];
 
     enum USBConnectionState{
       ConnectedDebug,
