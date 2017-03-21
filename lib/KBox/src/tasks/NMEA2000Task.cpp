@@ -113,6 +113,8 @@ void NMEA2000Task::visit(const IMUMessage &m) {
     sendN2kMessage(n2kmessage);
 
     _imuSequence++;
+  } else {
+       DEBUG("IMU is not calibrated: move the unit around to calibrate it"); //debug message added to warn user if IMU not calibrated
   }
 }
 
