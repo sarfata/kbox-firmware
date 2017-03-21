@@ -33,11 +33,18 @@ void ADCTask::loop() {
   int bat1_adc = adc.analogRead(bat1_analog, ADC_0);
   int bat2_adc = adc.analogRead(bat2_analog, ADC_0);
   int bat3_adc = adc.analogRead(bat3_analog, ADC_0);
+    
+  //permits rudder sensor on bat3 input.  Eventually should move rudder sensor calcs to a separate task
+  double maxAngle = 680; //this is the max reading based on the potentiometer I am using at 3.3v.
+  double midAngle = maxAngle / 2;
+  int rudderFactor = 10; //680 / 10 is close to the rudder angle range currently defined as 0-66.  Factor could require a bit of tuning based on the actual installation in the boat
+  double rudderAngle = (bat3_adc - midAngle) / rudderFactor;
 
   supply = supply_adc * analog_max_voltage / adc.getMaxValue();
   bat1 = bat1_adc * analog_max_voltage / adc.getMaxValue();
   bat2 = bat2_adc * analog_max_voltage / adc.getMaxValue();
-  bat3 = bat3_adc * analog_max_voltage / adc.getMaxValue();
+  //bat3 = bat3_adc * analog_max_voltage / adc.getMaxValue();
+   bat3 = rudderAngle;
 
   //DEBUG("ADC - Supply: %sV Bat1: %sV Bat2: %sV Bat3: %sV", 
       //String(supply, 2).c_str(), String(bat1, 2).c_str(), String(bat2, 2).c_str(), String(bat3, 2).c_str());
