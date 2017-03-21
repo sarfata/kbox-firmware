@@ -1,3 +1,4 @@
+
 /*
   The MIT License
 
@@ -34,6 +35,8 @@ class BarometerMeasurement;
 class VoltageMeasurement;
 class NMEA2000Message;
 class IMUMessage;
+class NAVMessage;
+class APMessage;
 
 class KMessage {
   private:
@@ -51,6 +54,9 @@ class KVisitor {
     virtual void visit(const VoltageMeasurement &) {};
     virtual void visit(const NMEA2000Message &) {};
     virtual void visit(const IMUMessage &) {};
+    virtual void visit(const NAVMessage &) {};
+    virtual void visit(const APMessage &) {};
+
 };
 
 class NMEASentence : public KMessage {
@@ -145,17 +151,22 @@ class NMEA2000Message: public KMessage {
 
 class IMUMessage: public KMessage {
   private:
+    String label; //RIGM added, may not need it
     int calibration;
     double course, yaw, pitch, roll;
 
   public:
     static const int IMU_CALIBRATED = 3;
 
-    IMUMessage(int c, double course, double yaw, double pitch, double roll) : calibration(c), course(course), yaw(yaw), pitch(pitch), roll(roll)
+    IMUMessage(String label, int c, float course, float yaw, float pitch, float roll) : calibration(c), course(course), yaw(yaw), pitch(pitch), roll(roll)
     {};
 
     void accept(KVisitor &v) const {
       v.visit(*this);
+    };
+    
+    String getLabel() const {
+        return label;
     };
 
     int getCalibration() const {
@@ -163,23 +174,23 @@ class IMUMessage: public KMessage {
     };
 
     /*
-     * Heading in Radians
+     * Heading in Radians: for necessary precision need to use float, not double for radians (RIGM)
      */
-    double getCourse() const {
+    float getCourse() const {
       return course;
     };
 
     /*
      * Difference between vessel orientation and course over water in radians.
      */
-    double getYaw() const {
+    float getYaw() const {
       return yaw;
     };
 
     /*
      * Pitch in radians. Positive when bow rises.
      */
-    double getPitch() const {
+    float getPitch() const {
       return pitch;
     };
 
@@ -190,6 +201,92 @@ class IMUMessage: public KMessage {
       return roll;
     };
 };
+
+class NAVMessage: public KMessage { //RIGM added for autopilot functionality
+private:
+    String label; //not sure we need a label
+    bool apMode, apHeadingMode, apWaypointMode, apDodgeMode;
+    double currentHeading, targetHeading, courseToWaypoint, rudderSensorPosition, targetRudderPosition, rudderCommandSent;
+    
+public:
+    NAVMessage(String label, bool apMode, bool apHeadingMode, bool apWaypointMode, bool apDodgeMode, double currentHeading, double targetHeading, double courseToWaypoint, double rudderSensorPosition) :
+    label(label), apMode(apMode), apHeadingMode(apHeadingMode), apWaypointMode(apWaypointMode), apDodgeMode(apDodgeMode),
+    currentHeading(currentHeading),targetHeading(targetHeading),courseToWaypoint(courseToWaypoint),
+    rudderSensorPosition(rudderSensorPosition){};
+    
+    void accept(KVisitor &v) const {
+        v.visit(*this);
+    };
+    
+    String getLabel() const {
+        return label;
+    };
+    
+    bool getApMode() const {
+        return apMode;
+    };
+    
+    bool getApHeadingMode() const {
+        return apHeadingMode;
+    };
+    
+    bool getApWaypointMode() const {
+        return apWaypointMode;
+    };
+    
+    bool getApDodgeMode() const {
+        return apDodgeMode;
+    };
+    
+    /*
+     * Courses in Degrees, therefore using doubles:
+     */
+    double getCurrentHeading() const {
+        return currentHeading;
+    };
+    
+    double getTargetHeading() const {
+        return targetHeading;
+    };
+    
+    double getCourseToWaypoint() const {
+        return courseToWaypoint;
+    };
+    
+    double getRudderSensorPosition() const {
+        return rudderSensorPosition;
+    };
+    
+    
+};
+
+class APMessage: public KMessage {  //RIGM added for autopilot functionality
+private:
+    String label; //not sure we need a label
+    double targetRudderPosition, rudderCommandSent;
+    
+public:
+    APMessage(String label, double targetRudderPosition, double rudderCommandSent) :
+    label(label), targetRudderPosition(targetRudderPosition),rudderCommandSent(rudderCommandSent){};
+    
+    void accept(KVisitor &v) const {
+        v.visit(*this);
+    };
+    
+    String getLabel() const {
+        return label;
+    };
+    
+    double getTargetRudderPosition() const {
+        return targetRudderPosition;
+    };
+    
+    double getRudderCommandSent() const {
+        return rudderCommandSent;
+    };
+    
+};
+
 
 class KReceiver {
   public:
