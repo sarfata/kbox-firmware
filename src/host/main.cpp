@@ -69,6 +69,7 @@ void setup() {
   reader2->connectTo(*wifi);
 
   IMUTask *imuTask = new IMUTask();
+  imuTask->connectTo(*wifi); //RIGM added
   imuTask->connectTo(*n2kTask);
 
   BarometerTask *baroTask = new BarometerTask();
@@ -86,6 +87,10 @@ void setup() {
   n2kTask->connectTo(*sdcardTask);
   baroTask->connectTo(*sdcardTask);
   imuTask->connectTo(*sdcardTask);
+    
+  AutoPilotTask *autoPilotTask = new AutoPilotTask();//RIGM added
+  autoPilotTask->connectTo(*wifi);
+  autoPilotTask->connectTo(*n2kTask);
 
   // Add all the tasks
   kbox.addTask(new IntervalTask(new RunningLightTask(), 250));
@@ -97,6 +102,14 @@ void setup() {
   kbox.addTask(reader2);
   kbox.addTask(wifi);
   kbox.addTask(sdcardTask);
+  kbox.addTask(autoPilotTask);
+    
+  NavigationPage *navPage = new NavigationPage(); //RIGM added
+  imuTask->connectTo(*navPage);
+  adcTask->connectTo(*navPage);
+  autoPilotTask->connectTo(*navPage);
+  kbox.addPage(navPage);
+  navPage->connectTo(*autoPilotTask);
 
   BatteryMonitorPage *batPage = new BatteryMonitorPage();
   adcTask->connectTo(*batPage);
