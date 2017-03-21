@@ -24,6 +24,10 @@
 #include "IMUTask.h"
 #include "KBoxDebug.h"
 
+const String kBoxOrientation = "bow"; //Modification to send correct course, pitch, roll data based on where the back of the KBOX is mounted.  Options are back of the box to port, to bow, to stbd, to stern
+
+
+
 void IMUTask::setup() {
   DEBUG("Initing BNO055");
   if (!bno055.begin()) {
@@ -47,8 +51,29 @@ void IMUTask::loop() {
     eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
     //DEBUG("Vector Euler x=%f y=%f z=%f", eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
     //DEBUG("Course: %.0f MAG  Pitch: %.1f  Heel: %.1f", eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
-    IMUMessage m(sysCalib, eulerAngles.x(), /* yaw?*/ 0, eulerAngles.y(), eulerAngles.z());
-    sendMessage(m);
+    //IMUMessage m(sysCalib, eulerAngles.x(), /* yaw?*/ 0, eulerAngles.y(), eulerAngles.z()); //original
+    //sendMessage(m);
+      
+      
+      if (kBoxOrientation == "port"){
+          IMUMessage m("heading",sysCalib, DegToRad(eulerAngles.x() - 90), /* yaw?*/ 0, DegToRad(eulerAngles.y() * -1), DegToRad(eulerAngles.z()));
+          sendMessage(m);
+      }
+      
+      if (kBoxOrientation == "stbd"){
+          IMUMessage m("heading",sysCalib, DegToRad(eulerAngles.x() + 90), /* yaw?*/ 0, DegToRad(eulerAngles.y()), DegToRad(eulerAngles.z() * -1));
+          sendMessage(m);
+      }
+      
+      if (kBoxOrientation == "bow"){
+          IMUMessage m("heading",sysCalib, DegToRad(eulerAngles.x() - 180), /* yaw?*/ 0, DegToRad(eulerAngles.y()), DegToRad(eulerAngles.z()));
+          sendMessage(m);
+      }
+      
+      if (kBoxOrientation == "stern"){
+          IMUMessage m("heading",sysCalib, DegToRad(eulerAngles.x()), /* yaw?*/ 0, DegToRad(eulerAngles.z() * -1), DegToRad(eulerAngles.y() * -1));
+          sendMessage(m);
+      }
   }
   
   //DEBUG("BNO055 temperature is %i", bno055.getTemp());
