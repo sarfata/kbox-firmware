@@ -24,6 +24,7 @@
 #include <Adafruit_BNO055.h>
 #include "TaskManager.h"
 #include "KMessage.h"
+#include "NMEA2000Task.h" //RIGM added
 
 class IMUTask : public Task, public KGenerator {
   private:
