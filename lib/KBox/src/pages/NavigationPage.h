@@ -28,16 +28,6 @@
 #include "KMessage.h"
 #include "ui/TextLayer.h"
 
-/*
-extern double navCurrentHeading;
-extern double navTargetHeading;
-extern double navTargetRudderPosition;
-extern double navRudderSensorPosition;
-extern double navRudderCommandSent;
-extern String navRudderMovementIndicator;
- */
-
-
 class NavigationPage : public Page, public KReceiver, public KVisitor, public KGenerator {
   private:
     TextLayer *apModeDisplay, *waypointDisplay, *headingDisplay, *targetHeadingDisplay, *rudderPositionDisplay, *rudderCommandDisplay;
@@ -49,19 +39,39 @@ class NavigationPage : public Page, public KReceiver, public KVisitor, public KG
     bool buttonPressed = false;
     elapsedMillis buttonPressedTimer;
     
-    double navCurrentHeading;
-    double navTargetHeading;
-    double navRudderSensorPosition;
-    double navTargetRudderPosition;
-    double navRudderCommandSent;
+    bool imuCalibrated = false;
+    bool apMode = false;
+    bool apDodgeMode = false;
+    bool apHeadingMode = false;
+    bool apWaypointMode = false;
+    String apModeString = "APMode: Off";
+    
+    int navEncoderClicks = 0;
+    int encoderClicks = 0;
+    
+    String apWaypointString;//for future use
+    double courseToWaypoint;//for future use
+    
+    double rawHeading = 0;
+    double navCurrentHeading = 0;
+    double navTargetHeading = 0;
+    bool isTargetSet = false;
+    double navRudderSensorPosition = 0;
+    double navTargetRudderPosition = 0;
+    double navRudderCommandSent = 0;
+    double initialTargetHeading = 0;
+    double navCurrentDisplayHeading = 0;
+    double navTargetDisplayHeading = 0;
+    double rudderCommandForDisplay = 0;
+    double rudderAngleForDisplay = 0;
+    double navOffCourse = 0;
     
   public:
     NavigationPage();
-
     void processMessage(const KMessage& message);
     void visit(const IMUMessage&);
     void visit(const APMessage&);
-    void visit(const VoltageMeasurement&);
+    void visit(const RUDMessage&);
     bool processEvent(const ButtonEvent &be);
     bool processEvent(const EncoderEvent &ee);
 };

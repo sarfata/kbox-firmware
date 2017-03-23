@@ -36,37 +36,8 @@
 #include "KBoxDebug.h"
 
 
-bool apMode = false;
-bool apDodgeMode = false;
-bool apHeadingMode = false;
-bool apWaypointMode = false;//reserved for future use
-String apModeString = "APMode: Off"; // Modes: "Off", "Heading" == follow set heading, "Waypoint" = GoTo provided Waypoint, "Dodge"
-String apWaypointString = "045 20.2N, 081 50.3W";//placeholder for future use
-double courseToWaypoint = 0;
-
-int navEncoderClicks = 0;
-int encoderClicks = 0;
-
-//String navRudderMovementIndicator = "|";
-
-double initialTargetHeading = 0;
-double navCurrentDisplayHeading = 0;
-double navTargetDisplayHeading = 0;
-double rudderCommandForDisplay = 0;
-double rudderAngleForDisplay = 0;
-double rawHeading = 0;
-double rawRudderAngle = 0;
-double rawTargetHeading = 0;
-bool isTargetSet = false;
-
-#define P_Param  0.5 //proportional param P-gain, the gain determines how much change the OP will make due to a change in error
-#define I_Param  0.0 //integral or I-gain, the the reset determines how much to change the OP over time due to the error
-#define D_Param  0.0 //derivative or D-gain, the preact determines how much to change the OP due from a change in direction of the error
-
-
 NavigationPage::NavigationPage() {
   static const int col1 = 5;
-  //static const int col2 = 200;
   static const int col2 = 160;
   static const int row1 = 20;
   static const int row2 = 40;
@@ -74,7 +45,6 @@ NavigationPage::NavigationPage() {
   static const int row4 = 152;
   static const int row5 = 182;
 
-    
   addLayer(new TextLayer(Point(col1, row2), Size(20, 20), "Heading", ColorWhite, ColorBlack, FontDefault));
   addLayer(new TextLayer(Point(col2, row2), Size(20, 20), "Target Heading", ColorWhite, ColorBlack, FontDefault));
   addLayer(new TextLayer(Point(col1, row4), Size(20, 20), "Rudder Position", ColorWhite, ColorBlack, FontDefault));
@@ -148,18 +118,20 @@ bool NavigationPage::processEvent(const ButtonEvent &be) {
             }
         } else if (this->buttonPressedTimer > 5000) {  // Long click - start and stop the navMode here
             DEBUG("long click");
-            if (apMode == false){
-                apMode = true;
-                apHeadingMode = true;
-                apModeString = "APMode: Heading   ";//extra spaces needed to overwrite old string if longer
-                apModeDisplay->setText(apModeString);
-                apModeDisplay->setColor(ColorGreen);
-            } else {
-                apMode = false;
-                apDodgeMode = false;
-                apModeString = "APMode: Off           ";
-                apModeDisplay->setText(apModeString);
-                apModeDisplay->setColor(ColorBlue);
+            if (imuCalibrated == true){
+                if (apMode == false){
+                    apMode = true;
+                    apHeadingMode = true;
+                    apModeString = "APMode: Heading       ";//extra spaces needed to overwrite old string if longer
+                    apModeDisplay->setText(apModeString);
+                    apModeDisplay->setColor(ColorGreen);
+                } else {
+                    apMode = false;
+                    apDodgeMode = false;
+                    apModeString = "APMode: Off           ";
+                    apModeDisplay->setText(apModeString);
+                    apModeDisplay->setColor(ColorBlue);
+                }
             }
             return true;
         }
@@ -171,23 +143,17 @@ bool NavigationPage::processEvent(const ButtonEvent &be) {
 }
 
 bool NavigationPage::processEvent(const EncoderEvent &ee) {
-        encoderClicks = ee.rotation;
-        navEncoderClicks = navEncoderClicks + encoderClicks;
-        encoderClicks = 0;
-    
-        //DEBUG("encoderClicks - %d", encoderClicks);
-        //DEBUG("navEncoderClicks - %d", navEncoderClicks);
+    encoderClicks = ee.rotation;
+    navEncoderClicks = navEncoderClicks + encoderClicks;
+    encoderClicks = 0;
     return true;
 }
-
 
 String NavigationPage::formatMeasurement(float measure, const char *unit) {
   // extra spaces at the end needed to clear previous value completely
   // (we use a non-fixed width font)
   char s[10];
-  //snprintf(s, sizeof(s), "%.1f %s  ", measure, unit);
-  snprintf(s, sizeof(s), "%.0f %s  ", measure, unit);
-  
+  snprintf(s, sizeof(s), "%.0f %s  ", measure, unit); //do not display decimals for headings
   return String(s);
 }
 
@@ -196,27 +162,30 @@ void NavigationPage::processMessage(const KMessage &message) {
   message.accept(*this);
 }
 
-void NavigationPage::visit(const VoltageMeasurement &vm) {
-    if (vm.getLabel() == "bat3") {
-        rawRudderAngle = vm.getVoltage();
-        //provision for tuning
-        navRudderSensorPosition = rawRudderAngle;
-    }
+void NavigationPage::visit(const APMessage &ap) {
+    navTargetRudderPosition = ap.getTargetRudderPosition();
+    navRudderCommandSent = ap.getRudderCommandSent();
 }
 
-
-void NavigationPage::visit(const APMessage &ap) { //this function never called
-    
-    navTargetRudderPosition = ap.getTargetRudderPosition();
-    navTargetRudderPosition = ap.getRudderCommandSent();
-    //DEBUG("testRudderCommandPosition - %.0f",navTargetRudderPosition);
-    //DEBUG("testRudderCommandSent - %.0f",navRudderCommandSent);
-    
-
-
+void NavigationPage::visit(const RUDMessage &rm) {
+    navRudderSensorPosition = rm.getRudderDisplayAngle();
 }
 
 void NavigationPage::visit(const IMUMessage &imu) {
+    if (imu.getCalibration() == 3){
+        imuCalibrated = true;
+    }
+    if (imuCalibrated){
+        if (!apMode){
+            apModeString = "APMode: Off   ";
+            apModeDisplay->setText(apModeString);
+            apModeDisplay->setColor(ColorGreen);
+        }
+    } else {
+        apModeString = "Calibrating   ";
+        apModeDisplay->setText(apModeString);
+        apModeDisplay->setColor(ColorRed);
+    }
     
     rawHeading = RadToDeg(imu.getCourse());
     if (rawHeading < 0){
@@ -244,34 +213,40 @@ void NavigationPage::visit(const IMUMessage &imu) {
         }
         targetHeadingDisplay->setText(formatMeasurement(navTargetDisplayHeading, ""));
         targetHeadingDisplay->setColor(colorForCourse(navTargetDisplayHeading));
+        
+        //following code recalculates navCurrentHeading based on "offcourse" value to avoid non-linear heading numbers across 180 degrees
+        navOffCourse = navCurrentDisplayHeading - navTargetDisplayHeading;
+        navOffCourse += (navOffCourse > 180) ? -360 : (navOffCourse < -180) ? 360 : 0;
+        navCurrentHeading = navTargetHeading + navOffCourse;
 
-    
         if (navTargetRudderPosition == 33){  // 0 = full starboard rudder (trailing edge of rudder to the right, bow moves to right
             rudderCommandForDisplay = 0;
         } else if (navTargetRudderPosition < 33){ //32 sb 1 so display 33 - command
             rudderCommandForDisplay = 33 - navTargetRudderPosition;
-        } else if (navTargetRudderPosition > 33){ //34 sb -1 so display 66 -
+        } else if (navTargetRudderPosition > 33){ //34 sb -1 so display command - 32 as negative number
             rudderCommandForDisplay = (navTargetRudderPosition - 32) * -1 ; //rounding anomaly to avoid displaying -0
         }
         rudderCommandDisplay->setText(formatMeasurement(rudderCommandForDisplay, ""));
         rudderCommandDisplay->setColor(colorForRudder(rudderCommandForDisplay));
-    
-        //this should ultimately be done with the rudderCommandSent variable, not the rudderCommandForDisplay
-        if (rudderCommandForDisplay == navRudderSensorPosition){ //zero angle
-            rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, "|"));
-        }
-        if (rudderCommandForDisplay >= 0){
-            if (navRudderSensorPosition < rudderCommandForDisplay){
-                rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, ">"));
+        
+        if (!apDodgeMode){ //if not in dodgeMode show rudder movement indicator
+            if (rudderCommandForDisplay > 0){
+                if (navRudderSensorPosition < rudderCommandForDisplay){
+                    rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, ">"));
+                } else {
+                    rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, "<"));
+                }
+            } else if (rudderCommandForDisplay < 0) {
+                if (navRudderSensorPosition > rudderCommandForDisplay){
+                    rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, "<"));
+                } else {
+                    rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, ">"));
+                }
             } else {
-                rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, "<"));
+                rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, "|"));
             }
         } else {
-            if (navRudderSensorPosition > rudderCommandForDisplay){
-                rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, "<"));
-            } else {
-                rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, ">"));
-            }
+            rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, ""));
         }
         rudderPositionDisplay->setColor(colorForRudder(navRudderSensorPosition));
         
@@ -280,7 +255,9 @@ void NavigationPage::visit(const IMUMessage &imu) {
         //reserved for future use when waypoint functionality added
     
     } else { //AP mode is false
-       isTargetSet = false;
+       isTargetSet = false; //reset variables
+       navEncoderClicks = 0;
+        
        targetHeadingDisplay->setText("----  ");
        targetHeadingDisplay->setColor(ColorWhite);
         
@@ -290,10 +267,8 @@ void NavigationPage::visit(const IMUMessage &imu) {
         rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, ""));
         rudderPositionDisplay->setColor(colorForRudder(navRudderSensorPosition));
     }
-    
-    NAVMessage m("test", apMode, apHeadingMode, apWaypointMode, apDodgeMode, navCurrentHeading, navTargetHeading, courseToWaypoint, rawRudderAngle);
+    NAVMessage m(apMode, apHeadingMode, apWaypointMode, apDodgeMode, navCurrentHeading, navTargetHeading, courseToWaypoint);
     sendMessage(m);
-
 }
 
 
