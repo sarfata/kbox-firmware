@@ -28,28 +28,26 @@
 #include "KMessage.h"
 #include <PID_v1.h>
 
-//original values 0.45, 0.08, 0.52
-
+//following variables will need to be tuned based on actual boat performance
 #define P_Param  0.5 //proportional param P-gain, the gain determines how much change the OP will make due to a change in error
 #define I_Param  0.0 //integral or I-gain, the the reset determines how much to change the OP over time due to the error
 #define D_Param  0.0 //derivative or D-gain, the preact determines how much to change the OP due from a change in direction of the error
-
-//extern double autoPilotRudderCommand;
+#define AUTOPILOTDEADZONE  0 //to be adjusted based on boat characteristics
+#define AUTOPILOTSLACK 0 //to be adjusted based on boat characteristics
+#define MAXRUDDERSWING 66.0 //max swing lock to lock
 
 class AutoPilotTask : public Task, public KReceiver, public KVisitor, public KGenerator {  private:
     
-    
-    double apRudderSensorPosition;
+    double apRudderSensorPosition; //populated from RudderSensorTask
     double apRudderCommandSent;
-    double autoPilotOffCourse; //not currently used
-    double autoPilotDeadZone;  //variable to be tuned based on experience
-    double autoPilotSlack; //variable to be tuned based on experience
     bool sameLastDirection; //last rudder movement direction
+    bool navMode = false;
+    bool navDodgeMode = false;
     
   public:
     AutoPilotTask() : Task("AutoPilot") {};
     void processMessage(const KMessage& message);
     void visit(const NAVMessage&);
+    void visit(const RUDMessage&);
     void loop();
-
 };
