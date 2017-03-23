@@ -37,6 +37,7 @@ class NMEA2000Message;
 class IMUMessage;
 class NAVMessage;
 class APMessage;
+class RUDMessage;
 
 class KMessage {
   private:
@@ -56,7 +57,7 @@ class KVisitor {
     virtual void visit(const IMUMessage &) {};
     virtual void visit(const NAVMessage &) {};
     virtual void visit(const APMessage &) {};
-
+    virtual void visit(const RUDMessage &) {};
 };
 
 class NMEASentence : public KMessage {
@@ -151,46 +152,41 @@ class NMEA2000Message: public KMessage {
 
 class IMUMessage: public KMessage {
   private:
-    String label; //RIGM added, may not need it
     int calibration;
     double course, yaw, pitch, roll;
 
   public:
     static const int IMU_CALIBRATED = 3;
 
-    IMUMessage(String label, int c, float course, float yaw, float pitch, float roll) : calibration(c), course(course), yaw(yaw), pitch(pitch), roll(roll)
+    IMUMessage(int c, double course, double yaw, double pitch, double roll) : calibration(c), course(course), yaw(yaw), pitch(pitch), roll(roll)
     {};
 
     void accept(KVisitor &v) const {
       v.visit(*this);
     };
     
-    String getLabel() const {
-        return label;
-    };
-
     int getCalibration() const {
       return calibration;
     };
 
     /*
-     * Heading in Radians: for necessary precision need to use float, not double for radians (RIGM)
+     * Heading in Radians: course value are compass (magnetic) values not adjusted for variation
      */
-    float getCourse() const {
+    double getCourse() const {
       return course;
     };
 
     /*
-     * Difference between vessel orientation and course over water in radians.
+     * Difference between vessel orientation and course over water in radians.  Not currently measured, set to 0 in code
      */
-    float getYaw() const {
+    double getYaw() const {
       return yaw;
     };
 
     /*
      * Pitch in radians. Positive when bow rises.
      */
-    float getPitch() const {
+    double getPitch() const {
       return pitch;
     };
 
@@ -202,24 +198,18 @@ class IMUMessage: public KMessage {
     };
 };
 
-class NAVMessage: public KMessage { //RIGM added for autopilot functionality
+class NAVMessage: public KMessage {
 private:
-    String label; //not sure we need a label
     bool apMode, apHeadingMode, apWaypointMode, apDodgeMode;
-    double currentHeading, targetHeading, courseToWaypoint, rudderSensorPosition, targetRudderPosition, rudderCommandSent;
+    double currentHeading, targetHeading, courseToWaypoint;
     
 public:
-    NAVMessage(String label, bool apMode, bool apHeadingMode, bool apWaypointMode, bool apDodgeMode, double currentHeading, double targetHeading, double courseToWaypoint, double rudderSensorPosition) :
-    label(label), apMode(apMode), apHeadingMode(apHeadingMode), apWaypointMode(apWaypointMode), apDodgeMode(apDodgeMode),
-    currentHeading(currentHeading),targetHeading(targetHeading),courseToWaypoint(courseToWaypoint),
-    rudderSensorPosition(rudderSensorPosition){};
+    NAVMessage(bool apMode, bool apHeadingMode, bool apWaypointMode, bool apDodgeMode, double currentHeading,double targetHeading, double courseToWaypoint):
+    apMode(apMode), apHeadingMode(apHeadingMode), apWaypointMode(apWaypointMode), apDodgeMode(apDodgeMode),
+    currentHeading(currentHeading),targetHeading(targetHeading),courseToWaypoint(courseToWaypoint){};
     
     void accept(KVisitor &v) const {
         v.visit(*this);
-    };
-    
-    String getLabel() const {
-        return label;
     };
     
     bool getApMode() const {
@@ -253,28 +243,17 @@ public:
         return courseToWaypoint;
     };
     
-    double getRudderSensorPosition() const {
-        return rudderSensorPosition;
-    };
-    
-    
 };
 
 class APMessage: public KMessage {  //RIGM added for autopilot functionality
 private:
-    String label; //not sure we need a label
     double targetRudderPosition, rudderCommandSent;
     
 public:
-    APMessage(String label, double targetRudderPosition, double rudderCommandSent) :
-    label(label), targetRudderPosition(targetRudderPosition),rudderCommandSent(rudderCommandSent){};
+    APMessage(double targetRudderPosition, double rudderCommandSent) : targetRudderPosition(targetRudderPosition),rudderCommandSent(rudderCommandSent){};
     
     void accept(KVisitor &v) const {
         v.visit(*this);
-    };
-    
-    String getLabel() const {
-        return label;
     };
     
     double getTargetRudderPosition() const {
@@ -285,6 +264,28 @@ public:
         return rudderCommandSent;
     };
     
+};
+
+class RUDMessage: public KMessage {  //RIGM added for autopilot functionality
+private:
+    double rawRudderAngle, rudderDisplayAngle;
+    
+public:
+    RUDMessage(double rawRudderAngle, double rudderDisplayAngle) : rawRudderAngle(rawRudderAngle), rudderDisplayAngle(rudderDisplayAngle){};
+    
+    void accept(KVisitor &v) const {
+        v.visit(*this);
+    };
+    
+    double getRawRudderAngle() const {
+        return rawRudderAngle;
+    };
+    
+    double getRudderDisplayAngle() const {
+        return rudderDisplayAngle;
+    };
+
+
 };
 
 
