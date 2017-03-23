@@ -43,7 +43,8 @@
 #include "tasks/IMUTask.h"
 #include "tasks/NMEAReaderTask.h"
 #include "tasks/WiFiTask.h"
-#include "tasks/AutoPilotTask.h" //RIGM added
+#include "tasks/AutoPilotTask.h"
+#include "tasks/RudderSensorTask.h"
 
 /* Converters */
 #include "converters/VoltageN2kConverter.h"
@@ -52,7 +53,7 @@
 /* Pages */
 #include "pages/BatteryMonitorPage.h"
 #include "pages/StatsPage.h"
-#include "pages/NavigationPage.h" //RIGM added
+#include "pages/NavigationPage.h"
 
 /* Other dependencies */
 #include <Adafruit_NeoPixel.h>
