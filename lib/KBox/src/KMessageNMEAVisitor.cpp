@@ -30,7 +30,6 @@
 #include "KBoxDebug.h"
 
 #define IMU_IN_NMEA2K true  //variable to determine whether IMU data sent out over N2K
-unsigned int _imuSequence = 1;
 
 void KMessageNMEAVisitor::visit(const NMEASentence& s) {
   nmeaContent += s.getSentence() + "\r\n";
@@ -70,6 +69,7 @@ void KMessageNMEAVisitor::visit(const NMEA2000Message &n2km) {
 }
 
 void KMessageNMEAVisitor::visit(const IMUMessage &imu) {
+    unsigned int _imuSequence = 1;
     
 #ifdef IMU_IN_NMEA2K //adds IMU to N2K
     
