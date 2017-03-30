@@ -44,18 +44,15 @@
 #include "tasks/NMEAReaderTask.h"
 #include "tasks/WiFiTask.h"
 #include "tasks/AutoPilotTask.h"
-#include "tasks/MFDTask.h"
 
 /* Converters */
 #include "converters/VoltageN2kConverter.h"
 #include "converters/BarometerN2kConverter.h"
 
 /* Pages */
-#include "pages/SplashPage.h"
-#include "pages/MFDPage.h"
-#include "pages/NavigationPage.h"
 #include "pages/BatteryMonitorPage.h"
 #include "pages/StatsPage.h"
+#include "pages/NavigationPage.h"
 
 /* Other dependencies */
 #include <Adafruit_NeoPixel.h>
