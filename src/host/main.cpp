@@ -88,15 +88,10 @@ void setup() {
   baroTask->connectTo(*sdcardTask);
   imuTask->connectTo(*sdcardTask);
     
-  RudderSensorTask *rudderSensorTask = new RudderSensorTask(kbox.getADC());
-  rudderSensorTask->connectTo(*wifi);
-  rudderSensorTask->connectTo(*n2kTask);
-
-    
   AutoPilotTask *autoPilotTask = new AutoPilotTask();
   autoPilotTask->connectTo(*wifi);
   autoPilotTask->connectTo(*n2kTask);
-  rudderSensorTask->connectTo(*autoPilotTask);
+  adcTask->connectTo(*autoPilotTask);
 
   // Add all the tasks
   kbox.addTask(new IntervalTask(new RunningLightTask(), 250));
@@ -109,14 +104,11 @@ void setup() {
   kbox.addTask(wifi);
   kbox.addTask(sdcardTask);
   kbox.addTask(autoPilotTask);
-  kbox.addTask(new IntervalTask(rudderSensorTask, 1000));
-    
-    
+  
   NavigationPage *navPage = new NavigationPage();
   imuTask->connectTo(*navPage);
   adcTask->connectTo(*navPage);
   autoPilotTask->connectTo(*navPage);
-  rudderSensorTask->connectTo(*navPage);
   kbox.addPage(navPage);
   navPage->connectTo(*autoPilotTask);
 
