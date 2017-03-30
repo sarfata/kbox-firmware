@@ -47,6 +47,8 @@ double apTargetRudderPosition = 0;
 PID headingPID(&apCurrentHeading, &apTargetRudderPosition, &apTargetHeading, (double)P_Param, (double)I_Param, (double)D_Param, (int)REVERSE);
 bool isSetup = false; //if false sets initial PID variables on bootup
 
+//AutoPilotTask::AutoPilotTask() : apCurrentHeading(0), apTargetHeading(0), apTargetRudderPosition(0), headingPID(&apCurrentHeading, &apTargetRudderPostion, &apTargetHeading, (double)P_Param, (double)I_Param, (double)D_Param, (int) REVERSE){};
+
 void AutoPilotTask::processMessage(const KMessage &message) {
     message.accept(*this);
 }
@@ -67,7 +69,7 @@ void AutoPilotTask::loop() {
     
   if (isSetup == false){ //tried a separate "setup" for init but could not get it to work
     sameLastDirection=true;
-    apTargetRudderPosition = 33; //centred.  For programming purposes rudder is assumed to move through 66 degrees lock to lock
+    apTargetRudderPosition = MAXRUDDERSWING / 2; //centred.  For programming purposes rudder is assumed to move through 66 degrees lock to lock
     headingPID.SetMode(AUTOMATIC);
     headingPID.SetOutputLimits(0.0, MAXRUDDERSWING); //output limits  0 = full starboard rudder (trailing edge of rudder to the right, bow moves to right)
     headingPID.SetSampleTime(250);
