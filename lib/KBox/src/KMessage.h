@@ -47,7 +47,6 @@ class KMessage {
     virtual void accept(KVisitor& v) const {};
 };
 
-
 class KVisitor {
   public:
     virtual void visit(const NMEASentence &) {};
@@ -158,8 +157,7 @@ class IMUMessage: public KMessage {
   public:
     static const int IMU_CALIBRATED = 3;
 
-    IMUMessage(int c, double course, double yaw, double pitch, double roll) : calibration(c), course(course), yaw(yaw), pitch(pitch), roll(roll)
-    {};
+    IMUMessage(int c, double course, double yaw, double pitch, double roll) : calibration(c), course(course), yaw(yaw), pitch(pitch), roll(roll) {};
 
     void accept(KVisitor &v) const {
       v.visit(*this);
@@ -229,7 +227,7 @@ public:
     };
     
     /*
-     * Courses in Degrees, therefore using doubles:
+     * Headings in Degrees for messages passed back and forth between the Autopilot task and the Nav page
      */
     double getCurrentHeading() const {
         return currentHeading;
@@ -242,10 +240,9 @@ public:
     double getCourseToWaypoint() const {
         return courseToWaypoint;
     };
-    
 };
 
-class APMessage: public KMessage {  //RIGM added for autopilot functionality
+class APMessage: public KMessage {
 private:
     double targetRudderPosition, rudderCommandSent;
     
@@ -266,7 +263,7 @@ public:
     
 };
 
-class RUDMessage: public KMessage {  //RIGM added for autopilot functionality
+class RUDMessage: public KMessage {
 private:
     double rawRudderAngle, rudderDisplayAngle;
     
@@ -284,8 +281,6 @@ public:
     double getRudderDisplayAngle() const {
         return rudderDisplayAngle;
     };
-
-
 };
 
 
