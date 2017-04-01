@@ -162,7 +162,7 @@ class IMUMessage: public KMessage {
     void accept(KVisitor &v) const {
       v.visit(*this);
     };
-    
+
     int getCalibration() const {
       return calibration;
     };
@@ -197,89 +197,89 @@ class IMUMessage: public KMessage {
 };
 
 class NAVMessage: public KMessage {
-private:
+  private:
     bool apMode, apHeadingMode, apWaypointMode, apDodgeMode;
     double currentHeading, targetHeading, courseToWaypoint;
-    
-public:
+
+  public:
     NAVMessage(bool apMode, bool apHeadingMode, bool apWaypointMode, bool apDodgeMode, double currentHeading,double targetHeading, double courseToWaypoint):
     apMode(apMode), apHeadingMode(apHeadingMode), apWaypointMode(apWaypointMode), apDodgeMode(apDodgeMode),
     currentHeading(currentHeading),targetHeading(targetHeading),courseToWaypoint(courseToWaypoint){};
-    
+
     void accept(KVisitor &v) const {
-        v.visit(*this);
+      v.visit(*this);
     };
-    
+
     bool getApMode() const {
-        return apMode;
+      return apMode;
     };
-    
+
     bool getApHeadingMode() const {
-        return apHeadingMode;
+      return apHeadingMode;
     };
-    
+
     bool getApWaypointMode() const {
-        return apWaypointMode;
+      return apWaypointMode;
     };
-    
+
     bool getApDodgeMode() const {
-        return apDodgeMode;
+      return apDodgeMode;
     };
-    
+
     /*
      * Headings in Degrees for messages passed back and forth between the Autopilot task and the Nav page
      */
     double getCurrentHeading() const {
-        return currentHeading;
+      return currentHeading;
     };
-    
+
     double getTargetHeading() const {
-        return targetHeading;
+      return targetHeading;
     };
-    
+
     double getCourseToWaypoint() const {
-        return courseToWaypoint;
+      return courseToWaypoint;
     };
 };
 
 class APMessage: public KMessage {
-private:
+  private:
     double targetRudderPosition, rudderCommandSent;
-    
-public:
+
+  public:
     APMessage(double targetRudderPosition, double rudderCommandSent) : targetRudderPosition(targetRudderPosition),rudderCommandSent(rudderCommandSent){};
-    
+
     void accept(KVisitor &v) const {
-        v.visit(*this);
+      v.visit(*this);
     };
-    
+
     double getTargetRudderPosition() const {
-        return targetRudderPosition;
+      return targetRudderPosition;
     };
-    
+
     double getRudderCommandSent() const {
-        return rudderCommandSent;
+      return rudderCommandSent;
     };
-    
+
 };
 
 class RUDMessage: public KMessage {
-private:
+  private:
     double rawRudderAngle, rudderDisplayAngle;
-    
-public:
+
+  public:
     RUDMessage(double rawRudderAngle, double rudderDisplayAngle) : rawRudderAngle(rawRudderAngle), rudderDisplayAngle(rudderDisplayAngle){};
-    
+
     void accept(KVisitor &v) const {
-        v.visit(*this);
+      v.visit(*this);
     };
-    
+
     double getRawRudderAngle() const {
-        return rawRudderAngle;
+      return rawRudderAngle;
     };
-    
+
     double getRudderDisplayAngle() const {
-        return rudderDisplayAngle;
+      return rudderDisplayAngle;
     };
 };
 
