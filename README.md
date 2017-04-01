@@ -153,6 +153,8 @@ separately.
  - [Adafruit BMP280](https://github.com/adafruit/Adafruit_BMP280_Library) is under the BSD license
  - [Adafruit BNO055](https://github.com/adafruit/Adafruit_BNO055/) is under the MIT license
  - [ADC library](https://github.com/pedvide/ADC) is a permissive custom license
+ - [Arduino PID Library](https://github.com/br3ttb/Arduino-PID-Library/) is
+   under the GPLv3
  - [FlexCAN](https://github.com/teachop/FlexCAN_Library) does not seem to have a
  license [yet](https://github.com/teachop/FlexCAN_Library/issues/12)
  - [i2c_t3](https://github.com/nox771/i2c_t3) is under the LGPL
