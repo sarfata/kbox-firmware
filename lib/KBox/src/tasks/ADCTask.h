@@ -32,6 +32,9 @@ class ADCTask : public Task, public KGenerator {
     ADC& adc;
     float bat1, bat2, bat3, supply;
 
+    // Set to true to use bat3 input as a rudder sensor
+    static const bool useRudderSensor = true;
+
   public:
     ADCTask(ADC& adc) : Task("ADC"), adc(adc) {};
     void loop();
