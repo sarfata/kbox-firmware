@@ -23,7 +23,6 @@
 */
 #pragma once
 
-//#include <ADC.h>
 #include "TaskManager.h"
 #include "KMessage.h"
 #include <PID_v1.h>
@@ -35,19 +34,28 @@
 #define AUTOPILOTDEADZONE  0 //to be adjusted based on boat characteristics
 #define AUTOPILOTSLACK 0 //to be adjusted based on boat characteristics
 #define MAXRUDDERSWING 66.0 //max swing lock to lock
+// How often should the autopilot computations run
+#define AUTOPILOT_SAMPLE_TIME 250
 
-class AutoPilotTask : public Task, public KReceiver, public KVisitor, public KGenerator {  private:
-    
+class AutoPilotTask : public Task, public KReceiver, public KVisitor, public KGenerator {  
+  private:
     double apRudderSensorPosition; //populated from RudderSensorTask
     double apRudderCommandSent;
     bool sameLastDirection; //last rudder movement direction
     bool navMode = false;
     bool navDodgeMode = false;
-    
+
+    double apCurrentHeading = 0;
+    double apTargetHeading = 0;
+    double apTargetRudderPosition = 0;
+
+    PID headingPID;
+
   public:
-    AutoPilotTask() : Task("AutoPilot") {};
+    AutoPilotTask();
     void processMessage(const KMessage& message);
     void visit(const NAVMessage&);
     void visit(const RUDMessage&);
+    void setup();
     void loop();
 };

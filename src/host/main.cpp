@@ -87,7 +87,7 @@ void setup() {
   n2kTask->connectTo(*sdcardTask);
   baroTask->connectTo(*sdcardTask);
   imuTask->connectTo(*sdcardTask);
-    
+
   AutoPilotTask *autoPilotTask = new AutoPilotTask();
   autoPilotTask->connectTo(*wifi);
   autoPilotTask->connectTo(*n2kTask);
@@ -103,8 +103,8 @@ void setup() {
   kbox.addTask(reader2);
   kbox.addTask(wifi);
   kbox.addTask(sdcardTask);
-  kbox.addTask(autoPilotTask);
-  
+  kbox.addTask(new IntervalTask(autoPilotTask, AUTOPILOT_SAMPLE_TIME));
+
   NavigationPage *navPage = new NavigationPage();
   imuTask->connectTo(*navPage);
   adcTask->connectTo(*navPage);
@@ -127,7 +127,7 @@ void setup() {
 
   kbox.setup();
 
-  // Reinitialize debug here because in some configurations 
+  // Reinitialize debug here because in some configurations
   // (like logging to nmea2 output), the kbox setup might have messed
   // up the debug configuration.
   DEBUG_INIT();
