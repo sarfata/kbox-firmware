@@ -24,54 +24,39 @@
 
 #include "MFD.h"
 #include "../tasks/AutoPilotTask.h"
-#include "../tasks/NMEA2000Task.h"
 #include "KMessage.h"
 #include "ui/TextLayer.h"
 
-class NavigationPage : public Page, public KReceiver, public KVisitor, public KGenerator {
+class AutopilotControlPage : public Page, public KReceiver, public KVisitor, public KGenerator {
   private:
-    TextLayer *apModeDisplay, *waypointDisplay, *headingDisplay, *targetHeadingDisplay, *rudderPositionDisplay, *rudderCommandDisplay;
+    TextLayer *apModeDisplay, *currentHeadingDisplay, *targetHeadingDisplay, *rudderPositionDisplay, *rudderCommandDisplay;
 
     Color colorForRudder(float r);
-    Color colorForCourse(float c);
-    String formatMeasurement(float measure, const char *unit);
-    
+    double normalizeRelativeAngle(double angle);
+    double normalizeAbsoluteAngle(double angle);
+    String formatRelativeAngle(double angle);
+    String formatAbsoluteAngle(double angle, bool isMagnetic);
+
     bool buttonPressed = false;
     elapsedMillis buttonPressedTimer;
-    
+
     bool imuCalibrated = false;
-    bool apMode = false;
-    bool apDodgeMode = false;
-    bool apHeadingMode = false;
-    bool apWaypointMode = false;
-    String apModeString = "APMode: Off";
-    
-    int navEncoderClicks = 0;
-    int encoderClicks = 0;
-    
-    String apWaypointString;//for future use
-    double courseToWaypoint;//for future use
-    
-    double rawHeading = 0;
-    double navCurrentHeading = 0;
-    double navTargetHeading = 0;
-    bool isTargetSet = false;
-    double navRudderSensorPosition = 0;
-    double navTargetRudderPosition = 0;
-    double navRudderCommandSent = 0;
-    double initialTargetHeading = 0;
-    double navCurrentDisplayHeading = 0;
-    double navTargetDisplayHeading = 0;
-    double rudderCommandForDisplay = 0;
-    double rudderAngleForDisplay = 0;
-    double navOffCourse = 0;
-    
+    bool autopilotEngaged = false;
+
+    double currentHeading;
+    double targetHeading;
+    double currentRuddderPosition;
+    double targetRudderPosition;
+    AutopilotCommand autopilotCommand;
+
+    void updateDisplay();
+
   public:
-    NavigationPage();
+    AutopilotControlPage();
     void processMessage(const KMessage& message);
     void visit(const IMUMessage&);
-    void visit(const APMessage&);
-    void visit(const RUDMessage&);
+    void visit(const AutopilotStatusMessage&);
+    void visit(const RudderMessage&);
     bool processEvent(const ButtonEvent &be);
     bool processEvent(const EncoderEvent &ee);
 };

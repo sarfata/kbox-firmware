@@ -35,9 +35,9 @@ class BarometerMeasurement;
 class VoltageMeasurement;
 class NMEA2000Message;
 class IMUMessage;
-class NAVMessage;
-class APMessage;
-class RUDMessage;
+class AutopilotStatusMessage;
+class AutopilotControlMessage;
+class RudderMessage;
 
 class KMessage {
   private:
@@ -54,9 +54,9 @@ class KVisitor {
     virtual void visit(const VoltageMeasurement &) {};
     virtual void visit(const NMEA2000Message &) {};
     virtual void visit(const IMUMessage &) {};
-    virtual void visit(const NAVMessage &) {};
-    virtual void visit(const APMessage &) {};
-    virtual void visit(const RUDMessage &) {};
+    virtual void visit(const AutopilotStatusMessage &) {};
+    virtual void visit(const AutopilotControlMessage &) {};
+    virtual void visit(const RudderMessage &) {};
 };
 
 class NMEASentence : public KMessage {
@@ -196,90 +196,79 @@ class IMUMessage: public KMessage {
     };
 };
 
-class NAVMessage: public KMessage {
+class AutopilotControlMessage : public KMessage {
   private:
-    bool apMode, apHeadingMode, apWaypointMode, apDodgeMode;
-    double currentHeading, targetHeading, courseToWaypoint;
+    bool engaged;
+    double targetHeading;
 
   public:
-    NAVMessage(bool apMode, bool apHeadingMode, bool apWaypointMode, bool apDodgeMode, double currentHeading,double targetHeading, double courseToWaypoint):
-    apMode(apMode), apHeadingMode(apHeadingMode), apWaypointMode(apWaypointMode), apDodgeMode(apDodgeMode),
-    currentHeading(currentHeading),targetHeading(targetHeading),courseToWaypoint(courseToWaypoint){};
+    AutopilotControlMessage(bool engaged, double targetHeading): engaged(engaged), targetHeading(targetHeading) {};
 
     void accept(KVisitor &v) const {
       v.visit(*this);
     };
 
-    bool getApMode() const {
-      return apMode;
+    bool isEngaged() const {
+      return engaged;
     };
 
-    bool getApHeadingMode() const {
-      return apHeadingMode;
+    double getTargetHeading() const {
+      return targetHeading;
+    };
+};
+
+typedef enum {
+  AutopilotCommandPort,
+  AutopilotCommandStarboard,
+  AutopilotCommandBrake,
+  AutopilotCommandFree
+} AutopilotCommand;
+
+class AutopilotStatusMessage : public KMessage {
+  private:
+    bool engaged;
+    double targetHeading, targetRudderPosition;
+    AutopilotCommand command;
+
+  public:
+    AutopilotStatusMessage(bool engaged, double targetHeading, double targetRudderPosition, AutopilotCommand command) :
+      engaged(engaged), targetHeading(targetHeading), targetRudderPosition(targetRudderPosition), command(command)
+    {};
+
+    void accept(KVisitor &v) const {
+      v.visit(*this);
     };
 
-    bool getApWaypointMode() const {
-      return apWaypointMode;
-    };
-
-    bool getApDodgeMode() const {
-      return apDodgeMode;
-    };
-
-    /*
-     * Headings in Degrees for messages passed back and forth between the Autopilot task and the Nav page
-     */
-    double getCurrentHeading() const {
-      return currentHeading;
+    bool isEngaged() const {
+      return engaged;
     };
 
     double getTargetHeading() const {
       return targetHeading;
     };
 
-    double getCourseToWaypoint() const {
-      return courseToWaypoint;
-    };
-};
-
-class APMessage: public KMessage {
-  private:
-    double targetRudderPosition, rudderCommandSent;
-
-  public:
-    APMessage(double targetRudderPosition, double rudderCommandSent) : targetRudderPosition(targetRudderPosition),rudderCommandSent(rudderCommandSent){};
-
-    void accept(KVisitor &v) const {
-      v.visit(*this);
-    };
-
     double getTargetRudderPosition() const {
       return targetRudderPosition;
     };
 
-    double getRudderCommandSent() const {
-      return rudderCommandSent;
+    AutopilotCommand getCommand() const {
+      return command;
     };
-
 };
 
-class RUDMessage: public KMessage {
+class RudderMessage: public KMessage {
   private:
-    double rawRudderAngle, rudderDisplayAngle;
+    double rudderAngle;
 
   public:
-    RUDMessage(double rawRudderAngle, double rudderDisplayAngle) : rawRudderAngle(rawRudderAngle), rudderDisplayAngle(rudderDisplayAngle){};
+    RudderMessage(double rudderAngle) : rudderAngle(rudderAngle) {};
 
     void accept(KVisitor &v) const {
       v.visit(*this);
     };
 
-    double getRawRudderAngle() const {
-      return rawRudderAngle;
-    };
-
-    double getRudderDisplayAngle() const {
-      return rudderDisplayAngle;
+    double getRudderAngle() const {
+      return rudderAngle;
     };
 };
 

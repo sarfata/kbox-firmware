@@ -52,7 +52,7 @@
 /* Pages */
 #include "pages/BatteryMonitorPage.h"
 #include "pages/StatsPage.h"
-#include "pages/NavigationPage.h"
+#include "pages/AutopilotControlPage.h"
 
 /* Other dependencies */
 #include <Adafruit_NeoPixel.h>

@@ -33,7 +33,6 @@
  */
 
 #include "AutoPilotTask.h"
-#include "../pages/NavigationPage.h"
 #include "KBoxDebug.h"
 #include "../drivers/board.h"
 #include "KMessage.h"
@@ -41,8 +40,7 @@
 #include <N2kMessages.h>
 
 AutoPilotTask::AutoPilotTask() : Task("AutoPilotTask"),
-  apCurrentHeading(0), apTargetHeading(0), apTargetRudderPosition(0),
-  headingPID(&apCurrentHeading, &apTargetRudderPosition, &apTargetHeading, (double)P_Param, (double)I_Param, (double)D_Param, (int) REVERSE)
+  headingPID(&currentHeading, &targetRudderPosition, &targetHeading, (double)P_Param, (double)I_Param, (double)D_Param, (int) REVERSE)
 {
 
 }
@@ -51,20 +49,23 @@ void AutoPilotTask::processMessage(const KMessage &message) {
   message.accept(*this);
 }
 
-void AutoPilotTask::visit(const NAVMessage &nav) {
-  apCurrentHeading = nav.getCurrentHeading();
-  apTargetHeading = nav.getTargetHeading();
-  navMode = nav.getApMode();
-  navDodgeMode = nav.getApDodgeMode();
+void AutoPilotTask::visit(const IMUMessage &imuMessage) {
+  currentHeading = imuMessage.getCourse();
 }
 
-void AutoPilotTask::visit(const RUDMessage &rm) {
-  apRudderSensorPosition = rm.getRawRudderAngle();
+void AutoPilotTask::visit(const AutopilotControlMessage &controlMessage) {
+  engaged = controlMessage.isEngaged();
+  targetHeading = controlMessage.getTargetHeading();
+}
+
+void AutoPilotTask::visit(const RudderMessage &rudderMessage) {
+  currentRuddderPosition = rudderMessage.getRudderAngle();
 }
 
 void AutoPilotTask::setup() {
-  sameLastDirection=true;
-  apTargetRudderPosition = MAXRUDDERSWING / 2; //centred.  For programming purposes rudder is assumed to move through 66 degrees lock to lock
+  // Centered.  For programming purposes rudder is assumed to move through 66 degrees lock to lock
+  targetRudderPosition = MAXRUDDERSWING / 2;
+
   headingPID.SetMode(AUTOMATIC);
   headingPID.SetOutputLimits(0.0, MAXRUDDERSWING); //output limits  0 = full starboard rudder (trailing edge of rudder to the right, bow moves to right)
   headingPID.SetSampleTime(AUTOPILOT_SAMPLE_TIME);
@@ -74,59 +75,21 @@ void AutoPilotTask::setup() {
 void AutoPilotTask::loop() {
   headingPID.Compute();
 
-  apRudderCommandSent = apTargetRudderPosition; //by default send rudder command to equal target position, then modify it
-  double testDegs = apTargetRudderPosition - apRudderCommandSent;
-
-  if (abs(testDegs) > AUTOPILOTDEADZONE) {
-    DEBUG("need to move the rudder");
-
-    //then we move the rudder.
-    //is it changing movement direction, we need to compensate for slack
-    if (sameLastDirection && apTargetRudderPosition > apRudderCommandSent) {
-        //same direction to stbd, no slack
-        apRudderCommandSent = apTargetRudderPosition;
-    } else if (sameLastDirection && apTargetRudderPosition < apRudderCommandSent) {
-        //changed direction to port, subtract slack
-        sameLastDirection = false;
-        apRudderCommandSent = apTargetRudderPosition - AUTOPILOTSLACK;
-    } else if (!sameLastDirection && apTargetRudderPosition < apRudderCommandSent) {
-        //same direction to port
-        apRudderCommandSent = apTargetRudderPosition;
-    } else if (!sameLastDirection && apTargetRudderPosition > apRudderCommandSent) {
-        //changed direction to stbd, add slack
-        sameLastDirection = true;
-        apRudderCommandSent = apTargetRudderPosition + AUTOPILOTSLACK;
+  AutopilotCommand command = AutopilotCommandFree;
+  if (engaged) {
+    if (targetRudderPosition > currentRuddderPosition + AUTOPILOTSLACK) {
+      command = AutopilotCommandStarboard;
     }
-
+    else if (targetRudderPosition < currentRuddderPosition - AUTOPILOTSLACK) {
+      command = AutopilotCommandPort;
+    }
+    else {
+      command = AutopilotCommandBrake;
+    }
   }
 
-  APMessage m(apTargetRudderPosition, apRudderCommandSent);
+  AutopilotStatusMessage m(engaged, targetHeading, targetRudderPosition, command);
   sendMessage(m);
 
-  if (navMode == true && navDodgeMode == false){
-
-    //DEBUG("apRudderCommandSent - %.0f", apRudderCommandSent);
-    //DEBUG("apRudderSensorPosition - %.0f",apRudderSensorPosition);
-
-    if (apRudderCommandSent > apRudderSensorPosition){
-        //send acuator stop command;
-        DEBUG("moving rudder left");
-        //send acuator left command;
-    } else if (apRudderCommandSent < apRudderSensorPosition){
-        //send acuator stop command;
-        DEBUG("moving rudder right");
-        //send acuator left command;
-    } else { //if equal
-        //send acuator stop command;
-        DEBUG("stop rudder motion");
-    }
-  }
+  // TODO: Actually send the command to the pilot motor.
 }
-
-
-
-
-
-
-
-

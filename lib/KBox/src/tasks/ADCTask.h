@@ -24,6 +24,7 @@
 #pragma once
 
 #include <ADC.h>
+#include <N2kMessages.h> // DegToRad
 #include "TaskManager.h"
 #include "KMessage.h"
 
@@ -33,7 +34,10 @@ class ADCTask : public Task, public KGenerator {
     float bat1, bat2, bat3, supply;
 
     // Set to true to use bat3 input as a rudder sensor
-    static const bool useRudderSensor = true;
+    static const bool   useRudderSensor = true;
+    const double rudderSensorSupplyVoltage = 5.0;
+    const double rudderSensorAngularMovement = DegToRad(66.0);
+    static const bool   rudderSensorZeroToPort = true;
 
   public:
     ADCTask(ADC& adc) : Task("ADC"), adc(adc) {};
