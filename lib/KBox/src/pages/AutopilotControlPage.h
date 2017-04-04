@@ -43,11 +43,11 @@ class AutopilotControlPage : public Page, public KReceiver, public KVisitor, pub
     bool imuCalibrated = false;
     bool autopilotEngaged = false;
 
-    double currentHeading;
-    double targetHeading;
-    double currentRuddderPosition;
-    double targetRudderPosition;
-    AutopilotCommand autopilotCommand;
+    double currentHeading = 0;
+    double targetHeading = 0;
+    double currentRuddderPosition = 0;
+    double targetRudderPosition = 0;
+    AutopilotCommand autopilotCommand = AutopilotCommandFree;
 
     void updateDisplay();
 

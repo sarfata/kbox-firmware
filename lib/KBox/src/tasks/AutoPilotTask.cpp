@@ -50,7 +50,12 @@ void AutoPilotTask::processMessage(const KMessage &message) {
 }
 
 void AutoPilotTask::visit(const IMUMessage &imuMessage) {
-  currentHeading = imuMessage.getCourse();
+  if (imuMessage.getCalibration() == 3) {
+    currentHeading = imuMessage.getCourse();
+  }
+  else {
+    engaged = false;
+  }
 }
 
 void AutoPilotTask::visit(const AutopilotControlMessage &controlMessage) {
@@ -63,18 +68,21 @@ void AutoPilotTask::visit(const RudderMessage &rudderMessage) {
 }
 
 void AutoPilotTask::setup() {
-  // Centered.  For programming purposes rudder is assumed to move through 66 degrees lock to lock
-  targetRudderPosition = MAXRUDDERSWING / 2;
+  // Centered.
+  targetRudderPosition = 0;
 
   headingPID.SetMode(AUTOMATIC);
-  headingPID.SetOutputLimits(0.0, MAXRUDDERSWING); //output limits  0 = full starboard rudder (trailing edge of rudder to the right, bow moves to right)
+  headingPID.SetOutputLimits( - MAXRUDDERSWING / 2, MAXRUDDERSWING / 2); //output limits  0 = full starboard rudder (trailing edge of rudder to the right, bow moves to right)
   headingPID.SetSampleTime(AUTOPILOT_SAMPLE_TIME);
+  headingPID.SetControllerDirection(DIRECT);
   DEBUG("Init autopilot complete");
 }
 
 void AutoPilotTask::loop() {
   headingPID.Compute();
 
+  // Very crude rudder control system. Could we use another PID to drive the
+  // rudder controller?
   AutopilotCommand command = AutopilotCommandFree;
   if (engaged) {
     if (targetRudderPosition > currentRuddderPosition + AUTOPILOTSLACK) {
@@ -87,6 +95,9 @@ void AutoPilotTask::loop() {
       command = AutopilotCommandBrake;
     }
   }
+
+  const char *commands = "<>o-";
+  DEBUG("Autopilot CurHeading=%.1f TargetHeading=%.1f RudderTarget=%.1f Command=%c", RadToDeg(currentHeading), RadToDeg(targetHeading), RadToDeg(targetRudderPosition), commands[command]);
 
   AutopilotStatusMessage m(engaged, targetHeading, targetRudderPosition, command);
   sendMessage(m);

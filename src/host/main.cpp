@@ -92,6 +92,7 @@ void setup() {
   autoPilotTask->connectTo(*wifi);
   autoPilotTask->connectTo(*n2kTask);
   adcTask->connectTo(*autoPilotTask);
+  imuTask->connectTo(*autoPilotTask);
 
   // Add all the tasks
   kbox.addTask(new IntervalTask(new RunningLightTask(), 250));
@@ -109,8 +110,8 @@ void setup() {
   imuTask->connectTo(*apControlPage);
   adcTask->connectTo(*apControlPage);
   autoPilotTask->connectTo(*apControlPage);
-  kbox.addPage(apControlPage);
   apControlPage->connectTo(*autoPilotTask);
+  kbox.addPage(apControlPage);
 
   BatteryMonitorPage *batPage = new BatteryMonitorPage();
   adcTask->connectTo(*batPage);

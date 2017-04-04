@@ -30,12 +30,12 @@
  an object or to manually put it back on course.  Waypoint functionality will be added at a later time. RIGM
  */
 
-#include "AutopilotControlPage.h"
-#include "MFD.h"
 #include <stdio.h>
+#include <math.h>
 #include <N2kMessages.h> // DegToRad & RadToDeg
+#include "MFD.h"
 #include "KBoxDebug.h"
-
+#include "AutopilotControlPage.h"
 
 AutopilotControlPage::AutopilotControlPage() {
   static const int col1 = 5;
@@ -81,6 +81,9 @@ Color AutopilotControlPage::colorForRudder(float r) {
  * Returns an angle between -PI (excluded) and +PI (included)
  */
 double AutopilotControlPage::normalizeRelativeAngle(double angle) {
+  if (!isfinite(angle)) {
+    return angle;
+  }
   while (angle <= -PI) {
     angle += 2*PI;
   }
@@ -94,6 +97,9 @@ double AutopilotControlPage::normalizeRelativeAngle(double angle) {
  * Returns an angle between 0 (included) and 2*PI (excluded)
  */
 double AutopilotControlPage::normalizeAbsoluteAngle(double angle) {
+  if (!isfinite(angle)) {
+    return angle;
+  }
   while (angle < 0) {
     angle += 2*PI;
   }
