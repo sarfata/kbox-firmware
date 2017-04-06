@@ -39,6 +39,9 @@
 
 class AutoPilotTask : public Task, public KReceiver, public KVisitor, public KGenerator {
   private:
+    // Have we seen the compass calibrated at least once?
+    bool gotCompassCalibration = false;
+
     // Provided by IMUMessage
     double currentHeading = 0;
 

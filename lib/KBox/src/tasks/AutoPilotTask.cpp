@@ -50,29 +50,39 @@ void AutoPilotTask::processMessage(const KMessage &message) {
 
 void AutoPilotTask::visit(const IMUMessage &imuMessage) {
   if (imuMessage.getCalibration() == 3) {
-    // Normalize target heading requested in the range 0 to 360 (but in radians)
-    currentHeading = Angles::normalizeAbsoluteAngle(imuMessage.getCourse());
-
-    // Now adjust the angle to find the lowest angular distance between our current course and the targetHeading.
-    // For example, if the targetHeading is 350 and our currentHeading is 005, then we will transform it to 365.
-    if (abs(targetHeading - currentHeading) > PI) {
-      if (currentHeading > targetHeading) {
-        currentHeading -= 2*M_PI;
-      } else {
-        currentHeading += 2*M_PI;
-      }
-    }
+    gotCompassCalibration = true;
   }
-  else {
-    engaged = false;
+
+  // Normalize target heading requested in the range 0 to 360 (but in radians)
+  currentHeading = Angles::normalizeAbsoluteAngle(imuMessage.getCourse());
+
+  // Now adjust the angle to find the lowest angular distance between our current course and the targetHeading.
+  // For example, if the targetHeading is 350 and our currentHeading is 005, then we will transform it to 365.
+  if (abs(targetHeading - currentHeading) > PI) {
+    if (currentHeading > targetHeading) {
+      currentHeading -= 2*M_PI;
+    } else {
+      currentHeading += 2*M_PI;
+    }
   }
 }
 
 void AutoPilotTask::visit(const AutopilotControlMessage &controlMessage) {
-  engaged = controlMessage.isEngaged();
-
-
   targetHeading = controlMessage.getTargetHeading();
+
+  if (!gotCompassCalibration) {
+    // Refuse to engage autopilot if we have not seen the IMU calibrated.
+    return;
+  }
+
+  if (engaged != controlMessage.isEngaged()) {
+    engaged = controlMessage.isEngaged();
+
+    // Setting the mode to MANUAL when we are not using the PID will cancel
+    // out error integration while we are not engaged.
+    // cf: http://brettbeauregard.com/blog/2011/04/improving-the-beginner%e2%80%99s-pid-onoff/
+    headingPID.SetMode(engaged ? AUTOMATIC : MANUAL);
+  }
 }
 
 void AutoPilotTask::visit(const RudderMessage &rudderMessage) {
@@ -83,11 +93,15 @@ void AutoPilotTask::setup() {
   // Centered.
   targetRudderPosition = 0;
 
+  // Go in automatic before configuring, otherwise config will be ignored.
   headingPID.SetMode(AUTOMATIC);
-  headingPID.SetOutputLimits( - MAXRUDDERSWING / 2, MAXRUDDERSWING / 2); //output limits  0 = full starboard rudder (trailing edge of rudder to the right, bow moves to right)
+  headingPID.SetOutputLimits( - MAXRUDDERSWING / 2, MAXRUDDERSWING / 2);
   headingPID.SetSampleTime(AUTOPILOT_SAMPLE_TIME);
   headingPID.SetControllerDirection(DIRECT);
   DEBUG("Init autopilot complete");
+
+  // Put autopilot in standby until we got calibrated compass
+  headingPID.SetMode(MANUAL);
 }
 
 void AutoPilotTask::loop() {
