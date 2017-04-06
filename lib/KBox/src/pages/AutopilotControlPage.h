@@ -57,4 +57,5 @@ class AutopilotControlPage : public Page, public KReceiver, public KVisitor, pub
     void visit(const RudderMessage&);
     bool processEvent(const ButtonEvent &be);
     bool processEvent(const EncoderEvent &ee);
+    bool processEvent(const TickEvent &tick);
 };

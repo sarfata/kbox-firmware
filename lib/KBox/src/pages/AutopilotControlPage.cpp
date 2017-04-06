@@ -118,23 +118,30 @@ bool AutopilotControlPage::processEvent(const ButtonEvent &be) {
       // return false to force the MFD to skip to the next page
       return false;
     }
-    // Long click
-    else {
-      // Disable autopilot
-      if (autopilotEngaged) {
-        autopilotEngaged = false;
-      }
-      // Engage autopilot - only if IMU is calibrated
-      else if (imuCalibrated) {
-        autopilotEngaged = true;
-        targetHeading = currentHeading;
-      }
-      // Transmit new command to autopilot task immediately
-      AutopilotControlMessage m(autopilotEngaged, targetHeading);
-      sendMessage(m);
-      updateDisplay();
-    }
   }
+  return true;
+}
+
+bool AutopilotControlPage::processEvent(const TickEvent &tick) {
+  // Detect when the button has been pressed for 2s
+  if (buttonPressed && buttonPressedTimer > 2000) {
+    // Disable autopilot
+    if (autopilotEngaged) {
+      autopilotEngaged = false;
+    }
+    // Engage autopilot - only if IMU is calibrated
+    else if (imuCalibrated) {
+      autopilotEngaged = true;
+      targetHeading = currentHeading;
+    }
+    // Transmit new command to autopilot task immediately
+    AutopilotControlMessage m(autopilotEngaged, targetHeading);
+    sendMessage(m);
+    updateDisplay();
+
+    buttonPressed = false;
+  }
+
   return true;
 }
 
