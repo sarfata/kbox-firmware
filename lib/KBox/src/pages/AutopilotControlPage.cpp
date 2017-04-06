@@ -127,6 +127,7 @@ bool AutopilotControlPage::processEvent(const ButtonEvent &be) {
       // Engage autopilot - only if IMU is calibrated
       else if (imuCalibrated) {
         autopilotEngaged = true;
+        targetHeading = currentHeading;
       }
       // Transmit new command to autopilot task immediately
       AutopilotControlMessage m(autopilotEngaged, targetHeading);
@@ -167,11 +168,11 @@ void AutopilotControlPage::visit(const RudderMessage &rm) {
 void AutopilotControlPage::visit(const IMUMessage &imu) {
   if (imu.getCalibration() == 3){
     imuCalibrated = true;
-    currentHeading = imu.getCourse();
   }
   else {
     imuCalibrated = false;
   }
+  currentHeading = imu.getCourse();
   updateDisplay();
 }
 
@@ -215,74 +216,7 @@ void AutopilotControlPage::updateDisplay() {
     rudderCommandDisplay->setColor(colorForRudder(targetRudderPosition));
   }
   else {
-    rudderCommandDisplay->setText("---");
+    rudderCommandDisplay->setText("---   ");
     rudderCommandDisplay->setColor(ColorWhite);
   }
 }
-
-/*
-  rawHeading = RadToDeg(imu.getCourse());
-  if (rawHeading < 0){
-    navCurrentHeading = 720 + rawHeading;//adding 720 for nav math purposes
-    navCurrentDisplayHeading = 360 + rawHeading;
-  } else {
-    navCurrentHeading = 720 + rawHeading;
-    navCurrentDisplayHeading =  rawHeading;
-  }
-  headingDisplay->setText(formatMeasurement(navCurrentDisplayHeading, ""));
-  headingDisplay->setColor(colorForCourse(navCurrentDisplayHeading));
-
-  if (apMode == true && apHeadingMode == true ){
-    if (isTargetSet == false){
-      initialTargetHeading = navCurrentHeading;
-      navTargetHeading = initialTargetHeading;
-      isTargetSet = true;
-    } else {
-      navTargetHeading = initialTargetHeading + navEncoderClicks;
-      if ((navTargetHeading - 720) < 0){
-        navTargetDisplayHeading = 360 + (navTargetHeading - 720) ;
-      } else {
-        navTargetDisplayHeading = navTargetHeading - 720;
-      }
-    }
-    targetHeadingDisplay->setText(formatMeasurement(navTargetDisplayHeading, ""));
-    targetHeadingDisplay->setColor(colorForCourse(navTargetDisplayHeading));
-
-    //following code recalculates navCurrentHeading based on "offcourse" value to avoid non-linear heading numbers across 180 degrees
-    navOffCourse = navCurrentDisplayHeading - navTargetDisplayHeading;
-    navOffCourse += (navOffCourse > 180) ? -360 : (navOffCourse < -180) ? 360 : 0;
-    navCurrentHeading = navTargetHeading + navOffCourse;
-
-    if (navTargetRudderPosition == 33){  // 0 = full starboard rudder (trailing edge of rudder to the right, bow moves to right
-      rudderCommandForDisplay = 0;
-    } else if (navTargetRudderPosition < 33){ //32 sb 1 so display 33 - command
-      rudderCommandForDisplay = 33 - navTargetRudderPosition;
-    } else if (navTargetRudderPosition > 33){ //34 sb -1 so display command - 32 as negative number
-      rudderCommandForDisplay = (navTargetRudderPosition - 32) * -1 ; //rounding anomaly to avoid displaying -0
-    }
-    rudderCommandDisplay->setText(formatMeasurement(rudderCommandForDisplay, ""));
-    rudderCommandDisplay->setColor(colorForRudder(rudderCommandForDisplay));
-
-    if (!apDodgeMode){ //if not in dodgeMode show rudder movement indicator
-      if (rudderCommandForDisplay > 0){
-        if (navRudderSensorPosition < rudderCommandForDisplay){
-          rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, ">"));
-        } else {
-          rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, "<"));
-        }
-      } else if (rudderCommandForDisplay < 0) {
-        if (navRudderSensorPosition > rudderCommandForDisplay){
-          rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, "<"));
-        } else {
-          rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, ">"));
-        }
-      } else {
-        rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, "|"));
-      }
-    } else {
-      rudderPositionDisplay->setText(formatMeasurement(navRudderSensorPosition, ""));
-    }
-    rudderPositionDisplay->setColor(colorForRudder(navRudderSensorPosition));
-  }
-}
-*/
