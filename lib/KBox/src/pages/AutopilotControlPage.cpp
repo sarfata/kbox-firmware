@@ -32,9 +32,9 @@
 
 #include <stdio.h>
 #include <math.h>
-#include <N2kMessages.h> // DegToRad & RadToDeg
 #include "MFD.h"
 #include "KBoxDebug.h"
+#include "../util/Angles.h"
 #include "AutopilotControlPage.h"
 
 AutopilotControlPage::AutopilotControlPage() {
@@ -78,48 +78,16 @@ Color AutopilotControlPage::colorForRudder(float r) {
 }
 
 /**
- * Returns an angle between -PI (excluded) and +PI (included)
- */
-double AutopilotControlPage::normalizeRelativeAngle(double angle) {
-  if (!isfinite(angle)) {
-    return angle;
-  }
-  while (angle <= -PI) {
-    angle += 2*PI;
-  }
-  while (angle > PI) {
-    angle -= 2*PI;
-  }
-  return angle;
-}
-
-/**
- * Returns an angle between 0 (included) and 2*PI (excluded)
- */
-double AutopilotControlPage::normalizeAbsoluteAngle(double angle) {
-  if (!isfinite(angle)) {
-    return angle;
-  }
-  while (angle < 0) {
-    angle += 2*PI;
-  }
-  while (angle >= 2*PI) {
-    angle -= 2*PI;
-  }
-  return angle;
-}
-
-/**
  * Formats a given absolute angle (in radian) into a string between 0 and 359.
  *
  * @param isMagnetic true if the angle is a magnetic angle
  * @return a string with the angle and a unit indicator ("T" or "M")
  */
 String AutopilotControlPage::formatAbsoluteAngle(double angle, bool isMagnetic) {
-  angle = normalizeAbsoluteAngle(angle);
+  angle = Angles::normalizeAbsoluteAngle(angle);
 
   char s[10];
-  snprintf(s, sizeof(s), "%3.0f %c  ", RadToDeg(angle), isMagnetic ? 'M' : 'T');
+  snprintf(s, sizeof(s), "%3.0f %c  ", Angles::RadToDeg(angle), isMagnetic ? 'M' : 'T');
   return String(s);
 }
 
@@ -129,10 +97,10 @@ String AutopilotControlPage::formatAbsoluteAngle(double angle, bool isMagnetic) 
  * @return a string with the angle
  */
 String AutopilotControlPage::formatRelativeAngle(double angle) {
-  angle = normalizeRelativeAngle(angle);
+  angle = Angles::normalizeRelativeAngle(angle);
 
   char s[10];
-  snprintf(s, sizeof(s), "%3.0f   ", RadToDeg(angle));
+  snprintf(s, sizeof(s), "%3.0f   ", Angles::RadToDeg(angle));
   return String(s);
 }
 
@@ -170,7 +138,7 @@ bool AutopilotControlPage::processEvent(const ButtonEvent &be) {
 }
 
 bool AutopilotControlPage::processEvent(const EncoderEvent &ee) {
-  targetHeading = normalizeAbsoluteAngle(targetHeading + DegToRad(ee.rotation));
+  targetHeading = Angles::normalizeAbsoluteAngle(targetHeading + Angles::DegToRad(ee.rotation));
 
   AutopilotControlMessage m(autopilotEngaged, targetHeading);
   sendMessage(m);

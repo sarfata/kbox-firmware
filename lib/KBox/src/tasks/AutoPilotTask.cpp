@@ -36,8 +36,7 @@
 #include "KBoxDebug.h"
 #include "../drivers/board.h"
 #include "KMessage.h"
-#include <NMEA2000.h>
-#include <N2kMessages.h>
+#include "../util/Angles.h"
 
 AutoPilotTask::AutoPilotTask() : Task("AutoPilotTask"),
   headingPID(&currentHeading, &targetRudderPosition, &targetHeading, (double)P_Param, (double)I_Param, (double)D_Param, (int) REVERSE)
@@ -51,7 +50,18 @@ void AutoPilotTask::processMessage(const KMessage &message) {
 
 void AutoPilotTask::visit(const IMUMessage &imuMessage) {
   if (imuMessage.getCalibration() == 3) {
-    currentHeading = imuMessage.getCourse();
+    // Normalize target heading requested in the range 0 to 360 (but in radians)
+    currentHeading = Angles::normalizeAbsoluteAngle(imuMessage.getCourse());
+
+    // Now adjust the angle to find the lowest angular distance between our current course and the targetHeading.
+    // For example, if the targetHeading is 350 and our currentHeading is 005, then we will transform it to 365.
+    if (abs(targetHeading - currentHeading) > PI) {
+      if (currentHeading > targetHeading) {
+        currentHeading -= 2*M_PI;
+      } else {
+        currentHeading += 2*M_PI;
+      }
+    }
   }
   else {
     engaged = false;
@@ -60,6 +70,8 @@ void AutoPilotTask::visit(const IMUMessage &imuMessage) {
 
 void AutoPilotTask::visit(const AutopilotControlMessage &controlMessage) {
   engaged = controlMessage.isEngaged();
+
+
   targetHeading = controlMessage.getTargetHeading();
 }
 
@@ -97,7 +109,7 @@ void AutoPilotTask::loop() {
   }
 
   const char *commands = "<>o-";
-  DEBUG("Autopilot CurHeading=%.1f TargetHeading=%.1f RudderTarget=%.1f Command=%c", RadToDeg(currentHeading), RadToDeg(targetHeading), RadToDeg(targetRudderPosition), commands[command]);
+  DEBUG("Autopilot CurHeading=%.1f TargetHeading=%.1f RudderTarget=%.1f Command=%c", Angles::RadToDeg(currentHeading), Angles::RadToDeg(targetHeading), Angles::RadToDeg(targetRudderPosition), commands[command]);
 
   AutopilotStatusMessage m(engaged, targetHeading, targetRudderPosition, command);
   sendMessage(m);

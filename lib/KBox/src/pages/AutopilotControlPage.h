@@ -32,8 +32,6 @@ class AutopilotControlPage : public Page, public KReceiver, public KVisitor, pub
     TextLayer *apModeDisplay, *currentHeadingDisplay, *targetHeadingDisplay, *rudderPositionDisplay, *rudderCommandDisplay;
 
     Color colorForRudder(float r);
-    double normalizeRelativeAngle(double angle);
-    double normalizeAbsoluteAngle(double angle);
     String formatRelativeAngle(double angle);
     String formatAbsoluteAngle(double angle, bool isMagnetic);
 

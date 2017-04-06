@@ -26,14 +26,14 @@
 #include "TaskManager.h"
 #include "KMessage.h"
 #include <PID_v1.h>
-#include <N2kMessages.h> // DegToRad
+#include "util/Angles.h"
 
 //following variables will need to be tuned based on actual boat performance
 #define P_Param  1.0 //proportional param P-gain, the gain determines how much change the OP will make due to a change in error
 #define I_Param  0.0 // 0.2 //integral or I-gain, the the reset determines how much to change the OP over time due to the error
 #define D_Param  0.0 // 0.2 //derivative or D-gain, the preact determines how much to change the OP due from a change in direction of the error
-#define AUTOPILOTSLACK DegToRad(0) //to be adjusted based on boat characteristics
-#define MAXRUDDERSWING DegToRad(66.0) //max swing allowed to the autopilot (should be less or equal to rudder swing)
+#define AUTOPILOTSLACK Angles::DegToRad(0) //to be adjusted based on boat characteristics
+#define MAXRUDDERSWING Angles::DegToRad(66.0) //max swing allowed to the autopilot (should be less or equal to rudder swing)
 // How often should the autopilot computations run
 #define AUTOPILOT_SAMPLE_TIME 250
 
