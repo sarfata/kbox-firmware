@@ -37,17 +37,17 @@ static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0x40);
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <KBoxLoggerStream.h>
 #include "comms/SlipStream.h"
 #include "comms/KommandHandler.h"
 #include "comms/KommandHandlerPing.h"
+#include "comms/KommandHandlerNMEA.h"
 #include "stats/KBoxMetrics.h"
 
 #include "ESPDebugLogger.h"
 
 SlipStream slip(Serial, 2048);
 KommandHandlerPing pingHandler;
-
+KommandHandlerNMEA nmeaHandler(server);
 
 void setup() {
   Serial1.begin(115200);
@@ -89,7 +89,7 @@ void loop() {
 
     KommandReader kr = KommandReader(frame, len);
 
-    KommandHandler *handlers[] = { &pingHandler, 0 };
+    KommandHandler *handlers[] = { &pingHandler, &nmeaHandler, 0 };
     if (KommandHandler::handleKommandWithHandlers(handlers, kr, slip)) {
       KBoxMetrics.event(KBoxEventESPValidKommand);
     }

@@ -76,7 +76,7 @@ void NetServer::handleNewClient(AsyncClient *client) {
   client->stop();
 }
 
-void NetServer::writeAll(uint8_t *bytes, int len) {
+void NetServer::writeAll(const uint8_t *bytes, int len) {
   for (int i = 0; i < maxClients; i++) {
     if (clients[i] && clients[i]->connected()) {
       queues[i].add(NetMessage(bytes, len));

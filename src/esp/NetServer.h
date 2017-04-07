@@ -40,7 +40,7 @@ class NetMessage {
     int _len;
 
   public:
-    NetMessage(uint8_t *bytes, int len) : _len(len) {
+    NetMessage(const uint8_t *bytes, int len) : _len(len) {
       _bytes = (uint8_t*)malloc(len);
       memcpy(_bytes, bytes, len);
     };
@@ -69,7 +69,7 @@ class NetServer {
     NetServer(int port);
 
     void loop();
-    void writeAll(uint8_t *bytes, int len);
+    void writeAll(const uint8_t *bytes, int len);
     int clientsCount();
 
   private:
