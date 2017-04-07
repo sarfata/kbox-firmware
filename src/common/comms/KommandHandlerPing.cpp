@@ -26,6 +26,10 @@
 #include <KBoxLogging.h>
 
 bool KommandHandlerPing::handleKommand(KommandReader &kreader, SlipStream &replyStream) {
+  if (kreader.getKommandIdentifier() != KommandPing) {
+    return false;
+  }
+
   /* data here should be a 4 bytes packet identfier that we will include in the reply. */
   if (kreader.dataSize() != 4) {
     return false;
