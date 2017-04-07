@@ -31,21 +31,12 @@ bool KommandHandlerPing::handleKommand(KommandReader &kreader, SlipStream &reply
     return false;
   }
 
-  DEBUG("About to read!");
-
-
   uint32_t pingId = kreader.read32();
 
-  DEBUG("About to send");
   FixedSizeKommand<4> pongFrame(KommandPong);
   pongFrame.append32(pingId);
 
-  // Works if we return true here.
-  DEBUG("pongFrame.getSize() == %u", pongFrame.getSize());
   replyStream.writeFrame(pongFrame.getBytes(), pongFrame.getSize());
-
-  // crashes in sendReply. The reference to _slip is not valid.
-  DEBUG("sent");
 
   return true;
 }
