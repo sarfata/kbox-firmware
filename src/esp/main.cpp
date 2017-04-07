@@ -43,35 +43,11 @@ static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0x40);
 #include "comms/KommandHandlerPing.h"
 #include "stats/KBoxMetrics.h"
 
+#include "ESPDebugLogger.h"
+
 SlipStream slip(Serial, 2048);
 KommandHandlerPing pingHandler;
 
-class ESPDebugLogger : public KBoxLogger {
-  private:
-    SlipStream &_slipStream;
-    static const size_t MaxLogFrameSize = 512;
-
-  public:
-    ESPDebugLogger(SlipStream &slipStream) : _slipStream(slipStream) {};
-
-    void log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs) {
-      FixedSizeKommand<MaxLogFrameSize> logKmd(KommandLog);
-      logKmd.append16(level);
-      logKmd.append16(lineno);
-      logKmd.append16(strlen(fname));
-      logKmd.appendNullTerminatedString(fname);
-
-      uint8_t *bytes;
-      size_t *index;
-
-      logKmd.captureBuffer(&bytes, &index);
-
-      *index += vsnprintf((char*)bytes + *index, MaxLogFrameSize - *index, fmt, fmtargs);
-      (*index)++; // for the null-terminating byte
-
-      _slipStream.writeFrame(bytes, *index);
-    };
-};
 
 void setup() {
   Serial1.begin(115200);
