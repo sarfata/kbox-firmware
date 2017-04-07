@@ -24,11 +24,7 @@
 
 
 #include <Arduino.h>
-#ifdef ESP8266
 #include <debug.h>
-#else
-#define panic()
-#endif
 
 #include "ESPAsyncTCPbuffer.h"
 
@@ -259,6 +255,8 @@ void AsyncTCPbuffer::stop() {
                 _RXmode = ATB_RX_MODE_NONE;
                 _cbDone(false, NULL);
                 break;
+            default:
+              break;
         }
     }
     _RXmode = ATB_RX_MODE_NONE;
@@ -303,7 +301,6 @@ void AsyncTCPbuffer::_attachCallbacks() {
         if(b->_cbDisconnect) {
             del = b->_cbDisconnect(b);
         }
-        c->free();
         delete c;
         if(del) {
             delete b;
@@ -542,4 +539,3 @@ size_t AsyncTCPbuffer::_handleRxBuffer(uint8_t *buf, size_t len) {
 
     return 0;
 }
-
