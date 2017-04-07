@@ -37,17 +37,20 @@ static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0x40);
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
 #include "comms/SlipStream.h"
 #include "comms/KommandHandler.h"
 #include "comms/KommandHandlerPing.h"
 #include "comms/KommandHandlerNMEA.h"
 #include "stats/KBoxMetrics.h"
+#include "net/KBoxWebServer.h"
 
 #include "ESPDebugLogger.h"
 
 SlipStream slip(Serial, 2048);
 KommandHandlerPing pingHandler;
 KommandHandlerNMEA nmeaHandler(server);
+KBoxWebServer webServer;
 
 void setup() {
   Serial1.begin(115200);
@@ -63,6 +66,8 @@ void setup() {
   Serial.begin(115200);
   Serial.setTimeout(0);
   Serial.setDebugOutput(true);
+
+  webServer.setup();
 
   // This delay is important so that KBox can detect when firmware
   // upload are done and restart normal operation.
