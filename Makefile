@@ -46,5 +46,5 @@ runmfg:
 	miniterm.py $(PORT) 115200
 
 test:
-	platformio run -e test
+	platformio run -e test -vv
 	.pioenvs/test/program
