@@ -64,7 +64,7 @@ void ESPProgrammer::loop() {
   }
 
   // If we do not receive anything for more than 3 seconds then we are probably done.
-  if (state != Disconnected && state != Done && timeSinceLastByte > 500) {
+  if (state != Disconnected && state != Done && timeSinceLastByte > 3000) {
     DEBUG("programming done!");
     state = Done;
   }
@@ -113,13 +113,13 @@ void ESPProgrammer::loopByteMode() {
   }
   else {
     if (computerSerial.available()) {
-      int read = Serial.readBytes((char*)buffer, bootloaderMtu);
+      int read = computerSerial.readBytes((char*)buffer, min(bootloaderMtu, computerSerial.available()));
       espSerial.write(buffer, read);
       timeSinceLastByte = 0;
     }
 
     if (espSerial.available()) {
-      int read = Serial1.readBytes(buffer, bootloaderMtu);
+      int read = espSerial.readBytes(buffer, min(bootloaderMtu, espSerial.available()));
       computerSerial.write(buffer, read);
       timeSinceLastByte = 0;
     }
@@ -195,7 +195,7 @@ void ESPProgrammer::updateColors() {
       stateColor = pixels.Color(0x20, 0x20, 0);
       break;
     case FrameModeFlash:
-      // Red+Blue (?) when programmer reading/writing flash
+      // Purple when programmer reading/writing flash
       stateColor = pixels.Color(0x20, 0x0, 0x20);
       break;
     case Done:
