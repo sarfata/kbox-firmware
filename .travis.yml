@@ -34,6 +34,7 @@ script:
 
 # required to get a modern version of g++ with full std-c11 support
 env:
+  CC=gcc=4.9
   CXX=g++-4.9
 addons:
   apt:
