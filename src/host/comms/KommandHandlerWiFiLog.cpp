@@ -46,7 +46,7 @@ bool KommandHandlerWiFiLog::handleKommand(KommandReader &kreader, SlipStream &re
 
   const char *log = kreader.readNullTerminatedString();
   if (log == 0) {
-    ERROR("Invalid log frame: no log (filename=%s)", fname);
+    ERROR("Invalid log frame: no log (source %s:%i level:%i)", fname, lineno, level);
     return false;
   }
 
