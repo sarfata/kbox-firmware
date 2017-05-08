@@ -23,10 +23,15 @@
 */
 
 #include "KommandHandler.h"
+#include <KBoxLogging.h>
 
 bool KommandHandler::handleKommandWithHandlers(KommandHandler *handlers[], KommandReader &kreader, SlipStream &replyStream, bool sendError) {
   bool processed = false;
 
+  if (kreader.getKommandIdentifier() == KommandErr) {
+    INFO("Received error frame!");
+    return true;
+  }
   for (unsigned int i = 0; handlers[i] != 0; i++) {
     if (handlers[i]->handleKommand(kreader, replyStream)) {
       processed = true;
