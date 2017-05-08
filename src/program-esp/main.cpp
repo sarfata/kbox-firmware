@@ -51,9 +51,9 @@ void setup() {
   KBox.espInit();
   KBox.espRebootInProgram();
 
-  Serial.setTimeout(0);
-  Serial1.setTimeout(0);
-  Serial3.setTimeout(0);
+  Serial.setTimeout(10000);
+  Serial1.setTimeout(10000);
+  Serial3.setTimeout(10000);
 }
 
 void loop() {
