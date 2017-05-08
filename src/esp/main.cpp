@@ -64,16 +64,21 @@ void setup() {
   WiFi.softAP("KBox");
 
   Serial.begin(115200);
-  Serial.setTimeout(0);
-  Serial.setDebugOutput(true);
+  // We do want a timeout to make sure write() does not return
+  // without having written everything.
+  Serial.setTimeout(1000);
+  // Turn on to get ESP debug messages (they will be intermixed with frames to
+  // teensy)
+  Serial.setDebugOutput(false);
 
+  // Configure our webserver
   webServer.setup();
 
   // This delay is important so that KBox can detect when firmware
   // upload are done and restart normal operation.
   delay(1000);
 
-  DEBUG("Starting KBox WiFi module");
+  INFO("ESP8266 running.");
 }
 
 uint8_t buffer[1024];
@@ -82,7 +87,7 @@ size_t rxIndex = 0;
 void loop() {
   static unsigned long int nextPrint = 0;
   if (millis() > nextPrint) {
-    DEBUG("Still running ... %i connected clients - %i heap", server.clientsCount(), ESP.getFreeHeap());
+    DEBUG("Still running ... %i connected clients - %i heap - IP: %s", server.clientsCount(), ESP.getFreeHeap(), WiFi.localIP().toString().c_str());
     nextPrint = millis() + 500;
   }
 

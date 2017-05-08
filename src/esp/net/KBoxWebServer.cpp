@@ -32,17 +32,48 @@
 
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <ArduinoJson.h>
 #include <KBoxLogging.h>
 
-// FIXME: DIRTY HACK
+// FIXME: This should be a member of KBoxWebServer but...
 // This library includes a class named LinkedList which conflicts with our
 // LinkedList<> library. This is why we are hiding the include to the library
 // here, away from other KBox code that uses our LinkedList ...
 static AsyncWebServer webServer(80);
-static AsyncWebSocket ws("/ws");
+static AsyncWebSocket ws("/signalk/v1/stream");
 
+// FIXME: We are going to have some threading problems here because the onEvent
+// will be called on a network thread and KBoxLogging is not thread-safe
 void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
-  DEBUG("Websocket event!");
+  if (type == WS_EVT_CONNECT) {
+    DEBUG("%u: New connection from %s to %s", client->id(), client->remoteIP().toString().c_str(), server->url() );
+
+    StaticJsonBuffer<500> jsonBuffer;
+    JsonObject &root = jsonBuffer.createObject();
+    root["version"] = "";
+    root["timestamp"] = "";
+    root["self"] = "KBOX";
+
+    char buffer[256];
+    root.printTo(buffer, sizeof(buffer));
+
+    client->printf(buffer);
+  }
+  else if (type == WS_EVT_DISCONNECT) {
+    DEBUG("%u: Disconnected", client->id());
+  }
+  else if (type == WS_EVT_ERROR) {
+    DEBUG("%u: Error", client->id());
+  }
+  else if (type == WS_EVT_PONG) {
+    DEBUG("%u: PONG", client->id());
+  }
+  else if (type == WS_EVT_DATA) {
+    DEBUG("%u: DATA", client->id());
+  }
+  else {
+    DEBUG("%u: Un-handled event with type=%i", client->id(), type);
+  }
 }
 
 KBoxWebServer::KBoxWebServer() {
@@ -53,19 +84,26 @@ void KBoxWebServer::setup() {
   ws.onEvent(onEvent);
   webServer.addHandler(&ws);
 
+  SPIFFS.begin();
+  if (SPIFFS.exists("/index.html")) {
+    DEBUG("Starting webserver with index.html existing on SPIFFS");
+  }
+  else {
+    DEBUG("Starting webserver BUT index.html DOES NOT EXIST");
+  }
+
   // respond to GET requests on URL /heap
   webServer.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/plain", String(ESP.getFreeHeap()));
   });
 
-  // send a file when /index is requested
-  webServer.on("/index", HTTP_ANY, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/index.htm");
+  // send a file when / is requested
+  webServer.on("/", HTTP_ANY, [](AsyncWebServerRequest *request){
+    request->send(SPIFFS, "/index.html");
   });
 
   // attach filesystem root at URL /fs
   webServer.serveStatic("/fs", SPIFFS, "/");
 
   webServer.begin();
-
 }

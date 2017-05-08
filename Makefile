@@ -20,6 +20,9 @@ esp:
 esp-upload:
 	platformio run -e esp -t upload
 
+esp-uploadfs:
+	platformio run -e esp -t uploadfs
+
 host:
 	platformio run -e host -t size
 
