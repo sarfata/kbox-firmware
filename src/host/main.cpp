@@ -57,7 +57,7 @@ void setup() {
   // Clears the screen
   mfd.setup();
 
-  delay(3000);
+  delay(1000);
 
   Serial.begin(115200);
   KBoxLogging.setLogger(&usbService);
