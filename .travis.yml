@@ -18,7 +18,9 @@ language: python
 python:
     - "2.7"
 
+# Trusty gives us a modern GCC - important for C++ 11 support
 dist: trusty
+
 sudo: false
 cache:
     directories:
@@ -33,16 +35,3 @@ script:
     # Run the few unit tests (C code running on computer)
     - make test
 
-# required to get a modern version of g++ with full std-c11 support
-#env:
-  #CC=gcc-4.9
-  #CXX=g++-4.9
-#addons:
-  #apt:
-    #sources:
-    ## add PPAs with more up-to-date toolchains
-    #- ubuntu-toolchain-r-test
-    #packages:
-    ## install toolchains
-    #- gcc-4.9
-    #- g++-4.9
