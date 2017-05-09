@@ -9,3 +9,5 @@ env.Replace(
     CC=os.environ.get('CC', env['CC']),
     CXX=os.environ.get('CXX', env['CXX'])
 )
+
+print "Configured CXX: {}".format(env['CXX'])
