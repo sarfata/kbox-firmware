@@ -134,14 +134,15 @@ class KBox(object):
 
 
     def ping(self, pingId):
+        print("PING[{}]".format(pingId))
         self.command(KBox.KommandPing, struct.pack('<I', pingId))
         t0 = time.time()
 
         ponged = False
         while not ponged:
             resp = self.readCommand(KBox.KommandPong)
-            (data) = struct.unpack('<I', resp)
-            print("PONG {} in {} ms".format(data, (time.time() - t0) * 1000))
+            (data,) = struct.unpack('<I', resp)
+            print("PONG[{}] in {} ms".format(data, (time.time() - t0) * 1000))
             ponged = True
 
     def command(self, command, data = ""):
