@@ -36,30 +36,30 @@ class NMEASentenceBuilder {
 
   public:
     /** Creates a new instance
-	 * @param talkerId: a null-terminated string identifying the talker on
-	 * the network. Usually only two uppercase letter.
-	 * @param sentenceId: a three-character identifier of the sentence. Usually
-	 * three upper-case letters.
-	 * @param largest field identifier that will be used in this sentence.
-	 */
+     * @param talkerId: a null-terminated string identifying the talker on
+     * the network. Usually only two uppercase letter.
+     * @param sentenceId: a three-character identifier of the sentence. Usually
+     * three upper-case letters.
+     * @param largest field identifier that will be used in this sentence.
+     */
     NMEASentenceBuilder(String talkerId, String sentenceId, int numFields);
     ~NMEASentenceBuilder();
 
     NMEASentenceBuilder& operator=(const NMEASentenceBuilder& other);
 
     /** Set the value of one of the field.
-	 * Note that fields are numbered from 1 so as to match the NMEA reference:
+     * Note that fields are numbered from 1 so as to match the NMEA reference:
      * http://catb.org/gpsd/NMEA.html
-	 *
-	 * @param fieldId the identifier of the field (between 1 and numFields
-	 * included)
-	 * @param s the new value
+     *
+     * @param fieldId the identifier of the field (between 1 and numFields
+     * included)
+     * @param s the new value
      */
     void setField(int fieldId, String s);
     void setField(int fieldId, float v, int precision);
 
-	/** Returns a string with a properly formatted NMEA sentence, terminated by
-	 * a checksum and "\r\n\0".
-	 */
+    /** Returns a string with a properly formatted NMEA sentence, terminated by
+     * a checksum and "\r\n\0".
+     */
     String toNMEA();
 };
