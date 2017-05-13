@@ -139,6 +139,7 @@ class KBox(object):
 
 
     def ping(self, pingId):
+        print("PING[{}]".format(pingId))
         self.command(KBox.KommandPing, struct.pack('<I', pingId))
         t0 = time.time()
 
@@ -148,8 +149,8 @@ class KBox(object):
             if len(resp) != 4:
                 raise FatalError("KBox ponged with wrong size frame ({} instead of 4)".format(len(resp)))
             else:
-                (data) = struct.unpack('<I', resp)
-                print("PONG {} in {} ms".format(data, (time.time() - t0) * 1000))
+                (data,) = struct.unpack('<I', resp)
+                print("PONG[{}] in {} ms".format(data, (time.time() - t0) * 1000))
                 ponged = True
 
     def command(self, command, data = ""):
