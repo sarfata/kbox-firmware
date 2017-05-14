@@ -26,17 +26,21 @@
 #include "common/signalk/SKValue.h"
 
 TEST_CASE("SKValue: Create a few values and make sure we can read their data back") {
-  SKValue cog = SKValue::NavigationCourseOverGroundTrue(1.323);
+  SKValue cog = SKValue::navigationCourseOverGroundTrue(1.323);
   CHECK( cog.getPath() == SKPathNavigationCourseOverGroundTrue );
   CHECK( cog.getNavigationCourseOverGroundTrue() == 1.323);
 
-  SKValue sog = SKValue::NavigationSpeedOverGround(21.22);
+  SKValue sog = SKValue::navigationSpeedOverGround(21.22);
   CHECK( sog.getPath() == SKPathNavigationSpeedOverGround );
   CHECK( sog.getNavigationSpeedOverGround() == 21.22);
 
-  SKValue pos = SKValue::NavigationPosition(32.33223, 32.4343);
+  SKValue pos = SKValue::navigationPosition(32.33223, 32.4343);
   CHECK( pos.getPath() == SKPathNavigationPosition );
   CHECK( pos.getNavigationPositionLatitude() == 32.33223);
   CHECK( pos.getNavigationPositionLongitude() == 32.4343);
+
+  CHECK( SKValueNone.getPath() == SKPathInvalid );
+  CHECK( SKValueNone == SKValue::noneValue() );
 };
+
 

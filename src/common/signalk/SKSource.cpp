@@ -33,6 +33,14 @@ static const String labelNMEA2 = "kbox.nmea0183.2";
 static const String labelNMEA2k = "kbox.nmea2000";
 static const String labelUnknown = "kbox.unknown";
 
+const SKSource SKSourceUnknown = SKSource::unknownSource();
+
+SKSource SKSource::unknownSource() {
+  SKSource s;
+  s._input = SKSourceInputUnknown;
+  return s;
+}
+
 SKSource SKSource::sourceForNMEA0183(const SKSourceInput input, const String& talker, const String& sentence) {
   SKSource s;
   if (input == SKSourceInputNMEA0183_1 || input == SKSourceInputNMEA0183_2) {
@@ -44,6 +52,28 @@ SKSource SKSource::sourceForNMEA0183(const SKSourceInput input, const String& ta
   s._talker = talker;
   s._sentence = sentence;
   return s;
+}
+
+bool SKSource::operator==(const SKSource &other) const {
+  if (_input != other._input) {
+    return false;
+  }
+
+  switch (_input) {
+    case SKSourceInputNMEA0183_1:
+    case SKSourceInputNMEA0183_2:
+      return _talker == other._talker && _sentence == other._sentence;
+    case SKSourceInputNMEA2000:
+      return _pgn == other._pgn;
+    case SKSourceInputUnknown:
+      return true;
+    default:
+      return true;
+  }
+}
+
+bool SKSource::operator!=(const SKSource &other) const {
+  return !(*this == other);
 }
 
 const String& SKSource::getType() const {

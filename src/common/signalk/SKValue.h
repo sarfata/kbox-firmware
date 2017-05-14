@@ -29,7 +29,9 @@
 typedef enum {
   SKPathNavigationCourseOverGroundTrue,
   SKPathNavigationSpeedOverGround,
-  SKPathNavigationPosition
+  SKPathNavigationPosition,
+
+  SKPathInvalid
 } SKPath;
 
 class SKValue {
@@ -49,6 +51,9 @@ class SKValue {
     SKValue(SKPath p) : _path(p) {};
 
   public:
+    // Default constructor so that arrays of SKValue can be declared.
+    SKValue() : _path(SKPathInvalid) {};
+
     /**
      * Return the path of this value.
      */
@@ -57,9 +62,17 @@ class SKValue {
     };
 
     /**
+     * Returns true if the two SKValues compared have the same path and the same
+     * value.
+     */
+    bool operator==(const SKValue& v) const;
+
+    bool operator!=(const SKValue& v) const;
+
+    /**
      * Create a new value for navigation.courseOverGroundTrue
      */
-    static SKValue NavigationCourseOverGroundTrue(double cog) {
+    static SKValue navigationCourseOverGroundTrue(double cog) {
       SKValue v(SKPathNavigationCourseOverGroundTrue);
       v._value.doubleValue = cog;
       return v;
@@ -68,7 +81,7 @@ class SKValue {
     /**
      * Create a new value for navigation.courseSpeedOverGround
      */
-    static SKValue NavigationSpeedOverGround(double sog) {
+    static SKValue navigationSpeedOverGround(double sog) {
       SKValue v(SKPathNavigationSpeedOverGround);
       v._value.doubleValue = sog;
       return v;
@@ -77,11 +90,19 @@ class SKValue {
     /**
      * Create a new value for navigation.position
      */
-    static SKValue NavigationPosition(double latitude, double longitude) {
+    static SKValue navigationPosition(double latitude, double longitude) {
       SKValue v(SKPathNavigationPosition);
       v._value.position.latitude = latitude;
       v._value.position.longitude = longitude;
       return v;
+    };
+
+    /**
+     * @private
+     * You should use SKValueNone instead.
+     */
+    static SKValue noneValue() {
+      return SKValue(SKPathInvalid);
     };
 
     double getNavigationCourseOverGroundTrue() const {
@@ -100,3 +121,6 @@ class SKValue {
       return _value.position.longitude;
     };
 };
+
+extern const SKValue SKValueNone;
+

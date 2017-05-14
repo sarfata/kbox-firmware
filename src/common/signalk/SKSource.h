@@ -26,22 +26,39 @@
 
 #include <WString.h>
 
-class SKSource {
-  public:
-    enum SKSourceInput {
-      SKSourceInputUnknown,
-      SKSourceInputNMEA0183_1,
-      SKSourceInputNMEA0183_2,
-      SKSourceInputNMEA2000
-    };
+enum SKSourceInput {
+  SKSourceInputUnknown,
+  SKSourceInputNMEA0183_1,
+  SKSourceInputNMEA0183_2,
+  SKSourceInputNMEA2000
+};
 
+class SKSource {
   private:
     SKSourceInput _input;
     String _talker;
     String _sentence;
+    uint32_t _pgn;
 
   public:
+    /**
+     * Returns an unknown source. 
+     * You should use the global SKSourceUnknown instead of calling this
+     * function.
+     */
+    static SKSource unknownSource();
+
+    /**
+     * Returns a source instance for the given NMEA0183 source info.
+     */
     static SKSource sourceForNMEA0183(const SKSourceInput input, const String& _talker, const String& _sentence);
+
+    /**
+     * Compares two SKSource object and returns true if they represent the same
+     * source.
+     */
+    bool operator==(const SKSource &other) const;
+    bool operator!=(const SKSource &other) const;
 
     const String& getType() const;
     const String& getTalker() const;
@@ -50,6 +67,7 @@ class SKSource {
 };
 
 /**
- * Define one global singleton instance of SKSource representing 'self'.
+ * Define one global singleton instance of SKSource representing an unknown
+ * source.
  */
-extern const SKSource SKSourceSelf;
+extern const SKSource SKSourceUnknown;

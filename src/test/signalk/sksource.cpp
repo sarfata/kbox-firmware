@@ -26,7 +26,7 @@
 #include "common/signalk/SKSource.h"
 
 TEST_CASE("Define a new NMEA0183 source") {
-  SKSource nmeaSource = SKSource::sourceForNMEA0183(SKSource::SKSourceInputNMEA0183_1, "GP", "RMC");
+  SKSource nmeaSource = SKSource::sourceForNMEA0183(SKSourceInputNMEA0183_1, "GP", "RMC");
 
   CHECK( nmeaSource.getType() == "NMEA0183" );
   CHECK( nmeaSource.getTalker() == "GP" );
@@ -35,7 +35,7 @@ TEST_CASE("Define a new NMEA0183 source") {
 }
 
 TEST_CASE("An nmea2000 input is invalid for an nmea0183 source") {
-  SKSource nmeaSource = SKSource::sourceForNMEA0183(SKSource::SKSourceInputNMEA2000, "xx", "xxx");
+  SKSource nmeaSource = SKSource::sourceForNMEA0183(SKSourceInputNMEA2000, "xx", "xxx");
 
   CHECK( nmeaSource.getType() == "unknown" );
   CHECK( nmeaSource.getLabel() == "kbox.unknown" );

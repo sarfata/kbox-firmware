@@ -24,4 +24,28 @@
 
 #include "SKValue.h"
 
+const SKValue SKValueNone = SKValue::noneValue();
 
+bool SKValue::operator==(const SKValue& other) const {
+  if (_path == other._path) {
+    switch (_path) {
+      case SKPathNavigationCourseOverGroundTrue:
+      case SKPathNavigationSpeedOverGround:
+        return _value.doubleValue == other._value.doubleValue;
+      case SKPathNavigationPosition:
+        return (_value.position.latitude == other._value.position.latitude) &&
+          (_value.position.longitude == other._value.position.longitude);
+      case SKPathInvalid:
+        return true;
+      default:
+        return false;
+    }
+  }
+  else {
+    return false;
+  }
+}
+
+bool SKValue::operator!=(const SKValue& other) const {
+  return !(*this == other);
+}
