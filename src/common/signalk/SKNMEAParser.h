@@ -24,43 +24,33 @@
 
 #pragma once
 
-#include "SKSource.h"
-#include "SKValue.h"
+#include "SKUpdate.h"
+#include "SKUpdateStatic.h"
+
+class NMEASentenceReader;
 
 /**
- * Represents a SignalK update message.
- *
- * Each update is identified by one source and a list of SKValue (path/value).
+ * Parse NMEA sentences into SignalK updates.
  */
-class SKUpdate {
+class SKNMEAParser {
+  private:
+    SKUpdate *_sku = 0;
+    SKUpdateStatic<0> _invalidSku = SKUpdateStatic<0>();
+
   public:
-    virtual ~SKUpdate() {};
+    SKNMEAParser() {};
+    ~SKNMEAParser();
 
     /**
-     * Returns the number of values in this update (it might be less than the
-     * capacity).
+     * Parses a NMEA0183 @param sentence received on @param input and returns a
+     * constant reference to a `SKUpdate` instance that will be valid until you
+     * call `parse()` again and the parser exists.
+     * Once `parse()` is called again, or the parser is destroyed, the reference
+     * is no longer valid!
      */
-    virtual int getSize() const = 0;
+    const SKUpdate& parse(const SKSourceInput& input, const String& sentence);
 
-    /**
-     * Returns the source of the values in this update.
-     */
-    virtual const SKSource& getSource() const = 0;
-
-    /**
-     * Return a value by index.
-     *
-     * @return SKValueNone if the index does not exist.
-     */
-    virtual const SKValue& operator[] (int index) const = 0;
-
-    /**
-     * Return a value by path, or null if the update does not have it.
-     *
-     * @note if there are multiple values with this path, the first one is
-     * returned.
-     * @return SKValueNone if the path does not exist in this update.
-     */
-    virtual const SKValue& operator[] (SKPath path) const = 0;
+  private:
+    const SKUpdate& parseRMC(const SKSourceInput& input, NMEASentenceReader& reader);
 };
 

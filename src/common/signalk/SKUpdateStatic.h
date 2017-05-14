@@ -43,12 +43,14 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
      */
     SKUpdateStatic() {};
 
+    ~SKUpdateStatic() {};
+
     /**
      * Add a new SKValue to this update. This will fail if the list is full.
      *
      * @return: true if succeeded, or false if the list is full.
      */
-    bool addValue(SKValue &v) {
+    bool addValue(const SKValue v) {
       if (_size < capacity) {
         _values[_size] = v;
         _size++;
@@ -69,7 +71,7 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
       return _size;
     };
 
-    const SKSource& getSource() override {
+    const SKSource& getSource() const override {
       return _source;
     };
 
