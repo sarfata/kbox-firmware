@@ -25,7 +25,7 @@
 #include "ctype.h"
 
 bool nmea_is_valid(const char *s) {
-  if (s[0] != '$' && s[0] != '!') {
+  if (s == 0 || s[0] == '\0' || (s[0] != '$' && s[0] != '!')) {
     return false;
   }
 
@@ -41,6 +41,10 @@ bool nmea_is_valid(const char *s) {
 }
 
 uint8_t nmea_compute_checksum(const char *sentence) {
+  if (sentence == 0) {
+    return false;
+  }
+
   // Skip the $ at the beginning
   int i = 1;
 
@@ -66,6 +70,9 @@ static uint8_t hexCharToInt(char c) {
 }
 
 int nmea_read_checksum(const char *sentence) {
+  if (sentence == 0) {
+    return 0;
+  }
   while (*sentence != '*' && *sentence != 0) {
     sentence++;
   }

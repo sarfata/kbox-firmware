@@ -22,8 +22,8 @@
   THE SOFTWARE.
 */
 
-#include "KBoxTest.h"
-#include "nmea/NMEASentenceBuilder.h"
+#include "../KBoxTest.h"
+#include "common/nmea/NMEASentenceBuilder.h"
 
 TEST_CASE("generating an empty sentence") {
   NMEASentenceBuilder sb("GG", "ABC", 0);
