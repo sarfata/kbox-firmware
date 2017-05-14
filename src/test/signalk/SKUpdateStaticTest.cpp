@@ -23,10 +23,10 @@
 */
 
 #include "../KBoxTest.h"
-#include "common/signalk/SKUpdate.h"
+#include "common/signalk/SKUpdateStatic.h"
 
-TEST_CASE("Create a new and empty update") {
-  SKUpdate<2> u;
+TEST_CASE("SKUpdateStatic") {
+  SKUpdateStatic<2> u;
   CHECK( u.getSize() == 0 );
   CHECK( u[42] == SKValueNone );
   CHECK( u[SKPathNavigationPosition] == SKValueNone );

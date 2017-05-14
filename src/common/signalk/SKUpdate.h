@@ -27,76 +27,37 @@
 #include "SKSource.h"
 #include "SKValue.h"
 
-template <int capacity> class SKUpdate {
-  private:
-    SKSource _source = SKSourceUnknown;
-    SKValue _values[capacity];
-    int _size = 0;
-
-  public:
-    /**
-     * Create a new SKUpdate object with an empty list that can hold at most
-     * `size` values.
-     */
-    SKUpdate() {
-    };
-
-    /**
-     * Add a new SKValue to this update. This will fail if the list is full.
-     *
-     * @return: true if succeeded, or false if the list is full.
-     */
-    bool addValue(SKValue &v) {
-      if (_size < capacity) {
-        _values[_size] = v;
-        _size++;
-        return true;
-      } else {
-        return false;
-      }
-    };
-
+/**
+ * Represents a SignalK update message.
+ *
+ * Each update is identified by one source and a list of SKValue (path/value).
+ */
+class SKUpdate {
     /**
      * Returns the number of values in this update (it might be less than the
      * capacity).
      */
-    int getSize() const {
-      return _size;
-    };
+    virtual int getSize() const = 0;
 
     /**
      * Returns the source of the values in this update.
      */
-    const SKSource& getSource() {
-      return _source;
-    };
-
-    /**
-     * Sets the source of the values in this update.
-     */
-    void setSource(const SKSource& source) {
-      _source = source;
-    };
+    virtual const SKSource& getSource() = 0;
 
     /**
      * Return a value by index.
+     *
+     * @return SKValueNone if the index does not exist.
      */
-    const SKValue& operator[] (int index) const {
-      if (index >= _size) {
-        return SKValueNone;
-      }
-      return _values[index];
-    }
+    virtual const SKValue& operator[] (int index) const = 0;
 
     /**
      * Return a value by path, or null if the update does not have it.
+     *
+     * @note if there are multiple values with this path, the first one is
+     * returned.
+     * @return SKValueNone if the path does not exist in this update.
      */
-    const SKValue& operator[] (SKPath path) const {
-      for (int i = 0; i < _size; i++) {
-        if (_values[i].getPath() == path) {
-          return _values[i];
-        }
-      }
-      return SKValueNone;
-    }
+    virtual const SKValue& operator[] (SKPath path) const = 0;
 };
+
