@@ -6,7 +6,6 @@
 .sconsign.dblite
 *.dSYM
 *.pyc
-*.o
 *.d
 tags
 .gdb_history
