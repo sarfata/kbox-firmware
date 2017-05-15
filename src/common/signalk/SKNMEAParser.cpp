@@ -22,7 +22,7 @@
   THE SOFTWARE.
 */
 
-#include <cmath>
+#include <math.h>
 #include "common/nmea/NMEASentenceReader.h"
 #include "SKNMEAParser.h"
 
