@@ -24,25 +24,25 @@
 
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
-#include "stats/KBoxMetrics.h"
-#include "nmea/nmea2000.h"
+#include "common/stats/KBoxMetrics.h"
+#include "common/nmea/nmea2000.h"
 #include <N2kMessages.h>
-#include "NMEA2000Task.h"
+#include "NMEA2000Service.h"
 
-static NMEA2000Task *handlerContext;
+static NMEA2000Service *handlerContext;
 
 static void handler(const tN2kMsg &msg) {
   DEBUG("Received N2K Message with pgn: %i", msg.PGN);
   handlerContext->publishN2kMessage(msg);
 }
 
-void NMEA2000Task::publishN2kMessage(const tN2kMsg& msg) {
+void NMEA2000Service::publishN2kMessage(const tN2kMsg& msg) {
   KBoxMetrics.event(KBoxEventNMEA2000MessageReceived);
   NMEA2000Message m(msg);
   sendMessage(m);
 }
 
-void NMEA2000Task::setup() {
+void NMEA2000Service::setup() {
   // Make sure the CAN transceiver is enabled.
   pinMode(can_standby, OUTPUT);
   digitalWrite(can_standby, 0);
@@ -79,7 +79,7 @@ void NMEA2000Task::setup() {
   }
 }
 
-void NMEA2000Task::sendN2kMessage(const tN2kMsg& msg) {
+void NMEA2000Service::sendN2kMessage(const tN2kMsg& msg) {
   bool result = NMEA2000.SendMsg(msg);
 
   DEBUG("Sending message on n2k bus - pgn=%i prio=%i src=%i dst=%i len=%i result=%s", msg.PGN, msg.Priority,
@@ -98,15 +98,15 @@ void NMEA2000Task::sendN2kMessage(const tN2kMsg& msg) {
   }
 }
 
-void NMEA2000Task::loop() {
+void NMEA2000Service::loop() {
   NMEA2000.ParseMessages();
 }
 
-void NMEA2000Task::visit(const NMEA2000Message &m) {
+void NMEA2000Service::visit(const NMEA2000Message &m) {
   sendN2kMessage(m.getN2kMsg());
 }
 
-void NMEA2000Task::visit(const IMUMessage &m) {
+void NMEA2000Service::visit(const IMUMessage &m) {
   if (m.getCalibration() == IMUMessage::IMU_CALIBRATED) {
     tN2kMsg n2kmessage;
     SetN2kPGN127257(n2kmessage, _imuSequence, m.getYaw(), m.getPitch(), m.getRoll());
@@ -119,6 +119,6 @@ void NMEA2000Task::visit(const IMUMessage &m) {
   }
 }
 
-void NMEA2000Task::processMessage(const KMessage &m) {
+void NMEA2000Service::processMessage(const KMessage &m) {
   m.accept(*this);
 }

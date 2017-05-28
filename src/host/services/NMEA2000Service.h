@@ -26,10 +26,10 @@
 
 #include <N2kMsg.h>
 #include <NMEA2000_teensy.h>
-#include "os/Task.h"
-#include "signalk/KMessage.h"
+#include "common/os/Task.h"
+#include "common/signalk/KMessage.h"
 
-class NMEA2000Task : public Task, public KGenerator, public KReceiver, public KVisitor {
+class NMEA2000Service : public Task, public KGenerator, public KReceiver, public KVisitor {
   private:
     tNMEA2000_teensy NMEA2000;
     unsigned int _imuSequence;
@@ -37,7 +37,7 @@ class NMEA2000Task : public Task, public KGenerator, public KReceiver, public KV
     void sendN2kMessage(const tN2kMsg& msg);
 
   public:
-    NMEA2000Task() : Task("NMEA2000"), _imuSequence(0) {};
+    NMEA2000Service() : Task("NMEA2000"), _imuSequence(0) {};
     void setup();
     void loop();
 
