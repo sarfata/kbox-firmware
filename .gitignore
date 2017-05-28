@@ -9,3 +9,5 @@
 *.d
 tags
 .gdb_history
+lcov-output
+cov.info
