@@ -23,23 +23,23 @@
 */
 
 #include <KBoxHardware.h>
-#include "os/TaskManager.h"
-#include "os/Task.h"
-#include "drivers/ILI9341GC.h"
-#include "pages/BatteryMonitorPage.h"
-#include "pages/StatsPage.h"
-#include "services/ADCTask.h"
-#include "services/BarometerN2kConverter.h"
-#include "services/BarometerTask.h"
-#include "services/IMUTask.h"
-#include "services/MFD.h"
-#include "services/NMEA2000Task.h"
-#include "services/NMEAReaderTask.h"
-#include "services/RunningLightTask.h"
-#include "services/SDCardTask.h"
-#include "services/USBService.h"
-#include "services/VoltageN2kConverter.h"
-#include "services/WiFiService.h"
+#include "common/os/TaskManager.h"
+#include "common/os/Task.h"
+#include "host/drivers/ILI9341GC.h"
+#include "host/pages/BatteryMonitorPage.h"
+#include "host/pages/StatsPage.h"
+#include "host/services/ADCTask.h"
+#include "host/services/BarometerN2kConverter.h"
+#include "host/services/BarometerTask.h"
+#include "host/services/IMUTask.h"
+#include "host/services/MFD.h"
+#include "host/services/NMEA2000Task.h"
+#include "host/services/NMEAService.h"
+#include "host/services/RunningLightTask.h"
+#include "host/services/SDCardTask.h"
+#include "host/services/USBService.h"
+#include "host/services/VoltageN2kConverter.h"
+#include "host/services/WiFiService.h"
 
 ILI9341GC gc(KBox.getDisplay(), Size(320, 240));
 MFD mfd(gc, KBox.getEncoder(), KBox.getButton());
@@ -81,8 +81,8 @@ void setup() {
   voltageConverter->connectTo(*wifi);
   voltageConverter->connectTo(*n2kTask);
 
-  NMEAReaderTask *reader1 = new NMEAReaderTask(NMEA1_SERIAL);
-  NMEAReaderTask *reader2 = new NMEAReaderTask(NMEA2_SERIAL);
+  NMEAService *reader1 = new NMEAService(NMEA1_SERIAL);
+  NMEAService *reader2 = new NMEAService(NMEA2_SERIAL);
   reader1->connectTo(*wifi);
   reader2->connectTo(*wifi);
 

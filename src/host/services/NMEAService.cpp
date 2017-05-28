@@ -24,9 +24,9 @@
 
 #include <KBoxLogging.h>
 #include <Arduino.h>
-#include "algo/List.h"
-#include "stats/KBoxMetrics.h"
-#include "NMEAReaderTask.h"
+#include "common/algo/List.h"
+#include "common/stats/KBoxMetrics.h"
+#include "NMEAService.h"
 
 
 // Linked list used to buffer messages
@@ -119,7 +119,7 @@ void serialEvent3() {
   }
 }
 
-NMEAReaderTask::NMEAReaderTask(HardwareSerial &s) : Task("NMEA Reader"), stream(s) {
+NMEAService::NMEAService(HardwareSerial &s) : Task("NMEA Service"), stream(s) {
   if (&s == &Serial2) {
     received2 = &receiveQueue;
     _taskName = "NMEA Reader1";
@@ -134,11 +134,11 @@ NMEAReaderTask::NMEAReaderTask(HardwareSerial &s) : Task("NMEA Reader"), stream(
   }
 }
 
-void NMEAReaderTask::setup() {
+void NMEAService::setup() {
 }
 
 
-void NMEAReaderTask::loop() {
+void NMEAService::loop() {
   if (receiveQueue.size() == 0) {
     return;
   }

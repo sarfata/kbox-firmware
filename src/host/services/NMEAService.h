@@ -23,21 +23,24 @@
 */
 #pragma once
 
-#include "os/Task.h"
-#include "signalk/KMessage.h"
-#include "stats/KBoxMetrics.h"
+#include "common/os/Task.h"
+#include "common/algo/List.h"
+#include "common/signalk/KMessage.h"
+#include "common/stats/KBoxMetrics.h"
 
-// completely arbitrary value. "ought to be enough..."
-#define MAX_NMEA_SENTENCE_LENGTH 200
+// Defined by the NMEA Standard
+#define MAX_NMEA_SENTENCE_LENGTH 82
 
-class NMEAReaderTask : public Task, public KGenerator {
+class HardwareSerial;
+
+class NMEAService : public Task, public KGenerator {
   private:
     HardwareSerial& stream;
     LinkedList<NMEASentence> receiveQueue;
     enum KBoxEvent rxValidEvent, rxErrorEvent;
 
   public:
-    NMEAReaderTask(HardwareSerial&s);
+    NMEAService(HardwareSerial&s);
 
     void setup();
     void loop();
