@@ -25,3 +25,11 @@
 #include "SKContext.h"
 
 const SKContext SKContextSelf("self");
+
+bool SKContext::operator==(const SKContext &other) const {
+  return _mrn == other.getMRN();
+}
+
+bool SKContext::operator!=(const SKContext &other) const {
+  return !(*this == other);
+}

@@ -25,6 +25,10 @@
 #include "../KBoxTest.h"
 #include "common/signalk/SKContext.h"
 
-TEST_CASE("SKContextSelf should describe itself as 'self'") {
+TEST_CASE("SKContext") {
   CHECK( SKContextSelf.getMRN() == "self" );
+
+  SKContext a = SKContextSelf;
+  CHECK( a == SKContextSelf );
 }
+

@@ -50,6 +50,13 @@ class SKContext {
     const String getMRN() const {
       return _mrn;
     };
+
+    /**
+     * Compares two SKContext objects and returns true if they represent the same
+     * context.
+     */
+    bool operator==(const SKContext &other) const;
+    bool operator!=(const SKContext &other) const;
 };
 
 extern const SKContext SKContextSelf;

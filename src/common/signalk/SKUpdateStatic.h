@@ -33,15 +33,22 @@
 template <int capacity> class SKUpdateStatic : public SKUpdate {
   private:
     SKSource _source = SKSourceUnknown;
+    const SKContext& _context;
     SKValue _values[capacity];
     int _size = 0;
 
   public:
     /**
-     * Create a new SKUpdate object with an empty list that can hold at most
-     * `size` values.
+     * Create a new SKUpdate object, with the context 'self' and  with an empty
+     * list that can hold at most `size` values.
      */
-    SKUpdateStatic() {};
+    SKUpdateStatic() : _context(SKContextSelf) {};
+
+    /**
+     * Create a new SKUpdate object, with the given contextn and with an empty
+     * list that can hold at most `size` values.
+     */
+    SKUpdateStatic(const SKContext& context) : _context(SKContextSelf) {};
 
     ~SKUpdateStatic() {};
 
@@ -73,6 +80,10 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
 
     const SKSource& getSource() const override {
       return _source;
+    };
+
+    const SKContext& getContext() const override {
+      return _context;
     };
 
     const SKValue& operator[] (int index) const override {

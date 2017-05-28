@@ -54,7 +54,7 @@ class SKSource {
     static SKSource sourceForNMEA0183(const SKSourceInput input, const String& _talker, const String& _sentence);
 
     /**
-     * Compares two SKSource object and returns true if they represent the same
+     * Compares two SKSource objects and returns true if they represent the same
      * source.
      */
     bool operator==(const SKSource &other) const;

@@ -25,6 +25,7 @@
 #pragma once
 
 #include "SKSource.h"
+#include "SKContext.h"
 #include "SKValue.h"
 
 /**
@@ -41,6 +42,11 @@ class SKUpdate {
      * capacity).
      */
     virtual int getSize() const = 0;
+
+    /**
+     * Returns the context of the values in this update.
+     */
+    virtual const SKContext& getContext() const = 0;
 
     /**
      * Returns the source of the values in this update.

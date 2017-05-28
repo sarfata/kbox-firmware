@@ -32,6 +32,7 @@ TEST_CASE("SKUpdateStatic") {
   CHECK( u[SKPathNavigationPosition] == SKValueNone );
 
   CHECK( u.getSource() == SKSourceUnknown );
+  CHECK( u.getContext() == SKContextSelf );
 
   SECTION("Add one value") {
     SKValue sog = SKValue::navigationSpeedOverGround(3.3);
@@ -65,7 +66,4 @@ TEST_CASE("SKUpdateStatic") {
     CHECK( u.getSource() == s );
   }
 };
-
-
-
 
