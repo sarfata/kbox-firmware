@@ -65,5 +65,13 @@ TEST_CASE("SKUpdateStatic") {
 
     CHECK( u.getSource() == s );
   }
+
+  SECTION("Specify a different context") {
+    SKContext differentContext("mrn:xxx");
+
+    SKUpdateStatic<3> u(differentContext);
+    CHECK( u.getContext() != SKContextSelf );
+    CHECK( u.getContext() == differentContext );
+  }
 };
 

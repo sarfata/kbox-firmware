@@ -48,7 +48,7 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
      * Create a new SKUpdate object, with the given contextn and with an empty
      * list that can hold at most `size` values.
      */
-    SKUpdateStatic(const SKContext& context) : _context(SKContextSelf) {};
+    SKUpdateStatic(const SKContext& context) : _context(context) {};
 
     ~SKUpdateStatic() {};
 
