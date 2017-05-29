@@ -44,4 +44,5 @@ runmfg:
 
 test:
 	cd lib/List/test && make test
+	cd lib/signalk-embedded/test && make test
 	cd lib/KBox/test && make test
