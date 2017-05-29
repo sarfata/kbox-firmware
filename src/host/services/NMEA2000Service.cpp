@@ -130,10 +130,13 @@ void NMEA2000Service::visit(const NMEA2000Message &m) {
 void NMEA2000Service::visit(const IMUMessage &m) {
   if (m.getCalibration() == IMUMessage::IMU_CALIBRATED) {
     tN2kMsg n2kmessage;
-    SetN2kPGN127257(n2kmessage, _imuSequence, m.getYaw(), m.getPitch(), m.getRoll());
+    SetN2kAttitude(n2kmessage, _imuSequence, m.getYaw(), m.getPitch(), m.getRoll());
     sendN2kMessage(n2kmessage);
 
-    SetN2kPGN127250(n2kmessage, _imuSequence, m.getCourse(), /* Deviation */ N2kDoubleNA, /* Variation */ N2kDoubleNA, N2khr_magnetic);
+    double magneticVariation = N2kDoubleNA;
+    double magneticDeviation = N2kDoubleNA;
+    SetN2kMagneticHeading(n2kmessage, _imuSequence, m.getCourse(), magneticDeviation, magneticVariation);
+
     sendN2kMessage(n2kmessage);
 
     _imuSequence++;

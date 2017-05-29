@@ -29,7 +29,7 @@ void VoltageN2kConverter::processMessage(const KMessage &m) {
 
   tN2kMsg msg;
   static int sid = 0;
-  // iNavX does not seem to like NA as a current value
-  SetN2kPGN127508(msg, vm->getIndex(), vm->getVoltage(), 0, N2kDoubleNA, sid++);
+  // iNavX does not seem to like NA as a BatteryCurrent value
+  SetN2kDCBatStatus(msg, vm->getIndex(), vm->getVoltage(), 0, N2kDoubleNA, sid++);
   sendMessage(NMEA2000Message(msg));
 }
