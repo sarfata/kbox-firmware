@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,32 +22,39 @@
   THE SOFTWARE.
 */
 
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include <N2kMsg.h>
+#include <N2kMessages.h>
+#include "SKNMEA2000Visitor.h"
+#include "SKUpdate.h"
+#include "SKValue.h"
 
-#include <WString.h>
-#include <stdarg.h>
-#define DEBUG(...) debug(__FILE__, __LINE__, __VA_ARGS__)
-
-// This is required so that Catch.hpp can print Teensy Strings
-std::ostream& operator << ( std::ostream& os, String const& value ) {
-    os << value.c_str();
-    return os;
+SKNMEA2000Visitor::SKNMEA2000Visitor() {
 }
 
-extern "C" {
-// So that millis() work
-uint32_t millis() {
-  return 42;
-}
+SKNMEA2000Visitor::~SKNMEA2000Visitor() {
+  flushMessages();
 }
 
-void debug(const char *fname, int lineno, const char *fmt, ... ) {
-  printf("%s: %i ", fname, lineno);
-  char tmp[128]; // resulting string limited to 128 chars
-  va_list args;
-  va_start (args, fmt );
-  vsnprintf(tmp, 128, fmt, args);
-  va_end (args);
-  printf("%s\n", tmp);
+void SKNMEA2000Visitor::processUpdate(const SKUpdate& update) {
+  // PGN 129026: Fast COG/SOG
+  if (update[SKPathNavigationSpeedOverGround] != SKValueNone
+      && update[SKPathNavigationCourseOverGroundTrue] != SKValueNone) {
+    tN2kMsg *msg = new tN2kMsg();
+    SetN2kPGN129026(*msg, (uint8_t)0, N2khr_true,
+        update[SKPathNavigationCourseOverGroundTrue].getNavigationCourseOverGroundTrue(),
+        update[SKPathNavigationSpeedOverGround].getNavigationSpeedOverGround());
+
+    _messages.add(msg);
+  }
+}
+
+const LinkedList<tN2kMsg*> SKNMEA2000Visitor::getMessages() const {
+  return _messages;
+}
+
+void SKNMEA2000Visitor::flushMessages() {
+  for (LinkedListIterator<tN2kMsg*> it = _messages.begin(); it != _messages.end(); it++) {
+    delete (*it);
+  }
+  _messages.clear();
 }

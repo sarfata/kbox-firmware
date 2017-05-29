@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,32 +22,17 @@
   THE SOFTWARE.
 */
 
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include "util.h"
+#include <N2kMsg.h>
 
-#include <WString.h>
-#include <stdarg.h>
-#define DEBUG(...) debug(__FILE__, __LINE__, __VA_ARGS__)
-
-// This is required so that Catch.hpp can print Teensy Strings
-std::ostream& operator << ( std::ostream& os, String const& value ) {
-    os << value.c_str();
-    return os;
+const tN2kMsg *findMessage(const LinkedList<tN2kMsg*> messages, uint32_t pgn, int index) {
+  for (LinkedListConstIterator<tN2kMsg*> it = messages.begin(); it != messages.end(); it++) {
+    if ((*it)->PGN == pgn) {
+      if (index-- == 0) {
+        return (*it);
+      }
+    }
+  }
+  return 0;
 }
 
-extern "C" {
-// So that millis() work
-uint32_t millis() {
-  return 42;
-}
-}
-
-void debug(const char *fname, int lineno, const char *fmt, ... ) {
-  printf("%s: %i ", fname, lineno);
-  char tmp[128]; // resulting string limited to 128 chars
-  va_list args;
-  va_start (args, fmt );
-  vsnprintf(tmp, 128, fmt, args);
-  va_end (args);
-  printf("%s\n", tmp);
-}

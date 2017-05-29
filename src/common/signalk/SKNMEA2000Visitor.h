@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,32 +22,40 @@
   THE SOFTWARE.
 */
 
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#pragma once
 
-#include <WString.h>
-#include <stdarg.h>
-#define DEBUG(...) debug(__FILE__, __LINE__, __VA_ARGS__)
+#include "common/algo/List.h"
 
-// This is required so that Catch.hpp can print Teensy Strings
-std::ostream& operator << ( std::ostream& os, String const& value ) {
-    os << value.c_str();
-    return os;
-}
+class tN2kMsg;
+class SKUpdate;
 
-extern "C" {
-// So that millis() work
-uint32_t millis() {
-  return 42;
-}
-}
 
-void debug(const char *fname, int lineno, const char *fmt, ... ) {
-  printf("%s: %i ", fname, lineno);
-  char tmp[128]; // resulting string limited to 128 chars
-  va_list args;
-  va_start (args, fmt );
-  vsnprintf(tmp, 128, fmt, args);
-  va_end (args);
-  printf("%s\n", tmp);
-}
+/**
+ * Converts one or multiple SignalK updates into a series of N2KMessages.
+ *
+ * N2kMsg are kept in an internal linked list and can be retrieved or flushed
+ * at any point.
+ */
+class SKNMEA2000Visitor {
+  private:
+    LinkedList<tN2kMsg*> _messages;
+
+  public:
+    SKNMEA2000Visitor();
+    ~SKNMEA2000Visitor();
+
+    /**
+     * Process a SKUpdate and add messages to the internal queue of messages.
+     */
+    void processUpdate(const SKUpdate& update);
+
+    /**
+     * Retrieve the current list of messages.
+     */
+    const LinkedList<tN2kMsg*> getMessages() const;
+
+    /**
+     * Flush the list of messages.
+     */
+    void flushMessages();
+};
