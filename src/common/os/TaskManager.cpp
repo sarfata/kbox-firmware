@@ -41,6 +41,8 @@ void TaskManager::setup() {
   restartStats();
 }
 
+static Task *lastRanTask;
+
 void TaskManager::loop() {
   elapsedMicros loopTimer;
 
@@ -48,6 +50,11 @@ void TaskManager::loop() {
   for (LinkedList<Task*>::iterator it = tasks.begin(); it != tasks.end(); it++, i++) {
     if ((*it)->ready()) {
       elapsedMicros timer;
+
+      // This is useful when debugging and the stack is corrupted, it
+      // will always point to the culprit.
+      lastRanTask = (*it);
+
       (*it)->loop();
       if (taskStats) {
         taskStats[i].recordRun(timer);
@@ -70,7 +77,7 @@ void TaskManager::displayStats() {
   DEBUG("%2s %16s %10s %10s %9s %9s %9s", "ID", "TaskName", "Runs", "Total (ms)", "Average (us)", "Min (us)", "Max (us)");
   for (LinkedList<Task*>::iterator it = tasks.begin(); it != tasks.end(); it++) {
     DEBUG("%2i %16s %10lu %10lu %9lu %9lu %9lu",
-        i, (*it)->getTaskName(), taskStats[i].count(), taskStats[i].totalTime() / 1000, 
+        i, (*it)->getTaskName(), taskStats[i].count(), taskStats[i].totalTime() / 1000,
         taskStats[i].avgTime(), taskStats[i].minTime(), taskStats[i].maxTime());
     i++;
   }

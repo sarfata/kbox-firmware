@@ -87,6 +87,7 @@ void setup() {
   reader2->connectTo(*wifi);
 
   IMUTask *imuTask = new IMUTask();
+  imuTask->connectTo(*wifi);
   imuTask->connectTo(*n2kTask);
 
   BarometerTask *baroTask = new BarometerTask();
@@ -129,6 +130,12 @@ void setup() {
   mfd.addPage(statsPage);
 
   taskManager.setup();
+
+  // Reinitialize debug here because in some configurations
+  // (like logging to nmea2 output), the kbox setup might have messed
+  // up the debug configuration.
+  DEBUG_INIT();
+  DEBUG("setup done");
 
   Serial.setTimeout(0);
   Serial1.setTimeout(0);

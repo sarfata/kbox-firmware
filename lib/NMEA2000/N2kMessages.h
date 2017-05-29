@@ -1,24 +1,24 @@
 /* 
 N2kMessages.h
 
-2015-2016 Copyright (c) Kave Oy, www.kave.fi  All right reserved.
+Copyright (c) 2015-2017 Timo Lappalainen, Kave Oy, www.kave.fi
 
-Author: Timo Lappalainen
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-
-  1301  USA
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
   
 This is collection of functions for handling NMEA2000 bus messages. 
@@ -36,7 +36,8 @@ NMEA2000.h
 #ifndef _N2kMessages_H_
 #define _N2kMessages_H_
 
-#include <N2kMsg.h>
+#include "N2kMsg.h"
+#include <stdint.h>
 
 inline double RadToDeg(double v) { return v*180.0/3.1415926535897932384626433832795; }
 inline double DegToRad(double v) { return v/180.0*3.1415926535897932384626433832795; }
@@ -52,7 +53,7 @@ inline double AhToCoulomb(double v) { return v*3600; }
 inline double CoulombToAh(double v) { return v/3600; }
 inline double hToSeconds(double v) { return v*3600; }
 inline double SecondsToh(double v) { return v/3600; }
-
+inline double msToKnots(double v) { return v*3600/1852.0; }
 
 enum tN2kHeadingReference {
                             N2khr_true=0,
@@ -244,13 +245,24 @@ enum tN2kAISMode {
                             N2kaismode_Autonomous=0,
                             N2kaismode_Assigned=1,
                           };
+enum tN2kMagneticVariation {
+                            N2kmagvar_Manual=0,
+                            N2kmagvar_Chart=1,
+                            N2kmagvar_Table=2,
+                            N2kmagvar_Calc=3,
+                            N2kmagvar_WMM2000=4,
+                            N2kmagvar_WMM2005=5,
+                            N2kmagvar_WMM2010=6,
+                            N2kmagvar_WMM2015=7,
+                            N2kmagvar_WMM2020=8,
+                          };
 
 //*****************************************************************************
 // System date/time
 // Input:
 //  - SID                   Sequence ID. If your device is e.g. boat speed and heading at same time, you can set same SID for different messages
 //                          to indicate that they are measured at same time.
-//  - SystemDate            Days since 1979-01-01
+//  - SystemDate            Days since 1970-01-01
 //  - SystemTime            seconds since midnight
 //  - TimeSource            see tN2kTimeSource
 // Output:
@@ -350,6 +362,28 @@ inline void SetN2kAttitude(tN2kMsg &N2kMsg, unsigned char SID, double Yaw, doubl
 bool ParseN2kPGN127257(const tN2kMsg &N2kMsg, unsigned char &SID, double &Yaw, double &Pitch, double &Roll);
 inline bool ParseN2kAttitude(const tN2kMsg &N2kMsg, unsigned char &SID, double &Yaw, double &Pitch, double &Roll) {
   return ParseN2kPGN127257(N2kMsg,SID, Yaw, Pitch, Roll);                   
+}
+
+//*****************************************************************************
+// Magnetic Variation
+// Input:
+//  - SID                   Sequence ID. If your device is e.g. boat speed and heading at same time, you can set same SID for different messages
+//                          to indicate that they are measured at same time.
+//  - Source                How was the variation value generated
+//  - DaysSince1970         Days since January 1, 1970
+//  - Variation             Magnetic variation/declination in radians
+// Output:
+//  - N2kMsg                NMEA2000 message ready to be send.
+void SetN2kPGN127258(tN2kMsg &N2kMsg, unsigned char SID, tN2kMagneticVariation Source, uint16_t DaysSince1970, double Variation);
+
+inline void SetN2kMagneticVariation(tN2kMsg &N2kMsg, unsigned char SID, tN2kMagneticVariation Source, uint16_t DaysSince1970, double Variation) {
+  SetN2kPGN127258(N2kMsg, SID, Source, DaysSince1970, Variation);
+}
+
+bool ParseN2kPGN127258(const tN2kMsg &N2kMsg, unsigned char &SID, tN2kMagneticVariation &Source, uint16_t &DaysSince1970, double &Variation);
+
+inline bool ParseN2kMagneticVariation(const tN2kMsg &N2kMsg, unsigned char &SID, tN2kMagneticVariation &Source, uint16_t &DaysSince1970, double &Variation) {
+  return ParseN2kPGN127258(N2kMsg, SID, Source, DaysSince1970, Variation);                   
 }
 
 //*****************************************************************************
@@ -469,11 +503,11 @@ inline void SetN2kTransmissionParameters(tN2kMsg &N2kMsg, unsigned char EngineIn
                      bool flagSailDrive=false) {
   unsigned char DiscreteStatus1=0;
   
-  if (flagCheck) DiscreteStatus1 |= B00000001;
-  if (flagOverTemp) DiscreteStatus1 |= B00000010;
-  if (flagLowOilPressure) DiscreteStatus1 |= B00000100;
-  if (flagLowOilLevel) DiscreteStatus1 |= B00001000;
-  if (flagSailDrive) DiscreteStatus1 |= B00010000;
+  if (flagCheck) DiscreteStatus1          |= BIT(0);
+  if (flagOverTemp) DiscreteStatus1       |= BIT(1);
+  if (flagLowOilPressure) DiscreteStatus1 |= BIT(2);
+  if (flagLowOilLevel) DiscreteStatus1    |= BIT(3);
+  if (flagSailDrive) DiscreteStatus1      |= BIT(4);
   SetN2kPGN127493(N2kMsg, EngineInstance, TransmissionGear, OilPressure, OilTemperature,DiscreteStatus1);
 }
 
@@ -491,11 +525,11 @@ inline bool ParseN2kTransmissionParameters(const tN2kMsg &N2kMsg, unsigned char 
   unsigned char DiscreteStatus1;
   bool ret=ParseN2kPGN127493(N2kMsg, EngineInstance, TransmissionGear, OilPressure, OilTemperature, DiscreteStatus1);
   if (ret) {
-    flagCheck          = ((DiscreteStatus1&B00000001)!=0);
-    flagOverTemp       = ((DiscreteStatus1&B00000010)!=0);
-    flagLowOilPressure = ((DiscreteStatus1&B00000100)!=0);
-    flagLowOilLevel    = ((DiscreteStatus1&B00001000)!=0);
-    flagSailDrive      = ((DiscreteStatus1&B00010000)!=0);
+    flagCheck          = ((DiscreteStatus1 & BIT(0))!=0);
+    flagOverTemp       = ((DiscreteStatus1 & BIT(1))!=0);
+    flagLowOilPressure = ((DiscreteStatus1 & BIT(2))!=0);
+    flagLowOilLevel    = ((DiscreteStatus1 & BIT(3))!=0);
+    flagSailDrive      = ((DiscreteStatus1 & BIT(4))!=0);
   }
   return ret;
 }
@@ -694,6 +728,10 @@ inline void SetN2kLatLonRapid(tN2kMsg &N2kMsg, double Latitude, double Longitude
   SetN2kPGN129025(N2kMsg,Latitude,Longitude);
 }
 
+bool ParseN2kPGN129025(const tN2kMsg &N2kMsg, double &Latitude, double &Longitude);
+inline bool ParseN2kPositionRapid(const tN2kMsg &N2kMsg, double &Latitude, double &Longitude) {
+	return ParseN2kPGN129025(N2kMsg, Latitude, Longitude);
+}
 //*****************************************************************************
 // COG SOG rapid
 // Input:
@@ -1057,6 +1095,13 @@ void SetN2kPGN130311(tN2kMsg &N2kMsg, unsigned char SID, tN2kTempSource TempInst
 inline void SetN2kEnvironmentalParameters(tN2kMsg &N2kMsg, unsigned char SID, tN2kTempSource TempInstance, double Temperature,
                      tN2kHumiditySource HumidityInstance=N2khs_Undef, double Humidity=N2kDoubleNA, double AtmosphericPressure=N2kDoubleNA) {
   SetN2kPGN130311(N2kMsg,SID,TempInstance,Temperature,HumidityInstance,Humidity,AtmosphericPressure);
+}
+
+bool ParseN2kPGN130311(const tN2kMsg &N2kMsg, unsigned char &SID, tN2kTempSource &TempInstance, double &Temperature,
+                     tN2kHumiditySource &HumidityInstance, double &Humidity, double &AtmosphericPressure);
+inline bool ParseN2kEnvironmentalParameters(const tN2kMsg &N2kMsg, unsigned char &SID, tN2kTempSource &TempInstance, double &Temperature,
+                     tN2kHumiditySource &HumidityInstance, double &Humidity, double &AtmosphericPressure) {
+  return ParseN2kPGN130311(N2kMsg,SID,TempInstance,Temperature,HumidityInstance,Humidity,AtmosphericPressure);
 }
 
 //*****************************************************************************
