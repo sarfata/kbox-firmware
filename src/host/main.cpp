@@ -134,7 +134,6 @@ void setup() {
   // Reinitialize debug here because in some configurations
   // (like logging to nmea2 output), the kbox setup might have messed
   // up the debug configuration.
-  DEBUG_INIT();
   DEBUG("setup done");
 
   Serial.setTimeout(0);
