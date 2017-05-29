@@ -39,9 +39,8 @@ class TestSubscriber : public SKSubscriber {
 
 TEST_CASE("SKHub") {
   SKHub hub;
-  SKContextPredicate predicate(SKContextSelf);
   TestSubscriber sub;
-  hub.subscribe(predicate, sub);
+  hub.subscribe(SKContextPredicate(SKContextSelf), sub);
 
   SECTION("test delivery") {
     SKUpdateStatic<0> update(SKContextSelf);

@@ -28,16 +28,24 @@
 #include <NMEA2000_teensy.h>
 #include "common/os/Task.h"
 #include "common/signalk/KMessage.h"
+#include "common/signalk/SKHub.h"
+#include "common/signalk/SKSubscriber.h"
+#include "common/signalk/SKPredicate.h"
+#include "common/signalk/SKNMEA2000Visitor.h"
 
-class NMEA2000Service : public Task, public KGenerator, public KReceiver, public KVisitor {
+class NMEA2000Service : public Task, public SKSubscriber,
+  //FIXME: Replace KGenerator and KReceiver by the new SKstyle
+  public KGenerator, public KReceiver, public KVisitor {
   private:
+    SKHub &_hub;
     tNMEA2000_teensy NMEA2000;
     unsigned int _imuSequence;
+    SKNMEA2000Visitor _skVisitor;
 
     void sendN2kMessage(const tN2kMsg& msg);
 
   public:
-    NMEA2000Service() : Task("NMEA2000"), _imuSequence(0) {};
+    NMEA2000Service(SKHub &hub) : Task("NMEA2000"), _hub(hub), _imuSequence(0) {};
     void setup();
     void loop();
 
@@ -47,4 +55,6 @@ class NMEA2000Service : public Task, public KGenerator, public KReceiver, public
     void processMessage(const KMessage&);
     void visit(const NMEA2000Message&);
     void visit(const IMUMessage&);
+
+    void updateReceived(const SKUpdate& update);
 };

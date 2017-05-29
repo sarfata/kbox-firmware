@@ -26,6 +26,7 @@
 #include <Arduino.h>
 #include "common/algo/List.h"
 #include "common/stats/KBoxMetrics.h"
+#include "common/signalk/SKNMEAParser.h"
 #include "NMEAService.h"
 
 
@@ -119,18 +120,20 @@ void serialEvent3() {
   }
 }
 
-NMEAService::NMEAService(HardwareSerial &s) : Task("NMEA Service"), stream(s) {
+NMEAService::NMEAService(SKHub &hub, HardwareSerial &s) : Task("NMEA Service"), _hub(hub), stream(s) {
   if (&s == &Serial2) {
     received2 = &receiveQueue;
     _taskName = "NMEA Reader1";
     rxValidEvent = KBoxEventNMEA1RX;
     rxErrorEvent = KBoxEventNMEA1RXError;
+    _skSourceInput = SKSourceInputNMEA0183_1;
   }
   if (&s == &Serial3) {
     received3 = &receiveQueue;
     _taskName = "NMEA Reader2";
     rxValidEvent = KBoxEventNMEA2RX;
     rxErrorEvent = KBoxEventNMEA2RXError;
+    _skSourceInput = SKSourceInputNMEA0183_2;
   }
 }
 
@@ -148,6 +151,12 @@ void NMEAService::loop() {
     if (it->isValid()) {
       KBoxMetrics.countEvent(rxValidEvent);
       this->sendMessage(*it);
+
+      SKNMEAParser p;
+      const SKUpdate &update = p.parse(_skSourceInput, (*it).getSentence());
+      if (update.getSize() > 0) {
+        _hub.publish(update);
+      }
     }
     else {
       KBoxMetrics.countEvent(rxErrorEvent);

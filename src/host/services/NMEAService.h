@@ -27,6 +27,8 @@
 #include "common/algo/List.h"
 #include "common/signalk/KMessage.h"
 #include "common/stats/KBoxMetrics.h"
+#include "common/signalk/SKSource.h"
+#include "common/signalk/SKHub.h"
 
 // Defined by the NMEA Standard
 #define MAX_NMEA_SENTENCE_LENGTH 82
@@ -35,12 +37,14 @@ class HardwareSerial;
 
 class NMEAService : public Task, public KGenerator {
   private:
+    SKHub &_hub;
     HardwareSerial& stream;
     LinkedList<NMEASentence> receiveQueue;
     enum KBoxEvent rxValidEvent, rxErrorEvent;
+    SKSourceInput _skSourceInput;
 
   public:
-    NMEAService(HardwareSerial&s);
+    NMEAService(SKHub &hub, HardwareSerial&s);
 
     void setup();
     void loop();

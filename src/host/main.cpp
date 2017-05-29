@@ -44,6 +44,7 @@
 ILI9341GC gc(KBox.getDisplay(), Size(320, 240));
 MFD mfd(gc, KBox.getEncoder(), KBox.getButton());
 TaskManager taskManager;
+SKHub skHub;
 
 USBService usbService(gc);
 
@@ -70,7 +71,7 @@ void setup() {
   WiFiService *wifi = new WiFiService(gc);
 
   // Create all the generating tasks and connect them
-  NMEA2000Service *n2kService = new NMEA2000Service();
+  NMEA2000Service *n2kService = new NMEA2000Service(skHub);
   n2kService->connectTo(*wifi);
 
   ADCTask *adcTask = new ADCTask(KBox.getADC());
@@ -81,8 +82,8 @@ void setup() {
   voltageConverter->connectTo(*wifi);
   voltageConverter->connectTo(*n2kService);
 
-  NMEAService *reader1 = new NMEAService(NMEA1_SERIAL);
-  NMEAService *reader2 = new NMEAService(NMEA2_SERIAL);
+  NMEAService *reader1 = new NMEAService(skHub, NMEA1_SERIAL);
+  NMEAService *reader2 = new NMEAService(skHub, NMEA2_SERIAL);
   reader1->connectTo(*wifi);
   reader2->connectTo(*wifi);
 

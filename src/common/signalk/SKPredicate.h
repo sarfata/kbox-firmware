@@ -51,3 +51,54 @@ class SKContextPredicate : public SKPredicate {
       return _context == update.getContext();
     };
 };
+
+/**
+ * A predicate to filter out updates from a specific source.
+ */
+class SKSourceInputPredicate : public SKPredicate {
+  private:
+    const SKSourceInput& _sourceInput;
+
+  public:
+    SKSourceInputPredicate(const SKSourceInput& input) : _sourceInput(input) {
+    };
+    ~SKSourceInputPredicate() {};
+
+    bool evaluate(const SKUpdate& update) const override {
+      return update.getSource().getInput() == _sourceInput;
+    };
+};
+
+/**
+ * A predicate to negate another predicate.
+ */
+class SKNotPredicate : public SKPredicate {
+  private:
+    const SKPredicate &_predicate;
+
+  public:
+    SKNotPredicate(const SKPredicate &p) : _predicate(p) {};
+    ~SKNotPredicate() {};
+
+    bool evaluate(const SKUpdate& update) const override {
+      return !_predicate.evaluate(update);
+    };
+};
+
+/**
+ * A predicate to combine two other predicates with a logic AND.
+ */
+class SKAndPredicate : public SKPredicate {
+  private:
+    const SKPredicate &_p1, &_p2;
+  public:
+    SKAndPredicate(const SKPredicate& p1, const SKPredicate& p2) : _p1(p1), _p2(p2) {
+    };
+    ~SKAndPredicate() {};
+
+    bool evaluate(const SKUpdate &update) const override {
+      return _p1.evaluate(update) && _p2.evaluate(update);
+    };
+};
+
+

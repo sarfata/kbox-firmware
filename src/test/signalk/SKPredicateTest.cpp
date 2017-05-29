@@ -39,4 +39,32 @@ TEST_CASE("SKPredicate") {
 
     CHECK( !p.evaluate(otherUpdate) );
   }
+
+  SECTION("SKSourceInputPredicate") {
+    SKSourceInputPredicate p = SKSourceInputPredicate(SKSourceInputNMEA0183_1);
+
+    update.setSource(SKSource::sourceForNMEA0183(SKSourceInputNMEA0183_1, "GP", "RMC"));
+    CHECK( p.evaluate(update) );
+
+    update.setSource(SKSource::unknownSource());
+    CHECK( ! p.evaluate(update) );
+  }
+
+  SECTION("SKNotPredicate") {
+    SKNotPredicate p = SKNotPredicate(SKContextPredicate(SKContextSelf));
+
+    CHECK( ! p.evaluate(update) );
+  }
+
+  SECTION("SKAndPredicate") {
+    SKAndPredicate p = SKAndPredicate(SKContextPredicate(SKContextSelf), SKSourceInputPredicate(SKSourceInputNMEA0183_2));
+    update.setSource(SKSource::sourceForNMEA0183(SKSourceInputNMEA0183_2, "GP", "RMC"));
+
+    CHECK( p.evaluate(update) );
+
+    SKUpdateStatic<2> update2(SKContext("mrn:other"));
+    update2.setSource(SKSource::sourceForNMEA0183(SKSourceInputNMEA0183_2, "GP", "RMC"));
+
+    CHECK( ! p.evaluate(update2) );
+  }
 };

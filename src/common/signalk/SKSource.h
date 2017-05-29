@@ -60,6 +60,7 @@ class SKSource {
     bool operator==(const SKSource &other) const;
     bool operator!=(const SKSource &other) const;
 
+    const SKSourceInput& getInput() const;
     const String& getType() const;
     const String& getTalker() const;
     const String& getSentence() const;

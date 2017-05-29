@@ -27,7 +27,9 @@
 #include "common/stats/KBoxMetrics.h"
 #include "common/nmea/nmea2000.h"
 #include <N2kMessages.h>
+#include "common/signalk/SKUpdate.h"
 #include "NMEA2000Service.h"
+#include <NMEA2000.h>
 
 static NMEA2000Service *handlerContext;
 
@@ -71,6 +73,10 @@ void NMEA2000Service::setup() {
   NMEA2000.EnableForward(false);
   NMEA2000.SetMode(tNMEA2000::N2km_ListenAndNode, 22);
 
+  // We are only interested in non-NMEA2000 updates, refering to 'self' (our boat)
+  _hub.subscribe(SKAndPredicate(SKNotPredicate(SKSourceInputPredicate(SKSourceInputNMEA2000)),
+        SKContextPredicate(SKContextSelf)), *this);
+
   if (NMEA2000.Open()) {
     DEBUG("Initialized NMEA2000");
   }
@@ -100,6 +106,20 @@ void NMEA2000Service::sendN2kMessage(const tN2kMsg& msg) {
 
 void NMEA2000Service::loop() {
   NMEA2000.ParseMessages();
+
+  if (_skVisitor.getMessages().size() > 0) {
+    // FIXME: We should move the messages into a circular buffer.
+    // This code will block too long if there are more than 4 messages.
+    for (LinkedListConstIterator<tN2kMsg*> it = _skVisitor.getMessages().begin();
+        it != _skVisitor.getMessages().end(); it++) {
+      sendN2kMessage(**it);
+    }
+    _skVisitor.flushMessages();
+  }
+}
+
+void NMEA2000Service::updateReceived(const SKUpdate& update) {
+  _skVisitor.processUpdate(update);
 }
 
 void NMEA2000Service::visit(const NMEA2000Message &m) {

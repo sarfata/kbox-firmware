@@ -76,6 +76,10 @@ bool SKSource::operator!=(const SKSource &other) const {
   return !(*this == other);
 }
 
+const SKSourceInput& SKSource::getInput() const {
+  return _input;
+}
+
 const String& SKSource::getType() const {
   switch (_input) {
     case SKSourceInputNMEA0183_1:
