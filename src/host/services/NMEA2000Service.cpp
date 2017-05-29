@@ -49,6 +49,7 @@ void NMEA2000Service::setup() {
   pinMode(can_standby, OUTPUT);
   digitalWrite(can_standby, 0);
 
+  // FIXME The hardware information should automatically stay up to date.
   NMEA2000.SetProductInformation("2", // Manufacturer's Model serial code
                                  // Manufacturer's product code
                                  1,
