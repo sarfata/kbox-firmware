@@ -122,20 +122,26 @@ class KBox(object):
                 raise FatalError("KBox responded with an error")
             elif cmd == KBox.KommandLog:
                 # Keep printing log messages while waiting
-                self.processLogFrame(frame[2:])
+                self.printLog(frame[2:])
             else:
                 print("Got unexpected command with id {}".format(cmd))
 
-    def processLogFrame(self, data):
+    def parseLogCommand(self, data):
         logLevels = { 0: "hD", 1: "hI", 2: "hE", 3: "wD", 4: "wI", 5: "wE" }
         (level, lineno, fnamelen) = struct.unpack('<HHH', data[0:6])
         fname = data[6:6+fnamelen]
-
-        if "/" in fname:
-            fname = fname.split("/")[-1]
         log = data[6+fnamelen:]
 
-        print("> {} {}:{} {}".format(logLevels[level], fname, lineno, log))
+        return (logLevels[level], fname, lineno, log)
+
+    def printLog(self, data):
+        (loglevel, fname, lineno, log) = self.parseLogCommand(data)
+
+        # remove path in name for clarity
+        if "/" in fname:
+            fname = fname.split("/")[-1]
+
+        print("> {} {}:{} {}".format(loglevel, fname, lineno, log))
 
 
     def ping(self, pingId):
@@ -198,7 +204,7 @@ class KBox(object):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--port", help = "USB Serial Port connected to KBox", default = "/dev/tty.usbmodem1441")
+    parser.add_argument("--port", help = "USB Serial Port connected to KBox", default = "/dev/tty.usbmodem1461")
     parser.add_argument("--debug", action = "store_true", help = "Show all incoming packets")
     subparsers = parser.add_subparsers(dest = "command")
     subparsers.add_parser("ping")
@@ -229,7 +235,7 @@ def main():
             # just keep waiting for a packet that does not exist
             # log messages will be printed automatically
             log = kbox.readCommand(KBox.KommandLog)
-            kbox.processLogFrame(log)
+            kbox.printLog(log)
     elif args.command == "screenshot":
         capture = kbox.takeScreenshot()
 
