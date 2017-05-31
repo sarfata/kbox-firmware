@@ -52,7 +52,7 @@ class SKNMEA2000Visitor {
     /**
      * Retrieve the current list of messages.
      */
-    const LinkedList<tN2kMsg*> getMessages() const;
+    const LinkedList<tN2kMsg*>& getMessages() const;
 
     /**
      * Flush the list of messages.

@@ -67,10 +67,21 @@ class KBoxTest(object):
 
 class BasicRMCTest(KBoxTest):
     def run(self):
+        # Look for a TaskManager message to make sure we have started
+        if not self.searchLog(".*", fnamepattern = "TaskManager.cpp", timeout = 10):
+            return False
+
         self.kboxjig.sendNMEA1Sentence("$GPRMC,004119.000,A,3751.3385,N,12227.4913,W,5.02,235.24,141116,,,D*75")
+
         if not self.searchLog("Found .* sentences waiting", fnamepattern = "NMEAService"):
             return False
         if not self.searchLog("Sending message on n2k bus - pgn=129026", fnamepattern = "NMEA2000Service.cpp"):
+            return False
+        if not self.searchLog("TX: \\$PCDIN,01F802", fnamepattern = "NMEA2000Service.cpp"):
+            return False
+
+        # Look for a TaskManager message to make sure we have not crashed.
+        if not self.searchLog(".*", fnamepattern = "TaskManager.cpp", timeout = 10):
             return False
 
         return True

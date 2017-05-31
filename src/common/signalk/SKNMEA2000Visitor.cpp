@@ -48,7 +48,7 @@ void SKNMEA2000Visitor::processUpdate(const SKUpdate& update) {
   }
 }
 
-const LinkedList<tN2kMsg*> SKNMEA2000Visitor::getMessages() const {
+const LinkedList<tN2kMsg*>& SKNMEA2000Visitor::getMessages() const {
   return _messages;
 }
 
