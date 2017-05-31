@@ -57,8 +57,8 @@ void SKHub::subscribe(const SKPredicate& predicate, SKSubscriber& subscriber) {
 
 void SKHub::publish(const SKUpdate& update) {
   for (int i = 0; i < _countSubscriptions; i++) {
-    if (_subscriptions[i]->predicate.evaluate(update)) {
+    //if (_subscriptions[i]->predicate.evaluate(update)) {
       _subscriptions[i]->subscriber.updateReceived(update);
-    }
+    //}
   }
 }
