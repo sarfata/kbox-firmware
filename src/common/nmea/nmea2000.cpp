@@ -50,7 +50,8 @@ static int appendWord(char *s, uint32_t i) {
 
 
 char *nmea_pcdin_sentence_for_n2kmsg(const tN2kMsg msg, unsigned long timestamp) {
-  char *buffer = (char*)malloc(6+1+6+1+8+1+2+1+msg.DataLen*2+1+1+2 + 1);
+  int pcdin_sentence_length = 6+1+6+1+8+1+2+1+msg.DataLen*2+1+2 + 1;
+  char *buffer = (char*)malloc(pcdin_sentence_length);
 
   char *s = buffer;
 
