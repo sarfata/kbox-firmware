@@ -24,6 +24,7 @@
 
 #include <math.h>
 #include "common/nmea/NMEASentenceReader.h"
+#include "SKUnits.h"
 #include "SKNMEAParser.h"
 
 SKNMEAParser::~SKNMEAParser() {
@@ -63,8 +64,8 @@ const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceR
 
   double latitude = reader.getFieldAsDouble(3);
   double longitude = reader.getFieldAsDouble(5);
-  double sog = reader.getFieldAsDouble(7) * 1852 / 3600;
-  double cog = reader.getFieldAsDouble(8) / 180.0 * M_PI;
+  double sog = SKKnotToMs(reader.getFieldAsDouble(7));
+  double cog = SKDegToRad(reader.getFieldAsDouble(8));
 
   if (!isnan(latitude) && !isnan(longitude)) {
     if (reader.getFieldAsChar(4) == 'S') {

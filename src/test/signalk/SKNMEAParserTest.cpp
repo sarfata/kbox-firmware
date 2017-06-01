@@ -23,6 +23,7 @@
 */
 
 #include "../KBoxTest.h"
+#include "common/signalk/SKUnits.h"
 #include "common/signalk/SKNMEAParser.h"
 
 TEST_CASE("SKNMEAParserTest: Basic tests") {
@@ -40,8 +41,8 @@ TEST_CASE("SKNMEAParserTest: Basic tests") {
     CHECK( update.getSource() != SKSourceUnknown );
     CHECK( update.getSource().getLabel() == "kbox.nmea0183.2" );
     CHECK( update.getContext() == SKContextSelf );
-    CHECK( update[SKPathNavigationSpeedOverGround].getNavigationSpeedOverGround() == 5.02 );
-    CHECK( update[SKPathNavigationCourseOverGroundTrue].getNavigationCourseOverGroundTrue() == 235.24 );
+    CHECK( update[SKPathNavigationSpeedOverGround].getNavigationSpeedOverGround() == SKKnotToMs(5.02) );
+    CHECK( update[SKPathNavigationCourseOverGroundTrue].getNavigationCourseOverGroundTrue() == SKDegToRad(235.24) );
     CHECK( update[SKPathNavigationPosition].getNavigationPositionLatitude() == 37.513385 );
     CHECK( update[SKPathNavigationPosition].getNavigationPositionLongitude() == -122.274913 );
   }
