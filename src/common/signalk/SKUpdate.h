@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <math.h>
 #include "SKSource.h"
 #include "SKContext.h"
 #include "SKValue.h"
@@ -68,5 +69,55 @@ class SKUpdate {
      * @return SKValueNone if the path does not exist in this update.
      */
     virtual const SKValue& operator[] (SKPath path) const = 0;
+
+    // Convenience functions
+
+    bool hasNavigationSpeedOverGround() const {
+      return this->operator[](SKPathNavigationSpeedOverGround) != SKValueNone;
+    };
+    const double getNavigationSpeedOverGround() const {
+      const SKValue& v = this->operator[](SKPathNavigationSpeedOverGround);
+      if (v != SKValueNone) {
+        return v._value.doubleValue;
+      }
+      else {
+        return NAN;
+      }
+    };
+
+    bool hasNavigationCourseOverGroundTrue() const {
+      return this->operator[](SKPathNavigationCourseOverGroundTrue) != SKValueNone;
+    };
+    const double getNavigationCourseOverGroundTrue() const {
+      const SKValue& v = this->operator[](SKPathNavigationCourseOverGroundTrue);
+      if (v != SKValueNone) {
+        return v._value.doubleValue;
+      }
+      else {
+        return NAN;
+      }
+    };
+
+    bool hasNavigationPosition() const {
+      return this->operator[](SKPathNavigationPosition) != SKValueNone;
+    };
+    const double getNavigationPositionLatitude() const {
+      const SKValue& v = this->operator[](SKPathNavigationPosition);
+      if (v != SKValueNone) {
+        return v._value.coords.latitude;
+      }
+      else {
+        return NAN;
+      }
+    };
+    const double getNavigationPositionLongitude() const {
+      const SKValue& v = this->operator[](SKPathNavigationPosition);
+      if (v != SKValueNone) {
+        return v._value.coords.longitude;
+      }
+      else {
+        return NAN;
+      }
+    };
 };
 

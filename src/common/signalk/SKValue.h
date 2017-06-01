@@ -26,6 +26,8 @@
 
 #include <WString.h>
 
+class SKUpdate;
+
 typedef enum {
   SKPathNavigationCourseOverGroundTrue,
   SKPathNavigationSpeedOverGround,
@@ -38,22 +40,31 @@ class SKValue {
   private:
     SKPath _path;
 
-    union {
+    struct coords {
+      coords(double lat, double lon) : latitude(lat), longitude(lon) {}
+
+      double latitude;
+      double longitude;
+    };
+    union value {
+      value(double d) : doubleValue(d) {}
+      value(struct coords c) : coords(c) {}
       double doubleValue;
-      struct {
-        double latitude;
-        double longitude;
-      } position;
+      struct coords coords;
     } _value;
 
     // private constructor.
     // User of this class should use the static factory methods instead.
     SKValue(SKPath p) : _path(p) {};
 
-  public:
-    // Default constructor so that arrays of SKValue can be declared.
-    SKValue() : _path(SKPathInvalid) {};
+    // SKUpdate is allowed to create SKValues
+    friend SKUpdate;
 
+    SKValue(SKPath& p, double v) : _path(p), _value(v) {};
+    SKValue(SKPath& p, struct coords c) : _path(p), _value(c) {}
+    SKValue() : _path(SKPathInvalid), _value(0) {};
+
+  public:
     /**
      * Return the path of this value.
      */
