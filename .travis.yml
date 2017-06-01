@@ -27,7 +27,7 @@ cache:
         - "~/.platformio"
 
 install:
-    - pip install -U platformio
+    - pip install -U platformio cpp-coveralls
 
 script:
     # This builds all the target
@@ -35,3 +35,5 @@ script:
     # Run the few unit tests (C code running on computer)
     - make test
 
+after_success:
+    - coveralls --exclude src/test --exclude /lib --exclude lib --exclude .piolibdeps

@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,25 @@
   THE SOFTWARE.
 */
 
-#include <ILI9341_t3.h>
-#include "common/ui/GC.h"
+#include "../KBoxTest.h"
+#include "common/signalk/SKValue.h"
 
-/**
- * This class implements all the GC primitives with the ILI9341_t3 driver.
- */
-class ILI9341GC : public GC {
-  private:
-    ILI9341_t3 &display;
-    Size size;
+TEST_CASE("SKValue: Create a few values and make sure we can read their data back") {
+  SKValue cog = SKValue::navigationCourseOverGroundTrue(1.323);
+  CHECK( cog.getPath() == SKPathNavigationCourseOverGroundTrue );
+  CHECK( cog.getNavigationCourseOverGroundTrue() == 1.323);
 
-  public:
-    ILI9341GC(ILI9341_t3 &display, Size size);
+  SKValue sog = SKValue::navigationSpeedOverGround(21.22);
+  CHECK( sog.getPath() == SKPathNavigationSpeedOverGround );
+  CHECK( sog.getNavigationSpeedOverGround() == 21.22);
 
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
-    void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
-    const Size& getSize() const;
+  SKValue pos = SKValue::navigationPosition(32.33223, 32.4343);
+  CHECK( pos.getPath() == SKPathNavigationPosition );
+  CHECK( pos.getNavigationPositionLatitude() == 32.33223);
+  CHECK( pos.getNavigationPositionLongitude() == 32.4343);
+
+  CHECK( SKValueNone.getPath() == SKPathInvalid );
+  CHECK( SKValueNone == SKValue::noneValue() );
 };
+
+

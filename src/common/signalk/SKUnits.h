@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -21,25 +21,8 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
 
-#include "os/Task.h"
-#include "signalk/KMessage.h"
-#include "stats/KBoxMetrics.h"
-
-// completely arbitrary value. "ought to be enough..."
-#define MAX_NMEA_SENTENCE_LENGTH 200
-
-class NMEAReaderTask : public Task, public KGenerator {
-  private:
-    HardwareSerial& stream;
-    LinkedList<NMEASentence> receiveQueue;
-    enum KBoxEvent rxValidEvent, rxErrorEvent;
-
-  public:
-    NMEAReaderTask(HardwareSerial&s);
-
-    void setup();
-    void loop();
-};
-
+#define SKKnotToMs(x) x * 1852 / 3600
+#define SKDegToRad(x) x * 2 * M_PI / 360

@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,30 @@
   THE SOFTWARE.
 */
 
-#include <ILI9341_t3.h>
-#include "common/ui/GC.h"
+#include "../KBoxTest.h"
+#include "common/signalk/SKHub.h"
+#include "common/signalk/SKSubscriber.h"
+#include "common/signalk/SKUpdateStatic.h"
 
-/**
- * This class implements all the GC primitives with the ILI9341_t3 driver.
- */
-class ILI9341GC : public GC {
-  private:
-    ILI9341_t3 &display;
-    Size size;
-
+class TestSubscriber : public SKSubscriber {
   public:
-    ILI9341GC(ILI9341_t3 &display, Size size);
+    bool notified = false;
 
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
-    void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
-    const Size& getSize() const;
+    void updateReceived(const SKUpdate& s) {
+      notified = true;
+    };
 };
+
+TEST_CASE("SKHub") {
+  SKHub hub;
+  TestSubscriber sub;
+  hub.subscribe(&sub);
+
+  SECTION("test delivery") {
+    SKUpdateStatic<0> update(SKContextSelf);
+
+    hub.publish(update);
+
+    CHECK( sub.notified );
+  }
+}

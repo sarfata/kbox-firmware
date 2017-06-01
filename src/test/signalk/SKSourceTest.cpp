@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,37 +22,21 @@
   THE SOFTWARE.
 */
 
-#include "KBoxTest.h"
-#include "nmea/NMEASentenceBuilder.h"
+#include "../KBoxTest.h"
+#include "common/signalk/SKSource.h"
 
-TEST_CASE("generating an empty sentence") {
-  NMEASentenceBuilder sb("GG", "ABC", 0);
-  REQUIRE( sb.toNMEA() == "$GGABC*40" );
+TEST_CASE("Define a new NMEA0183 source") {
+  SKSource nmeaSource = SKSource::sourceForNMEA0183(SKSourceInputNMEA0183_1, "GP", "RMC");
+
+  CHECK( nmeaSource.getType() == "NMEA0183" );
+  CHECK( nmeaSource.getTalker() == "GP" );
+  CHECK( nmeaSource.getSentence() == "RMC" );
+  CHECK( nmeaSource.getLabel() == "kbox.nmea0183.1" );
 }
 
-TEST_CASE("generating a sentence with one string and one float") {
-  NMEASentenceBuilder sb("GG", "ABC", 2);
-  sb.setField(1, 1.03403303, 5);
-  sb.setField(2, "toto");
+TEST_CASE("An nmea2000 input is invalid for an nmea0183 source") {
+  SKSource nmeaSource = SKSource::sourceForNMEA0183(SKSourceInputNMEA2000, "xx", "xxx");
 
-  REQUIRE( sb.toNMEA() == "$GGABC,1.03403,toto*6B" );
-}
-
-TEST_CASE("test a real nmea sentence to make sure the checksum is properly generated") {
-  NMEASentenceBuilder sb("GP", "RMC", 12);
-
-  sb.setField(1, "003516.000");
-  sb.setField(2, "A");
-  sb.setField(3, "3751.6035");
-  sb.setField(4, "N");
-  sb.setField(5, "12228.8065");
-  sb.setField(6, "W");
-  sb.setField(7, "0.01");
-  sb.setField(8, "0.00");
-  sb.setField(9, "030416");
-  sb.setField(10, "");
-  sb.setField(11, "");
-  sb.setField(12, "D");
-
-  REQUIRE( sb.toNMEA() == "$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79" );
+  CHECK( nmeaSource.getType() == "unknown" );
+  CHECK( nmeaSource.getLabel() == "kbox.unknown" );
 }

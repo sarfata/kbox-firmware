@@ -1,4 +1,4 @@
-/* 
+/*
 NMEA2000_CAN.h
 
 Copyright (c) 2015-2017 Timo Lappalainen, Kave Oy, www.kave.fi
@@ -28,13 +28,16 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   #define USE_N2K_CAN 2  // for use with due based CAN
   #define USE_N2K_CAN 3  // for use with Teensy 3.1/3.2 boards
   #define USE_N2K_CAN 4  // for use with avr boards
-  
+  #define USE_N2K_CAN 5  // for use with socketCAN (linux, etc) systems
+  #define USE_N2K_CAN 6  // for use with MBED (ARM) systems
+
   There are also library specific defines:
   mcp_can:
     #define N2k_SPI_CS_PIN 53  // Pin for SPI Can Select
     #define N2k_CAN_INT_PIN 21 // Use interrupt  and it is connected to pin 21
     #define USE_MCP_CAN_CLOCK_SET 8  // possible values 8 for 8Mhz and 16 for 16 Mhz clock
   */
+
 
 #ifndef _NMEA2000_CAN_H_
 #define _NMEA2000_CAN_H_
@@ -46,16 +49,23 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define USE_N2K_DUE_CAN 2
 #define USE_N2K_TEENSY_CAN 3
 #define USE_N2K_AVR_CAN 4
+#define USE_N2K_SOCKET_CAN 5
+#define USE_N2K_MBED_CAN 6
+
 
 // Select right CAN according to prosessor
 #if !defined(USE_N2K_CAN)
-#if defined(__SAM3X8E__)
+#if  defined(__MBED__)					// Placing mbed 1st in tree, as the following CPUs can also be used in MBED IDE
+#define USE_N2K_CAN USE_N2K_MBED_CAN
+#elif defined(__SAM3X8E__)
 #define USE_N2K_CAN USE_N2K_DUE_CAN
 #elif defined(__MK20DX256__)||defined(__ATMEGA32U4__) || defined(__MK64FX512__) || defined (__MK66FX1M0__)
 #define USE_N2K_CAN USE_N2K_TEENSY_CAN
 #elif defined(__AVR_AT90CAN32__)||defined(__AVR_AT90CAN64__)||defined(__AVR_AT90CAN128__)|| \
       defined(__AVR_ATmega32C1__)||defined(__AVR_ATmega64C1__)||defined(__AVR_ATmega16M1__)||defined(__AVR_ATmega32M1__)|| defined(__AVR_ATmega64M1__)
 #define USE_N2K_CAN USE_N2K_AVR_CAN
+#elif defined(__linux__)||defined(__linux)||defined(linux)
+#define USE_N2K_CAN USE_N2K_SOCKET_CAN
 #else
 #define USE_N2K_CAN USE_N2K_MCP_CAN
 #endif
@@ -65,19 +75,31 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // Use Arduino Due internal CAN with due_can library
 #include <due_can.h>         // https://github.com/collin80/due_can
 #include <NMEA2000_due.h>
-tNMEA2000_due NMEA2000;
+tNMEA2000 *pNMEA2000=new tNMEA2000_due();
 
 #elif USE_N2K_CAN == USE_N2K_TEENSY_CAN
 // Use Teensy 3.1&3.2 board internal CAN FlexCAN library
 #include <FlexCAN.h>
 #include <NMEA2000_teensy.h>    // https://github.com/sarfata/NMEA2000_teensy
-tNMEA2000_teensy NMEA2000;
+tNMEA2000 *pNMEA2000=new tNMEA2000_teensy();
 
 #elif USE_N2K_CAN == USE_N2K_AVR_CAN
 // Use Atmel AVR internal CAN controller with avr_can library
 #include <avr_can.h>            // https://github.com/thomasonw/avr_can
 #include <NMEA2000_avr.h>       // https://github.com/thomasonw/NMEA2000_avr
-tNMEA2000_avr NMEA2000;
+tNMEA2000 *pNMEA2000=new tNMEA2000_avr();
+
+#elif USE_N2K_CAN == USE_N2K_SOCKET_CAN
+// Use socketCAN devices
+#include <NMEA2000_SocketCAN.h>       // https://github.com/thomasonw/NMEA2000_socketCAN
+tNMEA2000 *pNMEA2000=new tNMEA2000_SocketCAN();
+tSocketStream serStream;
+
+#elif USE_N2K_CAN == USE_N2K_MBED_CAN
+// Use MBED devices
+#include <NMEA2000_mbed.h>       // https://github.com/thomasonw/NMEA2000_mbed
+tNMEA2000 *pNMEA2000=new tNMEA2000_mbed();
+tmbedStream serStream;
 
 #else  // Use USE_N2K_MCP_CAN
 // Use mcp_can library e.g. with Arduino Mega and external MCP2551 CAN bus chip
@@ -115,8 +137,11 @@ tNMEA2000_avr NMEA2000;
 #define MCP_CAN_CLOCK_SET MCP_16MHz
 #endif
 
-tNMEA2000_mcp NMEA2000(N2k_SPI_CS_PIN,MCP_CAN_CLOCK_SET,N2k_CAN_INT_PIN,MCP_CAN_RX_BUFFER_SIZE);
+tNMEA2000 *pNMEA2000=new tNMEA2000_mcp(N2k_SPI_CS_PIN,MCP_CAN_CLOCK_SET,N2k_CAN_INT_PIN,MCP_CAN_RX_BUFFER_SIZE);
 
 #endif
 
+tNMEA2000 &NMEA2000=*pNMEA2000;
+
 #endif
+

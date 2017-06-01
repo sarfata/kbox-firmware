@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,41 @@
   THE SOFTWARE.
 */
 
-#include <ILI9341_t3.h>
-#include "common/ui/GC.h"
+#pragma once
+
+#include <WString.h>
 
 /**
- * This class implements all the GC primitives with the ILI9341_t3 driver.
+ * Provides the context that applies to a collection of SKUpdate.
+ *
+ * In most case, the context is SKContextSelf which means our own boat.
+ *
+ * When representing data relative to other boats, SKContext will provide a
+ * unique identifier to the other boat.
  */
-class ILI9341GC : public GC {
+class SKContext {
   private:
-    ILI9341_t3 &display;
-    Size size;
+    String _mrn;
 
   public:
-    ILI9341GC(ILI9341_t3 &display, Size size);
+    /**
+     * Create a new SKContext instance with a given MRN.
+     */
+    SKContext(const String& mrn) : _mrn(mrn) {};
 
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
-    void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
-    const Size& getSize() const;
+    /**
+     * @return a unique identifier for a vessel.
+     */
+    const String getMRN() const {
+      return _mrn;
+    };
+
+    /**
+     * Compares two SKContext objects and returns true if they represent the same
+     * context.
+     */
+    bool operator==(const SKContext &other) const;
+    bool operator!=(const SKContext &other) const;
 };
+
+extern const SKContext SKContextSelf;

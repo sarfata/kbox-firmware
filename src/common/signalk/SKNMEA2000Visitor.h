@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,40 @@
   THE SOFTWARE.
 */
 
-#include <ILI9341_t3.h>
-#include "common/ui/GC.h"
+#pragma once
+
+#include "common/algo/List.h"
+
+class tN2kMsg;
+class SKUpdate;
+
 
 /**
- * This class implements all the GC primitives with the ILI9341_t3 driver.
+ * Converts one or multiple SignalK updates into a series of N2KMessages.
+ *
+ * N2kMsg are kept in an internal linked list and can be retrieved or flushed
+ * at any point.
  */
-class ILI9341GC : public GC {
+class SKNMEA2000Visitor {
   private:
-    ILI9341_t3 &display;
-    Size size;
+    LinkedList<tN2kMsg*> _messages;
 
   public:
-    ILI9341GC(ILI9341_t3 &display, Size size);
+    SKNMEA2000Visitor();
+    ~SKNMEA2000Visitor();
 
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
-    void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
-    const Size& getSize() const;
+    /**
+     * Process a SKUpdate and add messages to the internal queue of messages.
+     */
+    void processUpdate(const SKUpdate& update);
+
+    /**
+     * Retrieve the current list of messages.
+     */
+    const LinkedList<tN2kMsg*>& getMessages() const;
+
+    /**
+     * Flush the list of messages.
+     */
+    void flushMessages();
 };

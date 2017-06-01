@@ -21,27 +21,32 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+#pragma once
 
-#include <ILI9341_t3.h>
-#include "common/ui/GC.h"
+#include "common/os/Task.h"
+#include "common/algo/List.h"
+#include "common/signalk/KMessage.h"
+#include "common/stats/KBoxMetrics.h"
+#include "common/signalk/SKSource.h"
+#include "common/signalk/SKHub.h"
 
-/**
- * This class implements all the GC primitives with the ILI9341_t3 driver.
- */
-class ILI9341GC : public GC {
+// Defined by the NMEA Standard
+#define MAX_NMEA_SENTENCE_LENGTH 82
+
+class HardwareSerial;
+
+class NMEAService : public Task, public KGenerator {
   private:
-    ILI9341_t3 &display;
-    Size size;
+    SKHub &_hub;
+    HardwareSerial& stream;
+    LinkedList<NMEASentence> receiveQueue;
+    enum KBoxEvent rxValidEvent, rxErrorEvent;
+    SKSourceInput _skSourceInput;
 
   public:
-    ILI9341GC(ILI9341_t3 &display, Size size);
+    NMEAService(SKHub &hub, HardwareSerial&s);
 
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
-    void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
-    const Size& getSize() const;
+    void setup();
+    void loop();
 };
+

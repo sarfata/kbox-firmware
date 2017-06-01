@@ -24,9 +24,10 @@
 
 #include <KBoxLogging.h>
 #include <Arduino.h>
-#include "algo/List.h"
-#include "stats/KBoxMetrics.h"
-#include "NMEAReaderTask.h"
+#include "common/algo/List.h"
+#include "common/stats/KBoxMetrics.h"
+#include "common/signalk/SKNMEAParser.h"
+#include "NMEAService.h"
 
 
 // Linked list used to buffer messages
@@ -119,26 +120,28 @@ void serialEvent3() {
   }
 }
 
-NMEAReaderTask::NMEAReaderTask(HardwareSerial &s) : Task("NMEA Reader"), stream(s) {
+NMEAService::NMEAService(SKHub &hub, HardwareSerial &s) : Task("NMEA Service"), _hub(hub), stream(s) {
   if (&s == &Serial2) {
     received2 = &receiveQueue;
     _taskName = "NMEA Reader1";
     rxValidEvent = KBoxEventNMEA1RX;
     rxErrorEvent = KBoxEventNMEA1RXError;
+    _skSourceInput = SKSourceInputNMEA0183_1;
   }
   if (&s == &Serial3) {
     received3 = &receiveQueue;
     _taskName = "NMEA Reader2";
     rxValidEvent = KBoxEventNMEA2RX;
     rxErrorEvent = KBoxEventNMEA2RXError;
+    _skSourceInput = SKSourceInputNMEA0183_2;
   }
 }
 
-void NMEAReaderTask::setup() {
+void NMEAService::setup() {
 }
 
 
-void NMEAReaderTask::loop() {
+void NMEAService::loop() {
   if (receiveQueue.size() == 0) {
     return;
   }
@@ -148,6 +151,12 @@ void NMEAReaderTask::loop() {
     if (it->isValid()) {
       KBoxMetrics.countEvent(rxValidEvent);
       this->sendMessage(*it);
+
+      SKNMEAParser p;
+      const SKUpdate &update = p.parse(_skSourceInput, (*it).getSentence());
+      if (update.getSize() > 0) {
+        _hub.publish(update);
+      }
     }
     else {
       KBoxMetrics.countEvent(rxErrorEvent);

@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,39 @@
   THE SOFTWARE.
 */
 
-#include <ILI9341_t3.h>
-#include "common/ui/GC.h"
+#include <N2kMsg.h>
+#include <N2kMessages.h>
+#include "SKNMEA2000Visitor.h"
+#include "SKUpdate.h"
+#include "SKValue.h"
 
-/**
- * This class implements all the GC primitives with the ILI9341_t3 driver.
- */
-class ILI9341GC : public GC {
-  private:
-    ILI9341_t3 &display;
-    Size size;
+SKNMEA2000Visitor::SKNMEA2000Visitor() {
+}
 
-  public:
-    ILI9341GC(ILI9341_t3 &display, Size size);
+SKNMEA2000Visitor::~SKNMEA2000Visitor() {
+  flushMessages();
+}
 
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
-    void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
-    const Size& getSize() const;
-};
+void SKNMEA2000Visitor::processUpdate(const SKUpdate& update) {
+  // PGN 129026: Fast COG/SOG
+  if (update[SKPathNavigationSpeedOverGround] != SKValueNone
+      && update[SKPathNavigationCourseOverGroundTrue] != SKValueNone) {
+    tN2kMsg *msg = new tN2kMsg();
+    SetN2kPGN129026(*msg, (uint8_t)0, N2khr_true,
+        update[SKPathNavigationCourseOverGroundTrue].getNavigationCourseOverGroundTrue(),
+        update[SKPathNavigationSpeedOverGround].getNavigationSpeedOverGround());
+
+    _messages.add(msg);
+  }
+}
+
+const LinkedList<tN2kMsg*>& SKNMEA2000Visitor::getMessages() const {
+  return _messages;
+}
+
+void SKNMEA2000Visitor::flushMessages() {
+  for (LinkedListIterator<tN2kMsg*> it = _messages.begin(); it != _messages.end(); it++) {
+    delete (*it);
+  }
+  _messages.clear();
+}

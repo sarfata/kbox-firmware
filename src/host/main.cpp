@@ -23,27 +23,28 @@
 */
 
 #include <KBoxHardware.h>
-#include "os/TaskManager.h"
-#include "os/Task.h"
-#include "drivers/ILI9341GC.h"
-#include "pages/BatteryMonitorPage.h"
-#include "pages/StatsPage.h"
-#include "services/ADCTask.h"
-#include "services/BarometerN2kConverter.h"
-#include "services/BarometerTask.h"
-#include "services/IMUTask.h"
-#include "services/MFD.h"
-#include "services/NMEA2000Task.h"
-#include "services/NMEAReaderTask.h"
-#include "services/RunningLightTask.h"
-#include "services/SDCardTask.h"
-#include "services/USBService.h"
-#include "services/VoltageN2kConverter.h"
-#include "services/WiFiService.h"
+#include "common/os/TaskManager.h"
+#include "common/os/Task.h"
+#include "host/drivers/ILI9341GC.h"
+#include "host/pages/BatteryMonitorPage.h"
+#include "host/pages/StatsPage.h"
+#include "host/services/ADCTask.h"
+#include "host/services/BarometerN2kConverter.h"
+#include "host/services/BarometerTask.h"
+#include "host/services/IMUTask.h"
+#include "host/services/MFD.h"
+#include "host/services/NMEA2000Service.h"
+#include "host/services/NMEAService.h"
+#include "host/services/RunningLightTask.h"
+#include "host/services/SDCardTask.h"
+#include "host/services/USBService.h"
+#include "host/services/VoltageN2kConverter.h"
+#include "host/services/WiFiService.h"
 
 ILI9341GC gc(KBox.getDisplay(), Size(320, 240));
 MFD mfd(gc, KBox.getEncoder(), KBox.getButton());
 TaskManager taskManager;
+SKHub skHub;
 
 USBService usbService(gc);
 
@@ -70,8 +71,8 @@ void setup() {
   WiFiService *wifi = new WiFiService(gc);
 
   // Create all the generating tasks and connect them
-  NMEA2000Task *n2kTask = new NMEA2000Task();
-  n2kTask->connectTo(*wifi);
+  NMEA2000Service *n2kService = new NMEA2000Service(skHub);
+  n2kService->connectTo(*wifi);
 
   ADCTask *adcTask = new ADCTask(KBox.getADC());
 
@@ -79,22 +80,22 @@ void setup() {
   VoltageN2kConverter *voltageConverter = new VoltageN2kConverter();
   adcTask->connectTo(*voltageConverter);
   voltageConverter->connectTo(*wifi);
-  voltageConverter->connectTo(*n2kTask);
+  voltageConverter->connectTo(*n2kService);
 
-  NMEAReaderTask *reader1 = new NMEAReaderTask(NMEA1_SERIAL);
-  NMEAReaderTask *reader2 = new NMEAReaderTask(NMEA2_SERIAL);
+  NMEAService *reader1 = new NMEAService(skHub, NMEA1_SERIAL);
+  NMEAService *reader2 = new NMEAService(skHub, NMEA2_SERIAL);
   reader1->connectTo(*wifi);
   reader2->connectTo(*wifi);
 
   IMUTask *imuTask = new IMUTask();
   imuTask->connectTo(*wifi);
-  imuTask->connectTo(*n2kTask);
+  imuTask->connectTo(*n2kService);
 
   BarometerTask *baroTask = new BarometerTask();
 
   BarometerN2kConverter *bn2k = new BarometerN2kConverter();
   bn2k->connectTo(*wifi);
-  bn2k->connectTo(*n2kTask);
+  bn2k->connectTo(*n2kService);
 
   baroTask->connectTo(*bn2k);
 
@@ -102,7 +103,7 @@ void setup() {
   reader1->connectTo(*sdcardTask);
   reader2->connectTo(*sdcardTask);
   adcTask->connectTo(*sdcardTask);
-  n2kTask->connectTo(*sdcardTask);
+  n2kService->connectTo(*sdcardTask);
   baroTask->connectTo(*sdcardTask);
   imuTask->connectTo(*sdcardTask);
 
@@ -113,7 +114,7 @@ void setup() {
   taskManager.addTask(new IntervalTask(adcTask, 1000));
   taskManager.addTask(new IntervalTask(imuTask, 50));
   taskManager.addTask(new IntervalTask(baroTask, 1000));
-  taskManager.addTask(n2kTask);
+  taskManager.addTask(n2kService);
   taskManager.addTask(reader1);
   taskManager.addTask(reader2);
   taskManager.addTask(wifi);

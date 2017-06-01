@@ -6,7 +6,8 @@
 .sconsign.dblite
 *.dSYM
 *.pyc
-*.o
 *.d
 tags
 .gdb_history
+lcov-output
+cov.info

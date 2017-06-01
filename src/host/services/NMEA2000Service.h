@@ -22,26 +22,38 @@
   THE SOFTWARE.
 */
 
-#include <ILI9341_t3.h>
-#include "common/ui/GC.h"
+#pragma once
 
-/**
- * This class implements all the GC primitives with the ILI9341_t3 driver.
- */
-class ILI9341GC : public GC {
+#include <N2kMsg.h>
+#include <NMEA2000_teensy.h>
+#include "common/os/Task.h"
+#include "common/signalk/KMessage.h"
+#include "common/signalk/SKHub.h"
+#include "common/signalk/SKSubscriber.h"
+#include "common/signalk/SKNMEA2000Visitor.h"
+
+class NMEA2000Service : public Task, public SKSubscriber,
+  //FIXME: Replace KGenerator and KReceiver by the new SKstyle
+  public KGenerator, public KReceiver, public KVisitor {
   private:
-    ILI9341_t3 &display;
-    Size size;
+    SKHub &_hub;
+    tNMEA2000_teensy NMEA2000;
+    unsigned int _imuSequence;
+    SKNMEA2000Visitor _skVisitor;
+
+    void sendN2kMessage(const tN2kMsg& msg);
 
   public:
-    ILI9341GC(ILI9341_t3 &display, Size size);
+    NMEA2000Service(SKHub &hub) : Task("NMEA2000"), _hub(hub), _imuSequence(0) {};
+    void setup();
+    void loop();
 
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
-    void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
-    const Size& getSize() const;
+    // Helper for the handler who is not a part of this class
+    void publishN2kMessage(const tN2kMsg& msg);
+
+    void processMessage(const KMessage&);
+    void visit(const NMEA2000Message&);
+    void visit(const IMUMessage&);
+
+    void updateReceived(const SKUpdate& update);
 };

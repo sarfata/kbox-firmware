@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,37 @@
   THE SOFTWARE.
 */
 
-#include <ILI9341_t3.h>
-#include "common/ui/GC.h"
+#pragma once
 
-/**
- * This class implements all the GC primitives with the ILI9341_t3 driver.
+#include "common/algo/List.h"
+
+class SKUpdate;
+class SKSubscriber;
+
+/** An instance of SKHub is used to concentrate SignalK updates and distributes
+ * them to different subscribers.
+ *
+ * An instance of SKSubscriber can subscribe to updates with a filter defining
+ * which updates to get.
  */
-class ILI9341GC : public GC {
-  private:
-    ILI9341_t3 &display;
-    Size size;
-
+class SKHub {
   public:
-    ILI9341GC(ILI9341_t3 &display, Size size);
+    SKHub();
+    ~SKHub();
 
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
-    void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
-    const Size& getSize() const;
+    /**
+     * Adds a new subscriber which will be notified when updates
+     * are received by the hub.
+     */
+    void subscribe(SKSubscriber* subscriber);
+
+    /**
+     * Publish a new update on the hub. All the subscribers will be notified.
+     * They should process the update as fast as possible and return control so
+     * that calling publish should never take "a long time".
+     */
+    void publish(const SKUpdate&);
+
+  private:
+    LinkedList<SKSubscriber*> _subscribers;
 };

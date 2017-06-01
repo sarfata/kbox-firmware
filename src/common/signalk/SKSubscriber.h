@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,27 +24,14 @@
 
 #pragma once
 
-#include <N2kMsg.h>
-#include <NMEA2000_teensy.h>
-#include "os/Task.h"
-#include "signalk/KMessage.h"
+class SKUpdate;
 
-class NMEA2000Task : public Task, public KGenerator, public KReceiver, public KVisitor {
-  private:
-    tNMEA2000_teensy NMEA2000;
-    unsigned int _imuSequence;
-
-    void sendN2kMessage(const tN2kMsg& msg);
-
+/** A SignalK subscriber receives SKUpdates.
+ */
+class SKSubscriber {
   public:
-    NMEA2000Task() : Task("NMEA2000"), _imuSequence(0) {};
-    void setup();
-    void loop();
-
-    // Helper for the handler who is not a part of this class
-    void publishN2kMessage(const tN2kMsg& msg);
-
-    void processMessage(const KMessage&);
-    void visit(const NMEA2000Message&);
-    void visit(const IMUMessage&);
+    /** This method is called when a new update needs to be delivered to this
+     * subscriber.
+     */
+    virtual void updateReceived(const SKUpdate&) = 0;
 };

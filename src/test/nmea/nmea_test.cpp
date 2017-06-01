@@ -22,8 +22,8 @@
   THE SOFTWARE.
 */
 
-#include "KBoxTest.h"
-#include "nmea/nmea.h"
+#include "../KBoxTest.h"
+#include "common/nmea/nmea.h"
 
 TEST_CASE("nmea basic") {
   WHEN("sentence is empty") {

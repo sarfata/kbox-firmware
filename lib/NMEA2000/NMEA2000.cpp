@@ -63,6 +63,7 @@ const unsigned long DefSingleFrameMessages[] PROGMEM = {
                                        127257L, // Attitude
                                        127488L, // Engine parameters rapid
                                        127493L, // Transmission parameters, dynamic
+                                       127501L, // Binary status report
                                        127505L, // Fluid level
                                        127508L, // Battery Status
                                        127513L, // Battery Configuration Status
@@ -322,7 +323,7 @@ bool tNMEA2000::Open() {
       CANSendFrameBufferRead=0;
     }
 
-    DeviceReady=CANOpen();
+    DeviceReady = (dbMode!=dm_None) || CANOpen();
     if ( (ForwardStream!=0) && (ForwardType==tNMEA2000::fwdt_Text) ) {
       if ( DeviceReady ) { ForwardStream->println(F("CAN device ready")); } else { ForwardStream->println(F("CAN device failed to open")); }
     }
@@ -708,7 +709,7 @@ void tNMEA2000::HandlePGNListRequest(unsigned char Destination, int DeviceIndex)
     RespondMsg.Destination=Destination;
     RespondMsg.SetPGN(126464L);
     RespondMsg.Priority=6;
-    RespondMsg.AddByte(tN2kPGNList::N2kpgnl_transmit);
+    RespondMsg.AddByte(N2kpgnl_transmit);
     // First add default messages
     for (int i=0; (PGN=pgm_read_dword(&DefTransmitMessages[i]))!=0; i++) {
       RespondMsg.Add3ByteInt(PGN);
@@ -723,7 +724,7 @@ void tNMEA2000::HandlePGNListRequest(unsigned char Destination, int DeviceIndex)
     // Then add receive messages
     RespondMsg.Clear();
     RespondMsg.SetPGN(126464L);
-    RespondMsg.AddByte(tN2kPGNList::N2kpgnl_receive);
+    RespondMsg.AddByte(N2kpgnl_receive);
     // First add default messages
     for (int i=0; (PGN=pgm_read_dword(&DefReceiveMessages[i]))!=0; i++) {
       RespondMsg.Add3ByteInt(PGN);
@@ -1000,6 +1001,8 @@ void tNMEA2000::ParseMessages() {
 
     if (!Open()) return;  // Can not do much
 
+	if (dbMode != dm_None) return; // No much to do here when in Debug mode
+	
     SendFrames();
     SendPendingInformation();
 

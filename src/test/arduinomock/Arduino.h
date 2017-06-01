@@ -34,14 +34,3 @@
 #include <Print.h>
 #include <inttypes.h>
 #include <math.h>
-
-#define byte uint8_t
-#define lowByte(x) (x&0xff)
-#define highByte(x) ((x<<8)&0xff)
-
-
-static uint32_t millis(void) __attribute__((unused));
-
-static uint32_t millis(void) { 
-  return 42; 
-};

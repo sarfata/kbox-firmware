@@ -47,4 +47,11 @@ runmfg:
 
 test:
 	platformio run -e test -vv
+	find .pioenvs -name '*.gcda'|xargs rm -f
 	.pioenvs/test/program
+
+lcov: test
+	lcov --directory .pioenvs/test/ --base-directory . --capture -o cov.info
+	genhtml cov.info -o lcov-html
+
+

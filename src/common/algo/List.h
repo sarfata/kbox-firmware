@@ -128,7 +128,7 @@ template <class T> class LinkedList {
       return circularIterator(0);
     };
 
-    int size() {
+    int size() const {
       LinkedList<T>::node *n = head;
       int sz = 0;
       while (n != 0) {

@@ -85,9 +85,9 @@ bool ParseN2kPGN127250(const tN2kMsg &N2kMsg, unsigned char &SID, double &Headin
   int Index=0;
   
   SID=N2kMsg.GetByte(Index);
-  Heading=N2kMsg.Get2ByteDouble(0.0001,Index);
-  Deviation=N2kMsg.Get2ByteUDouble(0.0001,Index);
-  Variation=N2kMsg.Get2ByteUDouble(0.0001,Index);
+  Heading=N2kMsg.Get2ByteUDouble(0.0001,Index);
+  Deviation=N2kMsg.Get2ByteDouble(0.0001,Index);
+  Variation=N2kMsg.Get2ByteDouble(0.0001,Index);
   ref=(tN2kHeadingReference)(N2kMsg.GetByte(Index)&0x03);
   
   return true;
@@ -310,7 +310,86 @@ bool ParseN2kPGN127493(const tN2kMsg &N2kMsg, unsigned char &EngineInstance, tN2
   
   return true;
 }
+
+//*****************************************************************************
+// Binary status
                      
+//*****************************************************************************
+tN2kOnOff N2kGetStatusOnBinaryStatus(tN2kBinaryStatus BankStatus, uint8_t ItemIndex) {
+	ItemIndex--;
+	if (ItemIndex>27) return N2kOnOff_Unavailable;
+	
+	return (tN2kOnOff)((BankStatus >> (2*ItemIndex)) & 0x03);
+}
+
+//*****************************************************************************
+void N2kSetStatusBinaryOnStatus(tN2kBinaryStatus &BankStatus, tN2kOnOff ItemStatus, uint8_t ItemIndex) {
+	ItemIndex--;
+	if (ItemIndex>27) return;
+	
+  tN2kBinaryStatus Mask = ~(3 << (2*ItemIndex));
+  
+	BankStatus = (BankStatus & Mask) | (ItemStatus << (2*ItemIndex));
+}
+
+//*****************************************************************************
+void SetN2kPGN127501(tN2kMsg &N2kMsg, unsigned char DeviceBankInstance, tN2kBinaryStatus BankStatus) {
+    N2kMsg.SetPGN(127501L);
+    N2kMsg.Priority=6;
+	BankStatus = (BankStatus << 8) | DeviceBankInstance;
+	N2kMsg.AddUInt64(BankStatus);
+}
+
+//*****************************************************************************
+// Binary status report
+void SetN2kPGN127501(tN2kMsg &N2kMsg, unsigned char DeviceBankInstance
+                      ,tN2kOnOff Status1
+                      ,tN2kOnOff Status2
+                      ,tN2kOnOff Status3
+                      ,tN2kOnOff Status4
+                    ) {
+  tN2kBinaryStatus BankStatus;
+    
+    N2kResetBinaryStatus(BankStatus);
+	BankStatus = (BankStatus << 2) | Status4;
+	BankStatus = (BankStatus << 2) | Status3;
+	BankStatus = (BankStatus << 2) | Status2;
+	BankStatus = (BankStatus << 2) | Status1;
+	SetN2kPGN127501(N2kMsg,DeviceBankInstance,BankStatus);
+}
+
+//*****************************************************************************
+bool ParseN2kPGN127501(const tN2kMsg &N2kMsg, unsigned char &DeviceBankInstance
+                      ,tN2kOnOff &Status1
+                      ,tN2kOnOff &Status2
+                      ,tN2kOnOff &Status3
+                      ,tN2kOnOff &Status4
+                    ) {
+  if (N2kMsg.PGN!=127501L) return false;
+  
+  int Index=0;
+  DeviceBankInstance=N2kMsg.GetByte(Index);
+  unsigned char b=N2kMsg.GetByte(Index);
+  Status1=(tN2kOnOff)(b & 0x03); 
+  b>>=2; Status2=(tN2kOnOff)(b & 0x03); 
+  b>>=2; Status3=(tN2kOnOff)(b & 0x03); 
+  b>>=2; Status4=(tN2kOnOff)(b & 0x03); 
+
+  return true;
+}
+
+//*****************************************************************************
+bool ParseN2kPGN127501(const tN2kMsg &N2kMsg, unsigned char &DeviceBankInstance, tN2kBinaryStatus &BankStatus) {
+  if (N2kMsg.PGN!=127501L) return false;
+  
+  int Index=0;
+  BankStatus=N2kMsg.GetUInt64(Index);
+  DeviceBankInstance = BankStatus & 0xff;
+  BankStatus>>=8;
+  
+  return true;
+}
+
 //*****************************************************************************
 // Fluid level
 void SetN2kPGN127505(tN2kMsg &N2kMsg, unsigned char Instance, tN2kFluidType FluidType, double Level, double Capacity) {
@@ -614,8 +693,41 @@ bool ParseN2kPGN129029(const tN2kMsg &N2kMsg, unsigned char &SID, uint16_t &Days
   return true;
 }
 
+void SetN2kPGN129539(tN2kMsg& N2kMsg, unsigned char SID, tN2kGNSSDOPmode DesiredMode, tN2kGNSSDOPmode ActualMode,
+                     double HDOP, double VDOP, double TDOP)
+{
+    N2kMsg.SetPGN(129539L);
+    N2kMsg.Priority = 6;
+    N2kMsg.AddByte(SID);
+    N2kMsg.AddByte(((DesiredMode & 0x07) << 5) | ((ActualMode & 0x07) << 2));
+    N2kMsg.Add2ByteDouble(HDOP, 0.01);
+    N2kMsg.Add2ByteDouble(VDOP, 0.01);
+    N2kMsg.Add2ByteDouble(TDOP, 0.01);
+}
+
+bool ParseN2kPgn129539(const tN2kMsg& N2kMsg, unsigned char& SID, tN2kGNSSDOPmode& DesiredMode, tN2kGNSSDOPmode& ActualMode,
+                       double& HDOP, double& VDOP, double& TDOP)
+{
+    if(N2kMsg.PGN != 129539)
+        return false;
+
+    unsigned char modes;
+    int Index = 0;
+
+    SID = N2kMsg.GetByte(Index);
+    modes = N2kMsg.GetByte(Index);
+    DesiredMode = (tN2kGNSSDOPmode)((modes >> 5) & 0x07);
+    ActualMode = (tN2kGNSSDOPmode)(modes & 0x07);
+    HDOP = N2kMsg.Get2ByteDouble(0.01, Index);
+    VDOP = N2kMsg.Get2ByteDouble(0.01, Index);
+    TDOP = N2kMsg.Get2ByteDouble(0.01, Index);
+    return true;
+}
+
 //*****************************************************************************
 // AIS position report (class A 129038)
+// Latitude and Longitude in degrees (1e7)
+// COG and Heading in radians (1e4)
 void SetN2kPGN129038(tN2kMsg &N2kMsg, uint8_t MessageID, tN2kAISRepeat Repeat, uint32_t UserID,
                         double Latitude, double Longitude, bool Accuracy, bool RAIM, uint8_t Seconds,
                         double COG, double SOG, double Heading, double ROT, tN2kAISNavStatus NavStatus)
@@ -734,6 +846,20 @@ void SetN2kPGN129283(tN2kMsg &N2kMsg, unsigned char SID, tN2kXTEMode XTEMode, bo
     N2kMsg.AddByte(0xff); // Reserved
 }
 
+bool ParseN2kPGN129283(const tN2kMsg &N2kMsg, unsigned char& SID, tN2kXTEMode& XTEMode, bool& NavigationTerminated, double& XTE) {
+    if(N2kMsg.PGN != 129283L)
+        return false;
+
+    int Index = 0;
+    unsigned char c;
+    SID = N2kMsg.GetByte(Index);
+    c = N2kMsg.GetByte(Index);
+    XTEMode = (tN2kXTEMode)(c & 0x0F);
+    NavigationTerminated = c & 0x40;
+    XTE = N2kMsg.Get4ByteDouble(0.01, Index);
+    return true;
+}
+
 //*****************************************************************************
 // Navigation info
 void SetN2kPGN129284(tN2kMsg &N2kMsg, unsigned char SID, double DistanceToWaypoint, tN2kHeadingReference BearingReference,
@@ -755,6 +881,36 @@ void SetN2kPGN129284(tN2kMsg &N2kMsg, unsigned char SID, double DistanceToWaypoi
     N2kMsg.Add4ByteDouble(DestinationLatitude,1e-07);
     N2kMsg.Add4ByteDouble(DestinationLongitude,1e-07);
     N2kMsg.Add2ByteDouble(WaypointClosingVelocity,0.01);
+}
+
+bool ParseN2kPGN129284(const tN2kMsg &N2kMsg, unsigned char& SID, double& DistanceToWaypoint, tN2kHeadingReference& BearingReference,
+                      bool& PerpendicularCrossed, bool& ArrivalCircleEntered, tN2kDistanceCalculationType& CalculationType,
+                      double& ETATime, int16_t& ETADate, double& BearingOriginToDestinationWaypoint, double& BearingPositionToDestinationWaypoint,
+                      uint8_t& OriginWaypointNumber, uint8_t& DestinationWaypointNumber,
+                      double& DestinationLatitude, double& DestinationLongitude, double& WaypointClosingVelocity) {
+
+    if(N2kMsg.PGN != 129284L)
+      return false;
+
+    int Index;
+    unsigned char c;
+    SID = N2kMsg.GetByte(Index);
+    DistanceToWaypoint = N2kMsg.Get4ByteUDouble(0.01, Index);
+    c = N2kMsg.GetByte(Index);
+    BearingReference     = c & 0x01 ? N2khr_magnetic : N2khr_true;
+    PerpendicularCrossed = c & 0x04;
+    ArrivalCircleEntered = c & 0x10;
+    CalculationType      = c & 0x40 ? N2kdct_RhumbLine : N2kdct_GreatCircle;
+    ETATime = N2kMsg.Get4ByteUDouble(0.0001, Index);
+    ETADate = N2kMsg.Get2ByteUInt(Index);
+    BearingOriginToDestinationWaypoint = N2kMsg.Get2ByteUDouble(0.0001, Index);
+    BearingPositionToDestinationWaypoint = N2kMsg.Get2ByteUDouble(0.0001, Index);
+    OriginWaypointNumber = N2kMsg.Get4ByteUInt(Index);
+    DestinationWaypointNumber = N2kMsg.Get4ByteUInt(Index);
+    DestinationLatitude = N2kMsg.Get4ByteDouble(1e-07, Index);
+    DestinationLongitude = N2kMsg.Get4ByteDouble(1e-07, Index);
+    WaypointClosingVelocity = N2kMsg.Get2ByteDouble(0.01, Index);
+    return true;
 }
 
 //*****************************************************************************

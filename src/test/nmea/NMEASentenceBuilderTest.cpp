@@ -22,26 +22,37 @@
   THE SOFTWARE.
 */
 
-#include <ILI9341_t3.h>
-#include "common/ui/GC.h"
+#include "../KBoxTest.h"
+#include "common/nmea/NMEASentenceBuilder.h"
 
-/**
- * This class implements all the GC primitives with the ILI9341_t3 driver.
- */
-class ILI9341GC : public GC {
-  private:
-    ILI9341_t3 &display;
-    Size size;
+TEST_CASE("generating an empty sentence") {
+  NMEASentenceBuilder sb("GG", "ABC", 0);
+  REQUIRE( sb.toNMEA() == "$GGABC*40" );
+}
 
-  public:
-    ILI9341GC(ILI9341_t3 &display, Size size);
+TEST_CASE("generating a sentence with one string and one float") {
+  NMEASentenceBuilder sb("GG", "ABC", 2);
+  sb.setField(1, 1.03403303, 5);
+  sb.setField(2, "toto");
 
-    void drawText(Point a, Font font, Color color, const char *text);
-    void drawText(Point a, Font font, Color color, Color bgColor, const char *text);
-    void drawText(const Point &a, const Font &font, const Color &color, const Color &bgColor, const String &text);
-    void drawLine(Point a, Point b, Color color);
-    void drawRectangle(Point orig, Size size, Color color);
-    void fillRectangle(Point orig, Size size, Color color);
-    void readRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t *pcolors);
-    const Size& getSize() const;
-};
+  REQUIRE( sb.toNMEA() == "$GGABC,1.03403,toto*6B" );
+}
+
+TEST_CASE("test a real nmea sentence to make sure the checksum is properly generated") {
+  NMEASentenceBuilder sb("GP", "RMC", 12);
+
+  sb.setField(1, "003516.000");
+  sb.setField(2, "A");
+  sb.setField(3, "3751.6035");
+  sb.setField(4, "N");
+  sb.setField(5, "12228.8065");
+  sb.setField(6, "W");
+  sb.setField(7, "0.01");
+  sb.setField(8, "0.00");
+  sb.setField(9, "030416");
+  sb.setField(10, "");
+  sb.setField(11, "");
+  sb.setField(12, "D");
+
+  REQUIRE( sb.toNMEA() == "$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79" );
+}
