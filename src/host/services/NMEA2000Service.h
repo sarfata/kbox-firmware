@@ -30,7 +30,6 @@
 #include "common/signalk/KMessage.h"
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKSubscriber.h"
-#include "common/signalk/SKPredicate.h"
 #include "common/signalk/SKNMEA2000Visitor.h"
 
 class NMEA2000Service : public Task, public SKSubscriber,

@@ -24,12 +24,10 @@
 
 #pragma once
 
-class SKUpdate;
-class SKPredicate;
-class SKSubscriber;
+#include "common/algo/List.h"
 
-// Defined in SKHub.h
-class SKSubscription;
+class SKUpdate;
+class SKSubscriber;
 
 /** An instance of SKHub is used to concentrate SignalK updates and distributes
  * them to different subscribers.
@@ -43,21 +41,18 @@ class SKHub {
     ~SKHub();
 
     /**
-     * Adds a new subscriber which will be notified when updates matching the
-     * predicate are received by the hub.
+     * Adds a new subscriber which will be notified when updates
+     * are received by the hub.
      */
-    void subscribe(const SKPredicate& predicate, SKSubscriber& subscriber);
+    void subscribe(SKSubscriber* subscriber);
 
     /**
-     * Publish a new update on the hub. All the subscribers with matching
-     * subscribptions will be notified. They should process the update as fast
-     * as possible and return control so that calling publish should never take
-     * "a long time".
+     * Publish a new update on the hub. All the subscribers will be notified.
+     * They should process the update as fast as possible and return control so
+     * that calling publish should never take "a long time".
      */
     void publish(const SKUpdate&);
 
   private:
-    static const int maxSubscriptions = 20;
-    int _countSubscriptions = 0;
-    SKSubscription* _subscriptions[maxSubscriptions];
+    LinkedList<SKSubscriber*> _subscribers;
 };

@@ -24,41 +24,21 @@
 
 #include <KBoxLogging.h>
 #include "SKHub.h"
-#include "SKPredicate.h"
 #include "SKSubscriber.h"
 
-
-class SKSubscription {
-  public:
-    const SKPredicate& predicate;
-    SKSubscriber& subscriber;
-
-    SKSubscription(const SKPredicate& p, SKSubscriber& s) : predicate(p), subscriber(s) {};
-};
 
 SKHub::SKHub() {
 }
 
 SKHub::~SKHub() {
-  for (int i = 0; i < _countSubscriptions; i++) {
-    delete _subscriptions[i];
-  }
 }
 
-void SKHub::subscribe(const SKPredicate& predicate, SKSubscriber& subscriber) {
-  if (_countSubscriptions >= maxSubscriptions) {
-    ERROR("New subscription requested but maxSubscriptions reached. Ignoring.");
-    return;
-  }
-
-  _subscriptions[_countSubscriptions] = new SKSubscription(predicate, subscriber);
-  _countSubscriptions++;
+void SKHub::subscribe(SKSubscriber* subscriber) {
+  _subscribers.add(subscriber);
 }
 
 void SKHub::publish(const SKUpdate& update) {
-  for (int i = 0; i < _countSubscriptions; i++) {
-    //if (_subscriptions[i]->predicate.evaluate(update)) {
-      _subscriptions[i]->subscriber.updateReceived(update);
-    //}
+  for (LinkedListIterator<SKSubscriber*> it = _subscribers.begin(); it != _subscribers.end(); it++) {
+    (*it)->updateReceived(update);
   }
 }

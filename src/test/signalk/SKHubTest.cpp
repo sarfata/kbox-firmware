@@ -25,7 +25,6 @@
 #include "../KBoxTest.h"
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKSubscriber.h"
-#include "common/signalk/SKPredicate.h"
 #include "common/signalk/SKUpdateStatic.h"
 
 class TestSubscriber : public SKSubscriber {
@@ -40,7 +39,7 @@ class TestSubscriber : public SKSubscriber {
 TEST_CASE("SKHub") {
   SKHub hub;
   TestSubscriber sub;
-  hub.subscribe(SKContextPredicate(SKContextSelf), sub);
+  hub.subscribe(&sub);
 
   SECTION("test delivery") {
     SKUpdateStatic<0> update(SKContextSelf);
@@ -48,14 +47,5 @@ TEST_CASE("SKHub") {
     hub.publish(update);
 
     CHECK( sub.notified );
-  }
-
-  SECTION("test non delivery") {
-    SKContext anotherContext("mrn:xxx");
-    SKUpdateStatic<0> update(anotherContext);
-
-    hub.publish(update);
-
-    CHECK( !sub.notified );
   }
 }
