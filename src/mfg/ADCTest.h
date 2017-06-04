@@ -35,9 +35,9 @@ struct ADCTestCase {
 
 struct ADCTestCase cases[] = {
   { "Supply", supply_analog },
-  { "Bat1", bat1_analog },
-  { "Bat2", bat2_analog },
-  { "Bat3", bat3_analog }
+  { "Bat1", adc1_analog },
+  { "Bat2", adc2_analog },
+  { "Bat3", adc3_analog }
 };
 
 class ADCTest : public MfgTest {
