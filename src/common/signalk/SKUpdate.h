@@ -55,20 +55,25 @@ class SKUpdate {
     virtual const SKSource& getSource() const = 0;
 
     /**
-     * Return a value by index.
-     *
-     * @return SKValueNone if the index does not exist.
-     */
-    virtual const SKValue& operator[] (int index) const = 0;
-
-    /**
-     * Return a value by path, or null if the update does not have it.
+     * Return a value by path, or SKValueNone if the update does not have it.
      *
      * @note if there are multiple values with this path, the first one is
      * returned.
      * @return SKValueNone if the path does not exist in this update.
      */
     virtual const SKValue& operator[] (SKPath path) const = 0;
+
+    /**
+     * Return true if the SKUpdate contains a value with the given path.
+     */
+    virtual bool hasPath(const SKPath &path) = 0;
+
+    /**
+     * Add a new SKValue to this update. This will fail if the list is full.
+     *
+     * @return: true if succeeded, or false if the list is full.
+     */
+    virtual bool setValue(const SKPath& path, const SKValue v) = 0;
 
     // Convenience functions
 

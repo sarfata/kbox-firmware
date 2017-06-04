@@ -57,7 +57,15 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
      *
      * @return: true if succeeded, or false if the list is full.
      */
-    bool addValue(const SKValue v) {
+    bool setValue(const SKPath& path, const SKValue v) override {
+      // Update?
+      for (int i = 0; i < _size; i++) {
+        if (_values[i].getPath() == path) {
+          _values[i].v = v;
+          return true;
+        }
+      }
+      // Add?
       if (_size < capacity) {
         _values[_size] = v;
         _size++;
@@ -85,13 +93,6 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
     const SKContext& getContext() const override {
       return _context;
     };
-
-    const SKValue& operator[] (int index) const override {
-      if (index >= _size) {
-        return SKValueNone;
-      }
-      return _values[index];
-    }
 
     const SKValue& operator[] (SKPath path) const override {
       for (int i = 0; i < _size; i++) {
