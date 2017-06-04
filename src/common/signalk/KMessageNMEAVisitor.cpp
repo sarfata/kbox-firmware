@@ -45,15 +45,6 @@ void KMessageNMEAVisitor::visit(const BarometerMeasurement &bm) {
   nmeaContent += sb.toNMEA() + "\r\n";
 }
 
-void KMessageNMEAVisitor::visit(const VoltageMeasurement &vm) {
-  NMEASentenceBuilder sb("II", "XDR", 4);
-  sb.setField(1, "V");
-  sb.setField(2, vm.getVoltage(), 2);
-  sb.setField(3, "V");
-  sb.setField(4, vm.getLabel());
-  nmeaContent += sb.toNMEA() + "\r\n";
-}
-
 void KMessageNMEAVisitor::visit(const NMEA2000Message &n2km) {
   // $PCDIN,<PGN 6>,<Timestamp 8>,<src 2>,<data>*20
 

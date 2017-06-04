@@ -84,14 +84,14 @@ static const pin_t nmea2_out_enable = 16;
 
 /* Analag Inputs */
 #ifdef BOARD_v1_revA
-static const pin_t bat1_analog = A10;
-static const pin_t bat2_analog = A11;
-static const pin_t bat3_analog = A12;
+static const pin_t adc1_analog = A10;
+static const pin_t adc2_analog = A11;
+static const pin_t adc3_analog = A12;
 static const float analog_max_voltage = 3.3 / (10000/(10000+56000.0));
 #else
-static const pin_t bat1_analog = A12;
-static const pin_t bat2_analog = A11;
-static const pin_t bat3_analog = A10;
+static const pin_t adc1_analog = A12;
+static const pin_t adc2_analog = A11;
+static const pin_t adc3_analog = A10;
 static const float analog_max_voltage = 3.0 / (10000/(10000+56000.0));
 #endif
 static const pin_t supply_analog = A14;

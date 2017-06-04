@@ -62,5 +62,38 @@ TEST_CASE("NMEA2000Visitor") {
     }
   }
 
+  SECTION("Electrical") {
+    SKUpdateStatic<2> electricalUpdate;
+    electricalUpdate.setElectricalBatteries("house", 12.0);
+    electricalUpdate.setElectricalBatteries("engine", 13.0);
+
+    visitor.processUpdate(electricalUpdate);
+
+    CHECK( visitor.getMessages().size() == 2 );
+
+    if (visitor.getMessages().size() == 2) {
+      const tN2kMsg *m1 = findMessage(visitor.getMessages(), 127508, 0);
+      const tN2kMsg *m2 = findMessage(visitor.getMessages(), 127508, 1);
+
+      unsigned char instance;
+      double voltage;
+      double current;
+      double temperature;
+      unsigned char sid1, sid2;
+
+      CHECK( ParseN2kPGN127508(*m1, instance, voltage, current, temperature, sid1) );
+      CHECK( instance == 0 );
+      CHECK( voltage == 13.0 );
+      CHECK( current == N2kDoubleNA );
+      CHECK( temperature == N2kDoubleNA );
+
+      CHECK( ParseN2kPGN127508(*m2, instance, voltage, current, temperature, sid2) );
+      CHECK( instance == 1 );
+      CHECK( voltage == 12.0 );
+      CHECK( current == N2kDoubleNA );
+      CHECK( temperature == N2kDoubleNA );
+      CHECK( sid1 == sid2 );
+    }
+  }
 }
 

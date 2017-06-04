@@ -22,20 +22,20 @@
   THE SOFTWARE.
 */
 
-#include "signalk/KMessage.h"
-#include "ui/Page.h"
-#include "ui/TextLayer.h"
+#include "common/ui/Page.h"
+#include "common/ui/TextLayer.h"
+#include "common/signalk/SKHub.h"
+#include "common/signalk/SKSubscriber.h"
 
-class BatteryMonitorPage : public Page, public KReceiver, public KVisitor {
+class BatteryMonitorPage : public Page, public SKSubscriber {
   private:
-    TextLayer *houseVoltage, *houseCurrent, *starterVoltage, *supplyVoltage;
+    TextLayer *houseVoltage, *houseCurrent, *engineVoltage, *supplyVoltage;
 
     Color colorForVoltage(float v);
     String formatMeasurement(float measure, const char *unit);
 
   public:
-    BatteryMonitorPage();
+    BatteryMonitorPage(SKHub& hub);
 
-    void processMessage(const KMessage& message);
-    void visit(const VoltageMeasurement&);
+    virtual void updateReceived(const SKUpdate& up);
 };

@@ -108,5 +108,15 @@ class SKUpdate {
     bool setNavigationPosition(SKTypePosition p) {
       return setValue(SKPathNavigationPosition, SKValue(p));
     };
+
+    bool hasElectricalBatteries(String index) const {
+      return hasPath(SKPath(SKPathElectricalBatteries, index));
+    };
+    double getElectricalBatteries(String index) const {
+      return this->operator[](SKPath(SKPathElectricalBatteries, index)).getNumberValue();
+    };
+    bool setElectricalBatteries(String index, double voltage) {
+      return setValue(SKPath(SKPathElectricalBatteries, index), voltage);
+    };
 };
 

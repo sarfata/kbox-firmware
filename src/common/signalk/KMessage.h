@@ -95,32 +95,6 @@ class BarometerMeasurement : public KMessage {
     };
 };
 
-class VoltageMeasurement: public KMessage {
-  private:
-    int index;
-    String label;
-    float voltage;
-
-  public:
-    VoltageMeasurement(int index, String label, float voltage) : index(index), label(label), voltage(voltage) {};
-
-    String getLabel() const {
-      return label;
-    };
-
-    int getIndex() const {
-      return index;
-    };
-
-    float getVoltage() const {
-      return voltage;
-    };
-
-    void accept(KVisitor &v) const {
-      v.visit(*this);
-    };
-};
-
 class NMEA2000Message: public KMessage {
   private:
     tN2kMsg msg;

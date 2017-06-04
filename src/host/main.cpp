@@ -28,7 +28,7 @@
 #include "host/drivers/ILI9341GC.h"
 #include "host/pages/BatteryMonitorPage.h"
 #include "host/pages/StatsPage.h"
-#include "host/services/ADCTask.h"
+#include "host/services/ADCService.h"
 #include "host/services/BarometerN2kConverter.h"
 #include "host/services/BarometerTask.h"
 #include "host/services/IMUTask.h"
@@ -38,7 +38,6 @@
 #include "host/services/RunningLightTask.h"
 #include "host/services/SDCardTask.h"
 #include "host/services/USBService.h"
-#include "host/services/VoltageN2kConverter.h"
 #include "host/services/WiFiService.h"
 
 ILI9341GC gc(KBox.getDisplay(), Size(320, 240));
@@ -74,13 +73,7 @@ void setup() {
   NMEA2000Service *n2kService = new NMEA2000Service(skHub);
   n2kService->connectTo(*wifi);
 
-  ADCTask *adcTask = new ADCTask(KBox.getADC());
-
-  // Convert battery measurement into n2k messages before sending them to wifi.
-  VoltageN2kConverter *voltageConverter = new VoltageN2kConverter();
-  adcTask->connectTo(*voltageConverter);
-  voltageConverter->connectTo(*wifi);
-  voltageConverter->connectTo(*n2kService);
+  ADCService *adcService = new ADCService(skHub, KBox.getADC());
 
   NMEAService *reader1 = new NMEAService(skHub, NMEA1_SERIAL);
   NMEAService *reader2 = new NMEAService(skHub, NMEA2_SERIAL);
@@ -102,7 +95,6 @@ void setup() {
   SDCardTask *sdcardTask = new SDCardTask();
   reader1->connectTo(*sdcardTask);
   reader2->connectTo(*sdcardTask);
-  adcTask->connectTo(*sdcardTask);
   n2kService->connectTo(*sdcardTask);
   baroTask->connectTo(*sdcardTask);
   imuTask->connectTo(*sdcardTask);
@@ -111,7 +103,7 @@ void setup() {
   // Add all the tasks
   taskManager.addTask(&mfd);
   taskManager.addTask(new IntervalTask(new RunningLightTask(), 250));
-  taskManager.addTask(new IntervalTask(adcTask, 1000));
+  taskManager.addTask(new IntervalTask(adcService, 1000));
   taskManager.addTask(new IntervalTask(imuTask, 50));
   taskManager.addTask(new IntervalTask(baroTask, 1000));
   taskManager.addTask(n2kService);
@@ -121,8 +113,7 @@ void setup() {
   taskManager.addTask(sdcardTask);
   taskManager.addTask(&usbService);
 
-  BatteryMonitorPage *batPage = new BatteryMonitorPage();
-  adcTask->connectTo(*batPage);
+  BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
   mfd.addPage(batPage);
 
   StatsPage *statsPage = new StatsPage();

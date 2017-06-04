@@ -30,11 +30,41 @@
 
 #pragma once
 
+#include <WString.h>
+
 typedef enum {
   SKPathNavigationCourseOverGroundTrue,
   SKPathNavigationSpeedOverGround,
   SKPathNavigationPosition,
 
-  SKPathInvalid
-} SKPath;
+  // Marker value - Every path below requires an index.
+  SKPathEnumIndexedPaths,
 
+  SKPathElectricalBatteries,
+
+  SKPathInvalid
+} SKPathEnum;
+
+class SKPath {
+  private:
+    SKPathEnum _p;
+    String _index;
+
+  public:
+    SKPath() : _p(SKPathInvalid) {};
+    SKPath(SKPathEnum p) : _p(p) {
+      if (p >= SKPathEnumIndexedPaths) {
+        _p = SKPathInvalid;
+      }
+    };
+
+    SKPath(SKPathEnum p, String index) : _p(p), _index(index) {
+      if (p <= SKPathEnumIndexedPaths) {
+        _p = SKPathInvalid;
+        _index = String();
+      }
+    };
+
+    bool operator==(const SKPath &other) const;
+    bool operator!=(const SKPath &other) const;
+};

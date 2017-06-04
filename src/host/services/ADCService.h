@@ -24,10 +24,18 @@
 
 #pragma once
 
-#include "signalk/KMessage.h"
+#include <ADC.h>
+#include "common/os/Task.h"
+#include "common/signalk/SKHub.h"
 
-class VoltageN2kConverter : public KReceiver, public KGenerator {
+class ADCService : public Task {
+  private:
+    SKHub &_skHub;
+    ADC& _adc;
+    float _adc1, _adc2, _adc3, _supply;
+
   public:
-    void processMessage(const KMessage &m);
+    ADCService(SKHub &skHub, ADC& adc) : Task("ADC"), _skHub(skHub), _adc(adc) {};
 
+    virtual void loop() override;
 };

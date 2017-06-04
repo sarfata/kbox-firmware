@@ -45,6 +45,19 @@ void SKNMEA2000Visitor::processUpdate(const SKUpdate& update) {
 
     _messages.add(msg);
   }
+
+  // PGN127508: Battery Status
+  // FIXME: The mapping of Battery instance names to ids should be configurable
+  if (update.hasElectricalBatteries("engine")) {
+    tN2kMsg *msg = new tN2kMsg();
+    SetN2kDCBatStatus(*msg, 0, update.getElectricalBatteries("engine"));
+    _messages.add(msg);
+  }
+  if (update.hasElectricalBatteries("house")) {
+    tN2kMsg *msg = new tN2kMsg();
+    SetN2kDCBatStatus(*msg, 1, update.getElectricalBatteries("house"));
+    _messages.add(msg);
+  }
 }
 
 const LinkedList<tN2kMsg*>& SKNMEA2000Visitor::getMessages() const {

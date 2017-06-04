@@ -21,15 +21,32 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "VoltageN2kConverter.h"
-#include <N2kMessages.h>
 
-void VoltageN2kConverter::processMessage(const KMessage &m) {
-  VoltageMeasurement *vm = (VoltageMeasurement*) &m;
+#include <KBoxLogging.h>
+#include <KBoxHardware.h>
 
-  tN2kMsg msg;
-  static int sid = 0;
-  // iNavX does not seem to like NA as a BatteryCurrent value
-  SetN2kDCBatStatus(msg, vm->getIndex(), vm->getVoltage(), 0, N2kDoubleNA, sid++);
-  sendMessage(NMEA2000Message(msg));
+#include "common/signalk/SKUpdateStatic.h"
+
+#include "ADCService.h"
+
+void ADCService::loop() {
+  int supply_adc = _adc.analogRead(supply_analog, ADC_0);
+  int adc1_adc = _adc.analogRead(adc1_analog, ADC_0);
+  int adc2_adc = _adc.analogRead(adc2_analog, ADC_0);
+  int adc3_adc = _adc.analogRead(adc3_analog, ADC_0);
+
+  _supply = supply_adc * analog_max_voltage / _adc.getMaxValue();
+  _adc1 = adc1_adc * analog_max_voltage / _adc.getMaxValue();
+  _adc2 = adc2_adc * analog_max_voltage / _adc.getMaxValue();
+  _adc3 = adc3_adc * analog_max_voltage / _adc.getMaxValue();
+
+  // FIXME: We should have configuration options to describe what each input is
+  // connected to instead of hard-coding names.
+  SKUpdateStatic<4> sk;
+  sk.setElectricalBatteries("engine", _adc1);
+  sk.setElectricalBatteries("house", _adc2);
+  sk.setElectricalBatteries("dc3", _adc3);
+  sk.setElectricalBatteries("kbox-supply", _supply);
+
+  _skHub.publish(sk);
 }

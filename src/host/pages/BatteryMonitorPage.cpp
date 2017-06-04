@@ -23,9 +23,10 @@
 */
 
 #include <stdio.h>
+#include "common/signalk/SKUpdate.h"
 #include "BatteryMonitorPage.h"
 
-BatteryMonitorPage::BatteryMonitorPage() {
+BatteryMonitorPage::BatteryMonitorPage(SKHub& hub) {
   static const int col1 = 5;
   static const int col2 = 200;
   static const int row1 = 26;
@@ -40,13 +41,15 @@ BatteryMonitorPage::BatteryMonitorPage() {
 
   houseVoltage = new TextLayer(Point(col1, row2), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
   houseCurrent = new TextLayer(Point(col2, row2), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
-  starterVoltage  = new TextLayer(Point(col1, row4), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
+  engineVoltage  = new TextLayer(Point(col1, row4), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
   supplyVoltage = new TextLayer(Point(col2, row4), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
 
   addLayer(houseVoltage);
   addLayer(houseCurrent);
-  addLayer(starterVoltage);
+  addLayer(engineVoltage);
   addLayer(supplyVoltage);
+
+  hub.subscribe(this);
 }
 
 Color BatteryMonitorPage::colorForVoltage(float v) {
@@ -70,22 +73,20 @@ String BatteryMonitorPage::formatMeasurement(float measure, const char *unit) {
   return String(s);
 }
 
-void BatteryMonitorPage::processMessage(const KMessage &message) {
-  message.accept(*this);
+void BatteryMonitorPage::updateReceived(const SKUpdate& up) {
+  if (up.hasElectricalBatteries("house")) {
+    const SKValue& vm = up.getElectricalBatteries("house");
+    houseVoltage->setText(formatMeasurement(vm.getNumberValue(), "V"));
+    houseVoltage->setColor(colorForVoltage(vm.getNumberValue()));
+  }
+  if (up.hasElectricalBatteries("engine")) {
+    const SKValue& vm = up.getElectricalBatteries("engine");
+    engineVoltage->setText(formatMeasurement(vm.getNumberValue(), "V"));
+    engineVoltage->setColor(colorForVoltage(vm.getNumberValue()));
+  }
+  if (up.hasElectricalBatteries("kbox-supply")) {
+    const SKValue& vm = up.getElectricalBatteries("kbox-supply");
+    supplyVoltage->setText(formatMeasurement(vm.getNumberValue(), "V"));
+    supplyVoltage->setColor(colorForVoltage(vm.getNumberValue()));
+  }
 }
-
-void BatteryMonitorPage::visit(const VoltageMeasurement &vm) {
-if (vm.getLabel() == "house") {
-    houseVoltage->setText(formatMeasurement(vm.getVoltage(), "V"));
-    houseVoltage->setColor(colorForVoltage(vm.getVoltage()));
-  }
-  if (vm.getLabel() == "supply") {
-    supplyVoltage->setText(formatMeasurement(vm.getVoltage(), "V"));
-    supplyVoltage->setColor(colorForVoltage(vm.getVoltage()));
-  }
-  if (vm.getLabel() == "starter") {
-    starterVoltage->setText(formatMeasurement(vm.getVoltage(), "V"));
-    starterVoltage->setColor(colorForVoltage(vm.getVoltage()));
-  }
-}
-

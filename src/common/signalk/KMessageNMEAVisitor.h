@@ -38,7 +38,6 @@ class KMessageNMEAVisitor : public KVisitor {
   public:
     void visit(const NMEASentence& s);
     void visit(const BarometerMeasurement &bm);
-    void visit(const VoltageMeasurement &vm);
     void visit(const NMEA2000Message &n2km);
     void visit(const IMUMessage &imu);
 

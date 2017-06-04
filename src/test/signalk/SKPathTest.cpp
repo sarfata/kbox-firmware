@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,32 +28,29 @@
   THE SOFTWARE.
 */
 
-#include <KBoxLogging.h>
-#include <KBoxHardware.h>
+#include "../KBoxTest.h"
+#include "common/signalk/SKPath.h"
 
-#include "ADCTask.h"
+TEST_CASE("SKPath") {
+  SECTION("non-indexed paths") {
+    // Implicitly casting a SKPathEnum value to a SKPath should work
+    SKPath p = SKPathNavigationSpeedOverGround;
+    // and == too
+    CHECK( p == SKPathNavigationSpeedOverGround );
+  }
 
-void ADCTask::loop() {
-  int supply_adc = adc.analogRead(supply_analog, ADC_0);
-  int bat1_adc = adc.analogRead(bat1_analog, ADC_0);
-  int bat2_adc = adc.analogRead(bat2_analog, ADC_0);
-  int bat3_adc = adc.analogRead(bat3_analog, ADC_0);
+  SECTION("indexed paths") {
+    // Invalid assignment because no index provided
+    SKPath p = SKPathElectricalBatteries;
+    CHECK( p == SKPathInvalid );
 
-  supply = supply_adc * analog_max_voltage / adc.getMaxValue();
-  bat1 = bat1_adc * analog_max_voltage / adc.getMaxValue();
-  bat2 = bat2_adc * analog_max_voltage / adc.getMaxValue();
-  bat3 = bat3_adc * analog_max_voltage / adc.getMaxValue();
+    p = SKPath(SKPathElectricalBatteries, "starter");
 
-  //DEBUG("ADC - Supply: %sV Bat1: %sV Bat2: %sV Bat3: %sV", 
-  //String(supply, 2).c_str(), String(bat1, 2).c_str(), String(bat2, 2).c_str(), String(bat3, 2).c_str());
+    SKPath p2 = SKPath(SKPathElectricalBatteries, "engine");
+    CHECK( p != p2 );
 
-  VoltageMeasurement m1(0, "house", bat1);
-  VoltageMeasurement m2(1, "starter", bat2);
-  VoltageMeasurement mSupply(3, "supply", supply);
-  VoltageMeasurement m3(4, "bat3", bat3);
-
-  sendMessage(m1);
-  sendMessage(m2);
-  sendMessage(m3);
-  sendMessage(mSupply);
+    SKPath p3 = SKPath(SKPathElectricalBatteries, "starter");
+    CHECK( p == p3 );
+  }
 }
+
