@@ -39,10 +39,8 @@ TEST_CASE("NMEA2000Visitor") {
 
   SECTION("SOG/COG") {
     SKUpdateStatic<2> rmcUpdate;
-    SKValue vSog = SKValue::navigationSpeedOverGround(3);
-    SKValue vCog = SKValue::navigationCourseOverGroundTrue(1);
-    rmcUpdate.addValue(vSog);
-    rmcUpdate.addValue(vCog);
+    rmcUpdate.setValue(SKPathNavigationSpeedOverGround, 3);
+    rmcUpdate.setValue(SKPathNavigationCourseOverGroundTrue, 1);
 
     visitor.processUpdate(rmcUpdate);
 

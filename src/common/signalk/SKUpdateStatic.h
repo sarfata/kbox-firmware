@@ -25,6 +25,7 @@
 #pragma once
 
 #include "SKUpdate.h"
+#include "SKPath.h"
 
 /**
  * Implements a statically allocated SKUpdate. The capacity of the update is
@@ -34,6 +35,9 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
   private:
     SKSource _source = SKSourceUnknown;
     const SKContext& _context;
+
+    // Very simple hash-type data structure
+    SKPath _paths[capacity];
     SKValue _values[capacity];
     int _size = 0;
 
@@ -52,27 +56,31 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
 
     ~SKUpdateStatic() {};
 
-    /**
-     * Add a new SKValue to this update. This will fail if the list is full.
-     *
-     * @return: true if succeeded, or false if the list is full.
-     */
-    bool setValue(const SKPath& path, const SKValue v) override {
+    virtual bool hasPath(const SKPath &p) const override {
+      for (int i = 0; i < _size; i++) {
+        if (_paths[i] == p) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    virtual bool setValue(const SKPath p, const SKValue v) override {
       // Update?
       for (int i = 0; i < _size; i++) {
-        if (_values[i].getPath() == path) {
-          _values[i].v = v;
+        if (_paths[i] == p) {
+          _values[i] = v;
           return true;
         }
       }
       // Add?
       if (_size < capacity) {
+        _paths[_size] = p;
         _values[_size] = v;
         _size++;
         return true;
-      } else {
-        return false;
       }
+      return false;
     };
 
     /**
@@ -94,9 +102,9 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
       return _context;
     };
 
-    const SKValue& operator[] (SKPath path) const override {
+    const SKValue& operator[] (const SKPath& path) const override {
       for (int i = 0; i < _size; i++) {
-        if (_values[i].getPath() == path) {
+        if (_paths[i] == path) {
           return _values[i];
         }
       }

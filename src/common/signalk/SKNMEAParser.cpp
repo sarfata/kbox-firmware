@@ -79,13 +79,13 @@ const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceR
       longitude /= 100;
     }
 
-    rmc->addValue(SKValue::navigationPosition(latitude, longitude));
+    rmc->setValue(SKPathNavigationPosition, SKTypePosition(latitude, longitude, 0));
   }
   if (!isnan(sog)) {
-    rmc->addValue(SKValue::navigationSpeedOverGround(sog));
+    rmc->setValue(SKPathNavigationSpeedOverGround, sog);
   }
   if (!isnan(cog)) {
-    rmc->addValue(SKValue::navigationCourseOverGroundTrue(cog));
+    rmc->setValue(SKPathNavigationCourseOverGroundTrue, cog);
   }
   _sku = rmc;
   return *_sku;

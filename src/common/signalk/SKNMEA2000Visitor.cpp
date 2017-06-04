@@ -37,12 +37,11 @@ SKNMEA2000Visitor::~SKNMEA2000Visitor() {
 
 void SKNMEA2000Visitor::processUpdate(const SKUpdate& update) {
   // PGN 129026: Fast COG/SOG
-  if (update[SKPathNavigationSpeedOverGround] != SKValueNone
-      && update[SKPathNavigationCourseOverGroundTrue] != SKValueNone) {
+  if (update.hasNavigationSpeedOverGround() && update.hasNavigationCourseOverGroundTrue()) {
     tN2kMsg *msg = new tN2kMsg();
     SetN2kPGN129026(*msg, (uint8_t)0, N2khr_true,
-        update[SKPathNavigationCourseOverGroundTrue].getNavigationCourseOverGroundTrue(),
-        update[SKPathNavigationSpeedOverGround].getNavigationSpeedOverGround());
+        update.getNavigationCourseOverGroundTrue(),
+        update.getNavigationSpeedOverGround());
 
     _messages.add(msg);
   }

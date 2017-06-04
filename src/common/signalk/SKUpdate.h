@@ -27,6 +27,7 @@
 #include <math.h>
 #include "SKSource.h"
 #include "SKContext.h"
+#include "SKPath.h"
 #include "SKValue.h"
 
 /**
@@ -61,68 +62,51 @@ class SKUpdate {
      * returned.
      * @return SKValueNone if the path does not exist in this update.
      */
-    virtual const SKValue& operator[] (SKPath path) const = 0;
+    virtual const SKValue& operator[] (const SKPath& path) const = 0;
 
     /**
      * Return true if the SKUpdate contains a value with the given path.
      */
-    virtual bool hasPath(const SKPath &path) = 0;
+    virtual bool hasPath(const SKPath &path) const = 0;
 
     /**
      * Add a new SKValue to this update. This will fail if the list is full.
      *
      * @return: true if succeeded, or false if the list is full.
      */
-    virtual bool setValue(const SKPath& path, const SKValue v) = 0;
+    virtual bool setValue(const SKPath path, const SKValue v) = 0;
 
-    // Convenience functions
+    // Syntactic sugar to make working with SKUpdates easier to read and less
+    // prone to type errors.
 
     bool hasNavigationSpeedOverGround() const {
-      return this->operator[](SKPathNavigationSpeedOverGround) != SKValueNone;
+      return hasPath(SKPathNavigationSpeedOverGround);
     };
-    const double getNavigationSpeedOverGround() const {
-      const SKValue& v = this->operator[](SKPathNavigationSpeedOverGround);
-      if (v != SKValueNone) {
-        return v._value.doubleValue;
-      }
-      else {
-        return NAN;
-      }
+    double getNavigationSpeedOverGround() const {
+      return this->operator[](SKPathNavigationSpeedOverGround).getNumberValue();
+    };
+    bool setNavigationSpeedOverGround(double sog) {
+      return setValue(SKPathNavigationSpeedOverGround, SKValue(sog));
     };
 
     bool hasNavigationCourseOverGroundTrue() const {
-      return this->operator[](SKPathNavigationCourseOverGroundTrue) != SKValueNone;
+      return hasPath(SKPathNavigationCourseOverGroundTrue);
     };
-    const double getNavigationCourseOverGroundTrue() const {
-      const SKValue& v = this->operator[](SKPathNavigationCourseOverGroundTrue);
-      if (v != SKValueNone) {
-        return v._value.doubleValue;
-      }
-      else {
-        return NAN;
-      }
+    double getNavigationCourseOverGroundTrue() const {
+      return this->operator[](SKPathNavigationCourseOverGroundTrue).getNumberValue();
+    };
+    bool setNavigationCourseOverGroundTrue(double cog) {
+      return setValue(SKPathNavigationCourseOverGroundTrue, SKValue(cog));
     };
 
     bool hasNavigationPosition() const {
-      return this->operator[](SKPathNavigationPosition) != SKValueNone;
+      return hasPath(SKPathNavigationPosition);
     };
-    const double getNavigationPositionLatitude() const {
-      const SKValue& v = this->operator[](SKPathNavigationPosition);
-      if (v != SKValueNone) {
-        return v._value.coords.latitude;
-      }
-      else {
-        return NAN;
-      }
+    SKTypePosition getNavigationPosition() const {
+      return this->operator[](SKPathNavigationPosition).getPositionValue();
     };
-    const double getNavigationPositionLongitude() const {
-      const SKValue& v = this->operator[](SKPathNavigationPosition);
-      if (v != SKValueNone) {
-        return v._value.coords.longitude;
-      }
-      else {
-        return NAN;
-      }
+    bool setNavigationPosition(SKTypePosition p) {
+      return setValue(SKPathNavigationPosition, SKValue(p));
     };
 };
 

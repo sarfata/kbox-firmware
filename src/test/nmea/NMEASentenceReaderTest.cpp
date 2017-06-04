@@ -24,6 +24,10 @@
 
 #include "common/nmea/NMEASentenceReader.h"
 #include "../KBoxTest.h"
+#include <cmath>
+
+// We have a conflict here between KBox which uses math.h and Catch which uses cmath
+#define isnan(x) std::isnan(x)
 
 TEST_CASE("NMEASentenceReader") {
 

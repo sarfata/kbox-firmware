@@ -22,9 +22,31 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "../KBoxTest.h"
+#include "common/signalk/SKValue.h"
 
-#include <math.h>
+TEST_CASE("SKValue: Create a few values and make sure we can read their data back") {
+  SECTION("Double Value") {
+    SKValue cog = SKValue(1.323);
+    CHECK( cog.getNumberValue() == 1.323 );
 
-#define SKKnotToMs(x) x * 1852 / 3600
-#define SKDegToRad(x) x * 2 * M_PI / 360
+    // Check that reading the wrong type will always return 0
+    CHECK( cog.getPositionValue().latitude == 0 );
+    CHECK( cog.getPositionValue().longitude == 0 );
+    CHECK( cog.getPositionValue().altitude == 0 );
+  }
+
+
+  // Test Type Position
+  SECTION("Position Value") {
+    SKValue pos = SKValue(SKTypePosition(34.34, -178, 2));
+    CHECK( pos.getPositionValue().latitude == 34.34 );
+    CHECK( pos.getPositionValue().longitude == -178 );
+    CHECK( pos.getPositionValue().altitude == 2 );
+
+    // Check that reading the wrong type will always return 0
+    CHECK( pos.getNumberValue() == 0 );
+  }
+};
+
+

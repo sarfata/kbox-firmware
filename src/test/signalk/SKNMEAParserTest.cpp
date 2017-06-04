@@ -41,10 +41,11 @@ TEST_CASE("SKNMEAParserTest: Basic tests") {
     CHECK( update.getSource() != SKSourceUnknown );
     CHECK( update.getSource().getLabel() == "kbox.nmea0183.2" );
     CHECK( update.getContext() == SKContextSelf );
-    CHECK( update[SKPathNavigationSpeedOverGround].getNavigationSpeedOverGround() == SKKnotToMs(5.02) );
-    CHECK( update[SKPathNavigationCourseOverGroundTrue].getNavigationCourseOverGroundTrue() == SKDegToRad(235.24) );
-    CHECK( update[SKPathNavigationPosition].getNavigationPositionLatitude() == 37.513385 );
-    CHECK( update[SKPathNavigationPosition].getNavigationPositionLongitude() == -122.274913 );
+    CHECK( update.getNavigationSpeedOverGround() == SKKnotToMs(5.02) );
+    CHECK( update.getNavigationCourseOverGroundTrue() == SKDegToRad(235.24) );
+    CHECK( update.getNavigationPosition().latitude == 37.513385 );
+    CHECK( update.getNavigationPosition().longitude == -122.274913 );
+    CHECK( update.getNavigationPosition().altitude == 0 );
   }
 
   SECTION("RMC with invalid fix") {
