@@ -56,6 +56,18 @@ class SKUpdate {
     virtual const SKSource& getSource() const = 0;
 
     /**
+     * Return path at given index or SKPathInvalid if index
+     * is greater than getSize().
+     */
+    virtual const SKPath& getPath(int index) const = 0;
+
+    /**
+     * Return value at given index or SKValueNone if index is greater than
+     * getSize()
+     */
+    virtual const SKValue& getValue(int index) const = 0;
+
+    /**
      * Return a value by path, or SKValueNone if the update does not have it.
      *
      * @note if there are multiple values with this path, the first one is

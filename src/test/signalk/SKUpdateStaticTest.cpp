@@ -39,6 +39,8 @@ TEST_CASE("SKUpdateStatic") {
     CHECK( u.getSize() == 1 );
     CHECK( u[SKPathNavigationPosition] == SKValueNone );
     CHECK( u[SKPathNavigationSpeedOverGround] == 3.3 );
+    CHECK( u.getPath(0) == SKPathNavigationSpeedOverGround );
+    CHECK( u.getValue(0) == 3.3 );
   }
 
   SECTION("Add too many values") {

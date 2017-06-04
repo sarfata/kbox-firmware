@@ -25,10 +25,9 @@
 #pragma once
 
 #include "common/algo/List.h"
+#include "SKVisitor.h"
 
 class tN2kMsg;
-class SKUpdate;
-
 
 /**
  * Converts one or multiple SignalK updates into a series of N2KMessages.
@@ -36,9 +35,14 @@ class SKUpdate;
  * N2kMsg are kept in an internal linked list and can be retrieved or flushed
  * at any point.
  */
-class SKNMEA2000Visitor {
+class SKNMEA2000Visitor : SKVisitor {
   private:
     LinkedList<tN2kMsg*> _messages;
+
+  protected:
+    void visitSKNavigationPosition(const SKUpdate& u, const SKPath &p, const SKValue &v);
+    void visitSKNavigationSpeedOverGround(const SKUpdate& u, const SKPath &p, const SKValue &v);
+    void visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v);
 
   public:
     SKNMEA2000Visitor();
@@ -47,7 +51,9 @@ class SKNMEA2000Visitor {
     /**
      * Process a SKUpdate and add messages to the internal queue of messages.
      */
-    void processUpdate(const SKUpdate& update);
+    void processUpdate(const SKUpdate& update) {
+      visit(update);
+    };
 
     /**
      * Retrieve the current list of messages.

@@ -43,11 +43,15 @@ TEST_CASE("SKPath") {
     // Invalid assignment because no index provided
     SKPath p = SKPathElectricalBatteries;
     CHECK( p == SKPathInvalid );
+    CHECK( ! p.isIndexed() );
 
     p = SKPath(SKPathElectricalBatteries, "starter");
 
     SKPath p2 = SKPath(SKPathElectricalBatteries, "engine");
     CHECK( p != p2 );
+    CHECK( p2.isIndexed() );
+    CHECK( p2.getIndex() == "engine" );
+    CHECK( p2.getStaticPath() == SKPathElectricalBatteries );
 
     SKPath p3 = SKPath(SKPathElectricalBatteries, "starter");
     CHECK( p == p3 );

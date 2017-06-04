@@ -110,4 +110,22 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
       }
       return SKValueNone;
     }
+
+    virtual const SKPath& getPath(int index) const {
+      if (index < _size) {
+        return _paths[index];
+      }
+      else {
+        return SKPathInvalid;
+      }
+    };
+
+    virtual const SKValue& getValue(int index) const {
+      if (index < _size) {
+        return _values[index];
+      }
+      else {
+        return SKValueNone;
+      }
+    };
 };

@@ -64,8 +64,8 @@ TEST_CASE("NMEA2000Visitor") {
 
   SECTION("Electrical") {
     SKUpdateStatic<2> electricalUpdate;
-    electricalUpdate.setElectricalBatteries("house", 12.0);
     electricalUpdate.setElectricalBatteries("engine", 13.0);
+    electricalUpdate.setElectricalBatteries("house", 12.0);
 
     visitor.processUpdate(electricalUpdate);
 

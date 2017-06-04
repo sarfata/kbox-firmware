@@ -28,26 +28,22 @@
   THE SOFTWARE.
 */
 
-#include "SKPath.h"
+#pragma once
 
-// Shared global instance
-const SKPath SKPathInvalid;
+#include "SKUpdate.h"
 
-bool SKPath::operator==(const SKPath &other) const {
-  if (_p < SKPathEnumIndexedPaths) {
-    return _p == other._p;
-  }
-  else {
-    // If it is an indexed path, compare the indexes too
-    if (_p == other._p && _index == other._index) {
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-}
+/**
+ * This class will automatically visit all known properties of a
+ * SKUpdate and call protected methods to deal with each of them.
+ *
+ * This makes visiting a SKUpdate message much nicer.
+ */
+class SKVisitor {
+  protected:
+    void visit(const SKUpdate& u);
 
-bool SKPath::operator!=(const SKPath &other) const {
-  return ! (*this == other);
-}
+    virtual void visitSKNavigationSpeedOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+    virtual void visitSKNavigationCourseOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+    virtual void visitSKNavigationPosition(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+    virtual void visitSKElectricalBatteries(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+};

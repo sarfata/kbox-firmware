@@ -28,26 +28,37 @@
   THE SOFTWARE.
 */
 
-#include "SKPath.h"
+#pragma once
 
-// Shared global instance
-const SKPath SKPathInvalid;
+#include <WString.h>
+#include "common/algo/List.h"
+#include "common/signalk/SKVisitor.h"
 
-bool SKPath::operator==(const SKPath &other) const {
-  if (_p < SKPathEnumIndexedPaths) {
-    return _p == other._p;
-  }
-  else {
-    // If it is an indexed path, compare the indexes too
-    if (_p == other._p && _index == other._index) {
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-}
+class SKNMEAVisitor : SKVisitor {
+  private:
+    LinkedList<String> _sentences;
 
-bool SKPath::operator!=(const SKPath &other) const {
-  return ! (*this == other);
-}
+    void visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v);
+
+  public:
+    /**
+     * Process a SKUpdate and add messages to the internal queue of messages.
+     */
+    void processUpdate(const SKUpdate& update) {
+      visit(update);
+    };
+
+    /**
+     * Retrieve the current list of sentences.
+     */
+    const LinkedList<String>& getSentences() const {
+      return _sentences;
+    };
+
+    /**
+     * Flush the list of sentences.
+     */
+    void flushSentences() {
+      _sentences.clear();
+    };
+};

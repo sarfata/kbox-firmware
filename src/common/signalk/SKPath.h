@@ -33,6 +33,7 @@
 #include <WString.h>
 
 typedef enum {
+  SKPathInvalidPath,
   SKPathNavigationCourseOverGroundTrue,
   SKPathNavigationSpeedOverGround,
   SKPathNavigationPosition,
@@ -42,8 +43,10 @@ typedef enum {
 
   SKPathElectricalBatteries,
 
-  SKPathInvalid
 } SKPathEnum;
+
+class SKPath;
+extern const SKPath SKPathInvalid;
 
 class SKPath {
   private:
@@ -51,20 +54,49 @@ class SKPath {
     String _index;
 
   public:
-    SKPath() : _p(SKPathInvalid) {};
+    SKPath() : _p(SKPathInvalidPath) {};
     SKPath(SKPathEnum p) : _p(p) {
       if (p >= SKPathEnumIndexedPaths) {
-        _p = SKPathInvalid;
+        _p = SKPathInvalidPath;
       }
     };
 
     SKPath(SKPathEnum p, String index) : _p(p), _index(index) {
       if (p <= SKPathEnumIndexedPaths) {
-        _p = SKPathInvalid;
+        _p = SKPathInvalidPath;
         _index = String();
       }
     };
 
     bool operator==(const SKPath &other) const;
     bool operator!=(const SKPath &other) const;
+
+    /**
+     * Static path is the path without the index.
+     * If this specific path does not take an index then it is the same thing
+     * as the path.
+     */
+    SKPathEnum getStaticPath() const {
+      return _p;
+    };
+
+    /**
+     * Return true if this path is indexed.
+     */
+    bool isIndexed() const {
+      return _p > SKPathEnumIndexedPaths;
+    };
+
+    /**
+     * Returns the index associated with the path.
+     */
+    const String& getIndex() const {
+      if (isIndexed()) {
+        return _index;
+      }
+      else {
+        return SKPathInvalid._index;
+      }
+    };
 };
+

@@ -28,26 +28,14 @@
   THE SOFTWARE.
 */
 
-#include "SKPath.h"
+#include "SKNMEAVisitor.h"
+#include "common/nmea/NMEASentenceBuilder.h"
 
-// Shared global instance
-const SKPath SKPathInvalid;
-
-bool SKPath::operator==(const SKPath &other) const {
-  if (_p < SKPathEnumIndexedPaths) {
-    return _p == other._p;
-  }
-  else {
-    // If it is an indexed path, compare the indexes too
-    if (_p == other._p && _index == other._index) {
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-}
-
-bool SKPath::operator!=(const SKPath &other) const {
-  return ! (*this == other);
+void SKNMEAVisitor::visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+  NMEASentenceBuilder sb("II", "XDR", 4);
+  sb.setField(1, "V");
+  sb.setField(2, v.getNumberValue(), 2);
+  sb.setField(3, "V");
+  sb.setField(4, p.getIndex());
+  _sentences.add(sb.toNMEA() + "\r\n");
 }

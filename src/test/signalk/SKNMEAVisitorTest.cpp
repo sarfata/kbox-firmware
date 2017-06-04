@@ -1,10 +1,4 @@
 /*
-     __  __     ______     ______     __  __
-    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
-    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
-     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
-       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
-
   The MIT License
 
   Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
@@ -28,26 +22,24 @@
   THE SOFTWARE.
 */
 
-#include "SKPath.h"
+#include "common/signalk/SKNMEAVisitor.h"
+#include "common/signalk/SKUpdateStatic.h"
+#include "../KBoxTest.h"
 
-// Shared global instance
-const SKPath SKPathInvalid;
+TEST_CASE("SKNMEAVisitorTest") {
+  SKNMEAVisitor v;
 
-bool SKPath::operator==(const SKPath &other) const {
-  if (_p < SKPathEnumIndexedPaths) {
-    return _p == other._p;
-  }
-  else {
-    // If it is an indexed path, compare the indexes too
-    if (_p == other._p && _index == other._index) {
-      return true;
+  SECTION("ElectricalBatteries") {
+    SKUpdateStatic<3> u;
+    u.setElectricalBatteries("Supply", 12.42);
+
+    v.processUpdate(u);
+
+    CHECK( v.getSentences().size() == 1 );
+
+    if (v.getSentences().size() > 1) {
+      String s = *(v.getSentences().begin());
+      CHECK( s == "$IIXDR,V,12.42,V,Supply*56\r\n");
     }
-    else {
-      return false;
-    }
   }
-}
-
-bool SKPath::operator!=(const SKPath &other) const {
-  return ! (*this == other);
 }

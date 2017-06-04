@@ -28,26 +28,26 @@
   THE SOFTWARE.
 */
 
-#include "SKPath.h"
+#include "SKVisitor.h"
 
-// Shared global instance
-const SKPath SKPathInvalid;
 
-bool SKPath::operator==(const SKPath &other) const {
-  if (_p < SKPathEnumIndexedPaths) {
-    return _p == other._p;
-  }
-  else {
-    // If it is an indexed path, compare the indexes too
-    if (_p == other._p && _index == other._index) {
-      return true;
+void SKVisitor::visit(const SKUpdate& u) {
+  for (int i = 0; i < u.getSize(); i++) {
+    const SKPath &p = u.getPath(i);
+    const SKValue &v = u.getValue(i);
+
+    if (p.getStaticPath() == SKPathNavigationSpeedOverGround) {
+      visitSKNavigationSpeedOverGround(u, p, v);
     }
-    else {
-      return false;
+    if (p.getStaticPath() == SKPathNavigationCourseOverGroundTrue) {
+      visitSKNavigationCourseOverGround(u, p, v);
+    }
+    if (p.getStaticPath() == SKPathNavigationPosition) {
+      visitSKNavigationPosition(u, p, v);
+    }
+    if (p.getStaticPath() == SKPathElectricalBatteries) {
+      visitSKElectricalBatteries(u, p, v);
     }
   }
 }
 
-bool SKPath::operator!=(const SKPath &other) const {
-  return ! (*this == other);
-}
