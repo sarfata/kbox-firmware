@@ -44,7 +44,13 @@ void IMUService::loop() {
   SKUpdateStatic<2> update;
   // Note: We could calculate yaw as the difference between the Magnetic
   // Heading and the Course Over Ground Magnetic.
-  update.setNavigationAttitude(SKTypeAttitude(/* roll */ eulerAngles.z(), /* pitch */ eulerAngles.y(), /* yaw */ 0));
-  update.setNavigationHeadingMagnetic(eulerAngles.x());
+
+  if (accelCalib == 3) {
+    update.setNavigationAttitude(SKTypeAttitude(/* roll */ eulerAngles.z(), /* pitch */ eulerAngles.y(), /* yaw */ 0));
+  }
+
+  if (magCalib == 3) {
+    update.setNavigationHeadingMagnetic(eulerAngles.x());
+  }
   _skHub.publish(update);
 }
