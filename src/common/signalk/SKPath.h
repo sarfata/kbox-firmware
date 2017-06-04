@@ -34,9 +34,13 @@
 
 typedef enum {
   SKPathInvalidPath,
+
+  SKPathEnvironmentOutsidePressure,
+  SKPathNavigationAttitude,
   SKPathNavigationCourseOverGroundTrue,
-  SKPathNavigationSpeedOverGround,
+  SKPathNavigationHeadingMagnetic,
   SKPathNavigationPosition,
+  SKPathNavigationSpeedOverGround,
 
   // Marker value - Every path below requires an index.
   SKPathEnumIndexedPaths,

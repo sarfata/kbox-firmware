@@ -22,16 +22,29 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include <KBoxLogging.h>
+#include "common/signalk/SKUpdateStatic.h"
+#include "IMUService.h"
 
-#include "os/Task.h"
+void IMUService::setup() {
+  DEBUG("Initing BNO055");
+  if (!bno055.begin()) {
+    DEBUG("Error initializing BNO055");
+  }
+  else {
+    DEBUG("Success!");
+  }
+}
 
-class RunningLightTask : public Task {
-  private:
-    bool flipFlop;
+void IMUService::loop() {
+  bno055.getCalibration(&sysCalib, &gyroCalib, &accelCalib, &magCalib);
 
-  public:
-    RunningLightTask() : Task("RunningLight") {};
-    void setup();
-    void loop();
-};
+  eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
+
+  SKUpdateStatic<2> update;
+  // Note: We could calculate yaw as the difference between the Magnetic
+  // Heading and the Course Over Ground Magnetic.
+  update.setNavigationAttitude(SKTypeAttitude(/* roll */ eulerAngles.z(), /* pitch */ eulerAngles.y(), /* yaw */ 0));
+  update.setNavigationHeadingMagnetic(eulerAngles.x());
+  _skHub.publish(update);
+}

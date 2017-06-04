@@ -37,7 +37,6 @@ TEST_CASE("SKValue: Create a few values and make sure we can read their data bac
   }
 
 
-  // Test Type Position
   SECTION("Position Value") {
     SKValue pos = SKValue(SKTypePosition(34.34, -178, 2));
     CHECK( pos.getPositionValue().latitude == 34.34 );
@@ -46,6 +45,16 @@ TEST_CASE("SKValue: Create a few values and make sure we can read their data bac
 
     // Check that reading the wrong type will always return 0
     CHECK( pos.getNumberValue() == 0 );
+  }
+
+  SECTION("Attitude value") {
+    SKValue attitude = SKValue(SKTypeAttitude(33.0, 10.1, 0));
+
+    CHECK( attitude.getAttitudeValue().roll == 33.0 );
+    CHECK( attitude.getAttitudeValue().pitch == 10.1 );
+    CHECK( attitude.getAttitudeValue().yaw == 0 );
+
+    CHECK( attitude.getNumberValue() == 0 );
   }
 };
 

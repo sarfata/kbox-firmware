@@ -23,17 +23,18 @@
 */
 
 #include <Adafruit_BNO055.h>
-#include "os/Task.h"
-#include "signalk/KMessage.h"
+#include "common/os/Task.h"
+#include "common/signalk/SKHub.h"
 
-class IMUTask : public Task, public KGenerator {
+class IMUService : public Task {
   private:
+    SKHub &_skHub;
     Adafruit_BNO055 bno055;
     uint8_t sysCalib, gyroCalib, accelCalib, magCalib;
     imu::Vector<3> eulerAngles;
 
   public:
-    IMUTask() : Task("IMU") {};
+    IMUService(SKHub& skHub) : Task("IMU"), _skHub(skHub) {};
     void setup();
     void loop();
 };

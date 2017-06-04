@@ -37,6 +37,10 @@ bool SKValue::operator==(const SKValue& other) const {
         return (_value.position.latitude == other._value.position.latitude) &&
           (_value.position.longitude == other._value.position.longitude) &&
           (_value.position.altitude == other._value.position.altitude);
+      case SKValueTypeAttitude:
+        return (_value.attitude.roll == other._value.attitude.roll) &&
+          (_value.attitude.pitch == other._value.attitude.pitch) &&
+          (_value.attitude.yaw == other._value.attitude.yaw);
     }
   }
   return false;
@@ -58,4 +62,11 @@ SKTypePosition SKValue::getPositionValue() const {
     return SKTypePosition(0,0,0);
   }
   return _value.position;
+}
+
+SKTypeAttitude SKValue::getAttitudeValue() const {
+  if (_type != SKValueTypeAttitude) {
+    return SKTypeAttitude(0, 0, 0);
+  }
+  return _value.attitude;
 }

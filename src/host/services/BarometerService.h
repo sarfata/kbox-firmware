@@ -22,15 +22,28 @@
   THE SOFTWARE.
 */
 
-#include <KBoxHardware.h>
-#include "RunningLightTask.h"
+#pragma once
 
-void RunningLightTask::setup() {
-  flipFlop = false;
-  digitalWrite(led_pin, flipFlop);
-}
+#include <Adafruit_BMP280.h>
+#include "common/os/Task.h"
+#include "common/signalk/KMessage.h"
+#include "common/signalk/SKHub.h"
 
-void RunningLightTask::loop() {
-  flipFlop = !flipFlop;
-  digitalWrite(led_pin, flipFlop);
-}
+class BarometerService : public Task, public KGenerator {
+  private:
+    SKHub& _skHub;
+    int status = -1;
+
+    void fetchValues();
+
+    Adafruit_BMP280 bmp280;
+    float temperature;
+    float pressure;
+
+  public:
+    BarometerService(SKHub& skHub) : Task("Barometer"), _skHub(skHub) {};
+
+    void setup();
+    void loop();
+};
+
