@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,18 +28,26 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "SKPath.h"
 
-#include <ADC.h>
-#include "os/Task.h"
-#include "signalk/KMessage.h"
+// Shared global instance
+const SKPath SKPathInvalid;
 
-class ADCTask : public Task, public KGenerator {
-  private:
-    ADC& adc;
-    float bat1, bat2, bat3, supply;
+bool SKPath::operator==(const SKPath &other) const {
+  if (_p < SKPathEnumIndexedPaths) {
+    return _p == other._p;
+  }
+  else {
+    // If it is an indexed path, compare the indexes too
+    if (_p == other._p && _index == other._index) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+}
 
-  public:
-    ADCTask(ADC& adc) : Task("ADC"), adc(adc) {};
-    void loop();
-};
+bool SKPath::operator!=(const SKPath &other) const {
+  return ! (*this == other);
+}

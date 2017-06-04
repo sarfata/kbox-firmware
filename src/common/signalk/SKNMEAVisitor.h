@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,30 +28,37 @@
   THE SOFTWARE.
 */
 
-#include "KMessage.h"
+#pragma once
 
-/**
- * Converts KMessage objects into NMEA equivalents which are added
- * to nmeaContent.
- * Call getNMEAContent() to retrieve a string containing one or more
- * NMEA strings.
- * Call clearNMEAContent() to start fresh again.
- */
-class KMessageNMEAVisitor : public KVisitor {
+#include <WString.h>
+#include "common/algo/List.h"
+#include "common/signalk/SKVisitor.h"
+
+class SKNMEAVisitor : SKVisitor {
   private:
-    String nmeaContent;
+    LinkedList<String> _sentences;
+
+    void visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v);
 
   public:
-    void visit(const NMEASentence& s);
-    void visit(const BarometerMeasurement &bm);
-    void visit(const NMEA2000Message &n2km);
-    void visit(const IMUMessage &imu);
-
-    String toNMEA() const {
-      return nmeaContent;
+    /**
+     * Process a SKUpdate and add messages to the internal queue of messages.
+     */
+    void processUpdate(const SKUpdate& update) {
+      visit(update);
     };
 
-    void clearNMEAContent() {
-      nmeaContent = "";
+    /**
+     * Retrieve the current list of sentences.
+     */
+    const LinkedList<String>& getSentences() const {
+      return _sentences;
+    };
+
+    /**
+     * Flush the list of sentences.
+     */
+    void flushSentences() {
+      _sentences.clear();
     };
 };

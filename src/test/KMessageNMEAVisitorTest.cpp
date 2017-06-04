@@ -36,15 +36,6 @@ TEST_CASE("Visiting a BarometerMeasurement object") {
   CHECK( v.toNMEA() == "$IIXDR,P,1.02421,B,Barometer,T,21.52,C,TempAir*68\r\n" );
 }
 
-TEST_CASE("Visiting a Voltage Measurement object") {
-  VoltageMeasurement vm(0, "Supply", 12.42);
-
-  KMessageNMEAVisitor v;
-  vm.accept(v);
-
-  CHECK( v.toNMEA() == "$IIXDR,V,12.42,V,Supply*56\r\n");
-}
-
 TEST_CASE("Visiting a NMEA0183 sentence message") {
   NMEASentence s("$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79");
 

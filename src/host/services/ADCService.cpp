@@ -25,29 +25,28 @@
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
 
-#include "ADCTask.h"
+#include "common/signalk/SKUpdateStatic.h"
 
-void ADCTask::loop() {
-  int supply_adc = adc.analogRead(supply_analog, ADC_0);
-  int bat1_adc = adc.analogRead(bat1_analog, ADC_0);
-  int bat2_adc = adc.analogRead(bat2_analog, ADC_0);
-  int bat3_adc = adc.analogRead(bat3_analog, ADC_0);
+#include "ADCService.h"
 
-  supply = supply_adc * analog_max_voltage / adc.getMaxValue();
-  bat1 = bat1_adc * analog_max_voltage / adc.getMaxValue();
-  bat2 = bat2_adc * analog_max_voltage / adc.getMaxValue();
-  bat3 = bat3_adc * analog_max_voltage / adc.getMaxValue();
+void ADCService::loop() {
+  int supply_adc = _adc.analogRead(supply_analog, ADC_0);
+  int adc1_adc = _adc.analogRead(adc1_analog, ADC_0);
+  int adc2_adc = _adc.analogRead(adc2_analog, ADC_0);
+  int adc3_adc = _adc.analogRead(adc3_analog, ADC_0);
 
-  //DEBUG("ADC - Supply: %sV Bat1: %sV Bat2: %sV Bat3: %sV", 
-  //String(supply, 2).c_str(), String(bat1, 2).c_str(), String(bat2, 2).c_str(), String(bat3, 2).c_str());
+  _supply = supply_adc * analog_max_voltage / _adc.getMaxValue();
+  _adc1 = adc1_adc * analog_max_voltage / _adc.getMaxValue();
+  _adc2 = adc2_adc * analog_max_voltage / _adc.getMaxValue();
+  _adc3 = adc3_adc * analog_max_voltage / _adc.getMaxValue();
 
-  VoltageMeasurement m1(0, "house", bat1);
-  VoltageMeasurement m2(1, "starter", bat2);
-  VoltageMeasurement mSupply(3, "supply", supply);
-  VoltageMeasurement m3(4, "bat3", bat3);
+  // FIXME: We should have configuration options to describe what each input is
+  // connected to instead of hard-coding names.
+  SKUpdateStatic<4> sk;
+  sk.setElectricalBatteries("engine", _adc1);
+  sk.setElectricalBatteries("house", _adc2);
+  sk.setElectricalBatteries("dc3", _adc3);
+  sk.setElectricalBatteries("kbox-supply", _supply);
 
-  sendMessage(m1);
-  sendMessage(m2);
-  sendMessage(m3);
-  sendMessage(mSupply);
+  _skHub.publish(sk);
 }

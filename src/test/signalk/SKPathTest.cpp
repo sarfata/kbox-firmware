@@ -1,4 +1,10 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
   Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
@@ -22,46 +28,33 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "../KBoxTest.h"
+#include "common/signalk/SKPath.h"
 
-#include "common/algo/List.h"
-#include "SKVisitor.h"
+TEST_CASE("SKPath") {
+  SECTION("non-indexed paths") {
+    // Implicitly casting a SKPathEnum value to a SKPath should work
+    SKPath p = SKPathNavigationSpeedOverGround;
+    // and == too
+    CHECK( p == SKPathNavigationSpeedOverGround );
+  }
 
-class tN2kMsg;
+  SECTION("indexed paths") {
+    // Invalid assignment because no index provided
+    SKPath p = SKPathElectricalBatteries;
+    CHECK( p == SKPathInvalid );
+    CHECK( ! p.isIndexed() );
 
-/**
- * Converts one or multiple SignalK updates into a series of N2KMessages.
- *
- * N2kMsg are kept in an internal linked list and can be retrieved or flushed
- * at any point.
- */
-class SKNMEA2000Visitor : SKVisitor {
-  private:
-    LinkedList<tN2kMsg*> _messages;
+    p = SKPath(SKPathElectricalBatteries, "starter");
 
-  protected:
-    void visitSKNavigationPosition(const SKUpdate& u, const SKPath &p, const SKValue &v);
-    void visitSKNavigationSpeedOverGround(const SKUpdate& u, const SKPath &p, const SKValue &v);
-    void visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v);
+    SKPath p2 = SKPath(SKPathElectricalBatteries, "engine");
+    CHECK( p != p2 );
+    CHECK( p2.isIndexed() );
+    CHECK( p2.getIndex() == "engine" );
+    CHECK( p2.getStaticPath() == SKPathElectricalBatteries );
 
-  public:
-    SKNMEA2000Visitor();
-    ~SKNMEA2000Visitor();
+    SKPath p3 = SKPath(SKPathElectricalBatteries, "starter");
+    CHECK( p == p3 );
+  }
+}
 
-    /**
-     * Process a SKUpdate and add messages to the internal queue of messages.
-     */
-    void processUpdate(const SKUpdate& update) {
-      visit(update);
-    };
-
-    /**
-     * Retrieve the current list of messages.
-     */
-    const LinkedList<tN2kMsg*>& getMessages() const;
-
-    /**
-     * Flush the list of messages.
-     */
-    void flushMessages();
-};

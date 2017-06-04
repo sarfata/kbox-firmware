@@ -35,16 +35,36 @@ SKNMEA2000Visitor::~SKNMEA2000Visitor() {
   flushMessages();
 }
 
-void SKNMEA2000Visitor::processUpdate(const SKUpdate& update) {
+void SKNMEA2000Visitor::visitSKNavigationPosition(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+  //TODO
+}
+
+void SKNMEA2000Visitor::visitSKNavigationSpeedOverGround(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   // PGN 129026: Fast COG/SOG
-  if (update.hasNavigationSpeedOverGround() && update.hasNavigationCourseOverGroundTrue()) {
+  if (u.hasNavigationCourseOverGroundTrue()) {
     tN2kMsg *msg = new tN2kMsg();
     SetN2kPGN129026(*msg, (uint8_t)0, N2khr_true,
-        update.getNavigationCourseOverGroundTrue(),
-        update.getNavigationSpeedOverGround());
+        u.getNavigationCourseOverGroundTrue(),
+        v.getNumberValue());
 
     _messages.add(msg);
   }
+}
+
+void SKNMEA2000Visitor::visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+  // PGN127508: Battery Status
+  // FIXME: The mapping of Battery instance names to ids should be configurable
+  unsigned char instance = 255;
+  if (p.getIndex() == "engine") {
+    instance = 0;
+  }
+  else if (p.getIndex() == "house") {
+    instance = 1;
+  }
+
+  tN2kMsg *msg = new tN2kMsg();
+  SetN2kDCBatStatus(*msg, instance, v.getNumberValue());
+  _messages.add(msg);
 }
 
 const LinkedList<tN2kMsg*>& SKNMEA2000Visitor::getMessages() const {

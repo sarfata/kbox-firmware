@@ -22,30 +22,20 @@
   THE SOFTWARE.
 */
 
-#include "KMessage.h"
+#pragma once
 
-/**
- * Converts KMessage objects into NMEA equivalents which are added
- * to nmeaContent.
- * Call getNMEAContent() to retrieve a string containing one or more
- * NMEA strings.
- * Call clearNMEAContent() to start fresh again.
- */
-class KMessageNMEAVisitor : public KVisitor {
+#include <ADC.h>
+#include "common/os/Task.h"
+#include "common/signalk/SKHub.h"
+
+class ADCService : public Task {
   private:
-    String nmeaContent;
+    SKHub &_skHub;
+    ADC& _adc;
+    float _adc1, _adc2, _adc3, _supply;
 
   public:
-    void visit(const NMEASentence& s);
-    void visit(const BarometerMeasurement &bm);
-    void visit(const NMEA2000Message &n2km);
-    void visit(const IMUMessage &imu);
+    ADCService(SKHub &skHub, ADC& adc) : Task("ADC"), _skHub(skHub), _adc(adc) {};
 
-    String toNMEA() const {
-      return nmeaContent;
-    };
-
-    void clearNMEAContent() {
-      nmeaContent = "";
-    };
+    virtual void loop() override;
 };

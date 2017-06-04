@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,30 +28,26 @@
   THE SOFTWARE.
 */
 
-#include "KMessage.h"
+#include "SKVisitor.h"
 
-/**
- * Converts KMessage objects into NMEA equivalents which are added
- * to nmeaContent.
- * Call getNMEAContent() to retrieve a string containing one or more
- * NMEA strings.
- * Call clearNMEAContent() to start fresh again.
- */
-class KMessageNMEAVisitor : public KVisitor {
-  private:
-    String nmeaContent;
 
-  public:
-    void visit(const NMEASentence& s);
-    void visit(const BarometerMeasurement &bm);
-    void visit(const NMEA2000Message &n2km);
-    void visit(const IMUMessage &imu);
+void SKVisitor::visit(const SKUpdate& u) {
+  for (int i = 0; i < u.getSize(); i++) {
+    const SKPath &p = u.getPath(i);
+    const SKValue &v = u.getValue(i);
 
-    String toNMEA() const {
-      return nmeaContent;
-    };
+    if (p.getStaticPath() == SKPathNavigationSpeedOverGround) {
+      visitSKNavigationSpeedOverGround(u, p, v);
+    }
+    if (p.getStaticPath() == SKPathNavigationCourseOverGroundTrue) {
+      visitSKNavigationCourseOverGround(u, p, v);
+    }
+    if (p.getStaticPath() == SKPathNavigationPosition) {
+      visitSKNavigationPosition(u, p, v);
+    }
+    if (p.getStaticPath() == SKPathElectricalBatteries) {
+      visitSKElectricalBatteries(u, p, v);
+    }
+  }
+}
 
-    void clearNMEAContent() {
-      nmeaContent = "";
-    };
-};

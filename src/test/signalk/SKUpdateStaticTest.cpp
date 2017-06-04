@@ -39,6 +39,8 @@ TEST_CASE("SKUpdateStatic") {
     CHECK( u.getSize() == 1 );
     CHECK( u[SKPathNavigationPosition] == SKValueNone );
     CHECK( u[SKPathNavigationSpeedOverGround] == 3.3 );
+    CHECK( u.getPath(0) == SKPathNavigationSpeedOverGround );
+    CHECK( u.getValue(0) == 3.3 );
   }
 
   SECTION("Add too many values") {
@@ -81,6 +83,21 @@ TEST_CASE("SKUpdateStatic") {
     CHECK( u.setNavigationSpeedOverGround(1) );
     CHECK( u.hasNavigationSpeedOverGround() );
     CHECK( u.getNavigationSpeedOverGround() == true );
+  }
+
+  SECTION("SKPathElectricalBatteries") {
+    SKUpdateStatic<3> u;
+
+    CHECK( u.hasElectricalBatteries("engine") == false );
+    CHECK( u.setElectricalBatteries("engine", 12.1) == true );
+    CHECK( u.setElectricalBatteries("house", 12.2) == true );
+    CHECK( u.setElectricalBatteries("house2", 12.3) == true );
+
+    CHECK( u.setElectricalBatteries("house3", 12.4) == false );
+
+    CHECK( u.getElectricalBatteries("engine") == 12.1 );
+    CHECK( u.getElectricalBatteries("house") == 12.2 );
+    CHECK( u.getElectricalBatteries("house2") == 12.3 );
   }
 };
 

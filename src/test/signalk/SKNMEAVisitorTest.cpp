@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,24 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "common/signalk/SKNMEAVisitor.h"
+#include "common/signalk/SKUpdateStatic.h"
+#include "../KBoxTest.h"
 
-#include "signalk/KMessage.h"
+TEST_CASE("SKNMEAVisitorTest") {
+  SKNMEAVisitor v;
 
-class VoltageN2kConverter : public KReceiver, public KGenerator {
-  public:
-    void processMessage(const KMessage &m);
+  SECTION("ElectricalBatteries") {
+    SKUpdateStatic<3> u;
+    u.setElectricalBatteries("Supply", 12.42);
 
-};
+    v.processUpdate(u);
+
+    CHECK( v.getSentences().size() == 1 );
+
+    if (v.getSentences().size() > 1) {
+      String s = *(v.getSentences().begin());
+      CHECK( s == "$IIXDR,V,12.42,V,Supply*56\r\n");
+    }
+  }
+}

@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -21,15 +27,23 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "VoltageN2kConverter.h"
-#include <N2kMessages.h>
 
-void VoltageN2kConverter::processMessage(const KMessage &m) {
-  VoltageMeasurement *vm = (VoltageMeasurement*) &m;
+#pragma once
 
-  tN2kMsg msg;
-  static int sid = 0;
-  // iNavX does not seem to like NA as a BatteryCurrent value
-  SetN2kDCBatStatus(msg, vm->getIndex(), vm->getVoltage(), 0, N2kDoubleNA, sid++);
-  sendMessage(NMEA2000Message(msg));
-}
+#include "SKUpdate.h"
+
+/**
+ * This class will automatically visit all known properties of a
+ * SKUpdate and call protected methods to deal with each of them.
+ *
+ * This makes visiting a SKUpdate message much nicer.
+ */
+class SKVisitor {
+  protected:
+    void visit(const SKUpdate& u);
+
+    virtual void visitSKNavigationSpeedOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+    virtual void visitSKNavigationCourseOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+    virtual void visitSKNavigationPosition(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+    virtual void visitSKElectricalBatteries(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+};

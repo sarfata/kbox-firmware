@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,30 +28,14 @@
   THE SOFTWARE.
 */
 
-#include "KMessage.h"
+#include "SKNMEAVisitor.h"
+#include "common/nmea/NMEASentenceBuilder.h"
 
-/**
- * Converts KMessage objects into NMEA equivalents which are added
- * to nmeaContent.
- * Call getNMEAContent() to retrieve a string containing one or more
- * NMEA strings.
- * Call clearNMEAContent() to start fresh again.
- */
-class KMessageNMEAVisitor : public KVisitor {
-  private:
-    String nmeaContent;
-
-  public:
-    void visit(const NMEASentence& s);
-    void visit(const BarometerMeasurement &bm);
-    void visit(const NMEA2000Message &n2km);
-    void visit(const IMUMessage &imu);
-
-    String toNMEA() const {
-      return nmeaContent;
-    };
-
-    void clearNMEAContent() {
-      nmeaContent = "";
-    };
-};
+void SKNMEAVisitor::visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+  NMEASentenceBuilder sb("II", "XDR", 4);
+  sb.setField(1, "V");
+  sb.setField(2, v.getNumberValue(), 2);
+  sb.setField(3, "V");
+  sb.setField(4, p.getIndex());
+  _sentences.add(sb.toNMEA() + "\r\n");
+}
