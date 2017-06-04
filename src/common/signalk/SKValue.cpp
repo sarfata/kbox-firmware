@@ -24,28 +24,38 @@
 
 #include "SKValue.h"
 
-const SKValue SKValueNone = SKValue::noneValue();
+const SKValue SKValueNone = SKValue();
 
 bool SKValue::operator==(const SKValue& other) const {
-  if (_path == other._path) {
-    switch (_path) {
-      case SKPathNavigationCourseOverGroundTrue:
-      case SKPathNavigationSpeedOverGround:
-        return _value.doubleValue == other._value.doubleValue;
-      case SKPathNavigationPosition:
-        return (_value.position.latitude == other._value.position.latitude) &&
-          (_value.position.longitude == other._value.position.longitude);
-      case SKPathInvalid:
+  if (_type == other._type) {
+    switch (_type) {
+      case SKValueTypeNone:
         return true;
-      default:
-        return false;
+      case SKValueTypeNumber:
+        return _value.numberValue == other._value.numberValue;
+      case SKValueTypePosition:
+        return (_value.position.latitude == other._value.position.latitude) &&
+          (_value.position.longitude == other._value.position.longitude) &&
+          (_value.position.altitude == other._value.position.altitude);
     }
   }
-  else {
-    return false;
-  }
+  return false;
 }
 
 bool SKValue::operator!=(const SKValue& other) const {
   return !(*this == other);
+}
+
+double SKValue::getNumberValue() const {
+  if (_type != SKValueTypeNumber) {
+    return 0;
+  }
+  return _value.numberValue;
+}
+
+SKTypePosition SKValue::getPositionValue() const {
+  if (_type != SKValueTypePosition) {
+    return SKTypePosition(0,0,0);
+  }
+  return _value.position;
 }

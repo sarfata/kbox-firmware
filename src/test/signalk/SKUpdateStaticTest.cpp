@@ -28,35 +28,36 @@
 TEST_CASE("SKUpdateStatic") {
   SKUpdateStatic<2> u;
   CHECK( u.getSize() == 0 );
-  CHECK( u[42] == SKValueNone );
   CHECK( u[SKPathNavigationPosition] == SKValueNone );
 
   CHECK( u.getSource() == SKSourceUnknown );
   CHECK( u.getContext() == SKContextSelf );
 
   SECTION("Add one value") {
-    SKValue sog = SKValue::navigationSpeedOverGround(3.3);
-
-    CHECK( u.addValue(sog) );
+    CHECK( u.setValue(SKPathNavigationSpeedOverGround, 3.3) );
 
     CHECK( u.getSize() == 1 );
-    CHECK( u[0] != SKValueNone );
     CHECK( u[SKPathNavigationPosition] == SKValueNone );
-    CHECK( u[SKPathNavigationSpeedOverGround].getNavigationSpeedOverGround() == sog.getNavigationSpeedOverGround() );
+    CHECK( u[SKPathNavigationSpeedOverGround] == 3.3 );
   }
 
   SECTION("Add too many values") {
-    SKValue sog = SKValue::navigationSpeedOverGround(3.3);
-    SKValue cog = SKValue::navigationCourseOverGroundTrue(42);
-    SKValue pos = SKValue::navigationPosition(3.3, 2.2);
-
-    CHECK( u.addValue(sog) );
-    CHECK( u.addValue(cog) );
-    CHECK( ! u.addValue(pos) );
+    CHECK( u.setValue(SKPathNavigationSpeedOverGround, 1.0) );
+    CHECK( u.setValue(SKPathNavigationCourseOverGroundTrue, 2.0) );
+    CHECK( ! u.setValue(SKPathNavigationPosition, SKTypePosition(2.2, 3.3, 4.4)) );
 
     CHECK( u.getSize() == 2 );
-    CHECK( u[SKPathNavigationSpeedOverGround].getNavigationSpeedOverGround() == 3.3 );
-    CHECK( u[SKPathNavigationPosition] == SKValueNone );
+    CHECK( u.hasNavigationSpeedOverGround() );
+    CHECK( u.getNavigationSpeedOverGround() == 1.0 );
+    CHECK( ! u.hasNavigationPosition() );
+  }
+
+  SECTION("Re-define existing value") {
+    u.setValue(SKPathNavigationSpeedOverGround, 1.3);
+    u.setValue(SKPathNavigationCourseOverGroundTrue, 3.3);
+
+    CHECK( u.setValue(SKPathNavigationSpeedOverGround, 1.0) );
+    CHECK( u.getNavigationSpeedOverGround() == 1.0 );
   }
 
   SECTION("Add a source") {
@@ -72,6 +73,14 @@ TEST_CASE("SKUpdateStatic") {
     SKUpdateStatic<3> u(differentContext);
     CHECK( u.getContext() != SKContextSelf );
     CHECK( u.getContext() == differentContext );
+  }
+
+  SECTION("SKPathNavigationSpeedOverGround") {
+    SKUpdateStatic<1> u;
+    CHECK( u.hasNavigationSpeedOverGround() == false);
+    CHECK( u.setNavigationSpeedOverGround(1) );
+    CHECK( u.hasNavigationSpeedOverGround() );
+    CHECK( u.getNavigationSpeedOverGround() == true );
   }
 };
 

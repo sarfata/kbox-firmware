@@ -26,100 +26,73 @@
 
 #include <WString.h>
 
-typedef enum {
-  SKPathNavigationCourseOverGroundTrue,
-  SKPathNavigationSpeedOverGround,
-  SKPathNavigationPosition,
+class SKUpdate;
 
-  SKPathInvalid
-} SKPath;
+/*
+ * A position in the SignalK world.
+ */
+typedef struct SKTypePosition {
+  SKTypePosition(double lat, double lon, double alt) :
+    latitude(lat), longitude(lon), altitude(alt) {};
 
+  double latitude;
+  double longitude;
+  double altitude;
+} SKTypePosition;
+
+/**
+ * In memory representation of a SignalK value.
+ *
+ * A value is basically any element in the specification that includes
+ * 'commonValueFields'. They are associated to a path by the SKUpdate that owns
+ * them. To avoid using dynamic memory, the SKValue is implemented as a union
+ * of the different data types that are valid. Dynamic memory is only used for
+ * string-values and when using more rarely used attributes (like the meta
+ * characteristics).
+ *
+ */
 class SKValue {
   private:
-    SKPath _path;
+    // Type of the data in this SKValue
+    enum {
+      SKValueTypeNone,
+      SKValueTypeNumber,
+      SKValueTypePosition
+    } _type;
 
-    union {
-      double doubleValue;
-      struct {
-        double latitude;
-        double longitude;
-      } position;
+    // Storage of the actual value in an enum
+    union value {
+      value(double n) : numberValue(n) {};
+      value(SKTypePosition p) : position(p) {};
+
+      double numberValue;
+      SKTypePosition position;
+      // need to add:
+      // attitude (roll, pitch, yaw)
+      // smallString - fits in the size of the union
+      // largeString - uses dynamic memory allocation
+      // datetimevalue
+      // etc
     } _value;
 
-    // private constructor.
-    // User of this class should use the static factory methods instead.
-    SKValue(SKPath p) : _path(p) {};
+    // TODO: We should add here
+    // - timestamp
+    // - $source (maybe - this can also be grouped at the SKUpdate level
 
   public:
-    // Default constructor so that arrays of SKValue can be declared.
-    SKValue() : _path(SKPathInvalid) {};
+    SKValue(double v) : _type(SKValueTypeNumber), _value(v) {};
+    SKValue(SKTypePosition p) : _type(SKValueTypePosition), _value(p) {}
+    SKValue() : _type(SKValueTypeNone), _value(0) {};
 
     /**
-     * Return the path of this value.
-     */
-    SKPath getPath() const {
-      return _path;
-    };
-
-    /**
-     * Returns true if the two SKValues compared have the same path and the same
-     * value.
+     * Returns true if the two SKValues compared have the same value.
      */
     bool operator==(const SKValue& v) const;
 
     bool operator!=(const SKValue& v) const;
 
-    /**
-     * Create a new value for navigation.courseOverGroundTrue
-     */
-    static SKValue navigationCourseOverGroundTrue(double cog) {
-      SKValue v(SKPathNavigationCourseOverGroundTrue);
-      v._value.doubleValue = cog;
-      return v;
-    };
-
-    /**
-     * Create a new value for navigation.courseSpeedOverGround
-     */
-    static SKValue navigationSpeedOverGround(double sog) {
-      SKValue v(SKPathNavigationSpeedOverGround);
-      v._value.doubleValue = sog;
-      return v;
-    };
-
-    /**
-     * Create a new value for navigation.position
-     */
-    static SKValue navigationPosition(double latitude, double longitude) {
-      SKValue v(SKPathNavigationPosition);
-      v._value.position.latitude = latitude;
-      v._value.position.longitude = longitude;
-      return v;
-    };
-
-    /**
-     * @private
-     * You should use SKValueNone instead.
-     */
-    static SKValue noneValue() {
-      return SKValue(SKPathInvalid);
-    };
-
-    double getNavigationCourseOverGroundTrue() const {
-      return _value.doubleValue;
-    };
-
-    double getNavigationSpeedOverGround() const {
-      return _value.doubleValue;
-    };
-
-    double getNavigationPositionLatitude() const {
-      return _value.position.latitude;
-    };
-
-    double getNavigationPositionLongitude() const {
-      return _value.position.longitude;
-    };
+    double getNumberValue() const;
+    SKTypePosition getPositionValue() const;
 };
 
 extern const SKValue SKValueNone;
