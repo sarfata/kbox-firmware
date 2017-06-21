@@ -24,6 +24,13 @@
 
 #pragma once
 
+#include <WString.h>
+#include <string>
+#include <ostream>
+
+// This is required so that Catch.hpp can print Teensy Strings
+std::ostream& operator << ( std::ostream& os, ::String const& value );
+
 #include "catch.hpp"
 
 #include <stdarg.h>
