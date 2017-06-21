@@ -33,7 +33,6 @@
 #include "common/signalk/SKNMEA2000Visitor.h"
 
 class NMEA2000Service : public Task, public SKSubscriber,
-  //FIXME: Replace KGenerator and KReceiver by the new SKstyle
   public KGenerator, public KReceiver, public KVisitor {
   private:
     SKHub &_hub;
@@ -53,7 +52,6 @@ class NMEA2000Service : public Task, public SKSubscriber,
 
     void processMessage(const KMessage&);
     void visit(const NMEA2000Message&);
-    void visit(const IMUMessage&);
 
     void updateReceived(const SKUpdate& update);
 };
