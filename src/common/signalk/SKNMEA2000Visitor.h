@@ -40,9 +40,12 @@ class SKNMEA2000Visitor : SKVisitor {
     LinkedList<tN2kMsg*> _messages;
 
   protected:
-    void visitSKNavigationPosition(const SKUpdate& u, const SKPath &p, const SKValue &v);
-    void visitSKNavigationSpeedOverGround(const SKUpdate& u, const SKPath &p, const SKValue &v);
-    void visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v);
+    void visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+    void visitSKEnviromentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+    void visitSKNavigationAttitude(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+    void visitSKNavigationHeadingMagnetic(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+    void visitSKNavigationPosition(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+    void visitSKNavigationSpeedOverGround(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
 
   public:
     SKNMEA2000Visitor();

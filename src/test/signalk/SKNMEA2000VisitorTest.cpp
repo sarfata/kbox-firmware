@@ -71,7 +71,7 @@ TEST_CASE("NMEA2000Visitor") {
 
     CHECK( visitor.getMessages().size() == 2 );
 
-    if (visitor.getMessages().size() == 2) {
+    if (visitor.getMessages().size() > 2) {
       const tN2kMsg *m1 = findMessage(visitor.getMessages(), 127508, 0);
       const tN2kMsg *m2 = findMessage(visitor.getMessages(), 127508, 1);
 
@@ -93,6 +93,68 @@ TEST_CASE("NMEA2000Visitor") {
       CHECK( current == N2kDoubleNA );
       CHECK( temperature == N2kDoubleNA );
       CHECK( sid1 == sid2 );
+    }
+  }
+
+  SECTION("Barometer") {
+    SKUpdateStatic<1> pressureUpdate;
+    pressureUpdate.setEnvironmentOutsidePressure(1.013);
+
+    visitor.processUpdate(pressureUpdate);
+
+    CHECK( visitor.getMessages().size() == 1 );
+
+    if (visitor.getMessages().size() > 1) {
+      const tN2kMsg *m = findMessage(visitor.getMessages(), 130314, 0);
+
+      unsigned char sid;
+      unsigned char instance;
+      tN2kPressureSource source;
+      double pressure;
+      CHECK( ParseN2kPGN130314(*m, sid, instance, source, pressure) );
+      CHECK( instance == 0 );
+      CHECK( source == N2kps_Atmospheric );
+      CHECK( pressure == 130314 );
+    }
+  }
+
+  SECTION("IMU") {
+    SKUpdateStatic<2> imuUpdate;
+    imuUpdate.setNavigationHeadingMagnetic(1.5708);
+    imuUpdate.setNavigationAttitude(SKTypeAttitude(3, 1, 0));
+
+    visitor.processUpdate(imuUpdate);
+
+    CHECK( visitor.getMessages().size() == 2 );
+    const tN2kMsg *mAttitude = findMessage(visitor.getMessages(), 127257, 0);
+    const tN2kMsg *mHeading = findMessage(visitor.getMessages(), 127250, 0);
+
+    CHECK( mAttitude );
+    if (mAttitude) {
+      unsigned char sid;
+      double yaw;
+      double pitch;
+      double roll;
+
+      CHECK( ParseN2kPGN127257(*mAttitude, sid, yaw, pitch, roll) );
+      CHECK( yaw == 0 );
+      CHECK( pitch == 1 );
+      CHECK( roll == 3 );
+    }
+
+    CHECK( mHeading );
+    if (mHeading) {
+      unsigned char sid;
+      double heading;
+      double deviation;
+      double variation;
+      tN2kHeadingReference ref;
+
+      CHECK( ParseN2kPGN127250(*mHeading, sid, heading, deviation, variation, ref) );
+      CHECK( heading == 1.5708 );
+      CHECK( deviation == N2kDoubleNA );
+      CHECK( variation == N2kDoubleNA );
+      CHECK( ref == N2khr_magnetic );
     }
   }
 }

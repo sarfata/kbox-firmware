@@ -42,8 +42,11 @@ class SKVisitor {
   protected:
     void visit(const SKUpdate& u);
 
-    virtual void visitSKNavigationSpeedOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKNavigationCourseOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKNavigationPosition(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
     virtual void visitSKElectricalBatteries(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+    virtual void visitSKEnviromentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {};
+    virtual void visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+    virtual void visitSKNavigationCourseOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+    virtual void visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+    virtual void visitSKNavigationPosition(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+    virtual void visitSKNavigationSpeedOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
 };

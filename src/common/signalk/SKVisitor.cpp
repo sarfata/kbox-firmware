@@ -36,17 +36,26 @@ void SKVisitor::visit(const SKUpdate& u) {
     const SKPath &p = u.getPath(i);
     const SKValue &v = u.getValue(i);
 
-    if (p.getStaticPath() == SKPathNavigationSpeedOverGround) {
-      visitSKNavigationSpeedOverGround(u, p, v);
+    if (p.getStaticPath() == SKPathEnvironmentOutsidePressure) {
+      visitSKEnviromentOutsidePressure(u, p, v);
+    }
+    if (p.getStaticPath() == SKPathElectricalBatteries) {
+      visitSKElectricalBatteries(u, p, v);
+    }
+    if (p.getStaticPath() == SKPathNavigationAttitude) {
+      visitSKNavigationAttitude(u, p, v);
     }
     if (p.getStaticPath() == SKPathNavigationCourseOverGroundTrue) {
       visitSKNavigationCourseOverGround(u, p, v);
     }
+    if (p.getStaticPath() == SKPathNavigationHeadingMagnetic) {
+      visitSKNavigationHeadingMagnetic(u, p, v);
+    }
     if (p.getStaticPath() == SKPathNavigationPosition) {
       visitSKNavigationPosition(u, p, v);
     }
-    if (p.getStaticPath() == SKPathElectricalBatteries) {
-      visitSKElectricalBatteries(u, p, v);
+    if (p.getStaticPath() == SKPathNavigationSpeedOverGround) {
+      visitSKNavigationSpeedOverGround(u, p, v);
     }
   }
 }
