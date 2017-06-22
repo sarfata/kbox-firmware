@@ -507,6 +507,7 @@ typedef volatile uint32_t vuint32_t;
 #define FLEXCAN_MB_CODE_TX_RESPONSE_TEMPO	(0x0E)
 #define FLEXCAN_get_code(cs)				(((cs) & FLEXCAN_MB_CS_CODE_MASK)>>24)
 #define FLEXCAN_get_length(cs)             (((cs) & FLEXCAN_MB_CS_DLC_MASK)>>16)
+#define FLEXCAN_get_timestamp(cs)             (((cs) & FLEXCAN_MB_CS_TIMESTAMP_MASK)>>0)
 
 /* Bit definitions and macros for FLEXCAN_MB_ID */
 #define FLEXCAN_MB_ID_STD_MASK		   (0x1FFC0000L)
