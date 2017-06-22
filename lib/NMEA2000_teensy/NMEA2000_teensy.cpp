@@ -133,14 +133,15 @@ bool tNMEA2000_teensy::CANGetFrame(unsigned long &id, unsigned char &len, unsign
 //*****************************************************************************
 void tNMEA2000_teensy::InitCANFrameBuffers() {
 #if defined(FlexCAN_DYNAMIC_BUFFER_SUPPORT)
-  if ( MaxCANReceiveFrames<10 ) MaxCANReceiveFrames=10;
+  if ( MaxCANReceiveFrames==0 ) MaxCANReceiveFrames=32; // Use default, if not set
+  if ( MaxCANReceiveFrames<10 ) MaxCANReceiveFrames=10; // Do not allow less that 10 - Teensy should have enough memory.
   CANbus->setRxBufferSize(MaxCANReceiveFrames);
 
   if (MaxCANSendFrames<30 ) MaxCANSendFrames=30;
   
   uint16_t TotalFrames=MaxCANSendFrames;
   MaxCANSendFrames=4; // we do not need libary internal buffer since driver has them.
-  uint16_t CANGlobalBufSize=TotalFrames-5;
+  uint16_t CANGlobalBufSize=TotalFrames-MaxCANSendFrames;
 
 #if defined(FlexCAN_MAILBOX_TX_BUFFER_SUPPORT)
   CANbus->setNumTXBoxes(NumTxMailBoxes); 
