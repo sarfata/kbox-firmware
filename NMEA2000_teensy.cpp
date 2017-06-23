@@ -53,7 +53,7 @@ tNMEA2000_teensy::tNMEA2000_teensy(uint16_t _DefTimeOut, uint8_t CANBusIndex) : 
     CANbus = &Can1; 
   }
 #else
-  CANBusIndex=0;
+  (void)CANBusIndex; // just avoid warning
   CANbus = &Can0; 
 #endif
 
