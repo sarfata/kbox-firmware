@@ -27,30 +27,12 @@
 
 static inline double DegToRad(double v) { return v/180.0*3.1415926535897932384626433832795; }
 
-TEST_CASE("Visiting a BarometerMeasurement object") {
-  BarometerMeasurement bm(21.52, 1.02421);
-
-  KMessageNMEAVisitor v;
-  bm.accept(v);
-
-  CHECK( v.toNMEA() == "$IIXDR,P,1.02421,B,Barometer,T,21.52,C,TempAir*68\r\n" );
-}
-
 TEST_CASE("Visiting a NMEA0183 sentence message") {
   NMEASentence s("$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79");
 
   KMessageNMEAVisitor v;
   s.accept(v);
   CHECK( v.toNMEA() == "$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79\r\n" );
-}
-
-TEST_CASE("Visiting a IMU object") {
-  IMUMessage m(3, 232.423, 4.19, 10.122331, 29.028);
-
-  KMessageNMEAVisitor v;
-  m.accept(v);
-  CHECK( v.toNMEA() == "$IIXDR,A,4.2,D,Yaw,A,10.1,D,Pitch,A,29.0,D,Roll,,3,,Calibration*25\r\n"
-                       "$IIHDM,232.42,M*17\r\n" );
 }
 
 TEST_CASE("Visiting a NMEA2000 object") {

@@ -56,9 +56,9 @@ void NMEA2000Service::setup() {
                                  // Manufacturer's Model ID
                                  "KBox",
                                  // Manufacturer's Software version code
-                                 "0.0.1 (2016-04-01)",
+                                 "0.0.1 (2017-06-20)",
                                  // Manufacturer's Model version
-                                 "v1 revB (2016-02-01)"
+                                 "v1 revF (2017-06-20)"
                                  );
   //// Set device information
   NMEA2000.SetDeviceInformation(2, // Unique number. Use e.g. Serial number.
@@ -125,22 +125,6 @@ void NMEA2000Service::updateReceived(const SKUpdate& update) {
 
 void NMEA2000Service::visit(const NMEA2000Message &m) {
   sendN2kMessage(m.getN2kMsg());
-}
-
-void NMEA2000Service::visit(const IMUMessage &m) {
-  if (m.getCalibration() == IMUMessage::IMU_CALIBRATED) {
-    tN2kMsg n2kmessage;
-    SetN2kAttitude(n2kmessage, _imuSequence, m.getYaw(), m.getPitch(), m.getRoll());
-    sendN2kMessage(n2kmessage);
-
-    double magneticVariation = N2kDoubleNA;
-    double magneticDeviation = N2kDoubleNA;
-    SetN2kMagneticHeading(n2kmessage, _imuSequence, m.getCourse(), magneticDeviation, magneticVariation);
-
-    sendN2kMessage(n2kmessage);
-
-    _imuSequence++;
-  }
 }
 
 void NMEA2000Service::processMessage(const KMessage &m) {

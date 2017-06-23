@@ -22,11 +22,19 @@
   THE SOFTWARE.
 */
 
-#include "signalk/KMessage.h"
+#include <Adafruit_BNO055.h>
+#include "common/os/Task.h"
+#include "common/signalk/SKHub.h"
 
-class BarometerN2kConverter : public KReceiver, public KGenerator, public KVisitor {
+class IMUService : public Task {
+  private:
+    SKHub &_skHub;
+    Adafruit_BNO055 bno055;
+    uint8_t sysCalib, gyroCalib, accelCalib, magCalib;
+    imu::Vector<3> eulerAngles;
+
   public:
-    void processMessage(const KMessage&m);
-    void visit(const BarometerMeasurement &);
+    IMUService(SKHub& skHub) : Task("IMU"), _skHub(skHub) {};
+    void setup();
+    void loop();
 };
-

@@ -31,22 +31,35 @@
 #ifndef _NMEA2000_TEENSY_H_
 #define _NMEA2000_TEENSY_H_
 
-#include <NMEA2000.h>
+#include <NMEA2000.h> 
 #include <N2kMsg.h>
 
 #include <FlexCAN.h>
+#if !defined(NUM_MAILBOXES)
+#define NMEA2000_TEENSY_VER 1
+#else
+#define NMEA2000_TEENSY_VER 2
+#endif
+
+#if defined(__MK66FX1M0__)
+#define NMEA2000_TEENSY_MAX_CAN_BUSSES 2
+#else
+#define NMEA2000_TEENSY_MAX_CAN_BUSSES 1
+#endif
 
 class tNMEA2000_teensy : public tNMEA2000
 {
 protected:
   FlexCAN *CANbus;
-  uint16_t DefTimeOut;
+  uint16_t DefTimeOut; 
+  uint8_t NumTxMailBoxes;
   bool CANSendFrame(unsigned long id, unsigned char len, const unsigned char *buf, bool wait_sent);
   bool CANOpen();
   bool CANGetFrame(unsigned long &id, unsigned char &len, unsigned char *buf);
-
+  void InitCANFrameBuffers();
+  
 public:
-  tNMEA2000_teensy(uint16_t _DefTimeOut=2);
+  tNMEA2000_teensy(uint16_t _DefTimeOut=4, uint8_t CANBusIndex=0);
 };
 
 #endif

@@ -24,14 +24,26 @@
 
 #pragma once
 
-#include "os/Task.h"
+#include <Adafruit_BMP280.h>
+#include "common/os/Task.h"
+#include "common/signalk/KMessage.h"
+#include "common/signalk/SKHub.h"
 
-class RunningLightTask : public Task {
+class BarometerService : public Task, public KGenerator {
   private:
-    bool flipFlop;
+    SKHub& _skHub;
+    int status = -1;
+
+    void fetchValues();
+
+    Adafruit_BMP280 bmp280;
+    float temperature;
+    float pressure;
 
   public:
-    RunningLightTask() : Task("RunningLight") {};
+    BarometerService(SKHub& skHub) : Task("Barometer"), _skHub(skHub) {};
+
     void setup();
     void loop();
 };
+

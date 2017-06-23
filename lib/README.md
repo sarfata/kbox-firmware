@@ -9,7 +9,7 @@ To pull or push to the subtrees, start by defining remotes for all the origins:
     git remote add pedvide-adc git@github.com:pedvide/ADC.git
     git remote add ttlappalainen-nmea2000 git@github.com:ttlappalainen/NMEA2000.git
     git remote add sarfata-nmea2000teensy git@github.com:sarfata/NMEA2000_teensy.git
-    git remote add teachop-flexcan git@github.com:teachop/FlexCAN_Library.git
+    git remote add ttlappalainen-flexcan git@github.com:ttlappalainen/FlexCAN_Library.git
     git remote add paul-ili9341 git@github.com:PaulStoffregen/ILI9341_t3.git
     git remote add paul-time git@github.com:PaulStoffregen/Time.git
     git remote add espasynctcp git@github.com:me-no-dev/ESPAsyncTCP.git

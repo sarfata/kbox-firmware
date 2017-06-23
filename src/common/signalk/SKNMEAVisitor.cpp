@@ -28,8 +28,10 @@
   THE SOFTWARE.
 */
 
-#include "SKNMEAVisitor.h"
+#include "SKUnits.h"
 #include "common/nmea/NMEASentenceBuilder.h"
+
+#include "SKNMEAVisitor.h"
 
 void SKNMEAVisitor::visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   NMEASentenceBuilder sb("II", "XDR", 4);
@@ -39,3 +41,44 @@ void SKNMEAVisitor::visitSKElectricalBatteries(const SKUpdate& u, const SKPath &
   sb.setField(4, p.getIndex());
   _sentences.add(sb.toNMEA() + "\r\n");
 }
+
+void SKNMEAVisitor::visitSKEnviromentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+  // XDR is not a very well defined sentence. Can be used for lots of things
+  // apparently but that is better than nothing.
+  NMEASentenceBuilder sb("II", "XDR", 4);
+  sb.setField(1, "P");
+  sb.setField(2, v.getNumberValue(), 5);
+  sb.setField(3, "B");
+  sb.setField(4, "Barometer");
+  _sentences.add(sb.toNMEA() + "\r\n");
+}
+
+void SKNMEAVisitor::visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+  // Same comment on XDR. It's not very well standardized but at least its a way
+  // to share the data.
+  NMEASentenceBuilder sb("II", "XDR", 12);
+  sb.setField(1, "A");
+  sb.setField(2, SKRadToDeg(v.getAttitudeValue().yaw), 1);
+  sb.setField(3, "D");
+  sb.setField(4, "Yaw");
+
+  sb.setField(5, "A");
+  sb.setField(6, SKRadToDeg(v.getAttitudeValue().pitch), 1);
+  sb.setField(7, "D");
+  sb.setField(8, "Pitch");
+
+  sb.setField(9, "A");
+  sb.setField(10, SKRadToDeg(v.getAttitudeValue().roll), 1);
+  sb.setField(11, "D");
+  sb.setField(12, "Roll");
+
+  _sentences.add(sb.toNMEA() + "\r\n");
+};
+
+void SKNMEAVisitor::visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+  NMEASentenceBuilder sb2("II", "HDM", 2);
+  sb2.setField(1, SKRadToDeg(v.getNumberValue()), 1);
+  sb2.setField(2, "M");
+
+  _sentences.add(sb2.toNMEA() + "\r\n");
+};

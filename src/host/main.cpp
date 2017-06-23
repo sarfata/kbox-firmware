@@ -25,17 +25,17 @@
 #include <KBoxHardware.h>
 #include "common/os/TaskManager.h"
 #include "common/os/Task.h"
+#include "common/signalk/SKHub.h"
 #include "host/drivers/ILI9341GC.h"
 #include "host/pages/BatteryMonitorPage.h"
 #include "host/pages/StatsPage.h"
-#include "host/services/ADCService.h"
-#include "host/services/BarometerN2kConverter.h"
-#include "host/services/BarometerTask.h"
-#include "host/services/IMUTask.h"
 #include "host/services/MFD.h"
+#include "host/services/ADCService.h"
+#include "host/services/BarometerService.h"
+#include "host/services/IMUService.h"
 #include "host/services/NMEA2000Service.h"
 #include "host/services/NMEAService.h"
-#include "host/services/RunningLightTask.h"
+#include "host/services/RunningLightService.h"
 #include "host/services/SDCardTask.h"
 #include "host/services/USBService.h"
 #include "host/services/WiFiService.h"
@@ -66,46 +66,33 @@ void setup() {
 
   digitalWrite(led_pin, 1);
 
-  // Create all the receiver task first
+  // Instantiate all our services
   WiFiService *wifi = new WiFiService(gc);
 
-  // Create all the generating tasks and connect them
+  ADCService *adcService = new ADCService(skHub, KBox.getADC());
+  BarometerService *baroService = new BarometerService(skHub);
+  IMUService *imuService = new IMUService(skHub);
+
   NMEA2000Service *n2kService = new NMEA2000Service(skHub);
   n2kService->connectTo(*wifi);
-
-  ADCService *adcService = new ADCService(skHub, KBox.getADC());
 
   NMEAService *reader1 = new NMEAService(skHub, NMEA1_SERIAL);
   NMEAService *reader2 = new NMEAService(skHub, NMEA2_SERIAL);
   reader1->connectTo(*wifi);
   reader2->connectTo(*wifi);
 
-  IMUTask *imuTask = new IMUTask();
-  imuTask->connectTo(*wifi);
-  imuTask->connectTo(*n2kService);
-
-  BarometerTask *baroTask = new BarometerTask();
-
-  BarometerN2kConverter *bn2k = new BarometerN2kConverter();
-  bn2k->connectTo(*wifi);
-  bn2k->connectTo(*n2kService);
-
-  baroTask->connectTo(*bn2k);
-
   SDCardTask *sdcardTask = new SDCardTask();
   reader1->connectTo(*sdcardTask);
   reader2->connectTo(*sdcardTask);
   n2kService->connectTo(*sdcardTask);
-  baroTask->connectTo(*sdcardTask);
-  imuTask->connectTo(*sdcardTask);
 
 
   // Add all the tasks
   taskManager.addTask(&mfd);
-  taskManager.addTask(new IntervalTask(new RunningLightTask(), 250));
+  taskManager.addTask(new IntervalTask(new RunningLightService(), 250));
   taskManager.addTask(new IntervalTask(adcService, 1000));
-  taskManager.addTask(new IntervalTask(imuTask, 50));
-  taskManager.addTask(new IntervalTask(baroTask, 1000));
+  taskManager.addTask(new IntervalTask(imuService, 50));
+  taskManager.addTask(new IntervalTask(baroService, 1000));
   taskManager.addTask(n2kService);
   taskManager.addTask(reader1);
   taskManager.addTask(reader2);

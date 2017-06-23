@@ -22,31 +22,15 @@
   THE SOFTWARE.
 */
 
-#include <KBoxLogging.h>
 #include <KBoxHardware.h>
-#include <Adafruit_BMP280.h>
+#include "RunningLightService.h"
 
-#include "BarometerTask.h"
-
-void BarometerTask::setup() {
-  if (!bmp280.begin(bmp280_address)) {
-    DEBUG("Error initializing BMP280");
-    status = 1;
-  }
-  else {
-    status = 0;
-  }
+void RunningLightService::setup() {
+  flipFlop = false;
+  digitalWrite(led_pin, flipFlop);
 }
 
-void BarometerTask::fetchValues() {
-  temperature = bmp280.readTemperature();
-  pressure = bmp280.readPressure();
-
-  DEBUG("Read temperature=%.2f C and pressure=%.1f hPa", temperature, pressure/100);
-  BarometerMeasurement m(temperature, pressure);
-  sendMessage(m);
-}
-
-void BarometerTask::loop() {
-  fetchValues();
+void RunningLightService::loop() {
+  flipFlop = !flipFlop;
+  digitalWrite(led_pin, flipFlop);
 }

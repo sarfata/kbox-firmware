@@ -26,10 +26,10 @@
 #include "catch.hpp"
 
 #include <WString.h>
+
 #include <stdarg.h>
 #define DEBUG(...) debug(__FILE__, __LINE__, __VA_ARGS__)
 
-// This is required so that Catch.hpp can print Teensy Strings
 std::ostream& operator << ( std::ostream& os, String const& value ) {
     os << value.c_str();
     return os;

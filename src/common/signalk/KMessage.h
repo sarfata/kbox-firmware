@@ -30,10 +30,7 @@
 
 class KVisitor;
 class NMEASentence;
-class BarometerMeasurement;
-class VoltageMeasurement;
 class NMEA2000Message;
-class IMUMessage;
 
 class KMessage {
   private:
@@ -47,10 +44,7 @@ class KMessage {
 class KVisitor {
   public:
     virtual void visit(const NMEASentence &) {};
-    virtual void visit(const BarometerMeasurement &) {};
-    virtual void visit(const VoltageMeasurement &) {};
     virtual void visit(const NMEA2000Message &) {};
-    virtual void visit(const IMUMessage &) {};
 };
 
 class NMEASentence : public KMessage {
@@ -65,29 +59,6 @@ class NMEASentence : public KMessage {
 
     const String& getSentence() const {
       return sentence;
-    };
-
-    void accept(KVisitor &v) const {
-      v.visit(*this);
-    };
-};
-
-class BarometerMeasurement : public KMessage {
-  private:
-    float temperature;
-    // Stored in Pa which is the SI standard
-    float pressure;
-
-  public:
-    BarometerMeasurement(float t, float p) : temperature(t), pressure(p) {};
-
-    float getTemperature() const {
-      return temperature;
-    };
-
-    /* Pressure in Bar. 1 bar = 1000 hPa */
-    float getPressure() const {
-      return pressure;
     };
 
     void accept(KVisitor &v) const {
@@ -114,54 +85,6 @@ class NMEA2000Message: public KMessage {
 
     void accept(KVisitor &v) const {
       v.visit(*this);
-    };
-};
-
-class IMUMessage: public KMessage {
-  private:
-    int calibration;
-    double course, yaw, pitch, roll;
-
-  public:
-    static const int IMU_CALIBRATED = 3;
-
-    IMUMessage(int c, double course, double yaw, double pitch, double roll) : calibration(c), course(course), yaw(yaw), pitch(pitch), roll(roll)
-    {};
-
-    void accept(KVisitor &v) const {
-      v.visit(*this);
-    };
-
-    int getCalibration() const {
-      return calibration;
-    };
-
-    /*
-     * Heading in Radians
-     */
-    double getCourse() const {
-      return course;
-    };
-
-    /*
-     * Difference between vessel orientation and course over water in radians.
-     */
-    double getYaw() const {
-      return yaw;
-    };
-
-    /*
-     * Pitch in radians. Positive when bow rises.
-     */
-    double getPitch() const {
-      return pitch;
-    };
-
-    /*
-     * Roll in radians. Positive when tilted right.
-     */
-    double getRoll() const {
-      return roll;
     };
 };
 

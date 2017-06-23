@@ -35,22 +35,6 @@ SKNMEA2000Visitor::~SKNMEA2000Visitor() {
   flushMessages();
 }
 
-void SKNMEA2000Visitor::visitSKNavigationPosition(const SKUpdate& u, const SKPath &p, const SKValue &v) {
-  //TODO
-}
-
-void SKNMEA2000Visitor::visitSKNavigationSpeedOverGround(const SKUpdate& u, const SKPath &p, const SKValue &v) {
-  // PGN 129026: Fast COG/SOG
-  if (u.hasNavigationCourseOverGroundTrue()) {
-    tN2kMsg *msg = new tN2kMsg();
-    SetN2kPGN129026(*msg, (uint8_t)0, N2khr_true,
-        u.getNavigationCourseOverGroundTrue(),
-        v.getNumberValue());
-
-    _messages.add(msg);
-  }
-}
-
 void SKNMEA2000Visitor::visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   // PGN127508: Battery Status
   // FIXME: The mapping of Battery instance names to ids should be configurable
@@ -65,6 +49,40 @@ void SKNMEA2000Visitor::visitSKElectricalBatteries(const SKUpdate& u, const SKPa
   tN2kMsg *msg = new tN2kMsg();
   SetN2kDCBatStatus(*msg, instance, v.getNumberValue());
   _messages.add(msg);
+}
+
+void SKNMEA2000Visitor::visitSKEnviromentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+  tN2kMsg *msg = new tN2kMsg();
+  SetN2kPressure(*msg, /* sid */ 0, /* source */ 0, N2kps_Atmospheric, v.getNumberValue());
+  _messages.add(msg);
+}
+
+void SKNMEA2000Visitor::visitSKNavigationPosition(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+  //TODO
+}
+
+void SKNMEA2000Visitor::visitSKNavigationAttitude(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+  tN2kMsg *msg = new tN2kMsg();
+  SetN2kAttitude(*msg, 0, v.getAttitudeValue().yaw, v.getAttitudeValue().pitch, v.getAttitudeValue().roll);
+  _messages.add(msg);
+}
+
+void SKNMEA2000Visitor::visitSKNavigationHeadingMagnetic(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+  tN2kMsg *msg = new tN2kMsg();
+  SetN2kMagneticHeading(*msg, 0, v.getNumberValue());
+  _messages.add(msg);
+}
+
+void SKNMEA2000Visitor::visitSKNavigationSpeedOverGround(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+  // PGN 129026: Fast COG/SOG
+  if (u.hasNavigationCourseOverGroundTrue()) {
+    tN2kMsg *msg = new tN2kMsg();
+    SetN2kPGN129026(*msg, (uint8_t)0, N2khr_true,
+        u.getNavigationCourseOverGroundTrue(),
+        v.getNumberValue());
+
+    _messages.add(msg);
+  }
 }
 
 const LinkedList<tN2kMsg*>& SKNMEA2000Visitor::getMessages() const {

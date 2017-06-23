@@ -40,6 +40,29 @@ typedef struct SKTypePosition {
   double altitude;
 } SKTypePosition;
 
+/*
+ * Attitude of the boat.
+ */
+typedef struct SKTypeAttitude {
+  SKTypeAttitude(double roll, double pitch, double yaw) :
+    roll(roll), pitch(pitch), yaw(yaw) {};
+
+  /**
+   * Vessel roll, +ve is list to starboard.
+   */
+  double roll;
+
+  /**
+   * Vessel pitch, +ve is bow up.
+   */
+  double pitch;
+
+  /**
+   * Vessel yaw, +ve is heading change to starboard.
+   */
+  double yaw;
+} SKTypeAttitude;
+
 /**
  * In memory representation of a SignalK value.
  *
@@ -57,18 +80,20 @@ class SKValue {
     enum {
       SKValueTypeNone,
       SKValueTypeNumber,
-      SKValueTypePosition
+      SKValueTypePosition,
+      SKValueTypeAttitude
     } _type;
 
     // Storage of the actual value in an enum
     union value {
       value(double n) : numberValue(n) {};
       value(SKTypePosition p) : position(p) {};
+      value(SKTypeAttitude a) : attitude(a) {};
 
       double numberValue;
       SKTypePosition position;
+      SKTypeAttitude attitude;
       // need to add:
-      // attitude (roll, pitch, yaw)
       // smallString - fits in the size of the union
       // largeString - uses dynamic memory allocation
       // datetimevalue
@@ -80,9 +105,10 @@ class SKValue {
     // - $source (maybe - this can also be grouped at the SKUpdate level
 
   public:
+    SKValue() : _type(SKValueTypeNone), _value(0) {};
     SKValue(double v) : _type(SKValueTypeNumber), _value(v) {};
     SKValue(SKTypePosition p) : _type(SKValueTypePosition), _value(p) {}
-    SKValue() : _type(SKValueTypeNone), _value(0) {};
+    SKValue(SKTypeAttitude a) : _type(SKValueTypeAttitude), _value(a) {}
 
     /**
      * Returns true if the two SKValues compared have the same value.
@@ -93,6 +119,7 @@ class SKValue {
 
     double getNumberValue() const;
     SKTypePosition getPositionValue() const;
+    SKTypeAttitude getAttitudeValue() const;
 };
 
 extern const SKValue SKValueNone;

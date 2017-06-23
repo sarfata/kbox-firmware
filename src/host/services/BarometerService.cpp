@@ -21,22 +21,34 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "BarometerN2kConverter.h"
-#include <N2kMessages.h>
 
-void BarometerN2kConverter::processMessage(const KMessage &m) {
-  m.accept(*this);
+#include <KBoxLogging.h>
+#include <KBoxHardware.h>
+#include <Adafruit_BMP280.h>
+#include "common/signalk/SKUpdateStatic.h"
+#include "BarometerService.h"
+
+void BarometerService::setup() {
+  if (!bmp280.begin(bmp280_address)) {
+    DEBUG("Error initializing BMP280");
+    status = 1;
+  }
+  else {
+    status = 0;
+  }
 }
 
-void BarometerN2kConverter::visit(const BarometerMeasurement &bm) {
-  tN2kMsg n2km;
-  static int sid = 0;
-  // Seems the i70 display will only show sea or outside temperature and
-  // outside humidity.
-  SetN2kEnvironmentalParameters(n2km, sid++,
-    N2kts_OutsideTemperature, CToKelvin(bm.getTemperature()),
-    N2khs_Undef, N2kDoubleNA,
-    bm.getPressure()
-  );
-  sendMessage(NMEA2000Message(n2km));
+void BarometerService::fetchValues() {
+  temperature = bmp280.readTemperature();
+  pressure = bmp280.readPressure();
+
+  DEBUG("Read temperature=%.2f C and pressure=%.1f hPa", temperature, pressure/100);
+
+  SKUpdateStatic<1> update;
+  update.setEnvironmentOutsidePressure(pressure / 100);
+  _skHub.publish(update);
+}
+
+void BarometerService::loop() {
+  fetchValues();
 }

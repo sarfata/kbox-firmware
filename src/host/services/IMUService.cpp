@@ -22,18 +22,35 @@
   THE SOFTWARE.
 */
 
-#include <Adafruit_BNO055.h>
-#include "os/Task.h"
-#include "signalk/KMessage.h"
+#include <KBoxLogging.h>
+#include "common/signalk/SKUpdateStatic.h"
+#include "IMUService.h"
 
-class IMUTask : public Task, public KGenerator {
-  private:
-    Adafruit_BNO055 bno055;
-    uint8_t sysCalib, gyroCalib, accelCalib, magCalib;
-    imu::Vector<3> eulerAngles;
+void IMUService::setup() {
+  DEBUG("Initing BNO055");
+  if (!bno055.begin()) {
+    DEBUG("Error initializing BNO055");
+  }
+  else {
+    DEBUG("Success!");
+  }
+}
 
-  public:
-    IMUTask() : Task("IMU") {};
-    void setup();
-    void loop();
-};
+void IMUService::loop() {
+  bno055.getCalibration(&sysCalib, &gyroCalib, &accelCalib, &magCalib);
+
+  eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
+
+  SKUpdateStatic<2> update;
+  // Note: We could calculate yaw as the difference between the Magnetic
+  // Heading and the Course Over Ground Magnetic.
+
+  if (accelCalib == 3) {
+    update.setNavigationAttitude(SKTypeAttitude(/* roll */ eulerAngles.z(), /* pitch */ eulerAngles.y(), /* yaw */ 0));
+  }
+
+  if (magCalib == 3) {
+    update.setNavigationHeadingMagnetic(eulerAngles.x());
+  }
+  _skHub.publish(update);
+}

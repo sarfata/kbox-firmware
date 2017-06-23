@@ -22,6 +22,7 @@
   THE SOFTWARE.
 */
 
+#include "common/signalk/SKUnits.h"
 #include "common/signalk/SKNMEAVisitor.h"
 #include "common/signalk/SKUpdateStatic.h"
 #include "../KBoxTest.h"
@@ -37,9 +38,54 @@ TEST_CASE("SKNMEAVisitorTest") {
 
     CHECK( v.getSentences().size() == 1 );
 
-    if (v.getSentences().size() > 1) {
+    if (v.getSentences().size() > 0) {
       String s = *(v.getSentences().begin());
       CHECK( s == "$IIXDR,V,12.42,V,Supply*56\r\n");
     }
   }
+
+  SECTION("EnvironmentOutsidePressure") {
+    SKUpdateStatic<1> u;
+    u.setEnvironmentOutsidePressure(1.02421);
+
+    v.processUpdate(u);
+
+    CHECK( v.getSentences().size() == 1 );
+
+    if (v.getSentences().size() > 0) {
+      String s = *(v.getSentences().begin());
+      CHECK( s == "$IIXDR,P,1.02421,B,Barometer*23\r\n" );
+    }
+  }
+
+  SECTION("NavigationHeadingMagnetic") {
+    SKUpdateStatic<1> u;
+    u.setNavigationHeadingMagnetic(SKDegToRad(142));
+
+    v.processUpdate(u);
+
+    CHECK( v.getSentences().size() == 1 );
+
+    if (v.getSentences().size() > 0) {
+      String s = *(v.getSentences().begin());
+      CHECK( s == "$IIHDM,142.0,M*25\r\n" );
+    }
+  }
+
+  SECTION("NavigationAttitude") {
+    SKUpdateStatic<1> u;
+    u.setNavigationAttitude(SKTypeAttitude(/*roll*/SKDegToRad(29),
+          /*pitch*/SKDegToRad(10.1),
+          /*yaw*/SKDegToRad(4.2)));
+
+    v.processUpdate(u);
+
+    CHECK( v.getSentences().size() == 1 );
+
+    if (v.getSentences().size() > 0) {
+      String s = *(v.getSentences().begin());
+      CHECK( s == "$IIXDR,A,4.2,D,Yaw,A,10.1,D,Pitch,A,29.0,D,Roll*5C\r\n" );
+    }
+  }
+
 }

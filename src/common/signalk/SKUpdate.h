@@ -91,14 +91,34 @@ class SKUpdate {
     // Syntactic sugar to make working with SKUpdates easier to read and less
     // prone to type errors.
 
-    bool hasNavigationSpeedOverGround() const {
-      return hasPath(SKPathNavigationSpeedOverGround);
+    bool hasElectricalBatteries(String index) const {
+      return hasPath(SKPath(SKPathElectricalBatteries, index));
     };
-    double getNavigationSpeedOverGround() const {
-      return this->operator[](SKPathNavigationSpeedOverGround).getNumberValue();
+    double getElectricalBatteries(String index) const {
+      return this->operator[](SKPath(SKPathElectricalBatteries, index)).getNumberValue();
     };
-    bool setNavigationSpeedOverGround(double sog) {
-      return setValue(SKPathNavigationSpeedOverGround, SKValue(sog));
+    bool setElectricalBatteries(String index, double voltage) {
+      return setValue(SKPath(SKPathElectricalBatteries, index), voltage);
+    };
+
+    bool hasEnvironmentOutsidePressure() const {
+      return hasPath(SKPathEnvironmentOutsidePressure);
+    };
+    double getEnvironmentOutsidePressure() const {
+      return this->operator[](SKPathEnvironmentOutsidePressure).getNumberValue();
+    };
+    bool setEnvironmentOutsidePressure(double p) {
+      return this->setValue(SKPathEnvironmentOutsidePressure, p);
+    };
+
+    bool hasNavigationAttitude() const {
+      return hasPath(SKPathNavigationAttitude);
+    };
+    SKTypeAttitude getNavigationAttitude() const {
+      return this->operator[](SKPathNavigationAttitude).getAttitudeValue();
+    };
+    bool setNavigationAttitude(const SKTypeAttitude a) {
+      return this->setValue(SKPathNavigationAttitude, a);
     };
 
     bool hasNavigationCourseOverGroundTrue() const {
@@ -111,6 +131,16 @@ class SKUpdate {
       return setValue(SKPathNavigationCourseOverGroundTrue, SKValue(cog));
     };
 
+    bool hasNavigationHeadingMagnetic() const {
+      return hasPath(SKPathNavigationHeadingMagnetic);
+    };
+    double getNavigationHeadingMagnetic() const {
+      return this->operator[](SKPathNavigationHeadingMagnetic).getNumberValue();
+    };
+    bool setNavigationHeadingMagnetic(double cog) {
+      return setValue(SKPathNavigationHeadingMagnetic, SKValue(cog));
+    };
+
     bool hasNavigationPosition() const {
       return hasPath(SKPathNavigationPosition);
     };
@@ -121,14 +151,14 @@ class SKUpdate {
       return setValue(SKPathNavigationPosition, SKValue(p));
     };
 
-    bool hasElectricalBatteries(String index) const {
-      return hasPath(SKPath(SKPathElectricalBatteries, index));
+    bool hasNavigationSpeedOverGround() const {
+      return hasPath(SKPathNavigationSpeedOverGround);
     };
-    double getElectricalBatteries(String index) const {
-      return this->operator[](SKPath(SKPathElectricalBatteries, index)).getNumberValue();
+    double getNavigationSpeedOverGround() const {
+      return this->operator[](SKPathNavigationSpeedOverGround).getNumberValue();
     };
-    bool setElectricalBatteries(String index, double voltage) {
-      return setValue(SKPath(SKPathElectricalBatteries, index), voltage);
+    bool setNavigationSpeedOverGround(double sog) {
+      return setValue(SKPathNavigationSpeedOverGround, SKValue(sog));
     };
 };
 
