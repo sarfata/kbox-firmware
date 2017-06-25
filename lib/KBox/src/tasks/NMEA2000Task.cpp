@@ -78,13 +78,14 @@ void NMEA2000Task::setup() {
 
 void NMEA2000Task::sendN2kMessage(const tN2kMsg& msg) {
   bool result = NMEA2000.SendMsg(msg);
-
+/*
   DEBUG("Sending message on n2k bus - pgn=%i prio=%i src=%i dst=%i len=%i result=%s", msg.PGN, msg.Priority,
       msg.Source,
       msg.Destination, msg.DataLen, result ? "success":"fail");
-
+*/
+    
   char *pcdin = nmea_pcdin_sentence_for_n2kmsg(msg, 0);
-  DEBUG("TX: %s", pcdin);
+  //DEBUG("TX: %s", pcdin);
   free(pcdin);
 
   if (result) {
@@ -117,6 +118,8 @@ void NMEA2000Task::visit(const IMUMessage &m) {
     sendN2kMessage(n2kmessage);
 
     _imuSequence++;
+  } else {
+      // DEBUG("IMU is not calibrated: move the unit around to calibrate it");
   }
 }
 

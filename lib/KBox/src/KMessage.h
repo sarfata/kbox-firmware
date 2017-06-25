@@ -1,3 +1,4 @@
+
 /*
   The MIT License
 
@@ -34,6 +35,9 @@ class BarometerMeasurement;
 class VoltageMeasurement;
 class NMEA2000Message;
 class IMUMessage;
+class NAVMessage;
+class APMessage;
+class RUDMessage;
 
 class KMessage {
   private:
@@ -43,7 +47,6 @@ class KMessage {
     virtual void accept(KVisitor& v) const {};
 };
 
-
 class KVisitor {
   public:
     virtual void visit(const NMEASentence &) {};
@@ -51,6 +54,9 @@ class KVisitor {
     virtual void visit(const VoltageMeasurement &) {};
     virtual void visit(const NMEA2000Message &) {};
     virtual void visit(const IMUMessage &) {};
+    virtual void visit(const NAVMessage &) {};
+    virtual void visit(const APMessage &) {};
+    virtual void visit(const RUDMessage &) {};
 };
 
 class NMEASentence : public KMessage {
@@ -151,8 +157,7 @@ class IMUMessage: public KMessage {
   public:
     static const int IMU_CALIBRATED = 3;
 
-    IMUMessage(int c, double course, double yaw, double pitch, double roll) : calibration(c), course(course), yaw(yaw), pitch(pitch), roll(roll)
-    {};
+    IMUMessage(int c, double course, double yaw, double pitch, double roll) : calibration(c), course(course), yaw(yaw), pitch(pitch), roll(roll) {};
 
     void accept(KVisitor &v) const {
       v.visit(*this);
@@ -163,14 +168,14 @@ class IMUMessage: public KMessage {
     };
 
     /*
-     * Heading in Radians
+     * Heading in Radians: course value are compass (magnetic) values not adjusted for variation
      */
     double getCourse() const {
       return course;
     };
 
     /*
-     * Difference between vessel orientation and course over water in radians.
+     * Difference between vessel orientation and course over water in radians.  Not currently measured, set to 0 in code
      */
     double getYaw() const {
       return yaw;
@@ -190,6 +195,94 @@ class IMUMessage: public KMessage {
       return roll;
     };
 };
+
+class NAVMessage: public KMessage {
+  private:
+    bool apMode, apHeadingMode, apWaypointMode, apDodgeMode;
+    double currentHeading, targetHeading, courseToWaypoint;
+
+  public:
+    NAVMessage(bool apMode, bool apHeadingMode, bool apWaypointMode, bool apDodgeMode, double currentHeading,double targetHeading, double courseToWaypoint):
+    apMode(apMode), apHeadingMode(apHeadingMode), apWaypointMode(apWaypointMode), apDodgeMode(apDodgeMode),
+    currentHeading(currentHeading),targetHeading(targetHeading),courseToWaypoint(courseToWaypoint){};
+
+    void accept(KVisitor &v) const {
+      v.visit(*this);
+    };
+
+    bool getApMode() const {
+      return apMode;
+    };
+
+    bool getApHeadingMode() const {
+      return apHeadingMode;
+    };
+
+    bool getApWaypointMode() const {
+      return apWaypointMode;
+    };
+
+    bool getApDodgeMode() const {
+      return apDodgeMode;
+    };
+
+    /*
+     * Headings in Degrees for messages passed back and forth between the Autopilot task and the Nav page
+     */
+    double getCurrentHeading() const {
+      return currentHeading;
+    };
+
+    double getTargetHeading() const {
+      return targetHeading;
+    };
+
+    double getCourseToWaypoint() const {
+      return courseToWaypoint;
+    };
+};
+
+class APMessage: public KMessage {
+  private:
+    double targetRudderPosition, rudderCommandSent;
+
+  public:
+    APMessage(double targetRudderPosition, double rudderCommandSent) : targetRudderPosition(targetRudderPosition),rudderCommandSent(rudderCommandSent){};
+
+    void accept(KVisitor &v) const {
+      v.visit(*this);
+    };
+
+    double getTargetRudderPosition() const {
+      return targetRudderPosition;
+    };
+
+    double getRudderCommandSent() const {
+      return rudderCommandSent;
+    };
+
+};
+
+class RUDMessage: public KMessage {
+  private:
+    double rawRudderAngle, rudderDisplayAngle;
+
+  public:
+    RUDMessage(double rawRudderAngle, double rudderDisplayAngle) : rawRudderAngle(rawRudderAngle), rudderDisplayAngle(rudderDisplayAngle){};
+
+    void accept(KVisitor &v) const {
+      v.visit(*this);
+    };
+
+    double getRawRudderAngle() const {
+      return rawRudderAngle;
+    };
+
+    double getRudderDisplayAngle() const {
+      return rudderDisplayAngle;
+    };
+};
+
 
 class KReceiver {
   public:

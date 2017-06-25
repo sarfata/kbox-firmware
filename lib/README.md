@@ -14,10 +14,11 @@ To pull or push to the subtrees, start by defining remotes for all the origins:
     git remote add paul-time git@github.com:PaulStoffregen/Time.git
     git remote add espasynctcp git@github.com:me-no-dev/ESPAsyncTCP.git
     git remote add adafruit-ina219 git@github.com:adafruit/Adafruit_INA219.git
+    git remote add br3ttb-arduino-pid-library https://github.com/br3ttb/Arduino-PID-Library.git
 
 To add a new subtree:
 
-    git subtree add --prefix=lib/ESPAsyncTCP espasynctcp/master
+    git subtree add --squash --prefix=lib/ESPAsyncTCP espasynctcp/master
 
 To pull changes from a subtree:
 

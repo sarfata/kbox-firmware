@@ -24,12 +24,18 @@
 #include <Adafruit_BNO055.h>
 #include "TaskManager.h"
 #include "KMessage.h"
+#include "NMEA2000Task.h" //RIGM added
 
 class IMUTask : public Task, public KGenerator {
   private:
     Adafruit_BNO055 bno055;
     uint8_t sysCalib, gyroCalib, accelCalib, magCalib;
     imu::Vector<3> eulerAngles;
+
+    enum kboxOrientation {PORT, STBD, BOW, STERN};
+    // Modification to send correct course, pitch, roll data based on where the back of the KBOX is mounted.
+    // Options are back of the box to port, to bow, to stbd, to stern.  Specify as appropriate for your setup
+    static const kboxOrientation state = kboxOrientation::BOW;
 
   public:
     IMUTask() : Task("IMU") {};

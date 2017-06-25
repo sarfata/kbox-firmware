@@ -25,6 +25,11 @@
 #include "KMessageNMEAVisitor.h"
 #include "util/NMEASentenceBuilder.h"
 #include "util/nmea2000.h"
+//RIGM added
+#include "tasks/NMEA2000Task.h"
+#include "KBoxDebug.h"
+
+#define IMU_IN_NMEA2K true  //variable to determine whether IMU data sent out over N2K
 
 void KMessageNMEAVisitor::visit(const NMEASentence& s) {
   nmeaContent += s.getSentence() + "\r\n";
@@ -64,6 +69,35 @@ void KMessageNMEAVisitor::visit(const NMEA2000Message &n2km) {
 }
 
 void KMessageNMEAVisitor::visit(const IMUMessage &imu) {
+    unsigned int _imuSequence = 1;
+    
+#ifdef IMU_IN_NMEA2K //adds IMU to N2K
+    
+    tN2kMsg n2kmessage;
+    tN2kMsg n2kmessage2;
+    _imuSequence++;
+    //DEBUG("imuSequence: %i course: %.1f yaw: %.1f roll: %.1f pitch: %.1f",_imuSequence,imu.getCourse(),imu.getYaw(),imu.getRoll(),imu.getPitch());
+    //values already in Radians from IMUTask
+    SetN2kPGN127257(n2kmessage, _imuSequence, imu.getYaw(), imu.getPitch(), imu.getRoll()); //sequence consistent with KMessage, NMEA2000 task
+    if(RadToDeg(imu.getCourse()) < 0){
+        SetN2kPGN127250(n2kmessage2, _imuSequence, (imu.getCourse() - 0.261799), /* Deviation */ N2kDoubleNA, /* Variation */ N2kDoubleNA, N2khr_magnetic);
+        //for some strange reason, when converting RadToDeg for N2K streaming purposes, values over 180 are off by 15 degrees.  This does not affect the heading shown on the display, only NMEA output viewed on other devices.  Needs further exploration to find the cause
+    } else {
+        SetN2kPGN127250(n2kmessage2, _imuSequence, imu.getCourse(), /* Deviation */ N2kDoubleNA, /* Variation */ N2kDoubleNA, N2khr_magnetic);
+    }
+    
+    char *s = nmea_pcdin_sentence_for_n2kmsg(n2kmessage, millis() / 1000);
+    //DEBUG("nmeaContent: %s", s);
+    nmeaContent += String(s) + "\r\n";
+    free(s);
+    
+    s = nmea_pcdin_sentence_for_n2kmsg(n2kmessage2, millis() / 1000);
+    //DEBUG("nmeaContent: %s", s);
+    nmeaContent += String(s) + "\r\n";
+    free(s);
+    
+#else
+    
   NMEASentenceBuilder sb("II", "XDR", 16);
   sb.setField(1, "A");
   sb.setField(2, imu.getYaw(), 1);
@@ -92,5 +126,7 @@ void KMessageNMEAVisitor::visit(const IMUMessage &imu) {
   sb2.setField(2, "M");
 
   nmeaContent += sb2.toNMEA() + "\r\n";
+#endif
+
 }
 

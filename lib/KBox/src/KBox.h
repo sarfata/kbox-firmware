@@ -43,6 +43,7 @@
 #include "tasks/IMUTask.h"
 #include "tasks/NMEAReaderTask.h"
 #include "tasks/WiFiTask.h"
+#include "tasks/AutoPilotTask.h"
 
 /* Converters */
 #include "converters/VoltageN2kConverter.h"
@@ -51,6 +52,7 @@
 /* Pages */
 #include "pages/BatteryMonitorPage.h"
 #include "pages/StatsPage.h"
+#include "pages/NavigationPage.h"
 
 /* Other dependencies */
 #include <Adafruit_NeoPixel.h>
