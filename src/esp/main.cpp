@@ -63,7 +63,7 @@ size_t rxIndex = 0;
 void loop() {
   static unsigned long int nextPrint = 0;
   if (millis() > nextPrint) {
-    DEBUG("Still running ... %i connected clients - %i heap", server.clientsCount(), ESP.getFreeHeap());
+    DEBUG("Still running ... %i connected clients - %i heap - IP: %s", server.clientsCount(), ESP.getFreeHeap(), WiFi.localIP().toString().c_str());
     nextPrint = millis() + 500;
   }
 
