@@ -40,7 +40,22 @@ class NMEA2000Service : public Task, public SKSubscriber,
     unsigned int _imuSequence;
     SKNMEA2000Visitor _skVisitor;
 
+
     void sendN2kMessage(const tN2kMsg& msg);
+
+    /**
+     * Will initialize NMEA2000 and restore NMEA2000 parameters from persistent
+     * storage if available.
+     */
+    void initializeNMEA2000();
+
+    /**
+     * Saves NMEA2000 parameters to persistent storage so they can be restored
+     * on reboot.
+     */
+    void saveNMEA2000Parameters();
+
+    elapsedMillis timeSinceLastParametersSave;
 
   public:
     NMEA2000Service(SKHub &hub) : Task("NMEA2000"), _hub(hub), _imuSequence(0) {};
