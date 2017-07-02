@@ -5,11 +5,8 @@
 # https://bblanchon.github.io/ArduinoJson/
 # If you like this project, please add a star!
 
-include(gtest.cmake)
-
 if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
 	add_compile_options(
-		-fno-exceptions
 		-pedantic
 		-Wall
 		-Wcast-align
@@ -32,6 +29,12 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
 		-Wstrict-overflow=5
 		-Wundef
 	)
+
+	if(NOT MINGW)
+		add_compile_options(
+			-std=c++98
+		)
+	endif()
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
@@ -62,8 +65,6 @@ if(MSVC)
 		/WX # Treats all compiler warnings as errors.
 	)
 endif()
-
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../include)
 
 add_subdirectory(DynamicJsonBuffer)
 add_subdirectory(IntegrationTests)
