@@ -7,8 +7,8 @@
 
 add_executable(IntegrationTests 
 	gbathree.cpp
-	parse_print.cpp
+	round_trip.cpp
 )
 
-target_link_libraries(IntegrationTests gtest)
+target_link_libraries(IntegrationTests catch)
 add_test(IntegrationTests IntegrationTests)
