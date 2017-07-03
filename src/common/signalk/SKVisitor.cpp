@@ -39,8 +39,8 @@ void SKVisitor::visit(const SKUpdate& u) {
     if (p.getStaticPath() == SKPathEnvironmentOutsidePressure) {
       visitSKEnviromentOutsidePressure(u, p, v);
     }
-    if (p.getStaticPath() == SKPathElectricalBatteries) {
-      visitSKElectricalBatteries(u, p, v);
+    if (p.getStaticPath() == SKPathElectricalBatteriesVoltage) {
+      visitSKElectricalBatteriesVoltage(u, p, v);
     }
     if (p.getStaticPath() == SKPathNavigationAttitude) {
       visitSKNavigationAttitude(u, p, v);

@@ -91,14 +91,14 @@ class SKUpdate {
     // Syntactic sugar to make working with SKUpdates easier to read and less
     // prone to type errors.
 
-    bool hasElectricalBatteries(String index) const {
-      return hasPath(SKPath(SKPathElectricalBatteries, index));
+    bool hasElectricalBatteriesVoltage(String index) const {
+      return hasPath(SKPath(SKPathElectricalBatteriesVoltage, index));
     };
-    double getElectricalBatteries(String index) const {
-      return this->operator[](SKPath(SKPathElectricalBatteries, index)).getNumberValue();
+    double getElectricalBatteriesVoltage(String index) const {
+      return this->operator[](SKPath(SKPathElectricalBatteriesVoltage, index)).getNumberValue();
     };
-    bool setElectricalBatteries(String index, double voltage) {
-      return setValue(SKPath(SKPathElectricalBatteries, index), voltage);
+    bool setElectricalBatteriesVoltage(String index, double voltage) {
+      return setValue(SKPath(SKPathElectricalBatteriesVoltage, index), voltage);
     };
 
     bool hasEnvironmentOutsidePressure() const {

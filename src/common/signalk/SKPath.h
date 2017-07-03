@@ -45,7 +45,7 @@ typedef enum {
   // Marker value - Every path below requires an index.
   SKPathEnumIndexedPaths,
 
-  SKPathElectricalBatteries,
+  SKPathElectricalBatteriesVoltage,
 
 } SKPathEnum;
 

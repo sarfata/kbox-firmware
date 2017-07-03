@@ -33,7 +33,7 @@
 
 #include "SKNMEAVisitor.h"
 
-void SKNMEAVisitor::visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+void SKNMEAVisitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   NMEASentenceBuilder sb("II", "XDR", 4);
   sb.setField(1, "V");
   sb.setField(2, v.getNumberValue(), 2);

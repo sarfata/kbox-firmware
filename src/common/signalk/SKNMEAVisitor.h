@@ -38,7 +38,7 @@ class SKNMEAVisitor : SKVisitor {
   private:
     LinkedList<String> _sentences;
 
-    void visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+    void visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
     void visitSKEnviromentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
     void visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     void visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) override;

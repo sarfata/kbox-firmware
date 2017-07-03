@@ -35,7 +35,7 @@ SKNMEA2000Visitor::~SKNMEA2000Visitor() {
   flushMessages();
 }
 
-void SKNMEA2000Visitor::visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+void SKNMEA2000Visitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   // PGN127508: Battery Status
   // FIXME: The mapping of Battery instance names to ids should be configurable
   unsigned char instance = 255;

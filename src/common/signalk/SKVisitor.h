@@ -42,7 +42,7 @@ class SKVisitor {
   protected:
     void visit(const SKUpdate& u);
 
-    virtual void visitSKElectricalBatteries(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+    virtual void visitSKElectricalBatteriesVoltage(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
     virtual void visitSKEnviromentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {};
     virtual void visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
     virtual void visitSKNavigationCourseOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
