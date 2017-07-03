@@ -146,28 +146,28 @@ String SKTime::toString() const {
     // "2014-04-10T08:33:53.0101Z" => 25
     s.reserve(26);
   }
-  s.append(1970 + tm.Year); s.append("-");
-  if (tm.Month < 10) { s.append("0"); }
-  s.append(tm.Month); s.append("-");
-  if (tm.Day < 10) { s.append("0"); }
-  s.append(tm.Day); s.append("T");
-  if (tm.Hour < 10) { s.append("0"); }
-  s.append(tm.Hour); s.append(":");
-  if (tm.Minute < 10) { s.append("0"); }
-  s.append(tm.Minute); s.append(":");
-  if (tm.Second < 10) { s.append("0"); }
-  s.append(tm.Second);
+  s += (1970 + tm.Year); s += "-";
+  if (tm.Month < 10) { s += "0"; }
+  s += tm.Month; s += "-";
+  if (tm.Day < 10) { s += "0"; }
+  s += tm.Day; s += "T";
+  if (tm.Hour < 10) { s += "0"; }
+  s += tm.Hour; s += ":";
+  if (tm.Minute < 10) { s += "0"; }
+  s += tm.Minute; s += ":";
+  if (tm.Second < 10) { s += "0"; }
+  s += tm.Second;
 
   if (hasMilliseconds()) {
-    s.append(".");
+    s += ".";
     if (_milliseconds < 100) {
-      s.append("0");
+      s += "0";
     }
     if (_milliseconds < 10) {
-      s.append("0");
+      s += "0";
     }
-    s.append(_milliseconds);
+    s += _milliseconds;
   }
-  s.append("Z");
+  s += "Z";
   return s;
 }
