@@ -48,9 +48,9 @@ class SKNMEAParser {
      * Once `parse()` is called again, or the parser is destroyed, the reference
      * is no longer valid!
      */
-    const SKUpdate& parse(const SKSourceInput& input, const String& sentence);
+    const SKUpdate& parse(const SKSourceInput& input, const String& sentence, const SKTime& timestamp);
 
   private:
-    const SKUpdate& parseRMC(const SKSourceInput& input, NMEASentenceReader& reader);
+    const SKUpdate& parseRMC(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& timestamp);
 };
 

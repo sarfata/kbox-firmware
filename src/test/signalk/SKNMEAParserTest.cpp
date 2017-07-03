@@ -30,17 +30,18 @@ TEST_CASE("SKNMEAParserTest: Basic tests") {
   SKNMEAParser p;
 
   SECTION("Parse invalid sentence") {
-    const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "mambo jumbo");
+    const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "mambo jumbo", SKTime(0));
     CHECK( update.getSize() == 0 );
   }
 
   SECTION("RMC") {
-    const SKUpdate& update = p.parse(SKSourceInputNMEA0183_2, "$GPRMC,004119.000,A,3751.3385,N,12227.4913,W,5.02,235.24,141116,,,D*75");
+    const SKUpdate& update = p.parse(SKSourceInputNMEA0183_2, "$GPRMC,004119.000,A,3751.3385,N,12227.4913,W,5.02,235.24,141116,,,D*75", SKTime(0));
 
     CHECK( update.getSize() == 3 );
     CHECK( update.getSource() != SKSourceUnknown );
     CHECK( update.getSource().getLabel() == "kbox.nmea0183.2" );
     CHECK( update.getContext() == SKContextSelf );
+    CHECK( update.getTimestamp().getTime() == 0 );
     CHECK( update.getNavigationSpeedOverGround() == SKKnotToMs(5.02) );
     CHECK( update.getNavigationCourseOverGroundTrue() == SKDegToRad(235.24) );
     CHECK( update.getNavigationPosition().latitude == 37.513385 );
@@ -49,7 +50,7 @@ TEST_CASE("SKNMEAParserTest: Basic tests") {
   }
 
   SECTION("RMC with invalid fix") {
-    const SKUpdate& update = p.parse(SKSourceInputUnknown, "$IIRMC,,V,,,,,,,,009,W,N*2A");
+    const SKUpdate& update = p.parse(SKSourceInputUnknown, "$IIRMC,,V,,,,,,,,009,W,N*2A", SKTime(0));
 
     // This behavior is borrowed from signalk-parser-nmea0183
     // TODO: We should report an alarm here instead of nothing.

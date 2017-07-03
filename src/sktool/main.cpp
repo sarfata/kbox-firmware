@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
   for (std::string line; std::getline(std::cin, line); ) {
     std::cout << "Read line: " << line << std::endl;
 
-    const SKUpdate &u = nmeaParser.parse(sourceInput, String(line.c_str()));
+    const SKUpdate &u = nmeaParser.parse(sourceInput, String(line.c_str()), SKTime(time(0)));
 
     std::cout << "Update contains: " << u.getSize() << " values and uses " << u.getSizeBytes() << " bytes." << std::endl;
     JsonObject &o = v.processUpdate(u);

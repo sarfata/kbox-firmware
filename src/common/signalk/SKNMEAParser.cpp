@@ -33,7 +33,7 @@ SKNMEAParser::~SKNMEAParser() {
   }
 }
 
-const SKUpdate& SKNMEAParser::parse(const SKSourceInput& input, const String& sentence) {
+const SKUpdate& SKNMEAParser::parse(const SKSourceInput& input, const String& sentence, const SKTime& time) {
   if (_sku) {
     delete(_sku);
   }
@@ -45,19 +45,20 @@ const SKUpdate& SKNMEAParser::parse(const SKSourceInput& input, const String& se
   }
 
   if (reader.getSentenceCode() == "RMC") {
-    return parseRMC(input, reader);
+    return parseRMC(input, reader, time);
   }
 
   return _invalidSku;
 }
 
-const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceReader& reader) {
+const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& time) {
   // We first need to make sure the data is valid.
   if (reader.getFieldAsChar(2) != 'A') {
     return _invalidSku;
   }
 
   SKUpdateStatic<3>* rmc = new SKUpdateStatic<3>();
+  rmc->setTimestamp(time);
 
   SKSource source = SKSource::sourceForNMEA0183(input, reader.getTalkerId(), reader.getSentenceCode());
   rmc->setSource(source);
