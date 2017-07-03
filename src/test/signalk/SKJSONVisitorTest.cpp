@@ -28,27 +28,50 @@
   THE SOFTWARE.
 */
 
-#include <iostream>
-#include <string>
-#include <WString.h>
 #include <ArduinoJson.h>
-#include "common/signalk/SKNMEAParser.h"
+#include "common/signalk/SKUpdateStatic.h"
 #include "common/signalk/SKJSONVisitor.h"
+#include "../KBoxTest.h"
 
-int main(int argc, char **argv) {
-  SKNMEAParser nmeaParser = SKNMEAParser();
+TEST_CASE("SKJSONVisitor") {
   DynamicJsonBuffer jsonBuffer;
-  SKJSONVisitor v = SKJSONVisitor(jsonBuffer);
+  SKJSONVisitor jsonVisitor(jsonBuffer);
+  SKUpdateStatic<5> update;
 
-  const SKSourceInput &sourceInput = SKSourceInputNMEA0183_1;
+  SECTION("empty update") {
+    JsonObject &o = jsonVisitor.processUpdate(update);
 
-  for (std::string line; std::getline(std::cin, line); ) {
-    std::cout << "Read line: " << line << std::endl;
+    CHECK( o.containsKey("context") );
+    CHECK( o.containsKey("updates") );
 
-    const SKUpdate &u = nmeaParser.parse(sourceInput, String(line.c_str()));
+    if (o.containsKey("updates") && o.is<JsonArray>("updates")) {
+      JsonArray &a = o["updates"];
 
-    std::cout << "Update contains: " << u.getSize() << " values and uses " << u.getSizeBytes() << " bytes." << std::endl;
-    JsonObject &o = v.processUpdate(u);
-    std::cout << o << std::endl;
+      CHECK(a.size() == 0);
+    }
+  }
+
+  SECTION("update with one key") {
+    update.setElectricalBatteriesVoltage("starter", 12.0);
+
+    JsonObject &o = jsonVisitor.processUpdate(update);
+
+    CHECK( o.containsKey("updates") );
+
+    JsonObject &voltageUpdate = o["updates"][0];
+    CHECK(voltageUpdate != JsonObject::invalid());
+
+    if (voltageUpdate.containsKey("path")) {
+      CHECK(voltageUpdate["path"].as<std::string>() == "electrical.batteries.starter.voltage");
+    }
+    else {
+      CHECK(false);
+    }
+    if (voltageUpdate.containsKey("value")) {
+      CHECK(voltageUpdate["value"] == 12.0);
+    }
+    else {
+      CHECK(false);
+    }
   }
 }

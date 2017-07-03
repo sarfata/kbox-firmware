@@ -28,27 +28,29 @@
   THE SOFTWARE.
 */
 
-#include <iostream>
-#include <string>
-#include <WString.h>
+#pragma once
+
 #include <ArduinoJson.h>
-#include "common/signalk/SKNMEAParser.h"
-#include "common/signalk/SKJSONVisitor.h"
+#include "SKVisitor.h"
 
-int main(int argc, char **argv) {
-  SKNMEAParser nmeaParser = SKNMEAParser();
-  DynamicJsonBuffer jsonBuffer;
-  SKJSONVisitor v = SKJSONVisitor(jsonBuffer);
 
-  const SKSourceInput &sourceInput = SKSourceInputNMEA0183_1;
+class SKJSONVisitor {
+  private:
+    JsonBuffer &_jsonBuffer;
 
-  for (std::string line; std::getline(std::cin, line); ) {
-    std::cout << "Read line: " << line << std::endl;
+  public:
+    /**
+     * Create a new SKJSONVisitor with the given JsonBuffer.
+     *
+     * JsonObject references returned by processUpdate() will be valid as long
+     * as the JsonBuffer is valid and not cleared.
+     *
+     * You can pass a StaticJsonBuffer or a DynamicJsonBuffer here.
+     */
+    SKJSONVisitor(JsonBuffer& jsonBuffer) : _jsonBuffer(jsonBuffer) {};
 
-    const SKUpdate &u = nmeaParser.parse(sourceInput, String(line.c_str()));
-
-    std::cout << "Update contains: " << u.getSize() << " values and uses " << u.getSizeBytes() << " bytes." << std::endl;
-    JsonObject &o = v.processUpdate(u);
-    std::cout << o << std::endl;
-  }
-}
+    /**
+     * Process a SKUpdate and add messages to the internal queue of messages.
+     */
+    JsonObject& processUpdate(const SKUpdate& update);
+};

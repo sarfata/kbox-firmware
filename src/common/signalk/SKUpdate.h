@@ -45,6 +45,10 @@ class SKUpdate {
      */
     virtual int getSize() const = 0;
 
+    /** Calculate the size of this update in memory.
+     */
+    virtual int getSizeBytes() const = 0;
+
     /**
      * Returns the context of the values in this update.
      */
