@@ -30,16 +30,47 @@
 
 #include "SKJSONVisitor.h"
 
+void SKJSONVisitor::processSource(const SKSource &source, JsonObject &sourceObject) {
+  sourceObject["label"] = source.getLabel().c_str();
+
+  switch (source.getInput()) {
+    case SKSourceInputUnknown:
+      sourceObject["type"] = "unknown";
+      break;
+    case SKSourceInputNMEA2000:
+      sourceObject["type"] = "NMEA2000";
+      //FIXME: add PGN when we will start parsing NMEA2000 messages.
+      break;
+    case SKSourceInputNMEA0183_1:
+    case SKSourceInputNMEA0183_2:
+      sourceObject["type"] = "NMEA0183";
+      sourceObject["talker"] = source.getTalker().c_str();
+      sourceObject["sentence"] = source.getSentence().c_str();
+      break;
+  }
+}
+
 JsonObject& SKJSONVisitor::processUpdate(const SKUpdate& update) {
   JsonObject &root = _jsonBuffer.createObject();
   root["context"] = _jsonBuffer.strdup(update.getContext().getMRN().c_str());
+
   JsonArray &jsonUpdates = root.createNestedArray("updates");
+  JsonObject &thisUpdate = jsonUpdates.createNestedObject();
+
+  JsonObject &source = thisUpdate.createNestedObject("source");
+  processSource(update.getSource(), source);
+
+  if (update.getTimestamp().getTime() != 0) {
+    thisUpdate["timestamp"] = _jsonBuffer.strdup(update.getTimestamp().toString().c_str());
+  }
+
+  JsonArray &values = thisUpdate.createNestedArray("values");
 
   for (int i = 0; i < update.getSize(); i++) {
     const SKPath &p = update.getPath(i);
     const SKValue &v = update.getValue(i);
 
-    JsonObject &obj = jsonUpdates.createNestedObject();
+    JsonObject &obj = values.createNestedObject();
     obj["path"] = _jsonBuffer.strdup(p.toString().c_str());
     switch (v.getType()) {
       case SKValue::SKValueTypeNone:

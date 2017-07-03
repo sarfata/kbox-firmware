@@ -34,6 +34,7 @@
 template <int capacity> class SKUpdateStatic : public SKUpdate {
   private:
     SKSource _source = SKSourceUnknown;
+    SKTime _timestamp;
     const SKContext& _context;
 
     // Very simple hash-type data structure
@@ -49,7 +50,7 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
     SKUpdateStatic() : _context(SKContextSelf) {};
 
     /**
-     * Create a new SKUpdate object, with the given contextn and with an empty
+     * Create a new SKUpdate object, with the given context and with an empty
      * list that can hold at most `size` values.
      */
     SKUpdateStatic(const SKContext& context) : _context(context) {};
@@ -88,6 +89,14 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
      */
     void setSource(const SKSource& source) {
       _source = source;
+    };
+
+    const SKTime& getTimestamp() const override {
+      return _timestamp;
+    };
+
+    void setTimestamp(const SKTime& timestamp) {
+      _timestamp = timestamp;
     };
 
     int getSize() const override {

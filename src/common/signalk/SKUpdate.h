@@ -29,6 +29,7 @@
 #include "SKContext.h"
 #include "SKPath.h"
 #include "SKValue.h"
+#include "SKTime.h"
 
 /**
  * Represents a SignalK update message.
@@ -58,6 +59,11 @@ class SKUpdate {
      * Returns the source of the values in this update.
      */
     virtual const SKSource& getSource() const = 0;
+
+    /**
+     * Return the timestamp of this update.
+     */
+    virtual const SKTime& getTimestamp() const = 0;
 
     /**
      * Return path at given index or SKPathInvalid if index

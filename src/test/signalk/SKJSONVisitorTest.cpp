@@ -43,35 +43,49 @@ TEST_CASE("SKJSONVisitor") {
 
     CHECK( o.containsKey("context") );
     CHECK( o.containsKey("updates") );
+    CHECK( o["updates"].is<JsonArray>() );
 
-    if (o.containsKey("updates") && o.is<JsonArray>("updates")) {
-      JsonArray &a = o["updates"];
+    CHECK( o["updates"].size() == 1 );
+    JsonObject &u = o["updates"][0];
 
-      CHECK(a.size() == 0);
-    }
+    CHECK( u.containsKey("source") );
+    CHECK( !u.containsKey("timestamp") );
+    CHECK( u.containsKey("values") );
+    CHECK( u["values"].as<JsonArray>().size() == 0 );
   }
 
-  SECTION("update with one key") {
+  SECTION("empty update with a timestamp") {
+    update.setTimestamp(SKTime(409516200));
+
+    JsonObject &o = jsonVisitor.processUpdate(update);
+
+    CHECK( o["updates"][0].is<JsonObject>() );
+    CHECK( o["updates"][0]["timestamp"] == "1982-12-23T18:30:00Z" );
+  }
+
+  SECTION("update from one source at one time") {
     update.setElectricalBatteriesVoltage("starter", 12.0);
+    update.setTimestamp(SKTime(409516200));
 
     JsonObject &o = jsonVisitor.processUpdate(update);
 
     CHECK( o.containsKey("updates") );
+    CHECK( o["updates"].is<JsonArray>() );
 
-    JsonObject &voltageUpdate = o["updates"][0];
+    JsonArray &updates = o["updates"].as<JsonArray>();
+
+    CHECK( updates.size() == 1 );
+    CHECK( updates[0].is<JsonObject>() );
+
+    JsonObject &update = updates[0].as<JsonObject&>();
+
+    CHECK( update.containsKey("source") );
+    CHECK( update.containsKey("timestamp") );
+    CHECK( update.containsKey("values") );
+
+    JsonObject &voltageUpdate = update["values"][0];
     CHECK(voltageUpdate != JsonObject::invalid());
-
-    if (voltageUpdate.containsKey("path")) {
-      CHECK(voltageUpdate["path"].as<std::string>() == "electrical.batteries.starter.voltage");
-    }
-    else {
-      CHECK(false);
-    }
-    if (voltageUpdate.containsKey("value")) {
-      CHECK(voltageUpdate["value"] == 12.0);
-    }
-    else {
-      CHECK(false);
-    }
+    CHECK(voltageUpdate["path"].as<std::string>() == "electrical.batteries.starter.voltage");
+    CHECK(voltageUpdate["value"] == 12.0);
   }
 }

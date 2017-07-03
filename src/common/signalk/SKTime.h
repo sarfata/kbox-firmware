@@ -30,29 +30,49 @@
 
 #pragma once
 
-#include <ArduinoJson.h>
-#include "SKVisitor.h"
+#include <stdint.h>
+#include <WString.h>
 
-
-class SKJSONVisitor {
+/**
+ * Representation of UTC time.
+ *
+ * SignalK specifies that timestamp are represented in RFC3339 format, always
+ * in UTC. The spec uses the regexp `.*Z`. We chose to use a unix timestamp and
+ * to add fractional milliseconds on top.
+ *
+ */
+class SKTime {
   private:
-    JsonBuffer &_jsonBuffer;
-
-    void processSource(const SKSource &source, JsonObject &sourceObject);
+    uint32_t _timestamp;
+    uint16_t _milliseconds;
+    static const uint16_t unknownMilliseconds = 1042;
 
   public:
-    /**
-     * Create a new SKJSONVisitor with the given JsonBuffer.
-     *
-     * JsonObject references returned by processUpdate() will be valid as long
-     * as the JsonBuffer is valid and not cleared.
-     *
-     * You can pass a StaticJsonBuffer or a DynamicJsonBuffer here.
-     */
-    SKJSONVisitor(JsonBuffer& jsonBuffer) : _jsonBuffer(jsonBuffer) {};
+    SKTime() : _timestamp(0), _milliseconds(0) {};
+    SKTime(uint32_t time) : _timestamp(time), _milliseconds(unknownMilliseconds) {};
+    SKTime(uint32_t time, uint16_t ms) : _timestamp(time), _milliseconds(ms) {
+      if (_milliseconds >= 1000) {
+        _milliseconds = unknownMilliseconds;
+      }
+    };
 
-    /**
-     * Process a SKUpdate and add messages to the internal queue of messages.
-     */
-    JsonObject& processUpdate(const SKUpdate& update);
+    uint32_t getTime() const {
+      return _timestamp;
+    };
+
+    bool hasMilliseconds() const {
+      return _milliseconds != unknownMilliseconds;
+    };
+
+    uint16_t getMilliseconds() const {
+      if (_milliseconds == unknownMilliseconds) {
+        return 0;
+      }
+      else {
+        return _milliseconds;
+      }
+    };
+
+    String toString() const;
 };
+
