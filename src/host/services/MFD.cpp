@@ -87,10 +87,6 @@ void MFD::loop() {
   }
   for (LinkedList<Event*>::iterator it = events.begin(); it != events.end(); it++) {
     // Forward the event to the current page. If the handler returns false, skip to next page.
-    if ((*it)->getEventType() == EventType::EventTypeButton) {
-      ButtonEvent *be = static_cast<ButtonEvent* >(*it);
-      DEBUG("Processing button event with type: %i", be->clickType);
-    }
     if (!(*pageIterator)->processEvent(**it)) {
       DEBUG("Going to next page.");
       (*pageIterator)->willDisappear();
