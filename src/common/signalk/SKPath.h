@@ -85,6 +85,45 @@ class SKPath {
     };
 
     /**
+     * Return the full path, with index if required.
+     */
+    String toString() const {
+      String path;
+
+      switch (_p) {
+        case SKPathEnvironmentOutsidePressure:
+          path = "environment.outside.pressure";
+          break;
+        case SKPathNavigationAttitude:
+          path = "navigation.attitude";
+          break;
+        case SKPathNavigationCourseOverGroundTrue:
+          path = "navigation.courseOverGroundTrue";
+          break;
+        case SKPathNavigationHeadingMagnetic:
+          path = "navigation.headingMagnetic";
+          break;
+        case SKPathNavigationPosition:
+          path = "navigation.position";
+          break;
+        case SKPathNavigationSpeedOverGround:
+          path = "navigation.speedOverGround";
+          break;
+
+        case SKPathElectricalBatteriesVoltage:
+          path = "electrical.batteries." + _index + ".voltage";
+          break;
+
+        case SKPathInvalidPath:
+        case SKPathEnumIndexedPaths:
+          path = "invalid";
+          break;
+      }
+
+      return path;
+    };
+
+    /**
      * Return true if this path is indexed.
      */
     bool isIndexed() const {

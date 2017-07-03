@@ -37,6 +37,8 @@ TEST_CASE("SKPath") {
     SKPath p = SKPathNavigationSpeedOverGround;
     // and == too
     CHECK( p == SKPathNavigationSpeedOverGround );
+
+    CHECK( p.toString() == "navigation.speedOverGround" );
   }
 
   SECTION("indexed paths") {
@@ -52,6 +54,7 @@ TEST_CASE("SKPath") {
     CHECK( p2.isIndexed() );
     CHECK( p2.getIndex() == "engine" );
     CHECK( p2.getStaticPath() == SKPathElectricalBatteriesVoltage );
+    CHECK( p2.toString() == "electrical.batteries.engine.voltage" );
 
     SKPath p3 = SKPath(SKPathElectricalBatteriesVoltage, "starter");
     CHECK( p == p3 );
