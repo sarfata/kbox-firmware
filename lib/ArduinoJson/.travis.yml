@@ -44,6 +44,12 @@ matrix:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-5']
       env: SCRIPT=cmake GCC=5 SANITIZE=undefined
+    - compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-6']
+      env: SCRIPT=cmake GCC=6
     - compiler: clang
       env: SCRIPT=cmake
     - compiler: clang
@@ -77,27 +83,13 @@ matrix:
       compiler: clang
       env: SCRIPT=cmake
     - os: osx
-      osx_image: xcode7
-      compiler: clang
-      env: SCRIPT=cmake
-    - os: osx
-      osx_image: xcode7.1
-      compiler: clang
-      env: SCRIPT=cmake
-    - os: osx
-      osx_image: xcode7.2
-      compiler: clang
-      env: SCRIPT=cmake
-    - os: osx
       osx_image: xcode7.3
       compiler: clang
       env: SCRIPT=cmake SANITIZE=address
     - env: SCRIPT=arduino VERSION=1.6.7 BOARD=arduino:avr:uno
     - env: SCRIPT=arduino VERSION=1.8.2 BOARD=arduino:avr:uno
     - env: SCRIPT=platformio BOARD=uno
-    - env: SCRIPT=platformio BOARD=due
     - env: SCRIPT=platformio BOARD=esp01
-    #- env: SCRIPT=platformio BOARD=teensy31C
 cache:
   directories:
     - "~/.platformio"

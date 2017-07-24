@@ -43,7 +43,7 @@ class SKUpdate {
      * Returns the number of values in this update (it might be less than the
      * capacity).
      */
-    virtual int getSize() const = 0;
+    virtual uint16_t getSize() const = 0;
 
     /**
      * Returns the context of the values in this update.

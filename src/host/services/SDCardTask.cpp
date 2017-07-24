@@ -34,7 +34,11 @@ SDCardTask::SDCardTask() : Task("SDCard") {
 }
 
 SDCardTask::~SDCardTask() {
-  delete(sd);
+  // FIXME: Update SDFat library to more recent version that fixes this or get
+  // rid of it.
+  // Do not delete SD because the constructor is non-virtual which causes a
+  // Warning.
+  //delete(sd);
 }
 
 void SDCardTask::setup() {
