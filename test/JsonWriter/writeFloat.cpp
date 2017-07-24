@@ -5,109 +5,112 @@
 // https://bblanchon.github.io/ArduinoJson/
 // If you like this project, please add a star!
 
-#include <gtest/gtest.h>
+#include <catch.hpp>
 #include <limits>
+#include <string>
 
+#include <ArduinoJson/Serialization/DynamicStringBuilder.hpp>
 #include <ArduinoJson/Serialization/JsonWriter.hpp>
-#include <ArduinoJson/Serialization/StaticStringBuilder.hpp>
 
 using namespace ArduinoJson::Internals;
 
-class JsonWriter_WriteFloat_Tests : public testing::Test {
- protected:
-  void whenInputIs(double input, uint8_t digits = 2) {
-    StaticStringBuilder sb(buffer, sizeof(buffer));
-    JsonWriter writer(sb);
-    writer.writeFloat(input, digits);
-    returnValue = writer.bytesWritten();
+template <typename TFloat>
+void check(TFloat input, const std::string& expected) {
+  std::string output;
+  DynamicStringBuilder<std::string> sb(output);
+  JsonWriter<DynamicStringBuilder<std::string> > writer(sb);
+  writer.writeFloat(input);
+  REQUIRE(writer.bytesWritten() == output.size());
+  CHECK(expected == output);
+}
+
+TEST_CASE("JsonWriter::writeFloat(double)") {
+  SECTION("Pi") {
+    check<double>(3.14159265359, "3.141592654");
   }
 
-  void outputMustBe(const char *expected) {
-    EXPECT_STREQ(expected, buffer);
-    EXPECT_EQ(strlen(expected), returnValue);
+  SECTION("Signaling NaN") {
+    double nan = std::numeric_limits<double>::signaling_NaN();
+    check<double>(nan, "NaN");
   }
 
- private:
-  char buffer[1024];
-  size_t returnValue;
-};
+  SECTION("Quiet NaN") {
+    double nan = std::numeric_limits<double>::quiet_NaN();
+    check<double>(nan, "NaN");
+  }
 
-TEST_F(JsonWriter_WriteFloat_Tests, NaN) {
-  whenInputIs(std::numeric_limits<double>::signaling_NaN());
-  outputMustBe("NaN");
+  SECTION("Infinity") {
+    double inf = std::numeric_limits<double>::infinity();
+    check<double>(inf, "Infinity");
+    check<double>(-inf, "-Infinity");
+  }
+
+  SECTION("Zero") {
+    check<double>(0.0, "0");
+    check<double>(-0.0, "0");
+  }
+
+  SECTION("Espilon") {
+    check<double>(2.2250738585072014E-308, "2.225073859e-308");
+    check<double>(-2.2250738585072014E-308, "-2.225073859e-308");
+  }
+
+  SECTION("Max double") {
+    check<double>(1.7976931348623157E+308, "1.797693135e308");
+    check<double>(-1.7976931348623157E+308, "-1.797693135e308");
+  }
+
+  SECTION("Big exponent") {
+    // this test increases coverage of normalize()
+    check<double>(1e255, "1e255");
+    check<double>(1e-255, "1e-255");
+  }
+
+  SECTION("Exponentation when <= 1e-5") {
+    check<double>(1e-4, "0.0001");
+    check<double>(1e-5, "1e-5");
+
+    check<double>(-1e-4, "-0.0001");
+    check<double>(-1e-5, "-1e-5");
+  }
+
+  SECTION("Exponentation when >= 1e7") {
+    check<double>(9999999.999, "9999999.999");
+    check<double>(10000000.0, "1e7");
+
+    check<double>(-9999999.999, "-9999999.999");
+    check<double>(-10000000.0, "-1e7");
+  }
+
+  SECTION("Rounding when too many decimals") {
+    check<double>(0.000099999999999, "0.0001");
+    check<double>(0.0000099999999999, "1e-5");
+    check<double>(0.9999999996, "1");
+  }
+
+  SECTION("9 decimal places") {
+    check<double>(0.100000001, "0.100000001");
+    check<double>(0.999999999, "0.999999999");
+
+    check<double>(9.000000001, "9.000000001");
+    check<double>(9.999999999, "9.999999999");
+  }
+
+  SECTION("10 decimal places") {
+    check<double>(0.1000000001, "0.1");
+    check<double>(0.9999999999, "1");
+
+    check<double>(9.0000000001, "9");
+    check<double>(9.9999999999, "10");
+  }
 }
 
-TEST_F(JsonWriter_WriteFloat_Tests, PositiveInfinity) {
-  whenInputIs(std::numeric_limits<double>::infinity());
-  outputMustBe("Infinity");
-}
+TEST_CASE("JsonWriter::writeFloat(float)") {
+  SECTION("Pi") {
+    check<float>(3.14159265359f, "3.141593");
+  }
 
-TEST_F(JsonWriter_WriteFloat_Tests, NegativeInfinity) {
-  whenInputIs(-std::numeric_limits<double>::infinity());
-  outputMustBe("-Infinity");
-}
-
-TEST_F(JsonWriter_WriteFloat_Tests, Zero) {
-  whenInputIs(0);
-  outputMustBe("0.00");
-}
-
-TEST_F(JsonWriter_WriteFloat_Tests, ZeroDigits_Rounding) {
-  whenInputIs(9.5, 0);
-  outputMustBe("10");
-}
-
-TEST_F(JsonWriter_WriteFloat_Tests, ZeroDigits_NoRounding) {
-  whenInputIs(9.4, 0);
-  outputMustBe("9");
-}
-
-TEST_F(JsonWriter_WriteFloat_Tests, OneDigit_Rounding) {
-  whenInputIs(9.95, 1);
-  outputMustBe("10.0");
-}
-
-TEST_F(JsonWriter_WriteFloat_Tests, OneDigit_NoRounding) {
-  whenInputIs(9.94, 1);
-  outputMustBe("9.9");
-}
-
-TEST_F(JsonWriter_WriteFloat_Tests, TwoDigits_Rounding) {
-  whenInputIs(9.995, 2);
-  outputMustBe("10.00");
-}
-
-TEST_F(JsonWriter_WriteFloat_Tests, TwoDigits_NoRounding) {
-  whenInputIs(9.994, 2);
-  outputMustBe("9.99");
-}
-
-TEST_F(JsonWriter_WriteFloat_Tests, ThreeDigits_Rounding) {
-  whenInputIs(9.9995, 3);
-  outputMustBe("10.000");
-}
-
-TEST_F(JsonWriter_WriteFloat_Tests, ThreeDigits_NoRounding) {
-  whenInputIs(9.9994, 3);
-  outputMustBe("9.999");
-}
-
-TEST_F(JsonWriter_WriteFloat_Tests, FourDigits_Rounding) {
-  whenInputIs(9.99995, 4);
-  outputMustBe("10.0000");
-}
-
-TEST_F(JsonWriter_WriteFloat_Tests, FourDigits_NoRounding) {
-  whenInputIs(9.99994, 4);
-  outputMustBe("9.9999");
-}
-
-TEST_F(JsonWriter_WriteFloat_Tests, FiveDigits_Rounding) {
-  whenInputIs(9.999995, 5);
-  outputMustBe("10.00000");
-}
-
-TEST_F(JsonWriter_WriteFloat_Tests, FiveDigits_NoRounding) {
-  whenInputIs(9.999994, 5);
-  outputMustBe("9.99999");
+  SECTION("999.9") {  // issue #543
+    check<float>(999.9f, "999.9");
+  }
 }

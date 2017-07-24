@@ -39,6 +39,15 @@ process()
 
 cd $(dirname $0)/../
 INCLUDED=()
-process include/ArduinoJson.h true > ../ArduinoJson-$TAG.h
+process src/ArduinoJson.h true > ../ArduinoJson-$TAG.h
+g++ -x c++ -c -o ../smoketest.o - <<END
+#include "../ArduinoJson-$TAG.h"
+int main() {}
+END
+
 INCLUDED=()
-process include/ArduinoJson.hpp true > ../ArduinoJson-$TAG.hpp
+process src/ArduinoJson.hpp true > ../ArduinoJson-$TAG.hpp
+g++ -x c++ -c -o ../smoketest.o - <<END
+#include "../ArduinoJson-$TAG.hpp"
+int main() {}
+END
