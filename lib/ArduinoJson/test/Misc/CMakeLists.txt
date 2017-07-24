@@ -7,6 +7,7 @@
 
 add_executable(MiscTests 
 	deprecated.cpp
+	FloatParts.cpp
 	std_stream.cpp
 	std_string.cpp
 	StringBuilder.cpp
@@ -15,5 +16,5 @@ add_executable(MiscTests
 	vla.cpp
 )
 
-target_link_libraries(MiscTests gtest)
+target_link_libraries(MiscTests catch)
 add_test(Misc MiscTests)
