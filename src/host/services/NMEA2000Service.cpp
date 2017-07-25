@@ -23,11 +23,12 @@
 */
 
 #include <NMEA2000.h>
+#include <Seasmart.h>
 #include <N2kMessages.h>
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
+#include <TimeLib.h>
 #include "common/stats/KBoxMetrics.h"
-#include "common/nmea/nmea2000.h"
 #include "common/signalk/SKUpdate.h"
 #include "NMEA2000Service.h"
 
@@ -40,7 +41,7 @@ static void handler(const tN2kMsg &msg) {
 
 void NMEA2000Service::publishN2kMessage(const tN2kMsg& msg) {
   KBoxMetrics.event(KBoxEventNMEA2000MessageReceived);
-  NMEA2000Message m(msg);
+  NMEA2000Message m(msg, now());
   sendMessage(m);
 }
 
@@ -91,9 +92,9 @@ void NMEA2000Service::sendN2kMessage(const tN2kMsg& msg) {
       msg.Source,
       msg.Destination, msg.DataLen, result ? "success":"fail");
 
-  char *pcdin = nmea_pcdin_sentence_for_n2kmsg(msg, 0);
+  char pcdin[100];
+  N2kToSeasmart(msg, now(), pcdin, sizeof(pcdin));
   DEBUG("TX: %s", pcdin);
-  free(pcdin);
 
   if (result) {
     KBoxMetrics.event(KBoxEventNMEA2000MessageSent);
@@ -104,13 +105,19 @@ void NMEA2000Service::sendN2kMessage(const tN2kMsg& msg) {
 }
 
 void NMEA2000Service::loop() {
+  // Both incoming and outgoing messages are handled by interrupts.
+
+  // Incoming messages are stored in a circular buffer by the NMEA2000 library
+  // Right now this buffer is set to 32 messages. At 100% NMEA2000 bus
+  // capacity, that would mean the buffer would fill in about 10ms so we should
+  // call ParseMessages() at least every 10ms.
   NMEA2000.ParseMessages();
 
   if (_skVisitor.getMessages().size() > 0) {
-    // FIXME: We should move the messages into a circular buffer.
-    // This code will block too long if there are more than 4 messages.
     for (LinkedListConstIterator<tN2kMsg*> it = _skVisitor.getMessages().begin();
         it != _skVisitor.getMessages().end(); it++) {
+      // Outgoing messages are pushed into a circular buffer in the NMEA2000
+      // library. Currently set to 40 messages.
       sendN2kMessage(**it);
     }
     _skVisitor.flushMessages();

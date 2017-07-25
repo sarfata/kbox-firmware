@@ -69,18 +69,18 @@ class NMEASentence : public KMessage {
 class NMEA2000Message: public KMessage {
   private:
     tN2kMsg msg;
-    unsigned long int received_ms;
+    uint32_t received_time;
 
   public:
     NMEA2000Message(tN2kMsg m) : NMEA2000Message(m, 0) {};
-    NMEA2000Message(tN2kMsg m, uint32_t received_ms) : msg(m), received_ms(received_ms) {};
+    NMEA2000Message(tN2kMsg m, uint32_t received_time) : msg(m), received_time(received_time) {};
 
     const tN2kMsg& getN2kMsg() const {
       return msg;
     };
 
-    uint32_t getReceivedMillis() const {
-      return received_ms;
+    uint32_t getReceivedTime() const {
+      return received_time;
     };
 
     void accept(KVisitor &v) const {

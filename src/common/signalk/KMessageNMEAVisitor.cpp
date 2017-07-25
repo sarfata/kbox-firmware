@@ -22,9 +22,9 @@
   THE SOFTWARE.
 */
 
+#include <Seasmart.h>
 #include "KMessageNMEAVisitor.h"
 #include "nmea/NMEASentenceBuilder.h"
-#include "nmea/nmea2000.h"
 
 void KMessageNMEAVisitor::visit(const NMEASentence& s) {
   nmeaContent += s.getSentence() + "\r\n";
@@ -34,8 +34,11 @@ void KMessageNMEAVisitor::visit(const NMEA2000Message &n2km) {
   // $PCDIN,<PGN 6>,<Timestamp 8>,<src 2>,<data>*20
 
   const tN2kMsg& msg = n2km.getN2kMsg();
-  char *s = nmea_pcdin_sentence_for_n2kmsg(msg, n2km.getReceivedMillis() / 1000);
-  nmeaContent += String(s) + "\r\n";
-  free(s);
+
+  if (msg.DataLen < 500) {
+    char pcdin[30 + msg.DataLen * 2];
+    N2kToSeasmart(msg, n2km.getReceivedTime(), pcdin, sizeof(pcdin));
+    nmeaContent += String(pcdin) + "\r\n";
+  }
 }
 
