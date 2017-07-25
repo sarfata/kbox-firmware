@@ -35,13 +35,6 @@ std::ostream& operator << ( std::ostream& os, String const& value ) {
     return os;
 }
 
-extern "C" {
-// So that millis() work
-uint32_t millis() {
-  return 42;
-}
-}
-
 void debug(const char *fname, int lineno, const char *fmt, ... ) {
   printf("%s: %i ", fname, lineno);
   char tmp[128]; // resulting string limited to 128 chars

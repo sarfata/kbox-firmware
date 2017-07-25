@@ -33,6 +33,12 @@ extern "C" {
 #endif
 
 #include <stdio.h>
+#include <stdint.h>
+
+// So that millis() work
+uint32_t millis() {
+  return 42;
+}
 
 char * ultoa(unsigned int val, char *buf, int radix) {
   if (radix == 8) {

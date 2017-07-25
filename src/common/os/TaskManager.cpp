@@ -89,7 +89,7 @@ void TaskManager::displayStats() {
 
 void TaskManager::restartStats() {
   if (taskStats) {
-    delete(taskStats);
+    delete[] taskStats;
   }
-  taskStats = new(RunStat[tasks.size()]);
+  taskStats = new RunStat[tasks.size()];
 }
