@@ -68,7 +68,8 @@ bool PersistentStorage::read(uint16_t address, void *dest, uint16_t size) {
     return false;
   }
 
-  eeprom_read_block(dest, (void*)address, size);
+  uint32_t addressIndex = address;
+  eeprom_read_block(dest, (void*)addressIndex, size);
   return true;
 }
 
@@ -77,7 +78,8 @@ bool PersistentStorage::write(uint16_t address, const void *src, uint16_t size) 
     return false;
   }
 
-  eeprom_write_block(src, (void*)address, size);
+  uint32_t addressIndex = address;
+  eeprom_write_block(src, (void*)addressIndex, size);
 
   return true;
 }
