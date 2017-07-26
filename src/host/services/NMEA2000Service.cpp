@@ -32,6 +32,7 @@
 #include "common/stats/KBoxMetrics.h"
 #include "common/signalk/SKUpdate.h"
 #include "common/algo/crc.h"
+#include "common/version/KBoxVersion.h"
 #include "host/util/PersistentStorage.h"
 #include "NMEA2000Service.h"
 
@@ -123,7 +124,7 @@ void NMEA2000Service::initializeNMEA2000() {
   snprintf(serialNumberString, sizeof(serialNumberString), "%08lX%08lX%08lX%08lX",
       serialNumber[0], serialNumber[1], serialNumber[2], serialNumber[3]);
 
-  NMEA2000.SetProductInformation(serialNumberString, 1, "KBox", "0.2.0", "v1");
+  NMEA2000.SetProductInformation(serialNumberString, 1, "KBox", KBOX_VERSION, "KBox");
 
   // Generate a unique identifier using a CRC32 of the 128bits unique MCU
   // identifier. Only 21 bits will be used.
