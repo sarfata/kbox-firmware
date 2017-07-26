@@ -40,6 +40,9 @@ class NMEA2000Service : public Task, public SKSubscriber,
     unsigned int _imuSequence;
     SKNMEA2000Visitor _skVisitor;
 
+    const uint32_t deviceIdGateway = 0;
+    const uint32_t deviceIdIMU = 1;
+    const uint32_t deviceIdGPS = 2;
 
     void sendN2kMessage(const tN2kMsg& msg);
 

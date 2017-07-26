@@ -124,7 +124,13 @@ void NMEA2000Service::initializeNMEA2000() {
   snprintf(serialNumberString, sizeof(serialNumberString), "%08lX%08lX%08lX%08lX",
       serialNumber[0], serialNumber[1], serialNumber[2], serialNumber[3]);
 
-  NMEA2000.SetProductInformation(serialNumberString, 1, "KBox", KBOX_VERSION, "KBox");
+  NMEA2000.SetDeviceCount(3);
+  NMEA2000.SetProductInformation(serialNumberString, 1, "KBox Gateway",
+      KBOX_VERSION, "KBox Gateway", 0xff, 0xffff, 0xff, deviceIdGateway);
+  NMEA2000.SetProductInformation(serialNumberString, 2, "KBox IMU",
+      KBOX_VERSION, "KBox IMU", 0xff, 0xffff, 0xff, deviceIdIMU);
+  NMEA2000.SetProductInformation(serialNumberString, 3, "KBox GPS",
+      KBOX_VERSION, "KBox GPS", 0xff, 0xffff, 0xff, deviceIdGPS);
 
   // Generate a unique identifier using a CRC32 of the 128bits unique MCU
   // identifier. Only 21 bits will be used.
@@ -133,7 +139,9 @@ void NMEA2000Service::initializeNMEA2000() {
   // Class 25 and Function 130 => Register on network as a PC Gateway.
   // See: http://www.nmea.org/Assets/20120726%20nmea%202000%20class%20&%20function%20codes%20v%202.00.pdf
   // 42 (manufacturer code) Just choosen free from code list on http://www.nmea.org/Assets/20121020%20nmea%202000%20registration%20list.pdf
-  NMEA2000.SetDeviceInformation(uniqueId, 130, 25, 42);
+  NMEA2000.SetDeviceInformation(uniqueId, 130, 25, 42, 4, deviceIdGateway);
+  NMEA2000.SetDeviceInformation(uniqueId+1, 130, 75, 42, 4, deviceIdIMU);
+  NMEA2000.SetDeviceInformation(uniqueId+2, 170, 35, 42, 4, deviceIdGPS);
 
   struct PersistentStorage::NMEA2000Parameters p;
   if (PersistentStorage::readNMEA2000Parameters(p)) {
