@@ -1025,13 +1025,13 @@ uint8_t tNMEA2000::SetN2kCANBufMsg(unsigned long canId, unsigned char len, unsig
               N2kCANMsgBuf[MsgIndex].LastFrame=buf[0];
               CopyBufToCANMsg(N2kCANMsgBuf[MsgIndex],1,len,buf);
             } else { // We have lost frame, so free this
-              N2kFrameInDbg(millis()); N2kFrameInDbg(", Lost frame ");  N2kFrameInDbg(N2kCANMsgBuf[MsgIndex].LastFrame); N2kFrameInDbg("/");  N2kFrameInDbg(buf[0]); 
+              N2kFrameInDbg(millis()); N2kFrameInDbg(", Lost frame ");  N2kFrameInDbg(N2kCANMsgBuf[MsgIndex].LastFrame); N2kFrameInDbg("/");  N2kFrameInDbg(buf[0]);
               N2kFrameInDbg(", source ");  N2kFrameInDbg(Source); N2kFrameInDbg(" for: "); N2kFrameInDbgln(PGN);
               N2kCANMsgBuf[MsgIndex].FreeMessage();
               MsgIndex=MaxN2kCANMsgs;
             }
           } else {  // Orphan frame
-              N2kFrameInDbg(millis()); N2kFrameInDbg(", Orphan frame "); N2kFrameInDbg(buf[0]); N2kFrameInDbg(", source ");  
+              N2kFrameInDbg(millis()); N2kFrameInDbg(", Orphan frame "); N2kFrameInDbg(buf[0]); N2kFrameInDbg(", source ");
               N2kFrameInDbg(Source); N2kFrameInDbg(" for: "); N2kFrameInDbgln(PGN);
           }
         } else { // Handle first frame
@@ -1428,28 +1428,35 @@ void tNMEA2000::HandleISOAddressClaim(const tN2kMsg &N2kMsg) {
 }
 
 //*****************************************************************************
+void tNMEA2000::HandleCommandedAddress(uint64_t CommandedName, unsigned char NewAddress, int iDev) {
+  if (Devices[iDev].DeviceInformation.GetName() == CommandedName &&
+      Devices[iDev].N2kSource!=NewAddress) { // We have been commanded to set our address
+    Devices[iDev].N2kSource=NewAddress;
+    StartAddressClaim(iDev);
+    AddressChanged=true;
+  }
+}
+
+//*****************************************************************************
 void tNMEA2000::HandleCommandedAddress(const tN2kMsg &N2kMsg) {
   N2kMsgDbg(millis()); N2kMsgDbg(" Commanded address:"); N2kMsgDbgln(N2kMsg.Destination);
+
+  if ( N2kMsg.PGN!=65240L || N2kMsg.DataLen!=9 ) return;
+
   int iDev=FindSourceDeviceIndex(N2kMsg.Destination);
-    if ( N2kMsg.Destination!=0xff && iDev==-1) return; // if destination is not for us, we do nothing
+    if ( !tNMEA2000::IsBroadcast(N2kMsg.Destination) && iDev==-1) return; // if destination is not for us, we do nothing
 
-    if ( iDev==-1 ) iDev=0; // Should be handled for all, but no support yet.
+  int Index=0;
+  uint64_t CommandedName=N2kMsg.GetUInt64(Index);
+  unsigned char NewAddress=N2kMsg.GetByte(Index);
 
-  uint64_t *CommandedName;
-  unsigned char NewAddress;
-
-    if ( N2kMsg.DataLen!=9 ) return;
-
-    CommandedName=(uint64_t *)(N2kMsg.Data);
-    NewAddress=N2kMsg.Data[8];
-
-    if (Devices[iDev].DeviceInformation.GetName() == *CommandedName &&
-        Devices[iDev].N2kSource!=NewAddress) { // We have been commanded to set our address
-      Devices[iDev].N2kSource=NewAddress;
-      StartAddressClaim(iDev);
-      AddressChanged=true;
+    if ( iDev==-1 ) {
+      for (iDev=0; iDev<DeviceCount; iDev++) HandleCommandedAddress(CommandedName,NewAddress,iDev);
+    } else {
+      HandleCommandedAddress(CommandedName,NewAddress,iDev);
     }
 }
+
 
 //*****************************************************************************
 bool tNMEA2000::ReadResetAddressChanged() {

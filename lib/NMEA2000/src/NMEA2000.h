@@ -88,8 +88,8 @@ protected:
       unsigned char DeviceFunction;
       unsigned char DeviceClass;
     // I found document: http://www.novatel.com/assets/Documents/Bulletins/apn050.pdf it says about next fields:
-    // The System Instance Field can be utilized to facilitate multiple NMEA 2000 networks on these larger marine platforms. 
-    // NMEA 2000 devices behind a bridge, router, gateway, or as part of some network segment could all indicate this by use 
+    // The System Instance Field can be utilized to facilitate multiple NMEA 2000 networks on these larger marine platforms.
+    // NMEA 2000 devices behind a bridge, router, gateway, or as part of some network segment could all indicate this by use
     // and application of the System Instance Field.
     // DeviceInstance and SystemInstance fields can be now changed by function SetDeviceInformationInstances or
     // by NMEA 2000 group function. Group function handling is build in the library.
@@ -147,7 +147,7 @@ public:
       const char *InstallationDescription1;
       const char *InstallationDescription2;
   };
-  
+
 protected:
   class tDevice {
   public:
@@ -163,7 +163,7 @@ protected:
     // Transmit and receive PGNs
     const unsigned long *TransmitMessages;
     const unsigned long *ReceiveMessages;
-#if !defined(N2K_NO_HEARTBEAT_SUPPORT)    
+#if !defined(N2K_NO_HEARTBEAT_SUPPORT)
     unsigned long HeartbeatInterval;
     unsigned long DefaultHeartbeatInterval;
     unsigned long NextHeartbeatSentTime;
@@ -171,12 +171,12 @@ protected:
 
 
   public:
-    tDevice() { 
+    tDevice() {
       N2kSource=0;
       ProductInformation=0; LocalProductInformation=0; ManufacturerSerialCode=0;
       PendingProductInformation=0; PendingConfigurationInformation=0; AddressClaimStarted=0;
       TransmitMessages=0; ReceiveMessages=0;
-#if !defined(N2K_NO_HEARTBEAT_SUPPORT)    
+#if !defined(N2K_NO_HEARTBEAT_SUPPORT)
       HeartbeatInterval=60000;
       DefaultHeartbeatInterval=60000;
       NextHeartbeatSentTime=60000;
@@ -209,7 +209,7 @@ protected:
     bool DeviceReady;
     bool AddressChanged;
     bool DeviceInformationChanged;
-	
+
     // Device information
     tDevice *Devices;
     int DeviceCount;
@@ -221,7 +221,7 @@ protected:
 
     const unsigned long *SingleFrameMessages[N2kMessageGroups];
     const unsigned long *FastPacketMessages[N2kMessageGroups];
-    
+
     class tCANSendFrame
     {
     public:
@@ -259,8 +259,8 @@ protected:
     virtual bool CANSendFrame(unsigned long id, unsigned char len, const unsigned char *buf, bool wait_sent=true)=0;
     virtual bool CANOpen()=0;
     virtual bool CANGetFrame(unsigned long &id, unsigned char &len, unsigned char *buf)=0;
-    // This will be called on Open() before any other initialization. Inherit this, if buffers can be set for the driver 
-    // and you want to change size of library send frame buffer size. See e.g. NMEA2000_teensy.cpp. 
+    // This will be called on Open() before any other initialization. Inherit this, if buffers can be set for the driver
+    // and you want to change size of library send frame buffer size. See e.g. NMEA2000_teensy.cpp.
     virtual void InitCANFrameBuffers();
 
 protected:
@@ -274,7 +274,7 @@ protected:
 
 protected:
     void InitDevices();
-    bool IsInitialized() { return (N2kCANMsgBuf!=0); } 
+    bool IsInitialized() { return (N2kCANMsgBuf!=0); }
     void FindFreeCANMsgIndex(unsigned long PGN, unsigned char Source, uint8_t &MsgIndex);
     uint8_t SetN2kCANBufMsg(unsigned long canId, unsigned char len, unsigned char *buf);
     bool IsFastPacket(unsigned long PGN);
@@ -292,6 +292,7 @@ protected:
     void StartAddressClaim(int iDev);
     bool IsAddressClaimStarted(int iDev);
     void HandleISOAddressClaim(const tN2kMsg &N2kMsg);
+    void HandleCommandedAddress(uint64_t CommandedName, unsigned char NewAddress, int iDev);
     void HandleCommandedAddress(const tN2kMsg &N2kMsg);
     void GetNextAddress(int DeviceIndex);
     bool IsMySource(unsigned char Source);
@@ -302,19 +303,19 @@ protected:
     bool ForwardOnlyKnownMessages() const { return ((ForwardMode&FwdModeBit_OnlyKnownMessages)>0); }
     bool ForwardOwnMessages() const { return ((ForwardMode&FwdModeBit_OwnMessages)>0); }
     bool HandleOnlyKnownMessages() const { return ((ForwardMode&HandleModeBit_OnlyKnownMessages)>0); }
-    
-    bool HandleReceivedMessage(unsigned char Destination) { 
-      return (/* HandleMessagesToAnyDestination() */ true || 
-              tNMEA2000::IsBroadcast(Destination) || 
-              FindSourceDeviceIndex(Destination)>=0); 
+
+    bool HandleReceivedMessage(unsigned char Destination) {
+      return (/* HandleMessagesToAnyDestination() */ true ||
+              tNMEA2000::IsBroadcast(Destination) ||
+              FindSourceDeviceIndex(Destination)>=0);
     }
     bool IsActiveNode() { return (N2kMode==N2km_NodeOnly || N2kMode==N2km_ListenAndNode); }
     bool IsValidDevice(int iDev) { return (iDev>=0 && iDev<DeviceCount ); }
 
-    
-#if !defined(N2K_NO_ISO_MULTI_PACKET_SUPPORT)    
+
+#if !defined(N2K_NO_ISO_MULTI_PACKET_SUPPORT)
     // Transport protocol handlers
-    bool TestHandleTPMessage(unsigned long PGN, unsigned char Source, unsigned char Destination, 
+    bool TestHandleTPMessage(unsigned long PGN, unsigned char Source, unsigned char Destination,
                              unsigned char len, unsigned char *buf,
                              uint8_t &MsgIndex);
     void SendTPCM_CTS(unsigned long PGN, unsigned char Destination, unsigned char Source, unsigned char nPackets, unsigned char NextPacketNumber);
@@ -323,14 +324,14 @@ protected:
 #endif
 public:
     tNMEA2000();
-    
+
     // Your device can show multiple devices on the bus. If you define more than on device, call this before any other setting.
     void SetDeviceCount(const uint8_t _DeviceCount);
 
     // As default there are reservation for 5 messages. If it is not critical to handle all fast packet messages like with N2km_NodeOnly
     // you can set buffer size smaller like 3 or 2 by calling this before Open().
     void SetN2kCANMsgBufSize(const uint8_t _MaxN2kCANMsgs) { if (N2kCANMsgBuf==0) { MaxN2kCANMsgs=_MaxN2kCANMsgs; }; }
-    
+
     // When sending long messages like ProductInformation or GNSS data, there may not be enough buffers for successfully send data
     // This depends of your hw and device source. Device source has effect due to priority of getting sending slot. If your data is
     // critical, use buffer size, which is large enough (default 40 frames).
@@ -422,8 +423,8 @@ public:
     void SendIsoAddressClaim(unsigned char Destination=0xff, int DeviceIndex=0);
     bool SendProductInformation(int DeviceIndex=0);
     bool SendConfigurationInformation(int DeviceIndex=0);
-	
-#if !defined(N2K_NO_HEARTBEAT_SUPPORT)    
+
+#if !defined(N2K_NO_HEARTBEAT_SUPPORT)
     // According to document https://www.nmea.org/Assets/20140102%20nmea-2000-126993%20heartbeat%20pgn%20corrigendum.pdf
     // all NMEA devices shall transmit heartbeat PGN 126993.
     // With this function you can set transmission interval in ms (range 1000-655320 ms, default 60000). Set <1000 to disable it.
