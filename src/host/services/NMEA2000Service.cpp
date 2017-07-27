@@ -179,5 +179,13 @@ void NMEA2000Service::saveNMEA2000Parameters() {
     if (!PersistentStorage::writeNMEA2000Parameters(p)) {
       ERROR("Error saving NMEA2000 parameters to flash.");
     }
+
+    // TODO: Need to persist the info for all devices!
+
+    tNMEA2000::tDeviceInformation di2 = NMEA2000.GetDeviceInformation(deviceIdIMU);
+    DEBUG("NMEA2000Parameters have changed. Saving address=%u di=%i si=%i", NMEA2000.GetN2kSource(deviceIdIMU), di2.GetDeviceInstance(), di2.GetSystemInstance());
+
+    tNMEA2000::tDeviceInformation di3 = NMEA2000.GetDeviceInformation(deviceIdGPS);
+    DEBUG("NMEA2000Parameters have changed. Saving address=%u di=%i si=%i", NMEA2000.GetN2kSource(deviceIdGPS), di3.GetDeviceInstance(), di3.GetSystemInstance());
   }
 }
