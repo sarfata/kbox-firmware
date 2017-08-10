@@ -7,7 +7,7 @@ env = DefaultEnvironment()
 version = "git-cmd-not-available"
 
 try:
-    version = subprocess.check_output("git describe").strip()
+    version = subprocess.check_output(["git", "describe"]).strip()
 except:
     pass
 
