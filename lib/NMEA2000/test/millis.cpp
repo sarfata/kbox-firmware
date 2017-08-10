@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -21,16 +21,14 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#pragma once
 
-#include "N2kMsg.h"
+#include <stdint.h>
 
-/** Allocates a new buffer and writes a NMEA2000 message in PCDIN format into
- * this buffer.
- *
- * @param msg A NMEA2000 message to encode.
- * @param timestamp The time when the message was received (unix timestamp ???).
- * @return a newly malloc'd buffer terminated by "\r\n\0" that must be free()
- */
-char *nmea_pcdin_sentence_for_n2kmsg(const tN2kMsg msg, unsigned long timestamp);
+extern "C" {
 
+// So that millis() work
+uint32_t millis() {
+  return 42;
+}
+
+}

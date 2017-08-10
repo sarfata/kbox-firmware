@@ -31,7 +31,7 @@
  * Implements a statically allocated SKUpdate. The capacity of the update is
  * defined when instantiating the object.
  */
-template <int capacity> class SKUpdateStatic : public SKUpdate {
+template <uint16_t capacity> class SKUpdateStatic : public SKUpdate {
   private:
     SKSource _source = SKSourceUnknown;
     SKTime _timestamp;
@@ -40,7 +40,7 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
     // Very simple hash-type data structure
     SKPath _paths[capacity];
     SKValue _values[capacity];
-    int _size = 0;
+    uint16_t _size = 0;
 
   public:
     /**
@@ -58,7 +58,7 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
     ~SKUpdateStatic() {};
 
     virtual bool hasPath(const SKPath &p) const override {
-      for (int i = 0; i < _size; i++) {
+      for (uint16_t i = 0; i < _size; i++) {
         if (_paths[i] == p) {
           return true;
         }
@@ -68,7 +68,7 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
 
     virtual bool setValue(const SKPath p, const SKValue v) override {
       // Update?
-      for (int i = 0; i < _size; i++) {
+      for (uint16_t i = 0; i < _size && i < capacity; i++) {
         if (_paths[i] == p) {
           _values[i] = v;
           return true;
@@ -99,7 +99,7 @@ template <int capacity> class SKUpdateStatic : public SKUpdate {
       _timestamp = timestamp;
     };
 
-    int getSize() const override {
+    uint16_t getSize() const override {
       return _size;
     };
 

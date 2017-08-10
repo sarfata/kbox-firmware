@@ -146,6 +146,7 @@
 // Control the exponentiation threshold for small numbers
 #ifndef ARDUINOJSON_NEGATIVE_EXPONENTIATION_THRESHOLD
 #define ARDUINOJSON_NEGATIVE_EXPONENTIATION_THRESHOLD 1e-5
+<<<<<<< HEAD:lib/ArduinoJson/src/ArduinoJson/Configuration.hpp
 #endif
 
 // how many bits in a double
@@ -156,6 +157,8 @@
 #else
 #define ARDUINOJSON_DOUBLE_IS_64BITS 1  // by default support 64-bit
 #endif
+=======
+>>>>>>> develop:lib/ArduinoJson/src/ArduinoJson/Configuration.hpp
 #endif
 
 #if ARDUINOJSON_USE_LONG_LONG && ARDUINOJSON_USE_INT64

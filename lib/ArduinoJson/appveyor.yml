@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 version: 5.11.0.{build}
+=======
+version: 5.11.1.{build}
+>>>>>>> develop
 environment:
   matrix:
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
