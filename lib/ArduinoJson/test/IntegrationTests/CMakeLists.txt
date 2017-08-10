@@ -10,8 +10,6 @@ add_executable(IntegrationTests
 	round_trip.cpp
 )
 
-<<<<<<< HEAD
-=======
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 	target_compile_options(IntegrationTests
 		PUBLIC
@@ -19,6 +17,5 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 	)
 endif()
 
->>>>>>> develop
 target_link_libraries(IntegrationTests catch)
 add_test(IntegrationTests IntegrationTests)

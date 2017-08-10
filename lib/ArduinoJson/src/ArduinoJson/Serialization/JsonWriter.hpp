@@ -11,13 +11,7 @@
 #include "../Data/Encoding.hpp"
 #include "../Data/JsonInteger.hpp"
 #include "../Polyfills/attributes.hpp"
-<<<<<<< HEAD:lib/ArduinoJson/src/ArduinoJson/Serialization/JsonWriter.hpp
-#include "../Polyfills/math.hpp"
-#include "../Polyfills/normalize.hpp"
-#include "../TypeTraits/FloatTraits.hpp"
-=======
 #include "../Serialization/FloatParts.hpp"
->>>>>>> develop:lib/ArduinoJson/src/ArduinoJson/Serialization/JsonWriter.hpp
 
 namespace ArduinoJson {
 namespace Internals {
@@ -31,10 +25,6 @@ namespace Internals {
 // indentation.
 template <typename Print>
 class JsonWriter {
-  static const uint8_t maxDecimalPlaces = sizeof(JsonFloat) >= 8 ? 9 : 6;
-  static const uint32_t maxDecimalPart =
-      sizeof(JsonFloat) >= 8 ? 1000000000 : 1000000;
-
  public:
   explicit JsonWriter(Print &sink) : _sink(sink), _length(0) {}
 
@@ -90,12 +80,8 @@ class JsonWriter {
     }
   }
 
-<<<<<<< HEAD:lib/ArduinoJson/src/ArduinoJson/Serialization/JsonWriter.hpp
-  void writeFloat(JsonFloat value) {
-=======
   template <typename TFloat>
   void writeFloat(TFloat value) {
->>>>>>> develop:lib/ArduinoJson/src/ArduinoJson/Serialization/JsonWriter.hpp
     if (Polyfills::isNaN(value)) return writeRaw("NaN");
 
     if (value < 0.0) {
@@ -105,23 +91,12 @@ class JsonWriter {
 
     if (Polyfills::isInfinity(value)) return writeRaw("Infinity");
 
-<<<<<<< HEAD:lib/ArduinoJson/src/ArduinoJson/Serialization/JsonWriter.hpp
-    uint32_t integralPart, decimalPart;
-    int16_t powersOf10;
-    splitFloat(value, integralPart, decimalPart, powersOf10);
-
-    writeInteger(integralPart);
-    if (decimalPart) writeDecimals(decimalPart, maxDecimalPlaces);
-
-    if (powersOf10 < 0) {
-=======
     FloatParts<TFloat> parts(value);
 
     writeInteger(parts.integral);
     if (parts.decimalPlaces) writeDecimals(parts.decimal, parts.decimalPlaces);
 
     if (parts.exponent < 0) {
->>>>>>> develop:lib/ArduinoJson/src/ArduinoJson/Serialization/JsonWriter.hpp
       writeRaw("e-");
       writeInteger(-parts.exponent);
     }
@@ -148,21 +123,9 @@ class JsonWriter {
   }
 
   void writeDecimals(uint32_t value, int8_t width) {
-<<<<<<< HEAD:lib/ArduinoJson/src/ArduinoJson/Serialization/JsonWriter.hpp
-    // remove trailing zeros
-    while (value % 10 == 0 && width > 0) {
-      value /= 10;
-      width--;
-    }
-
-    // buffer should be big enough for all digits, the dot and the null
-    // terminator
-    char buffer[maxDecimalPlaces + 2];
-=======
     // buffer should be big enough for all digits, the dot and the null
     // terminator
     char buffer[16];
->>>>>>> develop:lib/ArduinoJson/src/ArduinoJson/Serialization/JsonWriter.hpp
     char *ptr = buffer + sizeof(buffer) - 1;
 
     // write the string in reverse order
@@ -190,33 +153,6 @@ class JsonWriter {
 
  private:
   JsonWriter &operator=(const JsonWriter &);  // cannot be assigned
-<<<<<<< HEAD:lib/ArduinoJson/src/ArduinoJson/Serialization/JsonWriter.hpp
-
-  void splitFloat(JsonFloat value, uint32_t &integralPart,
-                  uint32_t &decimalPart, int16_t &powersOf10) {
-    powersOf10 = Polyfills::normalize(value);
-
-    integralPart = uint32_t(value);
-    JsonFloat remainder = value - JsonFloat(integralPart);
-
-    remainder *= maxDecimalPart;
-    decimalPart = uint32_t(remainder);
-    remainder = remainder - JsonFloat(decimalPart);
-
-    // rounding:
-    // increment by 1 if remainder >= 0.5
-    decimalPart += uint32_t(remainder * 2);
-    if (decimalPart >= maxDecimalPart) {
-      decimalPart = 0;
-      integralPart++;
-      if (powersOf10 && integralPart >= 10) {
-        powersOf10++;
-        integralPart = 1;
-      }
-    }
-  }
-=======
->>>>>>> develop:lib/ArduinoJson/src/ArduinoJson/Serialization/JsonWriter.hpp
 };
 }
 }
