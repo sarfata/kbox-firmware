@@ -32,22 +32,8 @@
 
 #include <WString.h>
 
-typedef enum {
-  SKPathInvalidPath,
-
-  SKPathEnvironmentOutsidePressure,
-  SKPathNavigationAttitude,
-  SKPathNavigationCourseOverGroundTrue,
-  SKPathNavigationHeadingMagnetic,
-  SKPathNavigationPosition,
-  SKPathNavigationSpeedOverGround,
-
-  // Marker value - Every path below requires an index.
-  SKPathEnumIndexedPaths,
-
-  SKPathElectricalBatteriesVoltage,
-
-} SKPathEnum;
+// This file includes an enum with all the SKPath values. It is generated.
+#include "SKPathEnum.generated.h"
 
 class SKPath;
 extern const SKPath SKPathInvalid;
@@ -85,45 +71,6 @@ class SKPath {
     };
 
     /**
-     * Return the full path, with index if required.
-     */
-    String toString() const {
-      String path;
-
-      switch (_p) {
-        case SKPathEnvironmentOutsidePressure:
-          path = "environment.outside.pressure";
-          break;
-        case SKPathNavigationAttitude:
-          path = "navigation.attitude";
-          break;
-        case SKPathNavigationCourseOverGroundTrue:
-          path = "navigation.courseOverGroundTrue";
-          break;
-        case SKPathNavigationHeadingMagnetic:
-          path = "navigation.headingMagnetic";
-          break;
-        case SKPathNavigationPosition:
-          path = "navigation.position";
-          break;
-        case SKPathNavigationSpeedOverGround:
-          path = "navigation.speedOverGround";
-          break;
-
-        case SKPathElectricalBatteriesVoltage:
-          path = "electrical.batteries." + _index + ".voltage";
-          break;
-
-        case SKPathInvalidPath:
-        case SKPathEnumIndexedPaths:
-          path = "invalid";
-          break;
-      }
-
-      return path;
-    };
-
-    /**
      * Return true if this path is indexed.
      */
     bool isIndexed() const {
@@ -141,5 +88,10 @@ class SKPath {
         return SKPathInvalid._index;
       }
     };
+
+    /**
+     * Return the full path, with index if required.
+     */
+    String toString() const;
 };
 

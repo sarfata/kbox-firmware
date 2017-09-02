@@ -100,75 +100,8 @@ class SKUpdate {
 
     // Syntactic sugar to make working with SKUpdates easier to read and less
     // prone to type errors.
+    // Automatically generated.
+#include "SKUpdateSyntacticSugar.generated.h"
 
-    bool hasElectricalBatteriesVoltage(String index) const {
-      return hasPath(SKPath(SKPathElectricalBatteriesVoltage, index));
-    };
-    double getElectricalBatteriesVoltage(String index) const {
-      return this->operator[](SKPath(SKPathElectricalBatteriesVoltage, index)).getNumberValue();
-    };
-    bool setElectricalBatteriesVoltage(String index, double voltage) {
-      return setValue(SKPath(SKPathElectricalBatteriesVoltage, index), voltage);
-    };
-
-    bool hasEnvironmentOutsidePressure() const {
-      return hasPath(SKPathEnvironmentOutsidePressure);
-    };
-    double getEnvironmentOutsidePressure() const {
-      return this->operator[](SKPathEnvironmentOutsidePressure).getNumberValue();
-    };
-    bool setEnvironmentOutsidePressure(double p) {
-      return this->setValue(SKPathEnvironmentOutsidePressure, p);
-    };
-
-    bool hasNavigationAttitude() const {
-      return hasPath(SKPathNavigationAttitude);
-    };
-    SKTypeAttitude getNavigationAttitude() const {
-      return this->operator[](SKPathNavigationAttitude).getAttitudeValue();
-    };
-    bool setNavigationAttitude(const SKTypeAttitude a) {
-      return this->setValue(SKPathNavigationAttitude, a);
-    };
-
-    bool hasNavigationCourseOverGroundTrue() const {
-      return hasPath(SKPathNavigationCourseOverGroundTrue);
-    };
-    double getNavigationCourseOverGroundTrue() const {
-      return this->operator[](SKPathNavigationCourseOverGroundTrue).getNumberValue();
-    };
-    bool setNavigationCourseOverGroundTrue(double cog) {
-      return setValue(SKPathNavigationCourseOverGroundTrue, SKValue(cog));
-    };
-
-    bool hasNavigationHeadingMagnetic() const {
-      return hasPath(SKPathNavigationHeadingMagnetic);
-    };
-    double getNavigationHeadingMagnetic() const {
-      return this->operator[](SKPathNavigationHeadingMagnetic).getNumberValue();
-    };
-    bool setNavigationHeadingMagnetic(double cog) {
-      return setValue(SKPathNavigationHeadingMagnetic, SKValue(cog));
-    };
-
-    bool hasNavigationPosition() const {
-      return hasPath(SKPathNavigationPosition);
-    };
-    SKTypePosition getNavigationPosition() const {
-      return this->operator[](SKPathNavigationPosition).getPositionValue();
-    };
-    bool setNavigationPosition(SKTypePosition p) {
-      return setValue(SKPathNavigationPosition, SKValue(p));
-    };
-
-    bool hasNavigationSpeedOverGround() const {
-      return hasPath(SKPathNavigationSpeedOverGround);
-    };
-    double getNavigationSpeedOverGround() const {
-      return this->operator[](SKPathNavigationSpeedOverGround).getNumberValue();
-    };
-    bool setNavigationSpeedOverGround(double sog) {
-      return setValue(SKPathNavigationSpeedOverGround, SKValue(sog));
-    };
 };
 
