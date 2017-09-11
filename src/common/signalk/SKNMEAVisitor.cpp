@@ -42,7 +42,7 @@ void SKNMEAVisitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, const S
   _sentences.add(sb.toNMEA() + "\r\n");
 }
 
-void SKNMEAVisitor::visitSKEnviromentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+void SKNMEAVisitor::visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   // XDR is not a very well defined sentence. Can be used for lots of things
   // apparently but that is better than nothing.
   NMEASentenceBuilder sb("II", "XDR", 4);

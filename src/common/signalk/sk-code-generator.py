@@ -86,6 +86,9 @@ class SKKey(object):
     def enumKey(self):
         return "SKPath" + self.camelCasedPath()
 
+    def visitorName(self):
+        return "visitSK" + self.camelCasedPath();
+
     def cType(self):
         if self.skType == 'numberValue':
             return 'double'
@@ -195,6 +198,20 @@ class SKUpdateSyntacticSugarGenerator(TemplateGenerator):
             self.p("};")
 
 
+class SKVisitorHeaderGenerator(TemplateGenerator):
+    def generateForKey(self, k):
+        self.indentLevel = 2;
+        self.p("virtual void {}(const SKUpdate &u, const SKPath &p, const SKValue &v) {{}};".format(k.visitorName()))
+
+
+class SKVisitorImplGenerator(TemplateGenerator):
+    def generateForKey(self, k):
+        self.indentLevel = 4;
+        self.p("if (p.getStaticPath() == {}) {{".format(k.enumKey()))
+        self.p("  {}(u, p, v);".format(k.visitorName()));
+        self.p("}");
+
+
 def main():
     parser = argparse.ArgumentParser()
     args = parser.parse_args()
@@ -214,6 +231,8 @@ def main():
     SKPathEnumGenerator(os.path.join(templatePath, 'SKPathEnum.h.tmpl')).generate(model, open(os.path.join(outputPath, 'SKPathEnum.generated.h'), 'w'))
     SKPathToStringGenerator(os.path.join(templatePath, 'SKPathToString.cpp.tmpl')).generate(model, open(os.path.join(outputPath, 'SKPathToString.generated.cpp'), 'w'))
     SKUpdateSyntacticSugarGenerator(os.path.join(templatePath, 'SKUpdateSyntacticSugar.h.tmpl')).generate(model, open(os.path.join(outputPath, 'SKUpdateSyntacticSugar.generated.h'), 'w'))
+    SKVisitorHeaderGenerator(os.path.join(templatePath, 'SKVisitor.h.tmpl')).generate(model, open(os.path.join(outputPath, 'SKVisitor.generated.h'), 'w'))
+    SKVisitorImplGenerator(os.path.join(templatePath, 'SKVisitor.cpp.tmpl')).generate(model, open(os.path.join(outputPath, 'SKVisitor.generated.cpp'), 'w'))
 
 if __name__ == '__main__':
     main()

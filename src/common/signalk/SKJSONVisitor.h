@@ -31,7 +31,7 @@
 #pragma once
 
 #include <ArduinoJson.h>
-#include "SKVisitor.h"
+#include "SKVisitor.generated.h"
 
 
 class SKJSONVisitor {

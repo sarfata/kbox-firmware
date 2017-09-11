@@ -51,7 +51,7 @@ void SKNMEA2000Visitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, con
   _messages.add(msg);
 }
 
-void SKNMEA2000Visitor::visitSKEnviromentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+void SKNMEA2000Visitor::visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   tN2kMsg *msg = new tN2kMsg();
   SetN2kPressure(*msg, /* sid */ 0, /* source */ 0, N2kps_Atmospheric, v.getNumberValue());
   _messages.add(msg);
