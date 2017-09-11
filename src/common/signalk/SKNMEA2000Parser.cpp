@@ -69,10 +69,10 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
     SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
     update->setSource(source);
 
-    if (waterSpeed != N2kDoubleNA) {
-      update->setNavigateSpeedThroughWater(waterSpeed);
+    if (!N2kIsNA(waterSpeed)) {
+      update->setNavigationSpeedThroughWater(waterSpeed);
     }
-    if (groundSpeed != N2kDoubleNA) {
+    if (!N2kIsNA(groundSpeed)) {
       update->setNavigationSpeedOverGround(groundSpeed);
     }
 
@@ -98,14 +98,17 @@ const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const 
     update->setSource(source);
 
     update->setEnvironmentDepthBelowTransducer(depthBelowTransducer);
-    // When offset is negative, it's the distance between transducer and keel
-    if (offset < 0) {
-      update->setEnvironmentDepthTransducerToKeel(offset * -1);
-      update->setEnvironmentDepthBelowKeel(depthBelowTransducer + offset);
-    }
-    else if (offset > 0) {
-      update->setEnvironmentDepthSurfaceToTransducer(offset);
-      update->setEnvironmentDepthBelowSurface(depthBelowTransducer + offset);
+
+    if (!N2kIsNA(offset)) {
+      // When offset is negative, it's the distance between transducer and keel
+      if (offset < 0) {
+        update->setEnvironmentDepthTransducerToKeel(offset * -1);
+        update->setEnvironmentDepthBelowKeel(depthBelowTransducer + offset);
+      }
+      else if (offset > 0) {
+        update->setEnvironmentDepthSurfaceToTransducer(offset);
+        update->setEnvironmentDepthBelowSurface(depthBelowTransducer + offset);
+      }
     }
 
     _sku = update;

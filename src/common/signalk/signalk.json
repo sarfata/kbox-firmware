@@ -41,7 +41,7 @@
       "description": "Vessel speed over ground. If converting from AIS \"HIGH\" value, set to 102.2 (Ais max value) and add warning in notifications"
     },
     {
-      "path": "navigate.speedThroughWater",
+      "path": "navigation.speedThroughWater",
       "type": "numberValue",
       "units": "m/s",
       "description": "Vessel speed through the water"
