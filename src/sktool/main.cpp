@@ -32,22 +32,43 @@
 #include <string>
 #include <WString.h>
 #include <ArduinoJson.h>
+#include <Seasmart.h>
 #include "common/signalk/SKNMEAParser.h"
+#include "common/signalk/SKNMEA2000Parser.h"
 #include "common/signalk/SKJSONVisitor.h"
 
+
+SKNMEAParser nmeaParser = SKNMEAParser();
+SKNMEA2000Parser nmea2000Parser = SKNMEA2000Parser();
+
+const SKUpdate& parseInputLine(std::string line) {
+  static const SKUpdateStatic<0> noUpdate = SKUpdateStatic<0>();
+
+  if (line.find("$PCDIN") == 0) {
+    tN2kMsg msg;
+
+    uint32_t timestamp;
+    if (SeasmartToN2k(line.c_str(), timestamp, msg)) {
+      return nmea2000Parser.parse(SKSourceInputNMEA2000, msg, timestamp);
+    }
+    else {
+      std::cerr << "Unable to convert PCDIN message to N2kMsg: " << line << std::endl;
+      return noUpdate;
+    }
+  }
+  else {
+    return nmeaParser.parse(SKSourceInputNMEA0183_1, String(line.c_str()), SKTime(time(0)));
+  }
+}
+
 int main(int argc, char **argv) {
-  SKNMEAParser nmeaParser = SKNMEAParser();
   DynamicJsonBuffer jsonBuffer;
   SKJSONVisitor v = SKJSONVisitor(jsonBuffer);
 
-  const SKSourceInput &sourceInput = SKSourceInputNMEA0183_1;
-
   for (std::string line; std::getline(std::cin, line); ) {
-    std::cout << "Read line: " << line << std::endl;
+    const SKUpdate& u = parseInputLine(line);
 
-    const SKUpdate &u = nmeaParser.parse(sourceInput, String(line.c_str()), SKTime(time(0)));
-
-    std::cout << "Update contains: " << u.getSize() << " values and uses " << u.getSizeBytes() << " bytes." << std::endl;
+    std::cerr << "Update contains: " << u.getSize() << " values and uses " << u.getSizeBytes() << " bytes." << std::endl;
     JsonObject &o = v.processUpdate(u);
     std::cout << o << std::endl;
   }

@@ -105,7 +105,7 @@ template <uint16_t capacity> class SKUpdateStatic : public SKUpdate {
 
     int getSizeBytes() const override {
       // Should add the size of all referenced values.
-      return sizeof(this);
+      return sizeof(*this);
     };
 
     const SKSource& getSource() const override {
