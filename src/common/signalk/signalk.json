@@ -39,6 +39,42 @@
       "type": "numberValue",
       "units": "m/s",
       "description": "Vessel speed over ground. If converting from AIS \"HIGH\" value, set to 102.2 (Ais max value) and add warning in notifications"
+    },
+    {
+      "path": "navigate.speedThroughWater",
+      "type": "numberValue",
+      "units": "m/s",
+      "description": "Vessel speed through the water"
+    },
+    {
+      "path": "environment.depth.belowKeel",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Depth below keel"
+    },
+    {
+      "path": "environment.depth.belowTransducer",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Depth below Transducer"
+    },
+    {
+      "path": "environment.depth.belowSurface",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Depth below surface"
+    },
+    {
+      "path": "environment.depth.transducerToKeel",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Depth from the transducer to the bottom of the keel"
+    },
+    {
+      "path": "environment.depth.surfaceToTransducer",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Depth transducer is below the surface"
     }
   ]
 }

@@ -31,7 +31,7 @@
 #include "SKJSONVisitor.h"
 
 void SKJSONVisitor::processSource(const SKSource &source, JsonObject &sourceObject) {
-  sourceObject["label"] = source.getLabel().c_str();
+  sourceObject["label"] = _jsonBuffer.strdup(source.getLabel().c_str());
 
   switch (source.getInput()) {
     case SKSourceInputUnknown:
@@ -39,13 +39,15 @@ void SKJSONVisitor::processSource(const SKSource &source, JsonObject &sourceObje
       break;
     case SKSourceInputNMEA2000:
       sourceObject["type"] = "NMEA2000";
-      //FIXME: add PGN when we will start parsing NMEA2000 messages.
+      sourceObject["pgn"] = source.getPGN();
+      sourceObject["src"] = source.getSourceAddress();
+      sourceObject["priority"] = source.getPriority();
       break;
     case SKSourceInputNMEA0183_1:
     case SKSourceInputNMEA0183_2:
       sourceObject["type"] = "NMEA0183";
-      sourceObject["talker"] = source.getTalker().c_str();
-      sourceObject["sentence"] = source.getSentence().c_str();
+      sourceObject["talker"] = _jsonBuffer.strdup(source.getTalker());
+      sourceObject["sentence"] = _jsonBuffer.strdup(source.getSentence());
       break;
   }
 }

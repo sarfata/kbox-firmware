@@ -49,8 +49,24 @@ SKSource SKSource::sourceForNMEA0183(const SKSourceInput input, const String& ta
   else {
     s._input = SKSourceInputUnknown;
   }
-  s._talker = talker;
-  s._sentence = sentence;
+  strlcpy(s._info.nmea.talker, talker.c_str(), sizeof(s._info.nmea.talker));
+  strlcpy(s._info.nmea.sentence, sentence.c_str(), sizeof(s._info.nmea.sentence));
+  return s;
+}
+
+SKSource SKSource::sourceForNMEA2000(const SKSourceInput input, const uint32_t pgn,
+    const unsigned char priority, const unsigned char sourceAddress) {
+  SKSource s;
+
+  if (input != SKSourceInputNMEA2000) {
+    s._input = SKSourceInputUnknown;
+    return s;
+  }
+
+  s._input = input;
+  s._info.nmea2000.pgn = pgn;
+  s._info.nmea2000.priority = priority;
+  s._info.nmea2000.sourceAddress = sourceAddress;
   return s;
 }
 
@@ -62,9 +78,12 @@ bool SKSource::operator==(const SKSource &other) const {
   switch (_input) {
     case SKSourceInputNMEA0183_1:
     case SKSourceInputNMEA0183_2:
-      return _talker == other._talker && _sentence == other._sentence;
+      return strcmp(_info.nmea.talker, other._info.nmea.talker) == 0
+        && strcmp(_info.nmea.sentence, other._info.nmea.sentence) == 0;
     case SKSourceInputNMEA2000:
-      return _pgn == other._pgn;
+      return _info.nmea2000.pgn == other._info.nmea2000.pgn
+        && _info.nmea2000.sourceAddress == other._info.nmea2000.sourceAddress
+        && _info.nmea2000.priority == other._info.nmea2000.priority;
     case SKSourceInputUnknown:
       return true;
     default:
@@ -92,14 +111,6 @@ const String& SKSource::getType() const {
   }
 }
 
-const String& SKSource::getTalker() const {
-  return _talker;
-}
-
-const String& SKSource::getSentence() const {
-  return _sentence;
-}
-
 const String& SKSource::getLabel() const {
   switch (_input) {
     case SKSourceInputNMEA0183_1:
@@ -113,3 +124,47 @@ const String& SKSource::getLabel() const {
   }
 }
 
+const char* SKSource::getTalker() const {
+  if (_input == SKSourceInputNMEA0183_1 || _input == SKSourceInputNMEA0183_2) {
+    return _info.nmea.talker;
+  }
+  else {
+    return "";
+  }
+}
+
+const char* SKSource::getSentence() const {
+  if (_input == SKSourceInputNMEA0183_1 || _input == SKSourceInputNMEA0183_2) {
+    return _info.nmea.sentence;
+  }
+  else {
+    return "";
+  }
+}
+
+uint32_t SKSource::getPGN() const {
+  if (_input == SKSourceInputNMEA2000) {
+    return _info.nmea2000.pgn;
+  }
+  else {
+    return 0;
+  }
+}
+
+unsigned char SKSource::getPriority() const {
+  if (_input == SKSourceInputNMEA2000) {
+    return _info.nmea2000.priority;
+  }
+  else {
+    return 0;
+  }
+}
+
+unsigned char SKSource::getSourceAddress() const {
+  if (_input == SKSourceInputNMEA2000) {
+    return _info.nmea2000.sourceAddress;
+  }
+  else {
+    return 0;
+  }
+}
