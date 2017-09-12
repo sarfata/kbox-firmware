@@ -1,52 +1,6 @@
 {
   "vesselKeys": [
     {
-      "path": "environment.outside.pressure",
-      "type": "numberValue",
-      "unit": "Pa",
-      "description": "Current outside air ambient pressure"
-    },
-    {
-      "path": "electrical.batteries.%%.voltage",
-      "type": "numberValue",
-      "unit": "V",
-      "description": "Voltage measured at or as close as possible to the device"
-    },
-    {
-      "path": "navigation.attitude",
-      "type": "attitudeValue",
-      "description": "Vessel attitude: roll, pitch and yaw"
-    },
-    {
-      "path": "navigation.courseOverGroundTrue",
-      "type": "numberValue",
-      "units": "rad",
-      "description": "Course over ground (true)"
-    },
-    {
-      "path": "navigation.headingMagnetic",
-      "type": "numberValue",
-      "units": "rad",
-      "description": "Current magnetic heading of the vessel"
-    },
-    {
-      "path": "navigation.position",
-      "type": "positionValue",
-      "description": "The position of the vessel in 2 or 3 dimensions (WGS84 datum)"
-    },
-    {
-      "path": "navigation.speedOverGround",
-      "type": "numberValue",
-      "units": "m/s",
-      "description": "Vessel speed over ground. If converting from AIS \"HIGH\" value, set to 102.2 (Ais max value) and add warning in notifications"
-    },
-    {
-      "path": "navigation.speedThroughWater",
-      "type": "numberValue",
-      "units": "m/s",
-      "description": "Vessel speed through the water"
-    },
-    {
       "path": "environment.depth.belowKeel",
       "type": "numberValue",
       "units": "m",
@@ -75,6 +29,78 @@
       "type": "numberValue",
       "units": "m",
       "description": "Depth transducer is below the surface"
+    },
+    {
+      "path": "environment.water.temperature",
+      "type": "numberValue",
+      "units": "K",
+      "description": "Current water temperature"
+    },
+    {
+      "path": "environment.outside.pressure",
+      "type": "numberValue",
+      "unit": "Pa",
+      "description": "Current outside air ambient pressure"
+    },
+
+    {
+      "path": "electrical.batteries.%%.voltage",
+      "type": "numberValue",
+      "unit": "V",
+      "description": "Voltage measured at or as close as possible to the device"
+    },
+
+    {
+      "path": "navigation.attitude",
+      "type": "attitudeValue",
+      "description": "Vessel attitude: roll, pitch and yaw"
+    },
+    {
+      "path": "navigation.courseOverGroundTrue",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Course over ground (true)"
+    },
+    {
+      "path": "navigation.headingMagnetic",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Current magnetic heading of the vessel"
+    },
+    {
+      "path": "navigation.log",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Total distance traveled"
+    },
+    {
+      "path": "navigation.magneticVariation",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "The magnetic variation (declination) at the current position"
+    },
+    {
+      "path": "navigation.position",
+      "type": "positionValue",
+      "description": "The position of the vessel in 2 or 3 dimensions (WGS84 datum)"
+    },
+    {
+      "path": "navigation.speedOverGround",
+      "type": "numberValue",
+      "units": "m/s",
+      "description": "Vessel speed over ground. If converting from AIS \"HIGH\" value, set to 102.2 (Ais max value) and add warning in notifications"
+    },
+    {
+      "path": "navigation.speedThroughWater",
+      "type": "numberValue",
+      "units": "m/s",
+      "description": "Vessel speed through the water"
+    },
+    {
+      "path": "navigation.trip.log",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Total distance traveled on this trip / since trip reset"
     }
   ]
 }
