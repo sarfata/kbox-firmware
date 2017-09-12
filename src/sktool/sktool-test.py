@@ -4,6 +4,9 @@ import os
 import sys
 import subprocess
 import json
+import jsonschema
+from jsonschema.validators import validator_for, validate
+from termcolor import colored
 
 class SKTestCase(object):
     def __init__(self, json):
@@ -40,26 +43,33 @@ class SKTestCase(object):
 
 
 class SKTestRunner(object):
+    def __init__(self, skspecPath):
+        self.schema = json.load(open(skspecPath))
+
     def run(self, test):
         process = subprocess.Popen(['./.pioenvs/sktool/program'], stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
         process.stdin.write(test.nmea)
         process.stdin.close()
         process.wait()
         (out, err) = (process.stdout.read(), process.stderr.read())
-        print("Sent: {}".format(test.nmea))
-        print("Recv: {}".format(out.strip()))
+        print(colored("Testing:", 'white', 'on_cyan') + " " + colored(test.nmea, 'cyan'))
 
         try:
             out = json.loads(out)
-            # TODO: Run SignalK schema validator
+            print(colored(json.dumps(out, sort_keys=True, indent=4, separators=(',', ': ')), 'blue'))
+            try:
+                validate(out, self.schema)
+            except jsonschema.exceptions.RefResolutionError as e:
+                print(colored("Schema reference resolution error (are you connected?) - Skipping validation", 'magenta'))
             test.validateOutput(out)
-            print "OK!\n"
+            print(colored("PASS\n", 'white', 'on_green'))
         except ValueError as e:
-            print("Error validating output: {}\n".format(e))
+            print(colored("Error validating output: {}.".format(e), 'red'))
+            print(colored(out, 'magenta'))
 
 
 def main():
-    runner = SKTestRunner()
+    runner = SKTestRunner('/Users/thomas/work/signalk-specification/schemas/delta.json')
 
     workPath = os.path.dirname(sys.argv[0])
 
@@ -71,7 +81,6 @@ def main():
         print("Unable to parse test cases: {}".format(e))
 
     testcases = map(lambda x: SKTestCase(x), testcases)
-
 
     for tc in testcases:
         runner.run(tc)
