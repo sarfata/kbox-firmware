@@ -15,11 +15,14 @@
   },
   {
     "nmea": "$PCDIN,01F11A,000C9E34,00,0000000000000000*5E",
-    "expectedValues": []
+    "expectedValues": [
+      { "path": "navigation.magneticVariation", "value": 0 }
+    ]
   },
   {
     "nmea": "$PCDIN,01FD07,000C9F55,23,47C0D370FF7FFFFF*28",
     "expectedValues": [
+      { "path": "environment.water.temperature", "value": 15.68 }
     ]
   },
   {
@@ -33,6 +36,8 @@
   {
     "nmea": "$PCDIN,01F513,000C9F5D,23,FFFFFFFFFFFF7F3204007F320400*5C",
     "expectedValues": [
+      { "path": "navigation.log", "value": 275071 },
+      { "path": "navigation.trip.log", "value": 275071 }
     ]
   }
 ]

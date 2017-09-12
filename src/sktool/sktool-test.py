@@ -5,6 +5,7 @@ import sys
 import subprocess
 import json
 import jsonschema
+import argparse
 from jsonschema.validators import validator_for, validate
 from termcolor import colored
 
@@ -47,11 +48,7 @@ class SKTestRunner(object):
         self.schema = json.load(open(skspecPath))
 
     def run(self, test):
-        process = subprocess.Popen(['./.pioenvs/sktool/program'], stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-        process.stdin.write(test.nmea)
-        process.stdin.close()
-        process.wait()
-        (out, err) = (process.stdout.read(), process.stderr.read())
+        out = self.fetchOutput(test)
         print(colored("Testing:", 'white', 'on_cyan') + " " + colored(test.nmea, 'cyan'))
 
         try:
@@ -60,16 +57,59 @@ class SKTestRunner(object):
             try:
                 validate(out, self.schema)
             except jsonschema.exceptions.RefResolutionError as e:
-                print(colored("Schema reference resolution error (are you connected?) - Skipping validation", 'magenta'))
+                print(colored("Schema reference resolution error (are you connected?) - continuing...", 'yellow'))
             test.validateOutput(out)
-            print(colored("PASS\n", 'white', 'on_green'))
+            print(colored("PASS", 'white', 'on_green'))
         except ValueError as e:
-            print(colored("Error validating output: {}.".format(e), 'red'))
+            print(colored("FAIL", 'white', 'on_red') + " " + colored("Error parsing JSON: {}.".format(e), 'red'))
             print(colored(out, 'magenta'))
+        except jsonschema.exceptions.ValidationError as e:
+            print(colored("FAIL", 'white', 'on_red') + " " + colored("Error: JSON does not validate signalk specification", 'red'))
+            print(colored(e.message, 'red'))
+            print(colored(out, 'magenta'))
+
+        print ""
+
+    def fetchOutput(self, test):
+        raise Exception("Not implemented. Use a subclass")
+
+class SKTestRunnerSKTool(SKTestRunner):
+    def name(self):
+        return "SKTool"
+
+    def fetchOutput(self, test):
+        process = subprocess.Popen(['./.pioenvs/sktool/program'], stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        process.stdin.write(test.nmea)
+        process.stdin.close()
+        process.wait()
+        (out, err) = (process.stdout.read(), process.stderr.read())
+        return out
+
+class SKTestRunnerSKOfficial(SKTestRunner):
+    def name(self):
+        return "SKOfficial"
+
+    def fetchOutput(self, test):
+        process = subprocess.Popen(['/Users/thomas/work/canboat/rel/darwin-x86_64/analyzer -json| /Users/thomas/work/n2k-signalk/bin/n2k-signalk --delta'], shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        process.stdin.write(test.nmea)
+        process.stdin.close()
+        process.wait()
+        (out, err) = (process.stdout.read(), process.stderr.read())
+        return out
+
+
 
 
 def main():
-    runner = SKTestRunner('/Users/thomas/work/signalk-specification/schemas/delta.json')
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--spec", help = "Where to find the SignalK spec delta.json file")
+    parser.add_argument("--official", help = "Use SignalK official tools insted of KBox sktool", action = 'store_true')
+    args = parser.parse_args()
+
+    if args.official:
+        runner = SKTestRunnerSKOfficial(args.spec)
+    else:
+        runner = SKTestRunnerSKTool(args.spec)
 
     workPath = os.path.dirname(sys.argv[0])
 
