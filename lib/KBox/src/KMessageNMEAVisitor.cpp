@@ -63,20 +63,23 @@ void KMessageNMEAVisitor::visit(const NMEA2000Message &n2km) {
   free(s);
 }
 
+
+inline static double RadToDeg(double v) { return v*180.0/3.1415926535897932384626433832795; }
+
 void KMessageNMEAVisitor::visit(const IMUMessage &imu) {
   NMEASentenceBuilder sb("II", "XDR", 16);
   sb.setField(1, "A");
-  sb.setField(2, imu.getYaw(), 1);
+  sb.setField(2, RadToDeg(imu.getYaw()), 1);
   sb.setField(3, "D");
   sb.setField(4, "Yaw");
 
   sb.setField(5, "A");
-  sb.setField(6, imu.getPitch(), 1);
+  sb.setField(6, RadToDeg(imu.getPitch()), 1);
   sb.setField(7, "D");
   sb.setField(8, "Pitch");
 
   sb.setField(9, "A");
-  sb.setField(10, imu.getRoll(), 1);
+  sb.setField(10, RadToDeg(imu.getRoll()), 1);
   sb.setField(11, "D");
   sb.setField(12, "Roll");
 
@@ -88,7 +91,7 @@ void KMessageNMEAVisitor::visit(const IMUMessage &imu) {
   nmeaContent += sb.toNMEA() + "\r\n";
 
   NMEASentenceBuilder sb2("II", "HDM", 2);
-  sb2.setField(1, imu.getCourse());
+  sb2.setField(1, RadToDeg(imu.getCourse()));
   sb2.setField(2, "M");
 
   nmeaContent += sb2.toNMEA() + "\r\n";
