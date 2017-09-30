@@ -30,18 +30,22 @@
 #include "comms/SlipStream.h"
 #include "comms/KommandHandlerPing.h"
 #include "comms/KommandHandlerWiFiLog.h"
+#include "common/signalk/SKHub.h"
+#include "common/signalk/SKSubscriber.h"
 
-class WiFiService : public Task, public KReceiver {
+class WiFiService : public Task, public KReceiver, public SKSubscriber {
   private:
+    SKHub &_hub;
     SlipStream _slip;
     KommandHandlerPing _pingHandler;
     KommandHandlerWiFiLog _wifiLogHandler;
 
   public:
-    WiFiService(GC &gc);
+    WiFiService(SKHub &skHub, GC &gc);
 
     void setup();
     void loop();
-    void processMessage(const KMessage &m);
+    void processMessage(const KMessage &m) override;
+    void updateReceived(const SKUpdate&) override;
 };
 

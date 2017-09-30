@@ -24,18 +24,22 @@
 
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
-#include "signalk/KMessageNMEAVisitor.h"
+#include "common/signalk/SKNMEAVisitor.h"
+#include "common/signalk/KMessageNMEAVisitor.h"
 #include "stats/KBoxMetrics.h"
 
 #include "WiFiService.h"
 
-WiFiService::WiFiService(GC &gc) : Task("WiFi"), _slip(WiFiSerial, 2048) {
+WiFiService::WiFiService(SKHub &skHub, GC &gc) : Task("WiFi"), _hub(skHub), _slip(WiFiSerial, 2048) {
+  // We will need gc at some point to be able to take screenshot
 }
 
 void WiFiService::setup() {
   KBox.espInit();
   DEBUG("booting ESP!");
   KBox.espRebootInProgram();
+
+  _hub.subscribe(this);
 }
 
 void WiFiService::loop() {
@@ -75,4 +79,19 @@ void WiFiService::processMessage(const KMessage &m) {
   _slip.writeFrame(k.getBytes(), k.getSize());
 }
 
+void WiFiService::updateReceived(const SKUpdate& u) {
+  /* This is where we convert the data in SignalK format that floats inside KBox
+   * to messages that will be sent to WiFi clients.
+   */
+
+  // Convert to NMEA format first
+  SKNMEAVisitor nmeaVisitor;
+  nmeaVisitor.processUpdate(u);
+  for (LinkedList<String>::constIterator it = nmeaVisitor.getSentences().begin(); it != nmeaVisitor.getSentences().end(); it++) {
+    // NMEA Sentences should always be 82 bytes or less
+    FixedSizeKommand<100> k(KommandNMEASentence);
+    k.appendNullTerminatedString((*it).c_str());
+    _slip.writeFrame(k.getBytes(), k.getSize());
+  }
+}
 
