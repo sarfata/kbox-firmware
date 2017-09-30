@@ -22,6 +22,7 @@
   THE SOFTWARE.
 */
 
+#include <common/util/bsd-string.h>
 #include "SKSource.h"
 
 static const String typeNMEA0183 = "NMEA0183";

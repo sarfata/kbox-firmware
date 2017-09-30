@@ -44,8 +44,8 @@ TEST_CASE("An nmea2000 input is invalid for an nmea0183 source") {
 
   CHECK( nmeaSource.getType() == "unknown" );
   CHECK( nmeaSource.getLabel() == "kbox.unknown" );
-  CHECK( nmeaSource.getTalker() == "" );
-  CHECK( nmeaSource.getSentence() == "");
+  CHECK( nmeaSource.getTalker() == std::string("") );
+  CHECK( nmeaSource.getSentence() == std::string("") );
 }
 
 TEST_CASE("An NMEA2000 input") {
