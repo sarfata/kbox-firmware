@@ -53,7 +53,7 @@ void IMUService::loop() {
   double roll, pitch, heading;
   roll = eulerAngles.z();
   pitch = eulerAngles.y();
-  heading = fmod(eulerAngles.x() - 90, 360.0);
+  heading = fmod(eulerAngles.x() + 270, 360);
 
   if (sysCalib == 3) {
     update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(roll), /* pitch */ SKDegToRad(pitch), /* yaw */ 0));
