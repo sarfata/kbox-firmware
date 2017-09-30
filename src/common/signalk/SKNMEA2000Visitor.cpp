@@ -53,7 +53,13 @@ void SKNMEA2000Visitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, con
 
 void SKNMEA2000Visitor::visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   tN2kMsg *msg = new tN2kMsg();
-  SetN2kPressure(*msg, /* sid */ 0, /* source */ 0, N2kps_Atmospheric, v.getNumberValue());
+
+  // PGN 130310 seems to be better supported
+  SetN2kOutsideEnvironmentalParameters(*msg, 0, N2kDoubleNA, N2kDoubleNA, v.getNumberValue());
+
+  // PGN 130314 is more specific to pressure but not supported by Raymarine i70
+  //SetN2kPressure(*msg, /* sid */ 0, /* source */ 0, N2kps_Atmospheric, v.getNumberValue());
+
   _messages.add(msg);
 }
 
