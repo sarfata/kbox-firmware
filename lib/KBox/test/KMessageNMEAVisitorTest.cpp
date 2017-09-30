@@ -54,7 +54,7 @@ TEST_CASE("Visiting a NMEA0183 sentence message") {
 }
 
 TEST_CASE("Visiting a IMU object") {
-  IMUMessage m(3, 232.423, 4.19, 10.122331, 29.028);
+  IMUMessage m(3, DegToRad(232.423), DegToRad(4.19), DegToRad(10.122331), DegToRad(29.028));
 
   KMessageNMEAVisitor v;
   m.accept(v);
