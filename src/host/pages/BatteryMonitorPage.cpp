@@ -74,18 +74,18 @@ String BatteryMonitorPage::formatMeasurement(float measure, const char *unit) {
 }
 
 void BatteryMonitorPage::updateReceived(const SKUpdate& up) {
-  if (up.hasElectricalBatteries("house")) {
-    const SKValue& vm = up.getElectricalBatteries("house");
+  if (up.hasElectricalBatteriesVoltage("house")) {
+    const SKValue& vm = up.getElectricalBatteriesVoltage("house");
     houseVoltage->setText(formatMeasurement(vm.getNumberValue(), "V"));
     houseVoltage->setColor(colorForVoltage(vm.getNumberValue()));
   }
-  if (up.hasElectricalBatteries("engine")) {
-    const SKValue& vm = up.getElectricalBatteries("engine");
+  if (up.hasElectricalBatteriesVoltage("engine")) {
+    const SKValue& vm = up.getElectricalBatteriesVoltage("engine");
     engineVoltage->setText(formatMeasurement(vm.getNumberValue(), "V"));
     engineVoltage->setColor(colorForVoltage(vm.getNumberValue()));
   }
-  if (up.hasElectricalBatteries("kbox-supply")) {
-    const SKValue& vm = up.getElectricalBatteries("kbox-supply");
+  if (up.hasElectricalBatteriesVoltage("kbox-supply")) {
+    const SKValue& vm = up.getElectricalBatteriesVoltage("kbox-supply");
     supplyVoltage->setText(formatMeasurement(vm.getNumberValue(), "V"));
     supplyVoltage->setColor(colorForVoltage(vm.getNumberValue()));
   }

@@ -88,7 +88,7 @@ template <uint16_t maxDataSize> class FixedSizeKommand : public Kommand {
       int len = strlen(s);
 
       // We want to have space for the string content + the terminating \0
-      if (len > bufferSize - _index - 1) {
+      if (len > (int)(bufferSize - _index - 1)) {
         len = bufferSize - _index - 1;
       }
       if (len <= 0) {

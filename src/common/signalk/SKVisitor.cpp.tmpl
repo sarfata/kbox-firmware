@@ -28,25 +28,15 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "SKVisitor.generated.h"
 
-#include "SKUpdate.h"
 
-/**
- * This class will automatically visit all known properties of a
- * SKUpdate and call protected methods to deal with each of them.
- *
- * This makes visiting a SKUpdate message much nicer.
- */
-class SKVisitor {
-  protected:
-    void visit(const SKUpdate& u);
+void SKVisitor::visit(const SKUpdate& u) {
+  for (int i = 0; i < u.getSize(); i++) {
+    const SKPath &p = u.getPath(i);
+    const SKValue &v = u.getValue(i);
 
-    virtual void visitSKElectricalBatteries(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKEnviromentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKNavigationCourseOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKNavigationPosition(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKNavigationSpeedOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
-};
+// INSERT GENERATED CODE HERE
+  }
+}
+

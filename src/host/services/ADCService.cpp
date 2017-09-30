@@ -43,10 +43,10 @@ void ADCService::loop() {
   // FIXME: We should have configuration options to describe what each input is
   // connected to instead of hard-coding names.
   SKUpdateStatic<4> sk;
-  sk.setElectricalBatteries("engine", _adc1);
-  sk.setElectricalBatteries("house", _adc2);
-  sk.setElectricalBatteries("dc3", _adc3);
-  sk.setElectricalBatteries("kbox-supply", _supply);
+  sk.setElectricalBatteriesVoltage("engine", _adc1);
+  sk.setElectricalBatteriesVoltage("house", _adc2);
+  sk.setElectricalBatteriesVoltage("dc3", _adc3);
+  sk.setElectricalBatteriesVoltage("kbox-supply", _supply);
 
   _skHub.publish(sk);
 }

@@ -30,39 +30,30 @@
 
 #pragma once
 
-#include <WString.h>
-#include "common/algo/List.h"
-#include "common/signalk/SKVisitor.generated.h"
+#include <N2kMsg.h>
+#include "SKUpdate.h"
+#include "SKUpdateStatic.h"
 
-class SKNMEAVisitor : SKVisitor {
+class SKNMEA2000Parser {
   private:
-    LinkedList<String> _sentences;
-
-
-    void visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
-    void visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
-    void visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
-    void visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    SKUpdate *_sku = 0;
+    SKUpdateStatic<0> _invalidSku = SKUpdateStatic<0>();
 
   public:
-    /**
-     * Process a SKUpdate and add messages to the internal queue of messages.
-     */
-    void processUpdate(const SKUpdate& update) {
-      visit(update);
-    };
+    SKNMEA2000Parser() {};
+    ~SKNMEA2000Parser();
 
     /**
-     * Retrieve the current list of sentences.
+     * Parse a NMEA2000 @param msg received on @param input and returns a
+     * constant reference to a `SKUpdate` instance that will remain valid until
+     * the next call to `parse()` (or when you destroy this object).  
+     * Once `parse()` is called again, or the parser is destroyed, the
+     * reference is no longer valid!
      */
-    const LinkedList<String>& getSentences() const {
-      return _sentences;
-    };
+    const SKUpdate& parse(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
 
-    /**
-     * Flush the list of sentences.
-     */
-    void flushSentences() {
-      _sentences.clear();
-    };
+  private:
+    const SKUpdate& parse128259(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
+    const SKUpdate& parse128267(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
 };
+

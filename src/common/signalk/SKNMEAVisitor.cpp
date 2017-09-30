@@ -33,7 +33,7 @@
 
 #include "SKNMEAVisitor.h"
 
-void SKNMEAVisitor::visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+void SKNMEAVisitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   NMEASentenceBuilder sb("II", "XDR", 4);
   sb.setField(1, "V");
   sb.setField(2, v.getNumberValue(), 2);
@@ -42,7 +42,7 @@ void SKNMEAVisitor::visitSKElectricalBatteries(const SKUpdate& u, const SKPath &
   _sentences.add(sb.toNMEA() + "\r\n");
 }
 
-void SKNMEAVisitor::visitSKEnviromentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+void SKNMEAVisitor::visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   // XDR is not a very well defined sentence. Can be used for lots of things
   // apparently but that is better than nothing.
   NMEASentenceBuilder sb("II", "XDR", 4);

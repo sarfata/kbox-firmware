@@ -28,41 +28,37 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include <sys/types.h>
+#include <string.h>
 
-#include <WString.h>
-#include "common/algo/List.h"
-#include "common/signalk/SKVisitor.generated.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class SKNMEAVisitor : SKVisitor {
-  private:
-    LinkedList<String> _sentences;
+#ifndef HAVE_STRLCPY
 
+/*
+ * Copy string src to buffer dst of size dsize.  At most dsize-1
+ * chars will be copied.  Always NUL terminates (unless dsize == 0).
+ * Returns strlen(src); if retval >= dsize, truncation occurred.
+ */
+size_t strlcpy(char *dst, const char *src, size_t dsize);
 
-    void visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
-    void visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
-    void visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
-    void visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+#endif /* !HAVE_STRLCPY */
 
-  public:
-    /**
-     * Process a SKUpdate and add messages to the internal queue of messages.
-     */
-    void processUpdate(const SKUpdate& update) {
-      visit(update);
-    };
+#ifndef HAVE_STRLCAT
 
-    /**
-     * Retrieve the current list of sentences.
-     */
-    const LinkedList<String>& getSentences() const {
-      return _sentences;
-    };
+/*
+ * Appends src to string dst of size dsize (unlike strncat, dsize is the
+ * full size of dst, not space left).  At most dsize-1 characters
+ * will be copied.  Always NUL terminates (unless dsize <= strlen(dst)).
+ * Returns strlen(src) + MIN(dsize, strlen(initial dst)).
+ * If retval >= dsize, truncation occurred.
+ */
+size_t strlcat(char *dst, const char *src, size_t dsize);
 
-    /**
-     * Flush the list of sentences.
-     */
-    void flushSentences() {
-      _sentences.clear();
-    };
-};
+#endif
+
+#ifdef __cplusplus
+}
+#endif

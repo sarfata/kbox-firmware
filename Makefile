@@ -54,4 +54,6 @@ lcov: test
 	lcov --directory .pioenvs/test/ --base-directory . --capture -o cov.info
 	genhtml cov.info -o lcov-html
 
+sktool:
+	platformio run -e sktool
 

@@ -30,39 +30,49 @@
 
 #pragma once
 
+#include <stdint.h>
 #include <WString.h>
-#include "common/algo/List.h"
-#include "common/signalk/SKVisitor.generated.h"
 
-class SKNMEAVisitor : SKVisitor {
+/**
+ * Representation of UTC time.
+ *
+ * SignalK specifies that timestamp are represented in RFC3339 format, always
+ * in UTC. The spec uses the regexp `.*Z`. We chose to use a unix timestamp and
+ * to add fractional milliseconds on top.
+ *
+ */
+class SKTime {
   private:
-    LinkedList<String> _sentences;
-
-
-    void visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
-    void visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
-    void visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
-    void visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    uint32_t _timestamp;
+    uint16_t _milliseconds;
+    static const uint16_t unknownMilliseconds = 1042;
 
   public:
-    /**
-     * Process a SKUpdate and add messages to the internal queue of messages.
-     */
-    void processUpdate(const SKUpdate& update) {
-      visit(update);
+    SKTime() : _timestamp(0), _milliseconds(0) {};
+    SKTime(uint32_t time) : _timestamp(time), _milliseconds(unknownMilliseconds) {};
+    SKTime(uint32_t time, uint16_t ms) : _timestamp(time), _milliseconds(ms) {
+      if (_milliseconds >= 1000) {
+        _milliseconds = unknownMilliseconds;
+      }
     };
 
-    /**
-     * Retrieve the current list of sentences.
-     */
-    const LinkedList<String>& getSentences() const {
-      return _sentences;
+    uint32_t getTime() const {
+      return _timestamp;
     };
 
-    /**
-     * Flush the list of sentences.
-     */
-    void flushSentences() {
-      _sentences.clear();
+    bool hasMilliseconds() const {
+      return _milliseconds != unknownMilliseconds;
     };
+
+    uint16_t getMilliseconds() const {
+      if (_milliseconds == unknownMilliseconds) {
+        return 0;
+      }
+      else {
+        return _milliseconds;
+      }
+    };
+
+    String toString() const;
 };
+

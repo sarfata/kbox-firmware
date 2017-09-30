@@ -28,35 +28,31 @@
   THE SOFTWARE.
 */
 
-#include "SKVisitor.h"
+#pragma once
+
+#include <ArduinoJson.h>
+#include "SKVisitor.generated.h"
 
 
-void SKVisitor::visit(const SKUpdate& u) {
-  for (int i = 0; i < u.getSize(); i++) {
-    const SKPath &p = u.getPath(i);
-    const SKValue &v = u.getValue(i);
+class SKJSONVisitor {
+  private:
+    JsonBuffer &_jsonBuffer;
 
-    if (p.getStaticPath() == SKPathEnvironmentOutsidePressure) {
-      visitSKEnviromentOutsidePressure(u, p, v);
-    }
-    if (p.getStaticPath() == SKPathElectricalBatteries) {
-      visitSKElectricalBatteries(u, p, v);
-    }
-    if (p.getStaticPath() == SKPathNavigationAttitude) {
-      visitSKNavigationAttitude(u, p, v);
-    }
-    if (p.getStaticPath() == SKPathNavigationCourseOverGroundTrue) {
-      visitSKNavigationCourseOverGround(u, p, v);
-    }
-    if (p.getStaticPath() == SKPathNavigationHeadingMagnetic) {
-      visitSKNavigationHeadingMagnetic(u, p, v);
-    }
-    if (p.getStaticPath() == SKPathNavigationPosition) {
-      visitSKNavigationPosition(u, p, v);
-    }
-    if (p.getStaticPath() == SKPathNavigationSpeedOverGround) {
-      visitSKNavigationSpeedOverGround(u, p, v);
-    }
-  }
-}
+    void processSource(const SKSource &source, JsonObject &sourceObject);
 
+  public:
+    /**
+     * Create a new SKJSONVisitor with the given JsonBuffer.
+     *
+     * JsonObject references returned by processUpdate() will be valid as long
+     * as the JsonBuffer is valid and not cleared.
+     *
+     * You can pass a StaticJsonBuffer or a DynamicJsonBuffer here.
+     */
+    SKJSONVisitor(JsonBuffer& jsonBuffer) : _jsonBuffer(jsonBuffer) {};
+
+    /**
+     * Process a SKUpdate and add messages to the internal queue of messages.
+     */
+    JsonObject& processUpdate(const SKUpdate& update);
+};

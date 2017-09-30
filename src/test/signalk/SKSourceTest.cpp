@@ -29,9 +29,14 @@ TEST_CASE("Define a new NMEA0183 source") {
   SKSource nmeaSource = SKSource::sourceForNMEA0183(SKSourceInputNMEA0183_1, "GP", "RMC");
 
   CHECK( nmeaSource.getType() == "NMEA0183" );
-  CHECK( nmeaSource.getTalker() == "GP" );
-  CHECK( nmeaSource.getSentence() == "RMC" );
+  CHECK( String(nmeaSource.getTalker()) == "GP" );
+  CHECK( String(nmeaSource.getSentence()) == "RMC" );
   CHECK( nmeaSource.getLabel() == "kbox.nmea0183.1" );
+
+  // Make sure nmea2000 values are set to reasonable things in case someone would read them.
+  CHECK( nmeaSource.getPGN() == 0 );
+  CHECK( nmeaSource.getPriority() == 0 );
+  CHECK( nmeaSource.getSourceAddress() == 0 );
 }
 
 TEST_CASE("An nmea2000 input is invalid for an nmea0183 source") {
@@ -39,4 +44,14 @@ TEST_CASE("An nmea2000 input is invalid for an nmea0183 source") {
 
   CHECK( nmeaSource.getType() == "unknown" );
   CHECK( nmeaSource.getLabel() == "kbox.unknown" );
+  CHECK( nmeaSource.getTalker() == std::string("") );
+  CHECK( nmeaSource.getSentence() == std::string("") );
+}
+
+TEST_CASE("An NMEA2000 input") {
+  SKSource source = SKSource::sourceForNMEA2000(SKSourceInputNMEA2000, 128042, 1, 5);
+
+  CHECK( source.getPGN() == 128042 );
+  CHECK( source.getPriority() == 1 );
+  CHECK( source.getSourceAddress() == 5 );
 }

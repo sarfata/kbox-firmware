@@ -37,23 +37,26 @@ TEST_CASE("SKPath") {
     SKPath p = SKPathNavigationSpeedOverGround;
     // and == too
     CHECK( p == SKPathNavigationSpeedOverGround );
+
+    CHECK( p.toString() == "navigation.speedOverGround" );
   }
 
   SECTION("indexed paths") {
     // Invalid assignment because no index provided
-    SKPath p = SKPathElectricalBatteries;
+    SKPath p = SKPathElectricalBatteriesVoltage;
     CHECK( p == SKPathInvalid );
     CHECK( ! p.isIndexed() );
 
-    p = SKPath(SKPathElectricalBatteries, "starter");
+    p = SKPath(SKPathElectricalBatteriesVoltage, "starter");
 
-    SKPath p2 = SKPath(SKPathElectricalBatteries, "engine");
+    SKPath p2 = SKPath(SKPathElectricalBatteriesVoltage, "engine");
     CHECK( p != p2 );
     CHECK( p2.isIndexed() );
     CHECK( p2.getIndex() == "engine" );
-    CHECK( p2.getStaticPath() == SKPathElectricalBatteries );
+    CHECK( p2.getStaticPath() == SKPathElectricalBatteriesVoltage );
+    CHECK( p2.toString() == "electrical.batteries.engine.voltage" );
 
-    SKPath p3 = SKPath(SKPathElectricalBatteries, "starter");
+    SKPath p3 = SKPath(SKPathElectricalBatteriesVoltage, "starter");
     CHECK( p == p3 );
   }
 }

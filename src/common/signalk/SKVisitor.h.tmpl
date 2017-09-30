@@ -30,39 +30,17 @@
 
 #pragma once
 
-#include <WString.h>
-#include "common/algo/List.h"
-#include "common/signalk/SKVisitor.generated.h"
+#include "SKUpdate.h"
 
-class SKNMEAVisitor : SKVisitor {
-  private:
-    LinkedList<String> _sentences;
+/**
+ * This class will automatically visit all known properties of a
+ * SKUpdate and call protected methods to deal with each of them.
+ *
+ * This makes visiting a SKUpdate message much nicer.
+ */
+class SKVisitor {
+  protected:
+    void visit(const SKUpdate& u);
 
-
-    void visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
-    void visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
-    void visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
-    void visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
-
-  public:
-    /**
-     * Process a SKUpdate and add messages to the internal queue of messages.
-     */
-    void processUpdate(const SKUpdate& update) {
-      visit(update);
-    };
-
-    /**
-     * Retrieve the current list of sentences.
-     */
-    const LinkedList<String>& getSentences() const {
-      return _sentences;
-    };
-
-    /**
-     * Flush the list of sentences.
-     */
-    void flushSentences() {
-      _sentences.clear();
-    };
+// INSERT GENERATED CODE HERE
 };
