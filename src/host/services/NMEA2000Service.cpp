@@ -137,7 +137,7 @@ void NMEA2000Service::initializeNMEA2000() {
 
   struct PersistentStorage::NMEA2000Parameters p;
   if (PersistentStorage::readNMEA2000Parameters(p)) {
-    DEBUG("Reloading NMEA2000Parameters di=%x si=%x source=%x", p.deviceInstance, p.systemInstance, p.n2kSource);
+    INFO("Reloading NMEA2000Parameters di=%x si=%x source=%x", p.deviceInstance, p.systemInstance, p.n2kSource);
 
     NMEA2000.SetDeviceInformationInstances(p.deviceInstance & 0x07, p.deviceInstance >> 3, p.systemInstance);
     NMEA2000.SetMode(tNMEA2000::N2km_ListenAndNode, p.n2kSource);
@@ -151,10 +151,10 @@ void NMEA2000Service::initializeNMEA2000() {
   NMEA2000.EnableForward(false);
 
   if (NMEA2000.Open()) {
-    DEBUG("Initialized NMEA2000");
+    INFO("Initialized NMEA2000");
   }
   else {
-    DEBUG("Something went wrong initializing NMEA2000 ... ");
+    ERROR("Something went wrong initializing NMEA2000 ... ");
   }
 }
 
