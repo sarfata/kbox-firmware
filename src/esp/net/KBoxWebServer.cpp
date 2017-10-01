@@ -107,3 +107,10 @@ void KBoxWebServer::setup() {
 
   webServer.begin();
 }
+
+void KBoxWebServer::publishSKUpdate(const char *message) {
+  if (ws.enabled()) {
+    ws.textAll(message);
+  }
+}
+

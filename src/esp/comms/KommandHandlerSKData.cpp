@@ -28,16 +28,13 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "KommandHandlerSKData.h"
 
-#include <stdint.h>
+bool KommandHandlerSKData::handleKommand(KommandReader &kreader, SlipStream &replyStream) {
+  const char *jsonData = kreader.readNullTerminatedString();
 
-class KBoxWebServer {
-  private:
-
-  public:
-    KBoxWebServer();
-    void setup();
-    void publishSKUpdate(const char *message);
-};
-
+  if (jsonData) {
+    _webServer.publishSKUpdate(jsonData);
+  }
+  return true;
+}

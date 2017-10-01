@@ -26,6 +26,7 @@
 #include <KBoxHardware.h>
 #include "common/signalk/SKNMEAVisitor.h"
 #include "common/signalk/KMessageNMEAVisitor.h"
+#include "common/signalk/SKJSONVisitor.h"
 #include "stats/KBoxMetrics.h"
 
 #include "WiFiService.h"
@@ -93,5 +94,14 @@ void WiFiService::updateReceived(const SKUpdate& u) {
     k.appendNullTerminatedString((*it).c_str());
     _slip.writeFrame(k.getBytes(), k.getSize());
   }
+
+  // Now send in JSON format
+  StaticJsonBuffer<1024> jsonBuffer;
+  SKJSONVisitor jsonVisitor(jsonBuffer);
+  JsonObject &jsonData = jsonVisitor.processUpdate(u);
+  FixedSizeKommand<1024> k(KommandSKData);
+  jsonData.printTo(k);
+  //FIXME: who adds the final 0 here?
+  _slip.writeFrame(k.getBytes(), k.getSize());
 }
 

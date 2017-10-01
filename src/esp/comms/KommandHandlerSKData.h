@@ -30,14 +30,14 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "common/comms/KommandHandler.h"
+#include "net/KBoxWebServer.h"
 
-class KBoxWebServer {
+class KommandHandlerSKData : public KommandHandler {
   private:
+    KBoxWebServer &_webServer;
 
   public:
-    KBoxWebServer();
-    void setup();
-    void publishSKUpdate(const char *message);
+    KommandHandlerSKData(KBoxWebServer &webServer) : _webServer(webServer) {};
+    bool handleKommand(KommandReader &kreader, SlipStream &replyStream) override;
 };
-
