@@ -24,21 +24,21 @@
 #include "Arduino.h"
 
 #include <functional>
-#include <ESPAsyncTCP.h>
 #include "FS.h"
 
 #include "StringArray.h"
 
-#if defined(ESP31B)
-#include <ESP31BWiFi.h>
+#ifdef ESP32
+#include <WiFi.h>
+#include <AsyncTCP.h>
 #elif defined(ESP8266)
 #include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
 #else
 #error Platform not supported
 #endif
 
 #define DEBUGF(...) //Serial.printf(__VA_ARGS__)
-
 
 class AsyncWebServer;
 class AsyncWebServerRequest;
@@ -113,7 +113,10 @@ class AsyncWebHeader {
  * REQUEST :: Each incoming Client is wrapped inside a Request and both live together until disconnect
  * */
 
+typedef enum { RCT_NOT_USED = -1, RCT_DEFAULT = 0, RCT_HTTP, RCT_WS, RCT_EVENT, RCT_MAX } RequestedConnectionType;
+
 typedef std::function<size_t(uint8_t*, size_t, size_t)> AwsResponseFiller;
+typedef std::function<String(const String&)> AwsTemplateProcessor;
 
 class AsyncWebServerRequest {
   using File = fs::File;
@@ -136,6 +139,8 @@ class AsyncWebServerRequest {
     String _contentType;
     String _boundary;
     String _authorization;
+    RequestedConnectionType _reqconntype;
+    void _removeNotInterestingHeaders();
     bool _isDigest;
     bool _isMultipart;
     bool _isPlainPost;
@@ -194,7 +199,9 @@ class AsyncWebServerRequest {
     size_t contentLength() const { return _contentLength; }
     bool multipart() const { return _isMultipart; }
     const char * methodToString() const;
-
+    const char * requestedConnTypeToString() const;
+    RequestedConnectionType requestedConnType() const { return _reqconntype; }
+    bool isExpectedRequestedConnType(RequestedConnectionType erct1, RequestedConnectionType erct2 = RCT_NOT_USED, RequestedConnectionType erct3 = RCT_NOT_USED);
 
     //hash is the string representation of:
     // base64(user:pass) for basic or
@@ -210,23 +217,23 @@ class AsyncWebServerRequest {
 
     void send(AsyncWebServerResponse *response);
     void send(int code, const String& contentType=String(), const String& content=String());
-    void send(FS &fs, const String& path, const String& contentType=String(), bool download=false);
-    void send(File content, const String& path, const String& contentType=String(), bool download=false);
-    void send(Stream &stream, const String& contentType, size_t len);
-    void send(const String& contentType, size_t len, AwsResponseFiller callback);
-    void sendChunked(const String& contentType, AwsResponseFiller callback);
-    void send_P(int code, const String& contentType, const uint8_t * content, size_t len);
-    void send_P(int code, const String& contentType, PGM_P content);
+    void send(FS &fs, const String& path, const String& contentType=String(), bool download=false, AwsTemplateProcessor callback=nullptr);
+    void send(File content, const String& path, const String& contentType=String(), bool download=false, AwsTemplateProcessor callback=nullptr);
+    void send(Stream &stream, const String& contentType, size_t len, AwsTemplateProcessor callback=nullptr);
+    void send(const String& contentType, size_t len, AwsResponseFiller callback, AwsTemplateProcessor templateCallback=nullptr);
+    void sendChunked(const String& contentType, AwsResponseFiller callback, AwsTemplateProcessor templateCallback=nullptr);
+    void send_P(int code, const String& contentType, const uint8_t * content, size_t len, AwsTemplateProcessor callback=nullptr);
+    void send_P(int code, const String& contentType, PGM_P content, AwsTemplateProcessor callback=nullptr);
 
     AsyncWebServerResponse *beginResponse(int code, const String& contentType=String(), const String& content=String());
-    AsyncWebServerResponse *beginResponse(FS &fs, const String& path, const String& contentType=String(), bool download=false);
-    AsyncWebServerResponse *beginResponse(File content, const String& path, const String& contentType=String(), bool download=false);
-    AsyncWebServerResponse *beginResponse(Stream &stream, const String& contentType, size_t len);
-    AsyncWebServerResponse *beginResponse(const String& contentType, size_t len, AwsResponseFiller callback);
-    AsyncWebServerResponse *beginChunkedResponse(const String& contentType, AwsResponseFiller callback);
+    AsyncWebServerResponse *beginResponse(FS &fs, const String& path, const String& contentType=String(), bool download=false, AwsTemplateProcessor callback=nullptr);
+    AsyncWebServerResponse *beginResponse(File content, const String& path, const String& contentType=String(), bool download=false, AwsTemplateProcessor callback=nullptr);
+    AsyncWebServerResponse *beginResponse(Stream &stream, const String& contentType, size_t len, AwsTemplateProcessor callback=nullptr);
+    AsyncWebServerResponse *beginResponse(const String& contentType, size_t len, AwsResponseFiller callback, AwsTemplateProcessor templateCallback=nullptr);
+    AsyncWebServerResponse *beginChunkedResponse(const String& contentType, AwsResponseFiller callback, AwsTemplateProcessor templateCallback=nullptr);
     AsyncResponseStream *beginResponseStream(const String& contentType, size_t bufferSize=1460);
-    AsyncWebServerResponse *beginResponse_P(int code, const String& contentType, const uint8_t * content, size_t len);
-    AsyncWebServerResponse *beginResponse_P(int code, const String& contentType, PGM_P content);
+    AsyncWebServerResponse *beginResponse_P(int code, const String& contentType, const uint8_t * content, size_t len, AwsTemplateProcessor callback=nullptr);
+    AsyncWebServerResponse *beginResponse_P(int code, const String& contentType, PGM_P content, AwsTemplateProcessor callback=nullptr);
 
     size_t headers() const;                     // get header count
     bool hasHeader(const String& name) const;   // check if header exists
@@ -405,6 +412,31 @@ class AsyncWebServer {
     void _handleDisconnect(AsyncWebServerRequest *request);
     void _attachHandler(AsyncWebServerRequest *request);
     void _rewriteRequest(AsyncWebServerRequest *request);
+};
+
+class DefaultHeaders {
+  using headers_t = LinkedList<AsyncWebHeader *>;
+  headers_t _headers;
+  
+  DefaultHeaders()
+  :_headers(headers_t([](AsyncWebHeader *h){ delete h; }))
+  {}
+public:
+  using ConstIterator = headers_t::ConstIterator;
+
+  void addHeader(const String& name, const String& value){
+    _headers.add(new AsyncWebHeader(name, value));
+  }  
+  
+  ConstIterator begin() const { return _headers.begin(); }
+  ConstIterator end() const { return _headers.end(); }
+
+  DefaultHeaders(DefaultHeaders const &) = delete;
+  DefaultHeaders &operator=(DefaultHeaders const &) = delete;
+  static DefaultHeaders &Instance() {
+    static DefaultHeaders instance;
+    return instance;
+  }
 };
 
 #include "WebResponseImpl.h"

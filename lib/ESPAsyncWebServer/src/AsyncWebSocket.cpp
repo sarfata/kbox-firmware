@@ -40,6 +40,7 @@ void SHA1Final(unsigned char digest[20], SHA1_CTX* context);
 #include <Hash.h>
 #endif
 
+#define MAX_PRINTF_LEN 64
 
 size_t webSocketSendFrameWindow(AsyncClient *client){
   if(!client->canSend())
@@ -306,6 +307,7 @@ AsyncWebSocketBasicMessage::AsyncWebSocketBasicMessage(uint8_t opcode, bool mask
   ,_sent(0)
   ,_ack(0)
   ,_acked(0)
+  ,_data(NULL)
 {
   _opcode = opcode & 0x07;
   _mask = mask;
@@ -645,16 +647,18 @@ void AsyncWebSocketClient::_onData(void *buf, size_t plen){
 size_t AsyncWebSocketClient::printf(const char *format, ...) {
   va_list arg;
   va_start(arg, format);
-  char* temp = new char[64];
+  char* temp = new char[MAX_PRINTF_LEN];
   if(!temp){
     return 0;
   }
   char* buffer = temp;
-  size_t len = vsnprintf(temp, 64, format, arg);
+  size_t len = vsnprintf(temp, MAX_PRINTF_LEN, format, arg);
   va_end(arg);
-  if (len > 63) {
+
+  if (len > (MAX_PRINTF_LEN - 1)) {
     buffer = new char[len + 1];
     if (!buffer) {
+   	  delete[] temp;
       return 0;
     }
     va_start(arg, format);
@@ -669,19 +673,22 @@ size_t AsyncWebSocketClient::printf(const char *format, ...) {
   return len;
 }
 
+#ifndef ESP32
 size_t AsyncWebSocketClient::printf_P(PGM_P formatP, ...) {
   va_list arg;
   va_start(arg, formatP);
-  char* temp = new char[64];
+  char* temp = new char[MAX_PRINTF_LEN];
   if(!temp){
     return 0;
   }
   char* buffer = temp;
-  size_t len = vsnprintf_P(temp, 64, formatP, arg);
+  size_t len = vsnprintf_P(temp, MAX_PRINTF_LEN, formatP, arg);
   va_end(arg);
-  if (len > 63) {
+
+  if (len > (MAX_PRINTF_LEN - 1)) {
     buffer = new char[len + 1];
     if (!buffer) {
+   	  delete[] temp;
       return 0;
     }
     va_start(arg, formatP);
@@ -695,6 +702,7 @@ size_t AsyncWebSocketClient::printf_P(PGM_P formatP, ...) {
   delete[] temp;
   return len;
 }
+#endif
 
 void AsyncWebSocketClient::text(const char * message, size_t len){
   _queueMessage(new AsyncWebSocketBasicMessage(message, len));
@@ -928,11 +936,15 @@ size_t AsyncWebSocket::printf(uint32_t id, const char *format, ...){
 
 size_t AsyncWebSocket::printfAll(const char *format, ...) {
   va_list arg;
+  char* temp = new char[MAX_PRINTF_LEN];
+  if(!temp){
+    return 0;
+  }
   va_start(arg, format);
-  return 0;
-  size_t len = vsnprintf(nullptr, 0, format, arg);
+  size_t len = vsnprintf(temp, MAX_PRINTF_LEN, format, arg);
   va_end(arg);
-
+  delete[] temp;
+  
   AsyncWebSocketMessageBuffer * buffer = makeBuffer(len + 1); 
   if (!buffer) {
     return 0;
@@ -946,6 +958,7 @@ size_t AsyncWebSocket::printfAll(const char *format, ...) {
   return len;
 }
 
+#ifndef ESP32
 size_t AsyncWebSocket::printf_P(uint32_t id, PGM_P formatP, ...){
   AsyncWebSocketClient * c = client(id);
   if(c != NULL){
@@ -957,20 +970,28 @@ size_t AsyncWebSocket::printf_P(uint32_t id, PGM_P formatP, ...){
   }
   return 0;
 }
+#endif
 
 size_t AsyncWebSocket::printfAll_P(PGM_P formatP, ...) {
   va_list arg;
+  char* temp = new char[MAX_PRINTF_LEN];
+  if(!temp){
+    return 0;
+  }
   va_start(arg, formatP);
-  size_t len = vsnprintf_P(nullptr, 0, formatP, arg);
+  size_t len = vsnprintf_P(temp, MAX_PRINTF_LEN, formatP, arg);
   va_end(arg);
-
+  delete[] temp;
+  
   AsyncWebSocketMessageBuffer * buffer = makeBuffer(len + 1); 
   if (!buffer) {
     return 0;
   }
+
   va_start(arg, formatP);
-  vsnprintf_P( (char *)buffer->get(), len + 1, formatP, arg);
+  vsnprintf_P((char *)buffer->get(), len + 1, formatP, arg);
   va_end(arg);
+
   textAll(buffer);
   return len;
 }
@@ -1058,8 +1079,8 @@ const char * WS_STR_UUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 bool AsyncWebSocket::canHandle(AsyncWebServerRequest *request){
   if(!_enabled)
     return false;
-
-  if(request->method() != HTTP_GET || !request->url().equals(_url))
+  
+  if(request->method() != HTTP_GET || !request->url().equals(_url) || !request->isExpectedRequestedConnType(RCT_WS))
     return false;
 
   request->addInterestingHeader(WS_STR_CONNECTION);
@@ -1144,7 +1165,7 @@ AsyncWebSocketResponse::AsyncWebSocketResponse(const String& key, AsyncWebSocket
 #ifdef ESP8266
   sha1(key + WS_STR_UUID, hash);
 #else
-  key += WS_STR_UUID;
+  (String&)key += WS_STR_UUID;
   SHA1_CTX ctx;
   SHA1Init(&ctx);
   SHA1Update(&ctx, (const unsigned char*)key.c_str(), key.length());
