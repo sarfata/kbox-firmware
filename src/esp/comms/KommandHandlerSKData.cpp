@@ -28,6 +28,7 @@
   THE SOFTWARE.
 */
 
+#include <KBoxLogging.h>
 #include "KommandHandlerSKData.h"
 
 bool KommandHandlerSKData::handleKommand(KommandReader &kreader, SlipStream &replyStream) {
@@ -35,6 +36,9 @@ bool KommandHandlerSKData::handleKommand(KommandReader &kreader, SlipStream &rep
 
   if (jsonData) {
     _webServer.publishSKUpdate(jsonData);
+  }
+  else {
+    DEBUG("Received invalid KommandSKData");
   }
   return true;
 }

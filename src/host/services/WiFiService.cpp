@@ -101,7 +101,7 @@ void WiFiService::updateReceived(const SKUpdate& u) {
   JsonObject &jsonData = jsonVisitor.processUpdate(u);
   FixedSizeKommand<1024> k(KommandSKData);
   jsonData.printTo(k);
-  //FIXME: who adds the final 0 here?
+  k.write(0);
   _slip.writeFrame(k.getBytes(), k.getSize());
 }
 
