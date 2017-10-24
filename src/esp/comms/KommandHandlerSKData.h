@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -21,31 +27,17 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
 
-#include "ui/GC.h"
-#include "os/Task.h"
-#include "signalk/KMessage.h"
-#include "comms/Kommand.h"
-#include "comms/SlipStream.h"
-#include "comms/KommandHandlerPing.h"
-#include "comms/KommandHandlerWiFiLog.h"
-#include "common/signalk/SKHub.h"
-#include "common/signalk/SKSubscriber.h"
+#include "common/comms/KommandHandler.h"
+#include "net/KBoxWebServer.h"
 
-class WiFiService : public Task, public KReceiver, public SKSubscriber {
+class KommandHandlerSKData : public KommandHandler {
   private:
-    SKHub &_hub;
-    SlipStream _slip;
-    KommandHandlerPing _pingHandler;
-    KommandHandlerWiFiLog _wifiLogHandler;
+    KBoxWebServer &_webServer;
 
   public:
-    WiFiService(SKHub &skHub, GC &gc);
-
-    void setup();
-    void loop();
-    void processMessage(const KMessage &m) override;
-    void updateReceived(const SKUpdate&) override;
+    KommandHandlerSKData(KBoxWebServer &webServer) : _webServer(webServer) {};
+    bool handleKommand(KommandReader &kreader, SlipStream &replyStream) override;
 };
-

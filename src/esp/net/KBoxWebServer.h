@@ -30,11 +30,14 @@
 
 #pragma once
 
+#include <stdint.h>
+
 class KBoxWebServer {
   private:
 
   public:
     KBoxWebServer();
     void setup();
+    void publishSKUpdate(const char *message);
 };
 

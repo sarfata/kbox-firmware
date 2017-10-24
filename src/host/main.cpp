@@ -67,7 +67,7 @@ void setup() {
   digitalWrite(led_pin, 1);
 
   // Instantiate all our services
-  WiFiService *wifi = new WiFiService(gc);
+  WiFiService *wifi = new WiFiService(skHub, gc);
 
   ADCService *adcService = new ADCService(skHub, KBox.getADC());
   BarometerService *baroService = new BarometerService(skHub);

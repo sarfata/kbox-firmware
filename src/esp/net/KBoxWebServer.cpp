@@ -105,5 +105,16 @@ void KBoxWebServer::setup() {
   // attach filesystem root at URL /fs
   webServer.serveStatic("/fs", SPIFFS, "/");
 
+  webServer.onNotFound([](AsyncWebServerRequest *request) {
+    request->send(404, "text/plain", "No bounty for you here sailor. Keep looking. (404)");
+  });
+
   webServer.begin();
 }
+
+void KBoxWebServer::publishSKUpdate(const char *message) {
+  if (ws.enabled()) {
+    ws.textAll(message);
+  }
+}
+

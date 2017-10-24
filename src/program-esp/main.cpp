@@ -44,8 +44,11 @@ void setup() {
 
   // Use Serial3 as the Debug output to avoid trashing the communication
   // with the programmer program running on host.
+  digitalWrite(nmea2_out_enable, 1);
+  pinMode(nmea2_out_enable, OUTPUT);
   Serial3.begin(920800);
   KBoxLogging.setLogger(new KBoxLoggerStream(Serial3));
+
 
   DEBUG("Starting esp program");
   KBox.espInit();

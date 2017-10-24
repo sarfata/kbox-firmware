@@ -9,7 +9,7 @@ env.Replace(
     LOCAL_UPLOADERFLAGS=[
         "-p", "$UPLOAD_PORT",
         "-b", "2000000",
-        "write_flash", "--flash_mode", "dio", "--flash_size", "32m",
+        "write_flash", "--flash_mode", "dio", "--flash_size", "16m",
     ],
    UPLOADER=LOCAL_UPLOADER,
    UPLOADCMD='$UPLOADER $LOCAL_UPLOADERFLAGS $LOCAL_UPLOAD_ADDR $SOURCE',

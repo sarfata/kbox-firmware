@@ -31,7 +31,7 @@ logger = logging.getLogger('ycm-extra-conf')
 ## Platformio automatically copies over the libs you use after your first run.
 ## Be warned that you will not receive autocompletion on libraries until after
 ## your first `platformio run`.
-PlatformioAutogen = ".pioenvs/"
+PlatformioAutogen = ".piolibdeps/"
 
 # Platformio Arduino Std Libs
 ## Arduino Std libs from .platformio packages. Provides stdlib.h and such.
