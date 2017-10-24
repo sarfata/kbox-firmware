@@ -11,3 +11,4 @@ tags
 .gdb_history
 lcov-output
 cov.info
+node_modules
