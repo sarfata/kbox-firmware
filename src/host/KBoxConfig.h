@@ -46,6 +46,19 @@ extern bool cfUseHdgFromIMUSensor;        // Get Heading from internal IMU-Senso
 extern bool cfUseHeelPitchFromIMUSensor;  // Get Heel/Pitch from internal IMU-Sensor?
 extern int8_t cfIMU_MIN_CAL;              // Minimum Calibration to take HDG from internal sensor
 
+enum KBoxOrientation {
+    MOUNTED_ON_PORT_HULL,
+    MOUNTED_ON_STB_HULL,
+    LAYING_READ_DIR_TO_BOW
+};
+extern KBoxOrientation cfKBoxOrientation;
+
+// ---------------------------------------------------------------------------
+//           Interval Services
+// ---------------------------------------------------------------------------
+extern int16_t cfIMUServiceInterval;
+extern int16_t cfBaroServiceInterval;
+extern int16_t cfAdcServiceInterval;
 
 // ---------------------------------------------------------------------------
 //              NMEA 2000 Settings
