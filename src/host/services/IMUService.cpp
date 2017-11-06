@@ -34,6 +34,29 @@ void IMUService::setup() {
     DEBUG("Error initializing BNO055");
   }
   else {
+    // Different Mounting positions of KBox
+    bno055.setMode(bno055.OPERATION_MODE_CONFIG);
+    delay(50);
+    switch ( cfKBoxOrientation ) {
+      case MOUNTED_ON_PORT_HULL:
+        bno055.write8(bno055.BNO055_AXIS_MAP_CONFIG_ADDR, 0b00001001); // P0-P7, Default is P1
+        delay(10);
+        bno055.write8(bno055.BNO055_AXIS_MAP_SIGN_ADDR, 0b00000000); // P0-P7, Default is P1
+        delay(10);
+      break;
+      //case LAYING_READ_DIR_TO_BOW:
+      //break;
+      default:
+        // Should be default setting of BNO055 Adafruit Library
+        bno055.write8(bno055.BNO055_AXIS_MAP_CONFIG_ADDR, 0x21 );
+        delay(10);
+        bno055.write8(bno055.BNO055_AXIS_MAP_SIGN_ADDR, 0x04 );
+        delay(10);
+      break;
+    }
+
+    bno055.setMode( bno055.OPERATION_MODE_NDOF ); // OPERATION_MODE_NDOF_FMC_OFF
+    delay(100);
     DEBUG("Success!");
   }
 }
@@ -51,10 +74,21 @@ void IMUService::loop() {
   // Heading and the Course Over Ground Magnetic.
 
   double roll, pitch, heading;
-  if ( cfKBoxOrientation == MOUNTED_ON_PORT_HULL ) {
-    roll = eulerAngles.z();
-    pitch = eulerAngles.y();
-    heading = fmod(eulerAngles.x() + 270, 360);
+  roll = eulerAngles.z();
+  pitch = eulerAngles.y();
+  heading = eulerAngles.x();
+
+  // additional calculation for KBox port mounting....
+  switch ( cfKBoxOrientation ) {
+    case MOUNTED_ON_PORT_HULL:
+      heading = fmod(eulerAngles.x() + 270, 360);
+    break;
+    case LAYING_READ_DIR_TO_BOW:
+      pitch = (-1) * eulerAngles.z();
+      roll = eulerAngles.y();
+    break;
+    default:
+    break;
   }
 
   if (sysCalib >= cfIMU_MIN_CAL) {
