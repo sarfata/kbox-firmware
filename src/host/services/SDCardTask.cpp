@@ -30,7 +30,14 @@
 
 SDCardTask::SDCardTask() : Task("SDCard") {
   DEBUG("init sdcard ...");
-  sd = new SdFat();
+  #if defined(__MK66FX1M0__) // Teensy 3.6
+    // For Builtin SD-Card in Teensy 3.6
+    sd = new SdFatSdio();
+  #else
+    // KBox, Teensy 3.2
+    sd = new SdFat();
+  #endif
+
 }
 
 SDCardTask::~SDCardTask() {
@@ -79,7 +86,15 @@ void SDCardTask::loop() {
 }
 
 bool SDCardTask::cardInit() {
-  if (!sd->begin(sdcard_cs)) {
+  #if defined(__MK66FX1M0__) // Teensy 3.6
+    // For Builtin SD-Card in Teensy 3.6
+    // changed to builtin SDCard
+    if (!sd->begin()) {
+  #else
+    // KBox, Teensy 3.2
+    if (!sd->begin(sdcard_cs)) {
+  #endif
+
     if (sd->card()->errorCode()) {
       DEBUG("Something went wrong ... SD card errorCode: %i errorData: %i", sd->card()->errorCode(), sd->card()->errorData());
       return false;
@@ -159,7 +174,7 @@ uint64_t SDCardTask::getFreeSpace() const {
   // the running led stops flashing (although we do still call digitalWrite on it)
   // the serial ports start messing up big time (missing a lot of data)
   // eventually other things crash...
-  // Could be a memory problem or something like that. Have not found 
+  // Could be a memory problem or something like that. Have not found
   // it yet but the culprit is this line so for now it is disabled.
   uint64_t space = 0; //logFile->volume()->freeClusterCount();
   space *= logFile->volume()->blocksPerCluster();
