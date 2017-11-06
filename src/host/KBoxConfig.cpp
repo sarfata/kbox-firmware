@@ -49,6 +49,14 @@ bool cfUseHdgFromIMUSensor       = false;  // Get Heading from internal IMU-Sens
 bool cfUseHeelPitchFromIMUSensor = true;  // Get Heel/Pitch from internal IMU-Sensor?
 int8_t cfIMU_MIN_CAL             = 2;     // Minimum Calibration to take HDG from internal sensor
 
+KBoxOrientation cfKBoxOrientation = MOUNTED_ON_PORT_HULL;
+
+// ---------------------------------------------------------------------------
+//           Intervall Tasks
+// ---------------------------------------------------------------------------
+int8_t cfIMUServiceInterval   = 100;
+
+
 // ---------------------------------------------------------------------------
 //              NMEA 2000 Settings
 // ---------------------------------------------------------------------------
