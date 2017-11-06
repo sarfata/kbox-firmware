@@ -23,6 +23,8 @@
 */
 
 #include <KBoxHardware.h>
+#include "KBoxConfig.h"
+
 #include "common/os/TaskManager.h"
 #include "common/os/Task.h"
 #include "common/signalk/SKHub.h"
@@ -61,6 +63,12 @@ void setup() {
 
   Serial.begin(115200);
   KBoxLogging.setLogger(&usbService);
+
+  KBoxConfig *pConfig = new KBoxConfig();
+  DEBUG( "Loading KBoxConfig....");
+  pConfig->LoadKBoxConfig();
+  NMEA1_SERIAL.begin( cfCOM_1_baud );
+  NMEA2_SERIAL.begin( cfCOM_2_baud );
 
   DEBUG("Starting");
 
