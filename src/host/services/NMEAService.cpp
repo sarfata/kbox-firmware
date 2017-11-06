@@ -69,7 +69,7 @@ void serialEvent2() {
           // because we tested buffer.
           buffer[index-1] = 0;
           NMEASentence s((char*)buffer);
-          DEBUG("RX COM1: %s", (char*)buffer );
+          // DEBUG("RX COM1: %s", (char*)buffer );
           received2->add(s);
         }
         // Start again from scratch
