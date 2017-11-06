@@ -38,7 +38,14 @@ class Loggable {
 
 class SDCardTask : public Task, public KReceiver {
   private:
-    SdFat *sd = 0;
+    #if defined(__MK66FX1M0__) // Teensy 3.6
+      // For Builtin SD-Card in Teensy 3.6
+      SdFatSdio *sd = 0;  // Teensy 3.5/3.6 SDIO support lt. README.md SDFat Library
+    #else
+      // KBox, Teensy 3.2
+      SdFat *sd = 0;
+    #endif
+
     SdFile *logFile = 0;
     bool cardReady = false;
 
