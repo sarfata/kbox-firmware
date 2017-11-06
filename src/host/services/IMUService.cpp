@@ -26,6 +26,7 @@
 #include "common/signalk/SKUpdateStatic.h"
 #include "common/signalk/SKUnits.h"
 #include "IMUService.h"
+#include "KBoxConfig.h"
 
 void IMUService::setup() {
   DEBUG("Initing BNO055");
@@ -42,20 +43,21 @@ void IMUService::loop() {
 
   eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
 
-  //DEBUG("Calib Sys: %i Accel: %i Gyro: %i Mag: %i", sysCalib, accelCalib, gyroCalib, magCalib);
-  //DEBUG("Attitude roll: %f pitch: %f  Mag heading: %f", eulerAngles.z(), eulerAngles.y(), eulerAngles.x());
+  DEBUG("Calib Sys: %i Accel: %i Gyro: %i Mag: %i", sysCalib, accelCalib, gyroCalib, magCalib);
+  DEBUG("Attitude roll: %f pitch: %f  Mag heading: %f", eulerAngles.z(), eulerAngles.y(), eulerAngles.x());
 
   SKUpdateStatic<2> update;
   // Note: We could calculate yaw as the difference between the Magnetic
   // Heading and the Course Over Ground Magnetic.
 
-  /* if orientation == MOUNTED_ON_PORT_HULL */
   double roll, pitch, heading;
-  roll = eulerAngles.z();
-  pitch = eulerAngles.y();
-  heading = fmod(eulerAngles.x() + 270, 360);
+  if ( cfKBoxOrientation == MOUNTED_ON_PORT_HULL ) {
+    roll = eulerAngles.z();
+    pitch = eulerAngles.y();
+    heading = fmod(eulerAngles.x() + 270, 360);
+  }
 
-  if (sysCalib == 3) {
+  if (sysCalib >= cfIMU_MIN_CAL) {
     update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(roll), /* pitch */ SKDegToRad(pitch), /* yaw */ 0));
     update.setNavigationHeadingMagnetic(SKDegToRad(heading));
   }
