@@ -98,6 +98,20 @@ FlexCAN::FlexCAN (uint8_t id)
     if (id > 0)  {
         flexcanBase = FLEXCAN1_BASE;
     }
+#else
+    (void)id; // Just for avoid warning.
+#endif
+
+#if defined(__MK20DX256__)
+    IrqMessage=IRQ_CAN_MESSAGE;
+#elif defined(__MK64FX512__)
+    IrqMessage=IRQ_CAN0_MESSAGE;
+#elif defined(__MK66FX1M0__)
+    if (flexcanBase == FLEXCAN0_BASE) {
+      IrqMessage=IRQ_CAN0_MESSAGE;
+    } else {
+      IrqMessage=IRQ_CAN1_MESSAGE;
+    }
 #endif
 
     // Default mask is allow everything
@@ -220,21 +234,8 @@ void FlexCAN::begin (uint32_t baud, const CAN_filter_t &mask, uint8_t txAlt, uin
 
     setNumTxBoxes (numTxMailboxes);
 
-#if defined(__MK20DX256__)
-    NVIC_SET_PRIORITY (IRQ_CAN_MESSAGE, IRQ_PRIORITY);
-    NVIC_ENABLE_IRQ (IRQ_CAN_MESSAGE);
-#elif defined(__MK64FX512__)
-    NVIC_SET_PRIORITY (IRQ_CAN0_MESSAGE, IRQ_PRIORITY);
-    NVIC_ENABLE_IRQ (IRQ_CAN0_MESSAGE);
-#elif defined(__MK66FX1M0__)
-    if (flexcanBase == FLEXCAN0_BASE) {
-        NVIC_SET_PRIORITY (IRQ_CAN0_MESSAGE, IRQ_PRIORITY);
-        NVIC_ENABLE_IRQ (IRQ_CAN0_MESSAGE);
-    } else {
-        NVIC_SET_PRIORITY (IRQ_CAN1_MESSAGE, IRQ_PRIORITY);
-        NVIC_ENABLE_IRQ (IRQ_CAN1_MESSAGE);
-    }
-#endif
+    NVIC_SET_PRIORITY (IrqMessage, IRQ_PRIORITY);
+    NVIC_ENABLE_IRQ (IrqMessage);
 
     // enable interrupt masks for all 16 mailboxes
 
@@ -839,8 +840,8 @@ int FlexCAN::write (const CAN_message_t &msg, uint8_t mbox)
           result=1;
       }
     } 
-    if (result==0 && txRings[mbox]!=0) {
-      result=(txRings[mbox]!=0 && addToRingBuffer (*txRings[mbox], msg) == true);
+    if (result==0 && txRings[mbox]!=0 && addToRingBuffer(*txRings[mbox], msg) ) {
+      result=1;
     }
       
     irqRelease();
@@ -1560,7 +1561,7 @@ CANListener::CANListener ()
  *
  */
 
-bool CANListener::frameHandler (CAN_message_t &frame, int mailbox, uint8_t controller)
+bool CANListener::frameHandler (CAN_message_t &/*frame*/, int /*mailbox*/, uint8_t /*controller*/)
 {
 
     /* default implementation that doesn't handle frames */
@@ -1576,7 +1577,7 @@ bool CANListener::frameHandler (CAN_message_t &frame, int mailbox, uint8_t contr
  *
  */
 
-void CANListener::txHandler (int mailbox, uint8_t controller)
+void CANListener::txHandler (int /*mailbox*/, uint8_t /*controller*/)
 {
 
 }
@@ -1592,7 +1593,7 @@ void CANListener::txHandler (int mailbox, uint8_t controller)
 
 void CANListener::attachMBHandler (uint8_t mailBox)
 {
-    if ((mailBox >= 0) && (mailBox < NUM_MAILBOXES)) {
+    if ( (mailBox < NUM_MAILBOXES) ) {
         callbacksActive |= (1L << mailBox);
     }
 }
@@ -1608,7 +1609,7 @@ void CANListener::attachMBHandler (uint8_t mailBox)
 
 void CANListener::detachMBHandler (uint8_t mailBox)
 {
-    if ((mailBox >= 0) && (mailBox < NUM_MAILBOXES)) {
+    if ( (mailBox < NUM_MAILBOXES) ) {
         callbacksActive &= ~(1UL << mailBox);
     }
 }
