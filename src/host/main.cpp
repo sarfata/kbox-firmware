@@ -30,6 +30,7 @@
 #include "common/signalk/SKHub.h"
 #include "host/drivers/ILI9341GC.h"
 #include "host/pages/BatteryMonitorPage.h"
+#include "host/pages/IMUMonitorPage.h"
 #include "host/pages/StatsPage.h"
 #include "host/services/MFD.h"
 #include "host/services/ADCService.h"
@@ -98,9 +99,9 @@ void setup() {
   // Add all the tasks
   taskManager.addTask(&mfd);
   taskManager.addTask(new IntervalTask(new RunningLightService(), 250));
-  taskManager.addTask(new IntervalTask(adcService, 1000));
-  taskManager.addTask(new IntervalTask(imuService, 50));
-  taskManager.addTask(new IntervalTask(baroService, 1000));
+  taskManager.addTask(new IntervalTask(adcService, cfAdcServiceInterval ));
+  taskManager.addTask(new IntervalTask(imuService, cfIMUServiceInterval ));
+  taskManager.addTask(new IntervalTask(baroService, cfBaroServiceInterval ));
   taskManager.addTask(n2kService);
   taskManager.addTask(reader1);
   taskManager.addTask(reader2);
@@ -113,8 +114,10 @@ void setup() {
 
   StatsPage *statsPage = new StatsPage();
   statsPage->setSDCardTask(sdcardTask);
-
   mfd.addPage(statsPage);
+
+  IMUMonitorPage *imuPage = new IMUMonitorPage(skHub);
+  mfd.addPage(imuPage);
 
   taskManager.setup();
 
