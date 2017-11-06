@@ -35,7 +35,7 @@ SKNMEA2000Visitor::~SKNMEA2000Visitor() {
   flushMessages();
 }
 
-void SKNMEA2000Visitor::visitSKElectricalBatteries(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+void SKNMEA2000Visitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   // PGN127508: Battery Status
   // FIXME: The mapping of Battery instance names to ids should be configurable
   unsigned char instance = 255;
@@ -51,9 +51,15 @@ void SKNMEA2000Visitor::visitSKElectricalBatteries(const SKUpdate& u, const SKPa
   _messages.add(msg);
 }
 
-void SKNMEA2000Visitor::visitSKEnviromentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+void SKNMEA2000Visitor::visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   tN2kMsg *msg = new tN2kMsg();
-  SetN2kPressure(*msg, /* sid */ 0, /* source */ 0, N2kps_Atmospheric, v.getNumberValue());
+
+  // PGN 130310 seems to be better supported
+  SetN2kOutsideEnvironmentalParameters(*msg, 0, N2kDoubleNA, N2kDoubleNA, v.getNumberValue());
+
+  // PGN 130314 is more specific to pressure but not supported by Raymarine i70
+  //SetN2kPressure(*msg, /* sid */ 0, /* source */ 0, N2kps_Atmospheric, v.getNumberValue());
+
   _messages.add(msg);
 }
 

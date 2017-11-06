@@ -75,14 +75,17 @@ typedef struct SKTypeAttitude {
  *
  */
 class SKValue {
-  private:
-    // Type of the data in this SKValue
-    enum {
+  public:
+    enum SKValueType {
       SKValueTypeNone,
       SKValueTypeNumber,
       SKValueTypePosition,
       SKValueTypeAttitude
-    } _type;
+    };
+
+  private:
+    // Type of the data in this SKValue
+    enum SKValueType _type;
 
     // Storage of the actual value in an enum
     union value {
@@ -120,6 +123,10 @@ class SKValue {
     double getNumberValue() const;
     SKTypePosition getPositionValue() const;
     SKTypeAttitude getAttitudeValue() const;
+
+    enum SKValueType getType() const {
+      return _type;
+    };
 };
 
 extern const SKValue SKValueNone;

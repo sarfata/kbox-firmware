@@ -42,6 +42,7 @@ static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0x40);
 #include "comms/KommandHandler.h"
 #include "comms/KommandHandlerPing.h"
 #include "comms/KommandHandlerNMEA.h"
+#include "comms/KommandHandlerSKData.h"
 #include "stats/KBoxMetrics.h"
 #include "net/KBoxWebServer.h"
 
@@ -51,6 +52,7 @@ SlipStream slip(Serial, 2048);
 KommandHandlerPing pingHandler;
 KommandHandlerNMEA nmeaHandler(server);
 KBoxWebServer webServer;
+KommandHandlerSKData skDataHandler(webServer);
 
 void setup() {
   Serial1.begin(115200);
@@ -99,7 +101,7 @@ void loop() {
 
     KommandReader kr = KommandReader(frame, len);
 
-    KommandHandler *handlers[] = { &pingHandler, &nmeaHandler, 0 };
+    KommandHandler *handlers[] = { &pingHandler, &nmeaHandler, &skDataHandler, 0 };
     if (KommandHandler::handleKommandWithHandlers(handlers, kr, slip)) {
       KBoxMetrics.event(KBoxEventESPValidKommand);
     }

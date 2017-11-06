@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
+#include <Print.h>
 
 enum KommandIdentifier {
   KommandPing = 0x00,
@@ -36,6 +37,7 @@ enum KommandIdentifier {
   KommandScreenshot = 0x30,
   KommandScreenshotData = 0x31,
   KommandNMEASentence = 0x40,
+  KommandSKData = 0x42
 };
 
 class Kommand {
@@ -48,7 +50,7 @@ class Kommand {
  * Creates a Kommand object ready to hold at most maxDataSize of data. A few
  * extra bytes will be automatically added for header.
  */
-template <uint16_t maxDataSize> class FixedSizeKommand : public Kommand {
+template <uint16_t maxDataSize> class FixedSizeKommand : public Kommand, public Print {
   // Need 2 extra bytes for the command id
   static const uint16_t bufferSize = maxDataSize + 2;
   uint8_t _bytes[bufferSize];
@@ -88,7 +90,7 @@ template <uint16_t maxDataSize> class FixedSizeKommand : public Kommand {
       int len = strlen(s);
 
       // We want to have space for the string content + the terminating \0
-      if (len > bufferSize - _index - 1) {
+      if (len > (int)(bufferSize - _index - 1)) {
         len = bufferSize - _index - 1;
       }
       if (len <= 0) {
@@ -100,6 +102,14 @@ template <uint16_t maxDataSize> class FixedSizeKommand : public Kommand {
 
       // Always add 0 because strncpy(a,b, strlen(s)) will not!
       append8((uint8_t) 0);
+    };
+
+    virtual size_t write(uint8_t c) {
+      if (_index + 1 > bufferSize) {
+        return 0;
+      }
+      append8(c);
+      return 1;
     };
 
     void captureBuffer(uint8_t **ptr, size_t **index) {

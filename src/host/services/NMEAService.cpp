@@ -153,7 +153,8 @@ void NMEAService::loop() {
       this->sendMessage(*it);
 
       SKNMEAParser p;
-      const SKUpdate &update = p.parse(_skSourceInput, (*it).getSentence());
+      //FIXME: Get the time properly here!
+      const SKUpdate &update = p.parse(_skSourceInput, (*it).getSentence(), SKTime(0));
       if (update.getSize() > 0) {
         _hub.publish(update);
       }

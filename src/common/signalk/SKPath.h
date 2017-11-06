@@ -32,22 +32,8 @@
 
 #include <WString.h>
 
-typedef enum {
-  SKPathInvalidPath,
-
-  SKPathEnvironmentOutsidePressure,
-  SKPathNavigationAttitude,
-  SKPathNavigationCourseOverGroundTrue,
-  SKPathNavigationHeadingMagnetic,
-  SKPathNavigationPosition,
-  SKPathNavigationSpeedOverGround,
-
-  // Marker value - Every path below requires an index.
-  SKPathEnumIndexedPaths,
-
-  SKPathElectricalBatteries,
-
-} SKPathEnum;
+// This file includes an enum with all the SKPath values. It is generated.
+#include "SKPathEnum.generated.h"
 
 class SKPath;
 extern const SKPath SKPathInvalid;
@@ -102,5 +88,10 @@ class SKPath {
         return SKPathInvalid._index;
       }
     };
+
+    /**
+     * Return the full path, with index if required.
+     */
+    String toString() const;
 };
 

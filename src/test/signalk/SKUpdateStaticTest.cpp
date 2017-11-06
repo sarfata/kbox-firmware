@@ -85,19 +85,19 @@ TEST_CASE("SKUpdateStatic") {
     CHECK( u.getNavigationSpeedOverGround() == true );
   }
 
-  SECTION("SKPathElectricalBatteries") {
+  SECTION("SKPathElectricalBatteriesVoltage") {
     SKUpdateStatic<3> u;
 
-    CHECK( u.hasElectricalBatteries("engine") == false );
-    CHECK( u.setElectricalBatteries("engine", 12.1) == true );
-    CHECK( u.setElectricalBatteries("house", 12.2) == true );
-    CHECK( u.setElectricalBatteries("house2", 12.3) == true );
+    CHECK( u.hasElectricalBatteriesVoltage("engine") == false );
+    CHECK( u.setElectricalBatteriesVoltage("engine", 12.1) == true );
+    CHECK( u.setElectricalBatteriesVoltage("house", 12.2) == true );
+    CHECK( u.setElectricalBatteriesVoltage("house2", 12.3) == true );
 
-    CHECK( u.setElectricalBatteries("house3", 12.4) == false );
+    CHECK( u.setElectricalBatteriesVoltage("house3", 12.4) == false );
 
-    CHECK( u.getElectricalBatteries("engine") == 12.1 );
-    CHECK( u.getElectricalBatteries("house") == 12.2 );
-    CHECK( u.getElectricalBatteries("house2") == 12.3 );
+    CHECK( u.getElectricalBatteriesVoltage("engine") == 12.1 );
+    CHECK( u.getElectricalBatteriesVoltage("house") == 12.2 );
+    CHECK( u.getElectricalBatteriesVoltage("house2") == 12.3 );
   }
 };
 

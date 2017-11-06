@@ -36,9 +36,17 @@ enum SKSourceInput {
 class SKSource {
   private:
     SKSourceInput _input;
-    String _talker;
-    String _sentence;
-    uint32_t _pgn;
+    union {
+      struct {
+        char talker[3];
+        char sentence[4];
+      } nmea;
+      struct {
+        unsigned char sourceAddress;
+        unsigned char priority;
+        uint32_t pgn;
+      } nmea2000;
+    } _info;
 
   public:
     /**
@@ -54,6 +62,10 @@ class SKSource {
     static SKSource sourceForNMEA0183(const SKSourceInput input, const String& _talker, const String& _sentence);
 
     /**
+     * Returns a source instance for the given NMEA2000 source info.
+     */
+    static SKSource sourceForNMEA2000(const SKSourceInput input, const uint32_t pgn, const unsigned char priority, const unsigned char sourceAddress);
+    /**
      * Compares two SKSource objects and returns true if they represent the same
      * source.
      */
@@ -62,9 +74,16 @@ class SKSource {
 
     const SKSourceInput& getInput() const;
     const String& getType() const;
-    const String& getTalker() const;
-    const String& getSentence() const;
     const String& getLabel() const;
+
+    // Accessors for NMEA details
+    const char* getTalker() const;
+    const char* getSentence() const;
+
+    // Accessors for NMEA2000 details
+    uint32_t getPGN() const;
+    unsigned char getPriority() const;
+    unsigned char getSourceAddress() const;
 };
 
 /**

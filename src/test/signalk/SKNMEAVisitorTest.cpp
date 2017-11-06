@@ -30,9 +30,9 @@
 TEST_CASE("SKNMEAVisitorTest") {
   SKNMEAVisitor v;
 
-  SECTION("ElectricalBatteries") {
+  SECTION("ElectricalBatteriesVoltage") {
     SKUpdateStatic<3> u;
-    u.setElectricalBatteries("Supply", 12.42);
+    u.setElectricalBatteriesVoltage("Supply", 12.42);
 
     v.processUpdate(u);
 

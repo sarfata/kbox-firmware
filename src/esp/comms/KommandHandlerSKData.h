@@ -30,23 +30,14 @@
 
 #pragma once
 
-#include "SKUpdate.h"
+#include "common/comms/KommandHandler.h"
+#include "net/KBoxWebServer.h"
 
-/**
- * This class will automatically visit all known properties of a
- * SKUpdate and call protected methods to deal with each of them.
- *
- * This makes visiting a SKUpdate message much nicer.
- */
-class SKVisitor {
-  protected:
-    void visit(const SKUpdate& u);
+class KommandHandlerSKData : public KommandHandler {
+  private:
+    KBoxWebServer &_webServer;
 
-    virtual void visitSKElectricalBatteries(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKEnviromentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKNavigationCourseOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKNavigationPosition(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
-    virtual void visitSKNavigationSpeedOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {};
+  public:
+    KommandHandlerSKData(KBoxWebServer &webServer) : _webServer(webServer) {};
+    bool handleKommand(KommandReader &kreader, SlipStream &replyStream) override;
 };
