@@ -52,8 +52,8 @@ void KBoxHardware::setup() {
   digitalWrite(nmea2_out_enable, 0);
   pinMode(nmea1_out_enable, OUTPUT);
   pinMode(nmea2_out_enable, OUTPUT);
-  NMEA1_SERIAL.begin(38400);
-  NMEA2_SERIAL.begin(38400);
+  //NMEA1_SERIAL.begin(38400);
+  //NMEA2_SERIAL.begin(38400);
 
   // Initialize ADC
   adc.setAveraging(1);
