@@ -44,18 +44,20 @@ uint32_t cfCOM_2_baud     = 4800;
 // ---------------------------------------------------------------------------
 // [sensors]
 // TODO: better way to do??!!
-bool cfUseHdgFromBusIfExists     = true;      // Get Heading from NMEA2000?
+bool cfUseHdgFromBusIfExists     = true;   // Get Heading from NMEA2000?
 bool cfUseHdgFromIMUSensor       = false;  // Get Heading from internal IMU-Sensor?
-bool cfUseHeelPitchFromIMUSensor = true;  // Get Heel/Pitch from internal IMU-Sensor?
-int8_t cfIMU_MIN_CAL             = 2;     // Minimum Calibration to take HDG from internal sensor
+bool cfUseHeelPitchFromIMUSensor = true;   // Get Heel/Pitch from internal IMU-Sensor?
+int8_t cfIMU_MIN_CAL             = 2;      // Minimum Calibration to take HDG from internal sensor
 
-KBoxOrientation cfKBoxOrientation = MOUNTED_ON_PORT_HULL;
+// MOUNTED_ON_PORT_HULL, MOUNTED_ON_STB_HULL, LAYING_READ_DIR_TO_BOW
+KBoxOrientation cfKBoxOrientation = LAYING_READ_DIR_TO_BOW;
 
 // ---------------------------------------------------------------------------
-//           Intervall Tasks
+//           Interval Services
 // ---------------------------------------------------------------------------
-int8_t cfIMUServiceInterval   = 100;
-
+int16_t cfIMUServiceInterval   = 100;
+int16_t cfBaroServiceInterval  = 1000;
+int16_t cfAdcServiceInterval   = 1000;
 
 // ---------------------------------------------------------------------------
 //              NMEA 2000 Settings
@@ -87,10 +89,7 @@ String cfLabelADC4   = "Supply Voltage";
 //-----------------------------------------------------------------------------
 //          KBoxConfig Implementation
 //-----------------------------------------------------------------------------
-
-KBoxConfig::KBoxConfig(){
-
-}
+KBoxConfig::KBoxConfig(){}
 
 //-------------------------------------------------------------------------------
 //  Read ini-File
