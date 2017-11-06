@@ -69,6 +69,7 @@ void serialEvent2() {
           // because we tested buffer.
           buffer[index-1] = 0;
           NMEASentence s((char*)buffer);
+          DEBUG("RX COM1: %s", (char*)buffer );
           received2->add(s);
         }
         // Start again from scratch
@@ -149,8 +150,9 @@ void NMEAService::loop() {
   DEBUG("Found %i sentences waiting", receiveQueue.size());
   for (LinkedList<NMEASentence>::iterator it = receiveQueue.begin(); it != receiveQueue.end(); it++) {
     if (it->isValid()) {
-      KBoxMetrics.countEvent(rxValidEvent);
-      this->sendMessage(*it);
+      KBoxMetrics.event(rxValidEvent);
+      // DEBUG( "Rx NMEAValidCounter: %i", KBoxMetrics.countEvent(rxValidEvent) );
+      this->sendMessage(*it); // --> KGenerator sendMessage
 
       SKNMEAParser p;
       //FIXME: Get the time properly here!
@@ -160,7 +162,7 @@ void NMEAService::loop() {
       }
     }
     else {
-      KBoxMetrics.countEvent(rxErrorEvent);
+      KBoxMetrics.event(rxErrorEvent);
     }
   }
   // FIXME: the current linked list implementation would probably continue to
@@ -168,4 +170,3 @@ void NMEAService::loop() {
   // best if we had a clearer contract or a better way to manage this.
   receiveQueue.clear();
 }
-
