@@ -116,8 +116,10 @@ void setup() {
   statsPage->setSDCardTask(sdcardTask);
   mfd.addPage(statsPage);
 
-  IMUMonitorPage *imuPage = new IMUMonitorPage(skHub);
-  mfd.addPage(imuPage);
+  #ifdef IMU_MONITOR_PAGE
+    IMUMonitorPage *imuPage = new IMUMonitorPage(skHub);
+    mfd.addPage(imuPage);
+  #endif
 
   taskManager.setup();
 
