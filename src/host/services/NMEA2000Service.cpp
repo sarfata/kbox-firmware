@@ -39,7 +39,7 @@
 static NMEA2000Service *handlerContext;
 
 static void handler(const tN2kMsg &msg) {
-  DEBUG("Received N2K Message with pgn: %i", msg.PGN);
+  // DEBUG("Received N2K Message with pgn: %i", msg.PGN);
   handlerContext->publishN2kMessage(msg);
 }
 
@@ -62,13 +62,13 @@ void NMEA2000Service::setup() {
 void NMEA2000Service::sendN2kMessage(const tN2kMsg& msg) {
   bool result = NMEA2000.SendMsg(msg);
 
-  DEBUG("Sending message on n2k bus - pgn=%i prio=%i src=%i dst=%i len=%i result=%s", msg.PGN, msg.Priority,
-      msg.Source,
-      msg.Destination, msg.DataLen, result ? "success":"fail");
+  // DEBUG("Sending message on n2k bus - pgn=%i prio=%i src=%i dst=%i len=%i result=%s", msg.PGN, msg.Priority,
+  //    msg.Source,
+  //    msg.Destination, msg.DataLen, result ? "success":"fail");
 
   char pcdin[100];
   N2kToSeasmart(msg, now(), pcdin, sizeof(pcdin));
-  DEBUG("TX: %s", pcdin);
+  // DEBUG("TX: %s", pcdin);
 
   if (result) {
     KBoxMetrics.event(KBoxEventNMEA2000MessageSent);
