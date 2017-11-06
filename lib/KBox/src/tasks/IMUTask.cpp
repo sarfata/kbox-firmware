@@ -34,6 +34,8 @@ void IMUTask::setup() {
   }
 }
 
+static inline double DegToRad(double v) { return v/180.0*3.1415926535897932384626433832795; };
+
 void IMUTask::loop() {
   //uint8_t system_status, self_test_status, system_error;
   //bno055.getSystemStatus(&system_status, &self_test_status, &system_error);
@@ -47,7 +49,15 @@ void IMUTask::loop() {
     eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
     //DEBUG("Vector Euler x=%f y=%f z=%f", eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
     //DEBUG("Course: %.0f MAG  Pitch: %.1f  Heel: %.1f", eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
-    IMUMessage m(sysCalib, eulerAngles.x(), /* yaw?*/ 0, eulerAngles.y(), eulerAngles.z());
+
+    // Assuming the KBox is mounted on the PORT Hull, right side of KBox towards
+    // bow of the boat.
+    double course = fmod(eulerAngles.x() + 270, 360);
+    double yaw = 0;
+    double pitch = eulerAngles.y();
+    double roll = eulerAngles.z();
+
+    IMUMessage m(sysCalib, DegToRad(course), /* yaw?*/ 0, DegToRad(pitch), DegToRad(roll));
     sendMessage(m);
   }
   
