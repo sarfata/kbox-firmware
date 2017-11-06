@@ -27,6 +27,11 @@
 
 #include <IniFile.h>
 
+// ---------------------------------------------------------------------------
+// Define different tasks and pages
+// if you don't like a task or page just comment it out
+// ---------------------------------------------------------------------------
+#define IMU_MONITOR_PAGE
 
 // ---------------------------------------------------------------------------
 //   BAUD RATES ON KBOX SERIALS NMEA1 & 2
