@@ -75,7 +75,7 @@ void SDCardTask::loop() {
     logFile->print(it->timestamp);
     logFile->print(",");
     logFile->print(it->_message);
-    logFile->println();
+    // logFile->println();
   }
   // Force data to SD and update the directory entry to avoid data loss.
   if (!logFile->sync() || logFile->getWriteError()) {
