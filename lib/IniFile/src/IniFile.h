@@ -7,7 +7,7 @@
 #define _INIFILE_H
 
 #include "Arduino.h"
-#include <String.h>
+#include <string.h>
 
 #define INIFILE_VERSION "1.0.0"
 
