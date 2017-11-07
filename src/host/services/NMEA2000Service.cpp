@@ -66,8 +66,8 @@ void NMEA2000Service::sendN2kMessage(const tN2kMsg& msg) {
   //    msg.Source,
   //    msg.Destination, msg.DataLen, result ? "success":"fail");
 
-  char pcdin[100];
-  N2kToSeasmart(msg, now(), pcdin, sizeof(pcdin));
+  // char pcdin[100];
+  // N2kToSeasmart(msg, now(), pcdin, sizeof(pcdin));
   // DEBUG("TX: %s", pcdin);
 
   if (result) {
