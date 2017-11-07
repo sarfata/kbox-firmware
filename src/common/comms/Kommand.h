@@ -104,7 +104,7 @@ template <uint16_t maxDataSize> class FixedSizeKommand : public Kommand, public 
       append8((uint8_t) 0);
     };
 
-    virtual size_t write(uint8_t c) {
+    virtual size_t write(uint8_t c) override {
       if (_index + 1 > bufferSize) {
         return 0;
       }
@@ -125,4 +125,3 @@ template <uint16_t maxDataSize> class FixedSizeKommand : public Kommand, public 
       return _index;
     };
 };
-
