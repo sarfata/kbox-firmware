@@ -149,7 +149,7 @@ void NMEAService::loop() {
   DEBUG("Found %i sentences waiting", receiveQueue.size());
   for (LinkedList<NMEASentence>::iterator it = receiveQueue.begin(); it != receiveQueue.end(); it++) {
     if (it->isValid()) {
-      KBoxMetrics.countEvent(rxValidEvent);
+      KBoxMetrics.event(rxValidEvent);
       this->sendMessage(*it);
 
       SKNMEAParser p;
@@ -160,7 +160,7 @@ void NMEAService::loop() {
       }
     }
     else {
-      KBoxMetrics.countEvent(rxErrorEvent);
+      KBoxMetrics.event(rxErrorEvent);
     }
   }
   // FIXME: the current linked list implementation would probably continue to
@@ -168,4 +168,3 @@ void NMEAService::loop() {
   // best if we had a clearer contract or a better way to manage this.
   receiveQueue.clear();
 }
-
