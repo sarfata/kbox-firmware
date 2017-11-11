@@ -38,4 +38,5 @@ class IMUService : public Task {
     void setup();
     void loop();
     static uint8_t magCAL;
+    static double IMU_HdgFiltered;
 };
