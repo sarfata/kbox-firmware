@@ -28,6 +28,9 @@
 #include "IMUService.h"
 #include "KBoxConfig.h"
 
+// make it global to get the value for the IMU-Page
+uint8_t IMUService::magCAL = 0;
+
 void IMUService::setup() {
   DEBUG("Initing BNO055");
   if (!bno055.begin()) {
@@ -66,8 +69,8 @@ void IMUService::loop() {
 
   eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
 
-  DEBUG("Calib Sys: %i Accel: %i Gyro: %i Mag: %i", sysCalib, accelCalib, gyroCalib, magCalib);
-  DEBUG("Attitude roll: %f pitch: %f  Mag heading: %f", eulerAngles.z(), eulerAngles.y(), eulerAngles.x());
+  // DEBUG("Calib Sys: %i Accel: %i Gyro: %i Mag: %i", sysCalib, accelCalib, gyroCalib, magCalib);
+  // DEBUG("Attitude roll: %f pitch: %f  Mag heading: %f", eulerAngles.z(), eulerAngles.y(), eulerAngles.x());
 
   SKUpdateStatic<2> update;
   // Note: We could calculate yaw as the difference between the Magnetic
@@ -93,6 +96,7 @@ void IMUService::loop() {
 
   if (magCalib >= cfIMU_MIN_CAL) {
     update.setNavigationHeadingMagnetic(SKDegToRad(heading));
+    IMUService::magCAL = magCalib;
   }
   
   if (gyroCalib >= cfIMU_MIN_CAL) {
