@@ -30,6 +30,7 @@
 
 // make it global to get the value for the IMU-Page
 uint8_t IMUService::magCAL = 0;
+double IMUService::IMU_HdgFiltered = 361;   // not valid
 
 void IMUService::setup() {
   DEBUG("Initing BNO055");
@@ -96,12 +97,16 @@ void IMUService::loop() {
 
   if (magCalib >= cfIMU_MIN_CAL) {
     update.setNavigationHeadingMagnetic(SKDegToRad(heading));
-    IMUService::magCAL = magCalib;
   }
   
   if (gyroCalib >= cfIMU_MIN_CAL) {
     update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(roll), /* pitch */ SKDegToRad(pitch), /* yaw */ 0));
   }
+  
+  // global variables for the IMU Page
+  IMUService::magCAL = magCalib;
+  // TODO: implement filtering or own visitor for display frequency
+  IMUService::IMU_HdgFiltered = heading;  // Because it is for Display only we leave value in degrees
 
   _skHub.publish(update);
 }
