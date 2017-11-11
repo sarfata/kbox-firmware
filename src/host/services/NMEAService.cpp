@@ -150,8 +150,7 @@ void NMEAService::loop() {
   for (LinkedList<NMEASentence>::iterator it = receiveQueue.begin(); it != receiveQueue.end(); it++) {
     if (it->isValid()) {
       KBoxMetrics.event(rxValidEvent);
-      // DEBUG( "Rx NMEAValidCounter: %i", KBoxMetrics.countEvent(rxValidEvent) );
-      this->sendMessage(*it); // --> KGenerator sendMessage
+      this->sendMessage(*it);
 
       SKNMEAParser p;
       //FIXME: Get the time properly here!
