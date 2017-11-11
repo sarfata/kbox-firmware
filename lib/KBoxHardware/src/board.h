@@ -68,7 +68,11 @@ static const pin_t wifi_cs = 31;
 #define WiFiSerial Serial1
 
 /* CAN Transceiver */
-static const pin_t can_standby = 33;
+#if defined (__MK66FX1M0__) // Teensy 3.6
+  static const pin_t can_standby = 32;
+#else
+  static const pin_t can_standby = 33;
+#endif
 
 /* INA219 Battery Monitor */
 static const uint8_t ina219_address = 0x40;
@@ -88,13 +92,23 @@ static const pin_t adc1_analog = A10;
 static const pin_t adc2_analog = A11;
 static const pin_t adc3_analog = A12;
 static const float analog_max_voltage = 3.3 / (10000/(10000+56000.0));
-#else
-static const pin_t adc1_analog = A12;
-static const pin_t adc2_analog = A11;
-static const pin_t adc3_analog = A10;
-static const float analog_max_voltage = 3.0 / (10000/(10000+56000.0));
-#endif
 static const pin_t supply_analog = A14;
+#else
+  #if defined (__MK66FX1M0__) // Teensy 3.6
+    // To keep a 4th serial free on Teensy 3.6 the analog pins moved to:
+    static const pin_t supply_analog = A21; // for 12V on NMEA2000
+    static const float analog_max_voltage = 1.1155 * 3.31 / (10000/(10000+56000.0));
+    static const pin_t adc1_analog = A21; // House | connected Ground => 0V
+    static const pin_t adc2_analog = A24; // Engine | Bottom side Teensy
+    static const pin_t adc3_analog = A23; // Bottom side Teensy
+  #else
+    static const pin_t adc1_analog = A12;
+    static const pin_t adc2_analog = A11;
+    static const pin_t adc3_analog = A10;
+    static const float analog_max_voltage = 3.0 / (10000/(10000+56000.0));
+    static const pin_t supply_analog = A14;
+  #endif
+#endif
 
 /* SDCard Interface */
 static const pin_t sdcard_cs = 15;

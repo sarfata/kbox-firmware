@@ -1,6 +1,6 @@
 /* Teensy 3.x, LC ADC library
  * https://github.com/pedvide/ADC
- * Copyright (c) 2015 Pedro Villanueva
+ * Copyright (c) 2016 Pedro Villanueva
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -39,10 +39,10 @@
 *   Call init
 *   The very long initializer list could be shorter using some kind of struct?
 */
-ADC_Module::ADC_Module(uint8_t ADC_number, const uint8_t* const a_channel2sc1a, const uint8_t* const a_channel2sc1a_diff) :
+ADC_Module::ADC_Module(uint8_t ADC_number, const uint8_t* const a_channel2sc1a, const ADC_NLIST* const a_diff_table) :
         ADC_num(ADC_number)
         , channel2sc1a(a_channel2sc1a)
-        , channel2sc1a_diff(a_channel2sc1a_diff)
+        , diff_table(a_diff_table)
         , adc_offset((uint32_t)0x20000)
         , ADC_SC1A(&ADC0_SC1A + adc_offset*ADC_num)
         , ADC_SC1B(&ADC0_SC1B + adc_offset*ADC_num)
@@ -73,85 +73,9 @@ ADC_Module::ADC_Module(uint8_t ADC_number, const uint8_t* const a_channel2sc1a, 
         , ADC_CLM1(&ADC0_CLM1 + adc_offset*ADC_num)
         , ADC_CLM0(&ADC0_CLM0 + adc_offset*ADC_num)
         , PDB0_CHnC1(&PDB0_CH0C1 + ADC_num*0xA)
+        , IRQ_ADC(IRQ_ADC0 + ADC_num*1)
         {
 
-    // ADC0 or ADC1?
-    //ADC_num = ADC_number;
-
-    // point the control registers to the correct addresses
-    // use bitband where necessary
-    //uint32_t adc_offset = (uint32_t)0x20000;
-
-    //ADC_SC1A = &ADC0_SC1A + adc_offset*ADC_num;
-//        ADC_SC1A_coco = adc_bitband((uint32_t)ADC_SC1A, 7); // conversion complete
-//        ADC_SC1A_aien = adc_bitband((uint32_t)ADC_SC1A, 6); // interrupts enabled
-    //ADC_SC1B = &ADC0_SC1B + adc_offset*ADC_num;
-
-    //ADC_CFG1 = &ADC0_CFG1 + adc_offset*ADC_num;
-//        ADC_CFG1_adlpc = adc_bitband((uint32_t)ADC_CFG1, 7); // low power conf.
-//        ADC_CFG1_adiv1 = adc_bitband((uint32_t)ADC_CFG1, 6); // divide input clock
-//        ADC_CFG1_adiv0 = adc_bitband((uint32_t)ADC_CFG1, 5); //
-//        ADC_CFG1_adlsmp = adc_bitband((uint32_t)ADC_CFG1, 4); // low sampling speed
-//        ADC_CFG1_mode1 = adc_bitband((uint32_t)ADC_CFG1, 3); // resolution mode
-//        ADC_CFG1_mode0 = adc_bitband((uint32_t)ADC_CFG1, 2); //
-//        ADC_CFG1_adiclk1 = adc_bitband((uint32_t)ADC_CFG1, 1); // input clock
-//        ADC_CFG1_adiclk0 = adc_bitband((uint32_t)ADC_CFG1, 0); //
-    //ADC_CFG2 = &ADC0_CFG2 + adc_offset*ADC_num;
-//        ADC_CFG2_muxsel = adc_bitband((uint32_t)ADC_CFG2, 4); // mux to select a or b channels
-//        ADC_CFG2_adacken = adc_bitband((uint32_t)ADC_CFG2, 3); // enable the async. clock
-//        ADC_CFG2_adhsc = adc_bitband((uint32_t)ADC_CFG2, 2); // high-speed config: add 2 ADCK
-//        ADC_CFG2_adlsts1 = adc_bitband((uint32_t)ADC_CFG2, 1); // loger sampling time
-//        ADC_CFG2_adlsts0 = adc_bitband((uint32_t)ADC_CFG2, 0);
-
-    //ADC_RA = &ADC0_RA + adc_offset*ADC_num;
-    //ADC_RB = &ADC0_RB + adc_offset*ADC_num;
-
-    //ADC_CV1 = &ADC0_CV1 + adc_offset*ADC_num;
-    //ADC_CV2 = &ADC0_CV2 + adc_offset*ADC_num;
-
-    //ADC_SC2 = &ADC0_SC2 + adc_offset*ADC_num;
-//        ADC_SC2_adact = adc_bitband((uint32_t)ADC_SC2, 7); // conversion active
-//        ADC_SC2_cfe = adc_bitband((uint32_t)ADC_SC2, 5); // compare function enable, greater than and range enable
-//        ADC_SC2_cfgt = adc_bitband((uint32_t)ADC_SC2, 4);
-//        ADC_SC2_cren = adc_bitband((uint32_t)ADC_SC2, 3);
-//        ADC_SC2_dma = adc_bitband((uint32_t)ADC_SC2, 2); // dma enable
-//        ADC_SC2_ref = adc_bitband((uint32_t)ADC_SC2, 0); // refsel only uses bit 0, not really bit 1.
-
-
-    //ADC_SC3 = &ADC0_SC3 + adc_offset*ADC_num;
-//        ADC_SC3_cal = adc_bitband((uint32_t)ADC_SC3, 7); // start/stop calibration
-//        ADC_SC3_calf = adc_bitband((uint32_t)ADC_SC3, 6); // calibration failed flag
-//        ADC_SC3_adco = adc_bitband((uint32_t)ADC_SC3, 3); // continuous conversion
-//        ADC_SC3_avge = adc_bitband((uint32_t)ADC_SC3, 2); // enable averages bit
-//        ADC_SC3_avgs1 = adc_bitband((uint32_t)ADC_SC3, 1); // num of averages bits
-//        ADC_SC3_avgs0 = adc_bitband((uint32_t)ADC_SC3, 0);
-
-    //ADC_PGA = &ADC0_PGA + adc_offset*ADC_num;
-//        ADC_PGA_pgaen = adc_bitband((uint32_t)ADC_PGA, 23); // enable pga
-
-//    ADC_OFS = &ADC0_OFS + adc_offset*ADC_num;
-//    ADC_PG = &ADC0_PG + adc_offset*ADC_num;
-//    ADC_MG = &ADC0_MG + adc_offset*ADC_num;
-//    ADC_CLPD = &ADC0_CLPD + adc_offset*ADC_num;
-//    ADC_CLPS = &ADC0_CLPS + adc_offset*ADC_num;
-//    ADC_CLP4 = &ADC0_CLP4 + adc_offset*ADC_num;
-//    ADC_CLP3 = &ADC0_CLP3 + adc_offset*ADC_num;
-//    ADC_CLP2 = &ADC0_CLP2 + adc_offset*ADC_num;
-//    ADC_CLP1 = &ADC0_CLP1 + adc_offset*ADC_num;
-//    ADC_CLP0 = &ADC0_CLP0 + adc_offset*ADC_num;
-//    ADC_CLMD = &ADC0_CLMD + adc_offset*ADC_num;
-//    ADC_CLMS = &ADC0_CLMS + adc_offset*ADC_num;
-//    ADC_CLM4 = &ADC0_CLM4 + adc_offset*ADC_num;
-//    ADC_CLM3 = &ADC0_CLM3 + adc_offset*ADC_num;
-//    ADC_CLM2 = &ADC0_CLM2 + adc_offset*ADC_num;
-//    ADC_CLM1 = &ADC0_CLM1 + adc_offset*ADC_num;
-//    ADC_CLM0 = &ADC0_CLM0 + adc_offset*ADC_num;
-
-    IRQ_ADC = IRQ_ADC0 + ADC_num*1;
-
-    // pointer to channel2sc1a
-    //channel2sc1a = a_channel2sc1a;
-    //channel2sc1a_diff = a_channel2sc1a_diff;
 
     // call our init
     analog_init();
@@ -185,12 +109,12 @@ void ADC_Module::analog_init() {
     analog_res_bits = 0;
     analog_max_val = 0;
     analog_num_average = 0;
-    analog_reference_internal = 2;
+    analog_reference_internal = ADC_REF_SOURCE::REF_NONE;
     var_enableInterrupts = 0;
     pga_value = 1;
 
-    conversion_speed = 0;
-    sampling_speed =  0;
+    conversion_speed = ADC_CONVERSION_SPEED::VERY_HIGH_SPEED; // set to something different from line 139 so it gets changed there
+    sampling_speed =  ADC_SAMPLING_SPEED::VERY_HIGH_SPEED;
 
     calibrating = 0;
 
@@ -203,7 +127,7 @@ void ADC_Module::analog_init() {
     setBit(ADC_CFG2, ADC_CFG2_MUXSEL_BIT);
 
     // set reference to vcc
-    setReference(ADC_REF_3V3);
+    setReference(ADC_REFERENCE::REF_3V3);
 
     // set resolution to 10
     setResolution(10);
@@ -212,8 +136,8 @@ void ADC_Module::analog_init() {
     // when this calibration is over the averages and speed will be set to default by wait_for_cal and init_calib will be cleared.
     init_calib = 1;
     setAveraging(32);
-    setConversionSpeed(ADC_LOW_SPEED);
-    setSamplingSpeed(ADC_LOW_SPEED);
+    setConversionSpeed(ADC_CONVERSION_SPEED::LOW_SPEED);
+    setSamplingSpeed(ADC_SAMPLING_SPEED::LOW_SPEED);
 
     // begin init calibration
     calibrate();
@@ -269,10 +193,10 @@ void ADC_Module::wait_for_cal(void) {
     if(init_calib) {
 
         // set conversion speed to medium
-        setConversionSpeed(ADC_MED_SPEED);
+        setConversionSpeed(ADC_CONVERSION_SPEED::MED_SPEED);
 
         // set sampling speed to medium
-        setSamplingSpeed(ADC_MED_SPEED);
+        setSamplingSpeed(ADC_SAMPLING_SPEED::MED_SPEED);
 
         // number of averages to 4
         setAveraging(4);
@@ -302,27 +226,29 @@ void ADC_Module::recalibrate() {
 *   It needs to recalibrate
 *  Use ADC_REF_3V3, ADC_REF_1V2 (not for Teensy LC) or ADC_REF_EXT
 */
-void ADC_Module::setReference(uint8_t type) {
-    if (analog_reference_internal==type) { // don't need to change anything
+void ADC_Module::setReference(ADC_REFERENCE type) {
+    ADC_REF_SOURCE ref_type = static_cast<ADC_REF_SOURCE>(type); // cast to source type, that is, either internal or default
+
+    if (analog_reference_internal==ref_type) { // don't need to change anything
         return;
     }
 
-    if (type == ADC_REF_ALT) { // 1.2V ref for Teensy 3.x, 3.3 VDD for Teensy LC
+    if (ref_type == ADC_REF_SOURCE::REF_ALT) { // 1.2V ref for Teensy 3.x, 3.3 VDD for Teensy LC
         // internal reference requested
 
         startInternalReference(); // enable VREF if Teensy 3.x
 
-        analog_reference_internal = ADC_REF_ALT;
+        analog_reference_internal = ADC_REF_SOURCE::REF_ALT;
 
         // *ADC_SC2_ref = 1; // uses bitband: atomic
         setBit(ADC_SC2, ADC_SC2_REFSEL0_BIT);
 
-    } else if(type == ADC_REF_DEFAULT) { // ext ref for all Teensys, vcc also for Teensy 3.x
+    } else if(ref_type == ADC_REF_SOURCE::REF_DEFAULT) { // ext ref for all Teensys, vcc also for Teensy 3.x
         // vcc or external reference requested
 
         stopInternalReference(); // disable 1.2V reference source when using the external ref (p. 102, 3.7.1.7)
 
-        analog_reference_internal = ADC_REF_DEFAULT;
+        analog_reference_internal = ADC_REF_SOURCE::REF_DEFAULT;
 
         // *ADC_SC2_ref = 0; // uses bitband: atomic
         clearBit(ADC_SC2, ADC_SC2_REFSEL0_BIT);
@@ -333,7 +259,7 @@ void ADC_Module::setReference(uint8_t type) {
 
 //! Start the 1.2V internal reference (if present)
 void ADC_Module::startInternalReference() {
-#if defined(ADC_TEENSY_3_1) || defined(ADC_TEENSY_3_0)
+#if ADC_USE_INTERNAL
     VREF_TRM = VREF_TRM_CHOPEN | 0x20; // enable module and set the trimmer to medium (max=0x3F=63)
     VREF_SC = VREF_SC_VREFEN | VREF_SC_REGEN | VREF_SC_ICOMPEN | VREF_SC_MODE_LV(1); // (=0xE1) enable 1.2 volt ref with all compensations
 #endif
@@ -341,7 +267,7 @@ void ADC_Module::startInternalReference() {
 
 //! Stops the internal reference
 void ADC_Module::stopInternalReference() {
-#if defined(ADC_TEENSY_3_1) || defined(ADC_TEENSY_3_0)
+#if ADC_USE_INTERNAL
     VREF_SC = 0;
 #endif
 }
@@ -365,12 +291,16 @@ void ADC_Module::setResolution(uint8_t bits) {
 
     if (calibrating) wait_for_cal();
 
-    if (bits <8) {
+    if (bits <= 9) {
         config = 8;
-    } else if (bits >= 14) {
+    } else if (bits <= 11) {
+        config = 10;
+    } else if (bits <= 13) {
+        config = 12;
+    } else if (bits > 13) {
         config = 16;
     } else {
-        config = bits;
+        config = 8; // default to 8 bits
     }
 
     // conversion resolution
@@ -423,18 +353,16 @@ uint32_t ADC_Module::getMaxValue() {
 
 
 // Sets the conversion speed
-/*
-* \param speed can be ADC_VERY_LOW_SPEED, ADC_LOW_SPEED, ADC_MED_SPEED, ADC_HIGH_SPEED_16BITS, ADC_HIGH_SPEED or ADC_VERY_HIGH_SPEED
-    ADC_VERY_LOW_SPEED is guaranteed to be the lowest possible speed within specs for resolutions less than 16 bits (higher than 1 MHz),
-    it's different from ADC_LOW_SPEED only for 24, 4 or 2 MHz.
-    ADC_LOW_SPEED is guaranteed to be the lowest possible speed within specs for all resolutions (higher than 2 MHz).
-    ADC_MED_SPEED is always >= ADC_LOW_SPEED and <= ADC_HIGH_SPEED.
-    ADC_HIGH_SPEED_16BITS is guaranteed to be the highest possible speed within specs for all resolutions (lower or eq than 12 MHz).
-    ADC_HIGH_SPEED is guaranteed to be the highest possible speed within specs for resolutions less than 16 bits (lower or eq than 18 MHz).
-    ADC_VERY_HIGH_SPEED may be out of specs, it's different from ADC_HIGH_SPEED only for 48, 40 or 24 MHz.
-* It doesn't recalibrate at the end.
+/* Increase the sampling speed for low impedance sources, decrease it for higher impedance ones.
+* \param speed can be any of the ADC_SAMPLING_SPEED enum: VERY_LOW_SPEED, LOW_SPEED, MED_SPEED, HIGH_SPEED or VERY_HIGH_SPEED.
+*
+* VERY_LOW_SPEED is the lowest possible sampling speed (+24 ADCK).
+* LOW_SPEED adds +16 ADCK.
+* MED_SPEED adds +10 ADCK.
+* HIGH_SPEED adds +6 ADCK.
+* VERY_HIGH_SPEED is the highest possible sampling speed (0 ADCK added).
 */
-void ADC_Module::setConversionSpeed(uint8_t speed) {
+void ADC_Module::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
 
     if(speed==conversion_speed) { // no change
         return;
@@ -443,7 +371,10 @@ void ADC_Module::setConversionSpeed(uint8_t speed) {
     if (calibrating) wait_for_cal();
 
     // internal asynchronous clock settings: fADK = 2.4, 4.0, 5.2 or 6.2 MHz
-    if(speed >= ADC_ADACK_2_4) {
+    if( (speed == ADC_CONVERSION_SPEED::ADACK_2_4) ||
+        (speed == ADC_CONVERSION_SPEED::ADACK_4_0) ||
+        (speed == ADC_CONVERSION_SPEED::ADACK_5_2) ||
+        (speed == ADC_CONVERSION_SPEED::ADACK_6_2)) {
         setBit(ADC_CFG2, ADC_CFG2_ADACKEN_BIT); // enable ADACK (takes max 5us to be ready)
         setBit(ADC_CFG1, ADC_CFG1_ADICLK1_BIT); // select ADACK as clock source
         setBit(ADC_CFG1, ADC_CFG1_ADICLK0_BIT);
@@ -451,16 +382,16 @@ void ADC_Module::setConversionSpeed(uint8_t speed) {
         clearBit(ADC_CFG1, ADC_CFG1_ADIV0_BIT); // select divider 1
         clearBit(ADC_CFG1, ADC_CFG1_ADIV1_BIT); // we could divide this clk, but it would be too small for ADC use.
 
-        if(speed == ADC_ADACK_2_4) {
+        if(speed == ADC_CONVERSION_SPEED::ADACK_2_4) {
             clearBit(ADC_CFG2, ADC_CFG2_ADHSC_BIT);
             setBit(ADC_CFG1, ADC_CFG1_ADLPC_BIT);
-        } else if(speed == ADC_ADACK_4_0) {
+        } else if(speed == ADC_CONVERSION_SPEED::ADACK_4_0) {
             setBit(ADC_CFG2, ADC_CFG2_ADHSC_BIT);
             setBit(ADC_CFG1, ADC_CFG1_ADLPC_BIT);
-        } else if(speed == ADC_ADACK_5_2) {
+        } else if(speed == ADC_CONVERSION_SPEED::ADACK_5_2) {
             clearBit(ADC_CFG2, ADC_CFG2_ADHSC_BIT);
             clearBit(ADC_CFG1, ADC_CFG1_ADLPC_BIT);
-        } else if(speed == ADC_ADACK_6_2) {
+        } else if(speed == ADC_CONVERSION_SPEED::ADACK_6_2) {
             setBit(ADC_CFG2, ADC_CFG2_ADHSC_BIT);
             clearBit(ADC_CFG1, ADC_CFG1_ADLPC_BIT);
         }
@@ -476,7 +407,7 @@ void ADC_Module::setConversionSpeed(uint8_t speed) {
 
     uint32_t ADC_CFG1_speed; // store the clock and divisor
 
-    if(speed == ADC_VERY_LOW_SPEED) {
+    if(speed == ADC_CONVERSION_SPEED::VERY_LOW_SPEED) {
         // *ADC_CFG2_adhsc = 0; // no high-speed config
         // *ADC_CFG1_adlpc  = 1; // use low power conf.
         clearBit(ADC_CFG2, ADC_CFG2_ADHSC_BIT);
@@ -484,7 +415,7 @@ void ADC_Module::setConversionSpeed(uint8_t speed) {
 
         ADC_CFG1_speed = ADC_CFG1_VERY_LOW_SPEED;
 
-    } else if(speed == ADC_LOW_SPEED) {
+    } else if(speed == ADC_CONVERSION_SPEED::LOW_SPEED) {
         // *ADC_CFG2_adhsc = 0; // no high-speed config
         // *ADC_CFG1_adlpc  = 1; // use low power conf.
         clearBit(ADC_CFG2, ADC_CFG2_ADHSC_BIT);
@@ -492,7 +423,7 @@ void ADC_Module::setConversionSpeed(uint8_t speed) {
 
         ADC_CFG1_speed = ADC_CFG1_LOW_SPEED;
 
-    } else if(speed == ADC_MED_SPEED) {
+    } else if(speed == ADC_CONVERSION_SPEED::MED_SPEED) {
         // *ADC_CFG2_adhsc = 0; // no high-speed config
         // *ADC_CFG1_adlpc  = 0; // no low power conf.
         clearBit(ADC_CFG2, ADC_CFG2_ADHSC_BIT);
@@ -500,7 +431,7 @@ void ADC_Module::setConversionSpeed(uint8_t speed) {
 
         ADC_CFG1_speed = ADC_CFG1_MED_SPEED;
 
-    } else if(speed == ADC_HIGH_SPEED_16BITS) {
+    } else if(speed == ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS) {
         // *ADC_CFG2_adhsc = 1; // high-speed config: add 2 ADCK
         // *ADC_CFG1_adlpc  = 0; // no low power conf.
         setBit(ADC_CFG2, ADC_CFG2_ADHSC_BIT);
@@ -508,7 +439,7 @@ void ADC_Module::setConversionSpeed(uint8_t speed) {
 
         ADC_CFG1_speed = ADC_CFG1_HI_SPEED_16_BITS;
 
-    } else if(speed == ADC_HIGH_SPEED) {
+    } else if(speed == ADC_CONVERSION_SPEED::HIGH_SPEED) {
         // *ADC_CFG2_adhsc = 1; // high-speed config: add 2 ADCK
         // *ADC_CFG1_adlpc  = 0; // no low power conf.
         setBit(ADC_CFG2, ADC_CFG2_ADHSC_BIT);
@@ -516,7 +447,7 @@ void ADC_Module::setConversionSpeed(uint8_t speed) {
 
         ADC_CFG1_speed = ADC_CFG1_HI_SPEED;
 
-    } else if(speed == ADC_VERY_HIGH_SPEED) { // this speed is most likely out of specs, so accurancy can be bad
+    } else if(speed == ADC_CONVERSION_SPEED::VERY_HIGH_SPEED) { // this speed is most likely out of specs, so accuracy can be bad
         // *ADC_CFG2_adhsc = 1; // high-speed config: add 2 ADCK
         // *ADC_CFG1_adlpc  = 0; // no low power conf.
         setBit(ADC_CFG2, ADC_CFG2_ADHSC_BIT);
@@ -549,15 +480,15 @@ void ADC_Module::setConversionSpeed(uint8_t speed) {
 
 // Sets the sampling speed
 /* Increase the sampling speed for low impedance sources, decrease it for higher impedance ones.
-* \param speed can be ADC_VERY_LOW_SPEED, ADC_LOW_SPEED, ADC_MED_SPEED, ADC_HIGH_SPEED or ADC_VERY_HIGH_SPEED
-    ADC_VERY_LOW_SPEED is the lowest possible sampling speed (+24 ADCK).
-    ADC_LOW_SPEED adds +16 ADCK.
-    ADC_MED_SPEED adds +10 ADCK.
-    ADC_HIGH_SPEED (or ADC_HIGH_SPEED_16BITS) adds +6 ADCK.
-    ADC_VERY_HIGH_SPEED is the highest possible sampling speed (0 ADCK added).
-* It doesn't recalibrate at the end.
+* \param speed can be any of the ADC_SAMPLING_SPEED enum: VERY_LOW_SPEED, LOW_SPEED, MED_SPEED, HIGH_SPEED or VERY_HIGH_SPEED.
+*
+* VERY_LOW_SPEED is the lowest possible sampling speed (+24 ADCK).
+* LOW_SPEED adds +16 ADCK.
+* MED_SPEED adds +10 ADCK.
+* HIGH_SPEED adds +6 ADCK.
+* VERY_HIGH_SPEED is the highest possible sampling speed (0 ADCK added).
 */
-void ADC_Module::setSamplingSpeed(uint8_t speed) {
+void ADC_Module::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
 
     if(speed==sampling_speed) { // no change
         return;
@@ -566,7 +497,7 @@ void ADC_Module::setSamplingSpeed(uint8_t speed) {
     if (calibrating) wait_for_cal();
 
     // Select between the settings
-    if(speed == ADC_VERY_LOW_SPEED) {
+    if(speed == ADC_SAMPLING_SPEED::VERY_LOW_SPEED) {
         // *ADC_CFG1_adlsmp = 1; // long sampling time enable
         // *ADC_CFG2_adlsts1 = 0; // maximum sampling time (+24 ADCK)
         // *ADC_CFG2_adlsts0 = 0;
@@ -574,7 +505,7 @@ void ADC_Module::setSamplingSpeed(uint8_t speed) {
         clearBit(ADC_CFG2, ADC_CFG2_ADLSTS1_BIT);
         clearBit(ADC_CFG2, ADC_CFG2_ADLSTS0_BIT);
 
-    } else if(speed == ADC_LOW_SPEED) {
+    } else if(speed == ADC_SAMPLING_SPEED::LOW_SPEED) {
         // *ADC_CFG1_adlsmp = 1; // long sampling time enable
         // *ADC_CFG2_adlsts1 = 0;// high sampling time (+16 ADCK)
         // *ADC_CFG2_adlsts0 = 1;
@@ -582,7 +513,7 @@ void ADC_Module::setSamplingSpeed(uint8_t speed) {
         clearBit(ADC_CFG2, ADC_CFG2_ADLSTS1_BIT);
         setBit(ADC_CFG2, ADC_CFG2_ADLSTS0_BIT);
 
-    } else if(speed == ADC_MED_SPEED) {
+    } else if(speed == ADC_SAMPLING_SPEED::MED_SPEED) {
         // *ADC_CFG1_adlsmp = 1; // long sampling time enable
         // *ADC_CFG2_adlsts1 = 1;// medium sampling time (+10 ADCK)
         // *ADC_CFG2_adlsts0 = 0;
@@ -590,7 +521,7 @@ void ADC_Module::setSamplingSpeed(uint8_t speed) {
         setBit(ADC_CFG2, ADC_CFG2_ADLSTS1_BIT);
         clearBit(ADC_CFG2, ADC_CFG2_ADLSTS0_BIT);
 
-    } else if( (speed == ADC_HIGH_SPEED) || (speed == ADC_HIGH_SPEED_16BITS) ) {
+    } else if( speed == ADC_SAMPLING_SPEED::HIGH_SPEED ) {
         // *ADC_CFG1_adlsmp = 1; // long sampling time enable
         // *ADC_CFG2_adlsts1 = 1;// low sampling time (+6 ADCK)
         // *ADC_CFG2_adlsts0 = 1;
@@ -598,7 +529,7 @@ void ADC_Module::setSamplingSpeed(uint8_t speed) {
         setBit(ADC_CFG2, ADC_CFG2_ADLSTS1_BIT);
         setBit(ADC_CFG2, ADC_CFG2_ADLSTS0_BIT);
 
-    } else if(speed == ADC_VERY_HIGH_SPEED) {
+    } else if(speed == ADC_SAMPLING_SPEED::VERY_HIGH_SPEED) {
         // *ADC_CFG1_adlsmp = 0; // shortest sampling time
         clearBit(ADC_CFG1, ADC_CFG1_ADLSMP_BIT);
 
@@ -813,7 +744,7 @@ uint8_t ADC_Module::getPGA() {
 
 //! Disable PGA
 void ADC_Module::disablePGA() {
-#if defined(ADC_USE_PGA)
+#if ADC_USE_PGA
     // *ADC_PGA_pgaen = 0;
     clearBit(ADC_PGA, ADC_PGA_PGAEN_BIT);
 #endif
@@ -831,9 +762,9 @@ bool ADC_Module::checkPin(uint8_t pin) {
     }
 
     // translate pin number to SC1A number, that also contains MUX a or b info.
-    uint8_t sc1a_pin = channel2sc1a[pin];
+    const uint8_t sc1a_pin = channel2sc1a[pin];
 
-    //if ( (pin < 0) || (pin > 43) ) {
+    // check for valid pin
     if( (sc1a_pin&ADC_SC1A_CHANNELS) == ADC_SC1A_PIN_INVALID ) {
         return false;   // all others are invalid
     }
@@ -854,14 +785,11 @@ bool ADC_Module::checkDifferentialPins(uint8_t pinP, uint8_t pinN) {
         return false;   // all others are invalid
     }
 
-    // channel2sc1a_diff uses "base A10", that is channel2sc1a_diff[0] is A10
-    pinP -= A10;
-    // we get more info about the pin: which DAD pair it corresponds to.
-    sc1a_pin = channel2sc1a_diff[pinP];
+    // get SC1A number, also whether it can do PGA
+    sc1a_pin = getDifferentialPair(pinP);
 
     // the pair can't be measured with this ADC
     if( (sc1a_pin&ADC_SC1A_CHANNELS) == ADC_SC1A_PIN_INVALID ) {
-        fail_flag |= ADC_ERROR_WRONG_PIN;
         return false;   // all others are invalid
     }
 
@@ -904,9 +832,8 @@ void ADC_Module::startReadFast(uint8_t pin) {
 // It doesn't change the continuous conversion bit
 void ADC_Module::startDifferentialFast(uint8_t pinP, uint8_t pinN) {
 
-    // channel2sc1a_diff uses "base A10", that is channel2sc1a_diff[0] corresponds to A10
-    // we get more info about the pin: which DAD pair it corresponds to.
-    uint8_t sc1a_pin = channel2sc1a_diff[pinP - A10];
+    // get SC1A number
+     uint8_t sc1a_pin = getDifferentialPair(pinP);
 
     #if ADC_USE_PGA
     // check if PGA is enabled
@@ -1099,7 +1026,7 @@ int ADC_Module::analogReadDifferential(uint8_t pinP, uint8_t pinN) {
 
 /* Starts an analog measurement on the pin.
 *  It returns inmediately, read value with readSingle().
-*  If the pin is incorrect it returns ADC_ERROR_VALUE.
+*  If the pin is incorrect it returns false.
 */
 bool ADC_Module::startSingleRead(uint8_t pin) {
 
@@ -1133,7 +1060,7 @@ bool ADC_Module::startSingleRead(uint8_t pin) {
 
 /* Start a differential conversion between two pins (pinP - pinN).
 * It returns inmediately, get value with readSingle().
-* Incorrect pins will return ADC_ERROR_DIFF_VALUE.
+* Incorrect pins will return false.
 * Set the resolution, number of averages and voltage reference using the appropriate functions
 */
 bool ADC_Module::startSingleDifferential(uint8_t pinP, uint8_t pinN) {
@@ -1248,7 +1175,7 @@ bool ADC_Module::startContinuousDifferential(uint8_t pinP, uint8_t pinN) {
 void ADC_Module::stopContinuous() {
 
     // set channel select to all 1's (31) to stop it.
-    *ADC_SC1A = 0x1F + var_enableInterrupts*ADC_SC1_AIEN;;
+    *ADC_SC1A = ADC_SC1A_PIN_INVALID + var_enableInterrupts*ADC_SC1_AIEN;;
 
     // decrease the counter of measurements (unless it's 0)
     if(!num_measurements) {
@@ -1275,7 +1202,7 @@ void ADC_Module::startPDB(uint32_t freq) {
     if(freq<1) return; // too low
 
     // mod will have to be a 16 bit value
-    // we detect if it's higher than 0xFFFF and scale it back acordingly.
+    // we detect if it's higher than 0xFFFF and scale it back accordingly.
     uint32_t mod = (F_BUS / freq);
 
     uint8_t prescaler = 0; // from 0 to 7: factor of 1, 2, 4, 8, 16, 32, 64 or 128
@@ -1355,9 +1282,9 @@ void ADC_Module::startPDB(uint32_t freq) {
 
     PDB0_MOD = (uint16_t)(mod-1);
 
-    PDB0_SC = PDB_CONFIG | PDB_SC_PRESCALER(prescaler) | PDB_SC_MULT(mult) | PDB_SC_LDOK; // load all new values
+    PDB0_SC = ADC_PDB_CONFIG | PDB_SC_PRESCALER(prescaler) | PDB_SC_MULT(mult) | PDB_SC_LDOK; // load all new values
 
-    PDB0_SC = PDB_CONFIG | PDB_SC_PRESCALER(prescaler) | PDB_SC_MULT(mult) | PDB_SC_SWTRIG; // start the counter!
+    PDB0_SC = ADC_PDB_CONFIG | PDB_SC_PRESCALER(prescaler) | PDB_SC_MULT(mult) | PDB_SC_SWTRIG; // start the counter!
 
     *PDB0_CHnC1 = PDB_CHnC1_TOS_1 | PDB_CHnC1_EN_1; // enable pretrigger 0 (SC1A)
 

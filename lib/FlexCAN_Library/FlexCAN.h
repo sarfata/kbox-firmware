@@ -113,6 +113,7 @@ private:
     ringbuffer_t * txRings[NUM_MAILBOXES];
     
     bool IrqEnabled;
+    uint32_t IrqMessage;
 
     void writeTxRegisters (const CAN_message_t &msg, uint8_t buffer);
     void readRxRegisters (CAN_message_t &msg, uint8_t buffer);
@@ -123,8 +124,8 @@ private:
     bool isRingBufferEmpty (ringbuffer_t &ring);
     uint32_t ringBufferCount (ringbuffer_t &ring);
 
-    void irqLock() { IrqEnabled=NVIC_IS_ENABLED(IRQ_CAN_MESSAGE); NVIC_DISABLE_IRQ(IRQ_CAN_MESSAGE); }
-    void irqRelease() { if (IrqEnabled) NVIC_ENABLE_IRQ(IRQ_CAN_MESSAGE); }
+    void irqLock() { IrqEnabled=NVIC_IS_ENABLED(IrqMessage); NVIC_DISABLE_IRQ(IrqMessage); }
+    void irqRelease() { if (IrqEnabled) NVIC_ENABLE_IRQ(IrqMessage); }
     
     void initializeBuffers();
     bool isInitialized() { return tx_buffer!=0; }

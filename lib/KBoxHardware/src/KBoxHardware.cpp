@@ -52,18 +52,18 @@ void KBoxHardware::setup() {
   digitalWrite(nmea2_out_enable, 0);
   pinMode(nmea1_out_enable, OUTPUT);
   pinMode(nmea2_out_enable, OUTPUT);
-  NMEA1_SERIAL.begin(38400);
-  NMEA2_SERIAL.begin(38400);
+  //NMEA1_SERIAL.begin(38400);
+  //NMEA2_SERIAL.begin(38400);
 
   // Initialize ADC
   adc.setAveraging(1);
   adc.setResolution(12);
-  adc.setConversionSpeed(ADC_LOW_SPEED);
-  adc.setSamplingSpeed(ADC_HIGH_SPEED);
+  adc.setConversionSpeed(ADC_CONVERSION_SPEED::LOW_SPEED);
+  adc.setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);
 
 #ifndef BOARD_v1_revA
-  adc.setReference(ADC_REF_EXT, ADC_0);
-  adc.setReference(ADC_REF_EXT, ADC_1);
+  adc.setReference(ADC_REFERENCE::REF_EXT, ADC_0);
+  adc.setReference(ADC_REFERENCE::REF_EXT, ADC_1);
 #endif
   // If you do not force the ADC later, make sure to configure ADC1 too because
   // the ADC library might decide to use it (it round-robins read requests).
@@ -138,5 +138,3 @@ void KBoxHardware::espRebootInProgram() {
   digitalWrite(wifi_enable, 1);
   digitalWrite(wifi_rst, 1);
 }
-
-

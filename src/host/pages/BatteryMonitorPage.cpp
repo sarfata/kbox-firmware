@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include "common/signalk/SKUpdate.h"
 #include "BatteryMonitorPage.h"
+#include "KBoxConfig.h"
 
 BatteryMonitorPage::BatteryMonitorPage(SKHub& hub) {
   static const int col1 = 5;
@@ -34,10 +35,10 @@ BatteryMonitorPage::BatteryMonitorPage(SKHub& hub) {
   static const int row3 = 152;
   static const int row4 = 182;
 
-  addLayer(new TextLayer(Point(col1, row1), Size(20, 20), "House Battery", ColorWhite, ColorBlack, FontDefault));
-  addLayer(new TextLayer(Point(col2, row1), Size(20, 20), "House Current", ColorWhite, ColorBlack, FontDefault));
-  addLayer(new TextLayer(Point(col1, row3), Size(20, 20), "Engine Battery", ColorWhite, ColorBlack, FontDefault));
-  addLayer(new TextLayer(Point(col2, row3), Size(20, 20), "Supply Voltage", ColorWhite, ColorBlack, FontDefault));
+  addLayer(new TextLayer(Point(col1, row1), Size(20, 20), cfLabelADC1, ColorWhite, ColorBlack, FontDefault));
+  addLayer(new TextLayer(Point(col2, row1), Size(20, 20), cfLabelADC2, ColorWhite, ColorBlack, FontDefault));
+  addLayer(new TextLayer(Point(col1, row3), Size(20, 20), cfLabelADC3, ColorWhite, ColorBlack, FontDefault));
+  addLayer(new TextLayer(Point(col2, row3), Size(20, 20), cfLabelADC4, ColorWhite, ColorBlack, FontDefault));
 
   houseVoltage = new TextLayer(Point(col1, row2), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
   houseCurrent = new TextLayer(Point(col2, row2), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);

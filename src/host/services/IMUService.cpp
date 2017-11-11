@@ -26,6 +26,11 @@
 #include "common/signalk/SKUpdateStatic.h"
 #include "common/signalk/SKUnits.h"
 #include "IMUService.h"
+#include "KBoxConfig.h"
+
+// make it global to get the value for the IMU-Page
+uint8_t IMUService::magCAL = 0;
+double IMUService::IMU_HdgFiltered = 361;   // not valid
 
 void IMUService::setup() {
   DEBUG("Initing BNO055");
@@ -33,6 +38,29 @@ void IMUService::setup() {
     DEBUG("Error initializing BNO055");
   }
   else {
+    // Different Mounting positions of KBox
+    bno055.setMode(bno055.OPERATION_MODE_CONFIG);
+    delay(50);
+    switch ( cfKBoxOrientation ) {
+      case MOUNTED_ON_PORT_HULL:
+        bno055.write8(bno055.BNO055_AXIS_MAP_CONFIG_ADDR, 0b00001001); // P0-P7, Default is P1
+        delay(10);
+        bno055.write8(bno055.BNO055_AXIS_MAP_SIGN_ADDR, 0b00000000); // P0-P7, Default is P1
+        delay(10);
+      break;
+      //case LAYING_READ_DIR_TO_BOW:
+      //break;
+      default:
+        // Should be default setting of BNO055 Adafruit Library
+        bno055.write8(bno055.BNO055_AXIS_MAP_CONFIG_ADDR, 0x21 );
+        delay(10);
+        bno055.write8(bno055.BNO055_AXIS_MAP_SIGN_ADDR, 0x04 );
+        delay(10);
+      break;
+    }
+
+    bno055.setMode( bno055.OPERATION_MODE_NDOF ); // OPERATION_MODE_NDOF_FMC_OFF
+    delay(100);
     DEBUG("Success!");
   }
 }
@@ -42,23 +70,43 @@ void IMUService::loop() {
 
   eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
 
-  //DEBUG("Calib Sys: %i Accel: %i Gyro: %i Mag: %i", sysCalib, accelCalib, gyroCalib, magCalib);
-  //DEBUG("Attitude roll: %f pitch: %f  Mag heading: %f", eulerAngles.z(), eulerAngles.y(), eulerAngles.x());
+  // DEBUG("Calib Sys: %i Accel: %i Gyro: %i Mag: %i", sysCalib, accelCalib, gyroCalib, magCalib);
+  // DEBUG("Attitude roll: %f pitch: %f  Mag heading: %f", eulerAngles.z(), eulerAngles.y(), eulerAngles.x());
 
   SKUpdateStatic<2> update;
   // Note: We could calculate yaw as the difference between the Magnetic
   // Heading and the Course Over Ground Magnetic.
 
-  /* if orientation == MOUNTED_ON_PORT_HULL */
   double roll, pitch, heading;
   roll = eulerAngles.z();
   pitch = eulerAngles.y();
-  heading = fmod(eulerAngles.x() + 270, 360);
+  heading = eulerAngles.x();
 
-  if (sysCalib == 3) {
-    update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(roll), /* pitch */ SKDegToRad(pitch), /* yaw */ 0));
+  // additional calculation for KBox port mounting....
+  switch ( cfKBoxOrientation ) {
+    case MOUNTED_ON_PORT_HULL:
+      heading = fmod(eulerAngles.x() + 270, 360);
+    break;
+    case LAYING_READ_DIR_TO_BOW:
+      pitch = (-1) * eulerAngles.z();
+      roll = eulerAngles.y();
+    break;
+    default:
+    break;
+  }
+
+  if (magCalib >= cfIMU_MIN_CAL) {
     update.setNavigationHeadingMagnetic(SKDegToRad(heading));
   }
+  
+  if (gyroCalib >= cfIMU_MIN_CAL) {
+    update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(roll), /* pitch */ SKDegToRad(pitch), /* yaw */ 0));
+  }
+  
+  // global variables for the IMU Page
+  IMUService::magCAL = magCalib;
+  // TODO: implement filtering or own visitor for display frequency
+  IMUService::IMU_HdgFiltered = heading;  // Because it is for Display only we leave value in degrees
 
   _skHub.publish(update);
 }
