@@ -37,4 +37,5 @@ class IMUService : public Task {
     IMUService(SKHub& skHub) : Task("IMU"), _skHub(skHub) {};
     void setup();
     void loop();
+    static uint8_t magCAL;
 };
