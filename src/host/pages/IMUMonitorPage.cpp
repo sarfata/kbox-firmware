@@ -28,6 +28,7 @@
 #include "KBoxConfig.h"
 #include <KBoxLogging.h>
 #include "signalk/SKUnits.h"
+#include "services/IMUService.h"
 
 IMUMonitorPage::IMUMonitorPage(SKHub& hub) {
   static const int col1 = 5;
@@ -55,28 +56,37 @@ IMUMonitorPage::IMUMonitorPage(SKHub& hub) {
   hub.subscribe(this);
 }
 
+
 void IMUMonitorPage::updateReceived(const SKUpdate& up) {
-
-
+  
+  // No Updates coming when Calib below cfIMU_MIN_CAL
+  // Aproach was for trusted values only
+  // Disadvantage is, that the display is stuck to the last value!
+  /*
   if ( up.hasNavigationHeadingMagnetic() ) {
     const SKValue& vm = up.getNavigationHeadingMagnetic();
-    DEBUG( "Heading Magnetic %f", SKRadToDeg( vm.getNumberValue() ) );
-    hdgTL->setText(String( SKRadToDeg( vm.getNumberValue() ), 1) + "°        ");
-    if ( magCal < cfIMU_MIN_CAL ) {
-      hdgTL->setColor(ColorRed);
-    } else {
-      hdgTL->setColor(ColorWhite);
-    };
+    // DEBUG( "Heading Magnetic %f", SKRadToDeg( vm.getNumberValue() ) );
   }
+  */
+  
+  // Would be nice to see that something is wrong
+  // TODO: Some damping for the display in IMUService
+  hdgTL->setText(String( IMUService::IMU_HdgFiltered ), 1) + "°        ");
+  calTL->setText(String( IMUService::magCAL ) + "   ");
+  if ( IMUService::magCAL < cfIMU_MIN_CAL ) {
+    hdgTL->setColor(ColorRed);
+    calTL->setColor(ColorRed);
+  } else {
+    hdgTL->setColor(ColorWhite);
+    calTL->setColor(ColorWhite);
+  };
 
+  // GyroCalib is more likely better than magCalib, so we hope there is an update
+  // from IMUService
+  // TODO: An own Visitor for Display Values (damped values with lower frequency)
   if ( up.hasNavigationAttitude() ) {
     const SKValue& vm = up.getNavigationAttitude();
     pitchTL->setText(String( SKRadToDeg( vm.getAttitudeValue().pitch ), 1) + "°     ");
     heelTL->setText(String( SKRadToDeg( vm.getAttitudeValue().roll ), 1) + "°     ");
-    //calTL->setText(String(vm.getCalibration()) + "   ");
-
   }
-
-  //
-  // setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(roll), /* pitch */ SKDegToRad(pitch), /* yaw */ 0));
 }
