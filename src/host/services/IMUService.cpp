@@ -91,9 +91,12 @@ void IMUService::loop() {
     break;
   }
 
-  if (sysCalib >= cfIMU_MIN_CAL) {
-    update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(roll), /* pitch */ SKDegToRad(pitch), /* yaw */ 0));
+  if (magCalib >= cfIMU_MIN_CAL) {
     update.setNavigationHeadingMagnetic(SKDegToRad(heading));
+  }
+  
+  if (gyroCalib >= cfIMU_MIN_CAL) {
+    update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(roll), /* pitch */ SKDegToRad(pitch), /* yaw */ 0));
   }
 
   _skHub.publish(update);
