@@ -9,6 +9,10 @@ import argparse
 from jsonschema.validators import validator_for, validate
 from termcolor import colored
 
+# Courtesy of https://stackoverflow.com/questions/5595425
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
 class SKTestCase(object):
     def __init__(self, json):
         self.nmea = json['nmea']
@@ -32,6 +36,8 @@ class SKTestCase(object):
                     v['tested'] = True
 
                     if v['value'] == expected['value']:
+                        pass
+                    elif isinstance(expected['value'], float) and isclose(v['value'], expected['value']):
                         pass
                     else:
                         raise ValueError("{} should have value {} but is {} instead.".format(v['path'], expected['value'], v['value']))
@@ -78,19 +84,49 @@ class SKTestRunnerSKTool(SKTestRunner):
         return "SKTool"
 
     def fetchOutput(self, test):
-        process = subprocess.Popen(['./.pioenvs/sktool/program'], stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-        process.stdin.write(test.nmea)
-        process.stdin.close()
-        process.wait()
-        (out, err) = (process.stdout.read(), process.stderr.read())
-        return out
+        try:
+            process = subprocess.Popen(['./.pioenvs/sktool/program'], stdin = subprocess.PIPE,
+                    stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+            process.stdin.write(test.nmea)
+            process.stdin.close()
+            process.wait()
+            (out, err) = (process.stdout.read(), process.stderr.read())
+            return out
+        except OSError as error:
+            print("Unable to run sktool. Please run this script from the kbox"
+                    "root folder (OSError {}: {})".format(error.errno,
+                        error.strerror))
+            raise error
 
 class SKTestRunnerSKOfficial(SKTestRunner):
+    def __init__(self, skspecPath, canboat = None, n2k_signalk = None,
+            nmea0183_signalk = None):
+        SKTestRunner.__init__(self, skspecPath)
+        if canboat:
+            self.canboat = canboat
+        else:
+            self.canboat = 'canboat'
+        if n2k_signalk:
+            self.n2k_signalk = n2k_signalk
+        else:
+            self.n2k_signalk = 'n2k-signalk'
+        if nmea0183_signalk:
+            self.nmea0183_signalk = nmea0183_signalk
+        else:
+            self.nmea0183_signalk = 'nmea0183-signalk'
+
     def name(self):
         return "SKOfficial"
 
     def fetchOutput(self, test):
-        process = subprocess.Popen(['/Users/thomas/work/canboat/rel/darwin-x86_64/analyzer -json| /Users/thomas/work/n2k-signalk/bin/n2k-signalk --delta'], shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        process = None
+
+        if "$PCDIN" in test.nmea:
+            process = subprocess.Popen(['{} -json| {} --delta'.format(self.canboat, self.n2k_signalk)],
+                shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        else:
+            process = subprocess.Popen([ self.nmea0183_signalk ], stdin = subprocess.PIPE,
+                    stdout = subprocess.PIPE, stderr = subprocess.PIPE)
         process.stdin.write(test.nmea)
         process.stdin.close()
         process.wait()
@@ -103,13 +139,21 @@ class SKTestRunnerSKOfficial(SKTestRunner):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--spec", help = "Where to find the SignalK spec delta.json file")
-    parser.add_argument("--official", help = "Use SignalK official tools insted of KBox sktool", action = 'store_true')
+    parser.add_argument("--implementation", choices=['sktool', 'signalk'])
+    parser.add_argument("--canboat", help = "Where to find canboat/analyzer")
+    parser.add_argument("--n2k-signalk", help = "Where to find n2k-signalk"
+            "project")
+    parser.add_argument("--nmea0183-signalk", help = "Where to find"
+        "nmea0183-signalk (from signalk/signalk-parser-nmea0183)")
     args = parser.parse_args()
 
-    if args.official:
-        runner = SKTestRunnerSKOfficial(args.spec)
-    else:
+    if args.implementation == 'signalk':
+        runner = SKTestRunnerSKOfficial(args.spec, canboat = args.canboat,
+                n2k_signalk = args.n2k_signalk, nmea0183_signalk = args.nmea0183_signalk)
+    elif args.implementation == 'sktool':
         runner = SKTestRunnerSKTool(args.spec)
+    else:
+        raise FatalError("Unknown test implementation: {}".format(args.implementation))
 
     workPath = os.path.dirname(sys.argv[0])
 
