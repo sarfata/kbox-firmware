@@ -48,6 +48,8 @@ class SKTestCase(object):
             if not 'tested' in v:
                 raise ValueError("Found an extra value that was not expected with path {} and value {}".format(v['path'], v['value']))
 
+class SKRunnerError(Exception):
+    pass
 
 class SKTestRunner(object):
     def __init__(self, skspecPath):
@@ -77,7 +79,7 @@ class SKTestRunner(object):
         print ""
 
     def fetchOutput(self, test):
-        raise Exception("Not implemented. Use a subclass")
+        raise SKRunnerError("Not implemented. Use a subclass")
 
 class SKTestRunnerSKTool(SKTestRunner):
     def name(self):
@@ -93,10 +95,9 @@ class SKTestRunnerSKTool(SKTestRunner):
             (out, err) = (process.stdout.read(), process.stderr.read())
             return out
         except OSError as error:
-            print("Unable to run sktool. Please run this script from the kbox"
+            raise SKRunnerError("Unable to run sktool. Please run this script from the kbox"
                     "root folder (OSError {}: {})".format(error.errno,
                         error.strerror))
-            raise error
 
 class SKTestRunnerSKOfficial(SKTestRunner):
     def __init__(self, skspecPath, canboat = None, n2k_signalk = None,
@@ -125,8 +126,13 @@ class SKTestRunnerSKOfficial(SKTestRunner):
             process = subprocess.Popen(['{} -json| {} --delta'.format(self.canboat, self.n2k_signalk)],
                 shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
         else:
-            process = subprocess.Popen([ self.nmea0183_signalk ], stdin = subprocess.PIPE,
-                    stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+            try:
+                process = subprocess.Popen([ self.nmea0183_signalk ], stdin = subprocess.PIPE,
+                        stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+            except OSError as error:
+                raise SKRunnerError("Unable to run signalk-parser-nmea0183. If it's not in your path, please indicate "
+                                    "where it is with the --nmea0183-signalk argument. (OSError {}: {})".format(error.errno,
+                                        error.strerror))
         process.stdin.write(test.nmea)
         process.stdin.close()
         process.wait()
@@ -138,8 +144,8 @@ class SKTestRunnerSKOfficial(SKTestRunner):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--spec", help = "Where to find the SignalK spec delta.json file")
-    parser.add_argument("--implementation", choices=['sktool', 'signalk'])
+    parser.add_argument("--spec", help = "Where to find the SignalK spec delta.json file", required = True)
+    parser.add_argument("--implementation", choices=['sktool', 'signalk'], required = True)
     parser.add_argument("--canboat", help = "Where to find canboat/analyzer")
     parser.add_argument("--n2k-signalk", help = "Where to find n2k-signalk"
             "project")
@@ -153,7 +159,8 @@ def main():
     elif args.implementation == 'sktool':
         runner = SKTestRunnerSKTool(args.spec)
     else:
-        raise FatalError("Unknown test implementation: {}".format(args.implementation))
+        print(colored("Unknown test implementation: {}".format(args.implementation), 'red'))
+        return
 
     workPath = os.path.dirname(sys.argv[0])
 
@@ -166,8 +173,11 @@ def main():
 
     testcases = map(lambda x: SKTestCase(x), testcases)
 
-    for tc in testcases:
-        runner.run(tc)
+    try:
+        for tc in testcases:
+            runner.run(tc)
+    except SKRunnerError as e:
+        print(colored(e.message, 'red'))
 
 if __name__ == '__main__':
     main()
