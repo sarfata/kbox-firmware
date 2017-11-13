@@ -1,0 +1,16 @@
+[
+  {
+    "nmea": "$IIMWV,056,R,5.19,N,A*1D",
+    "expectedValues": [
+      { "path": "environment.wind.angleApparent", "value": 0.97738438134 },
+      { "path": "environment.wind.speedApparent", "value": 2.669967343058394 }
+    ]
+  },
+  {
+    "nmea": "$IIMWV,027,T,3.82,N,A*19",
+    "expectedValues": [
+      { "path": "environment.wind.speedTrue", "value": 1.965178275622941 },
+      { "path": "environment.wind.angleTrueWater", "value": 0.47123889814606673 }
+    ]
+  }
+]

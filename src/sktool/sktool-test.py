@@ -191,20 +191,19 @@ class SKTestRunnerSKOfficial(SKTestRunner):
             return out
 
 
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--spec", help = "Where to find the SignalK spec delta.json file",
             default = "https://raw.githubusercontent.com/SignalK/specification/master/schemas/delta.json")
-    parser.add_argument("--implementation", choices=['sktool', 'signalk'], required = True)
+    parser.add_argument("--implementation", choices=['sktool', 'signalk'], default = 'sktool')
     parser.add_argument("--canboat", help = "Where to find canboat/analyzer")
     parser.add_argument("--n2k-signalk", help = "Where to find n2k-signalk"
             "project")
     parser.add_argument("--nmea0183-signalk", help = "Where to find"
         "nmea0183-signalk (from signalk/signalk-parser-nmea0183)")
     parser.add_argument("-v", "--verbose", help = "More verbose output", action = 'store_true')
-    parser.add_argument("tests", help = "A JSON file with NMEA input and expected output in SignalK")
+    parser.add_argument("tests", help = "A JSON file with NMEA input and expected output in SignalK",
+            type = argparse.FileType('r'), nargs = '+')
 
     args = parser.parse_args()
 
@@ -219,21 +218,35 @@ def main():
 
     workPath = os.path.dirname(sys.argv[0])
 
-    testcases = []
-    try:
-        with open(args.tests) as f:
-            testcases = json.load(f)
-    except Exception as e:
-        print("Unable to parse test cases: {}".format(e))
+    testsuites = []
+    for f in args.tests:
+        try:
+            cases = json.load(f)
+            suite = { "name": f.name, "testcases": map(lambda x: SKTestCase(x), cases) }
+            testsuites.append(suite)
+        except Exception as e:
+            print("Unable to parse test cases: {}".format(e))
 
-    testcases = map(lambda x: SKTestCase(x), testcases)
-    (passCount, failCount, ignoreFailCount, errorCount) = runner.runCases(testcases)
-    total = passCount + failCount + ignoreFailCount + errorCount
+    (totalPass, totalFail, totalIgnore, totalError) = (0, 0, 0, 0)
+    for suite in testsuites:
+        print(colored("Running tests in {}".format(suite['name']), 'white', 'on_blue'))
+        (passCount, failCount, ignoreFailCount, errorCount) = runner.runCases(suite['testcases'])
+        total = passCount + failCount + ignoreFailCount + errorCount
 
-    print("{} PASS out of {} tests. {} tests failed ({} ignored) - {} tests error".format(passCount, total,
-        failCount + ignoreFailCount, ignoreFailCount, errorCount))
+        print(colored("{} pass out of {} tests. {} tests failed ({} ignored) - {} tests error".format(passCount, total,
+            failCount + ignoreFailCount, ignoreFailCount, errorCount), "white", "on_blue"))
+        print()
 
-    if failCount + errorCount > 0:
+        totalPass = totalPass + passCount
+        totalFail = totalFail + failCount
+        totalIgnore = totalIgnore + ignoreFailCount
+        totalError = totalError + errorCount
+
+    total = totalFail + totalPass + totalError + totalIgnore
+    print("{} PASS out of {} tests. {} tests failed ({} ignored) - {} tests error".format(totalPass, total,
+        totalFail + totalIgnore, totalFail, totalError))
+
+    if totalFail + totalError > 0:
         sys.exit(-1)
 
 if __name__ == '__main__':

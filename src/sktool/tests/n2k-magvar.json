@@ -1,0 +1,9 @@
+[
+  {
+    "nmea": "$PCDIN,01F11A,000C9E34,00,0000000000000000*5E",
+    "expectedValues": [
+      { "path": "navigation.magneticVariation", "value": 0 }
+    ]
+    ,"ignoreFail": true
+  }
+]

@@ -58,5 +58,5 @@ sktool:
 	platformio run -e sktool
 
 validation: sktool
-	src/sktool/sktool-test.py --implementation sktool src/sktool/tests/signalk-output-validation.json
+	src/sktool/sktool-test.py --implementation sktool src/sktool/tests/*json
 
