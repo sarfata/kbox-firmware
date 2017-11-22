@@ -31,7 +31,7 @@
 #include "common/signalk/SKHub.h"
 
 // Defined by the NMEA Standard
-#define MAX_NMEA_SENTENCE_LENGTH 82
+#define MAX_NMEA_SENTENCE_LENGTH 83
 
 class HardwareSerial;
 
