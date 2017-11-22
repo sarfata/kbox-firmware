@@ -40,7 +40,7 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
   SECTION("128259: Speed in water") {
     SetN2kBoatSpeed(msg, 0, 3.4, N2kDoubleNA, N2kSWRT_Paddle_wheel);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
-    CHECK( update.getSize() == 2 );
+    CHECK( update.getSize() == 1 );
     CHECK( update.getNavigationSpeedThroughWater() == 3.4 );
   }
 
