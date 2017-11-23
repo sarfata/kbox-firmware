@@ -63,23 +63,12 @@ const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceR
   SKSource source = SKSource::sourceForNMEA0183(input, reader.getTalkerId(), reader.getSentenceCode());
   rmc->setSource(source);
 
-  double latitude = reader.getFieldAsDouble(3);
-  double longitude = reader.getFieldAsDouble(5);
+  double latitude = reader.getFieldAsLatLon(3);
+  double longitude = reader.getFieldAsLatLon(5);
   double sog = SKKnotToMs(reader.getFieldAsDouble(7));
   double cog = SKDegToRad(reader.getFieldAsDouble(8));
 
   if (!isnan(latitude) && !isnan(longitude)) {
-    if (reader.getFieldAsChar(4) == 'S') {
-      latitude /= -100;
-    } else {
-      latitude /= 100;
-    }
-    if (reader.getFieldAsChar(6) == 'W') {
-      longitude /= -100;
-    } else {
-      longitude /= 100;
-    }
-
     rmc->setValue(SKPathNavigationPosition, SKTypePosition(latitude, longitude, 0));
   }
   if (!isnan(sog)) {
