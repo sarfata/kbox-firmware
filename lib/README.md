@@ -6,6 +6,7 @@ repository.
 
 To pull or push to the subtrees, start by defining remotes for all the origins:
 
+    git remote add adafruit-ina219 git@github.com:adafruit/Adafruit_INA219.git
     git remote add pedvide-adc git@github.com:pedvide/ADC.git
     git remote add ttlappalainen-nmea2000 git@github.com:ttlappalainen/NMEA2000.git
     git remote add sarfata-nmea2000teensy git@github.com:sarfata/NMEA2000_teensy.git

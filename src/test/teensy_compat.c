@@ -34,10 +34,19 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdint.h>
+#include <time.h>
 
 // So that millis() work
 uint32_t millis() {
   return 42;
+}
+
+// Required by NMEA2000 - Must be defined by application
+void delay(uint32_t ms) {
+  struct timespec sleeptime;
+  sleeptime.tv_sec = 0;
+  sleeptime.tv_nsec = ms * 1000 * 1000;
+  nanosleep(&sleeptime, NULL);
 }
 
 char * ultoa(unsigned int val, char *buf, int radix) {
