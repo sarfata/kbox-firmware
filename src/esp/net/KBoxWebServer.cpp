@@ -50,9 +50,9 @@ void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
 
     StaticJsonBuffer<500> jsonBuffer;
     JsonObject &root = jsonBuffer.createObject();
-    root["version"] = "";
-    root["timestamp"] = "";
-    root["self"] = "KBOX";
+    root["version"] = "0.1.1-11";
+    //root["timestamp"] = "2017-10-03T16:27:05.652Z";
+    root["self"] = "urn:mrn:imo:mmsi:4424242";
 
     char buffer[256];
     root.printTo(buffer, sizeof(buffer));
@@ -91,6 +91,15 @@ void KBoxWebServer::setup() {
   else {
     DEBUG("Starting webserver BUT index.html DOES NOT EXIST");
   }
+
+  webServer.on("/signalk/v1/api/self", HTTP_GET, [](AsyncWebServerRequest *request) {
+    //request->send(200, "text/plain", "urn:mrn:imo:mmsi:4424242");
+    request->send(200, "text/plain", "urn:mrn:imo:mmsi:4424242");
+  });
+
+  webServer.on("/signalk", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "text/plain", "{\"endpoints\":{\"v1\":{\"signalk-ws\":\"ws://192.168.1.154/signalk/v1/stream\"}}}");
+  });
 
   // respond to GET requests on URL /heap
   webServer.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
