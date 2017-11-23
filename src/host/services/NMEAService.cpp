@@ -59,6 +59,7 @@ void serialEvent2() {
       buffer[MAX_NMEA_SENTENCE_LENGTH - 1] = 0;
       DEBUG("Discarding incomplete sequence: %s", buffer);
       index = 0;
+      KBoxMetrics.event(KBoxEventNMEA1RXError);
     }
     else {
       // Check if we have reached end of sentence
@@ -101,6 +102,7 @@ void serialEvent3() {
       buffer[MAX_NMEA_SENTENCE_LENGTH - 1] = 0;
       DEBUG("Discarding incomplete sequence: %s", buffer);
       index = 0;
+      KBoxMetrics.event(KBoxEventNMEA2RXError);
     }
     else {
       // Check if we have reached end of sentence
