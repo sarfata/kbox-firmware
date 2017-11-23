@@ -29,3 +29,7 @@
 
 void debug_init();
 void debug(const char *fname, int lineno, const char *fmt, ... );
+
+//RES_MOD_11_6_17  add drivers for NMEA1_SERIAL
+/* Drivers */
+//#include "drivers/board.h"

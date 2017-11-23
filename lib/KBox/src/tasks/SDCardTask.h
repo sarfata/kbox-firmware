@@ -49,6 +49,9 @@ class SDCardTask : public Task, public KReceiver {
     LinkedList<Loggable> receivedMessages;
 
   public:
+    //RES_MOD_10_28_17 add messagecpy to public string
+    String messagecpy() const;
+    //end of my add
     SDCardTask();
     virtual ~SDCardTask();
 

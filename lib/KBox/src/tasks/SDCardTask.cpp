@@ -59,11 +59,16 @@ void SDCardTask::loop() {
   if (!isLogging()) {
     return;
   }
-  for (LinkedList<Loggable>::iterator it = receivedMessages.begin(); it != receivedMessages.end(); it++) {
+    for (LinkedList<Loggable>::iterator it = receivedMessages.begin(); it != receivedMessages.end(); it++) {
     logFile->print(it->timestamp);
     logFile->print(",");
     logFile->print(it->_message);
     logFile->println();
+    //RES_MOD_10_28_17 send character message to DEBUG
+    const char *messagecpy = (it->_message.c_str());
+    //DEBUG("Nmea data to follow","\n");
+    DEBUG(messagecpy);
+    //end of my MOD
   }
   // Force data to SD and update the directory entry to avoid data loss.
   if (!logFile->sync() || logFile->getWriteError()) {
@@ -154,7 +159,7 @@ uint64_t SDCardTask::getFreeSpace() const {
   // the running led stops flashing (although we do still call digitalWrite on it)
   // the serial ports start messing up big time (missing a lot of data)
   // eventually other things crash...
-  // Could be a memory problem or something like that. Have not found 
+  // Could be a memory problem or something like that. Have not found
   // it yet but the culprit is this line so for now it is disabled.
   uint64_t space = 0; //logFile->volume()->freeClusterCount();
   space *= logFile->volume()->blocksPerCluster();

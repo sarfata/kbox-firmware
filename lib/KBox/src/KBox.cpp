@@ -45,11 +45,13 @@ void KBox::setup() {
   neopixels.show();
 
   // Initialize serialports
-  digitalWrite(nmea1_out_enable, 0);
+  //RES_MOD_11_6_17  enable nmea1 output - set one to 'high'  1`?!
+  digitalWrite(nmea1_out_enable, 1);
   digitalWrite(nmea2_out_enable, 0);
   pinMode(nmea1_out_enable, OUTPUT);
   pinMode(nmea2_out_enable, OUTPUT);
-  NMEA1_SERIAL.begin(38400);
+  //RES_MOD_7_25_17 set baud rate for NMEA0183
+  NMEA1_SERIAL.begin(4800);
   NMEA2_SERIAL.begin(38400);
 
   // Initialize ADC
@@ -71,11 +73,13 @@ void KBox::setup() {
   //adc.setConversionSpeed(ADC_LOW_SPEED, ADC_1);
   //adc.setSamplingSpeed(ADC_HIGH_SPEED, ADC_1);
 
-
   taskManager.addTask(&mfd);
   taskManager.setup();
 }
 
 void KBox::loop() {
   taskManager.loop();
+  //RES_MOD_11_6_17 add next line to test writting to NMEA1 out
+  NMEA1_SERIAL.write("in loop");
+  DEBUG("debug in loop");
 }

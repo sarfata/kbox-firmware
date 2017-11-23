@@ -35,17 +35,19 @@ BatteryMonitorPage::BatteryMonitorPage() {
 
   addLayer(new TextLayer(Point(col1, row1), Size(20, 20), "House Battery", ColorWhite, ColorBlack, FontDefault));
   addLayer(new TextLayer(Point(col2, row1), Size(20, 20), "House Current", ColorWhite, ColorBlack, FontDefault));
-  addLayer(new TextLayer(Point(col1, row3), Size(20, 20), "Engine Battery", ColorWhite, ColorBlack, FontDefault));
+  addLayer(new TextLayer(Point(col1, row3), Size(20, 20), "Baro Pressure", ColorWhite, ColorBlack, FontDefault));
   addLayer(new TextLayer(Point(col2, row3), Size(20, 20), "Supply Voltage", ColorWhite, ColorBlack, FontDefault));
 
   houseVoltage = new TextLayer(Point(col1, row2), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
   houseCurrent = new TextLayer(Point(col2, row2), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
-  starterVoltage  = new TextLayer(Point(col1, row4), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
+  baroPressure = new TextLayer(Point(col1, row4), Size(20, 20), "101.535", ColorWhite, ColorBlack, FontLarge);
   supplyVoltage = new TextLayer(Point(col2, row4), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
 
   addLayer(houseVoltage);
   addLayer(houseCurrent);
-  addLayer(starterVoltage);
+  //RES_MOD_10_28_17 substatue baroPressure for starterVoltage see above also
+  addLayer(baroPressure);
+  //addLayer(starterVoltage);
   addLayer(supplyVoltage);
 }
 
@@ -57,35 +59,56 @@ Color BatteryMonitorPage::colorForVoltage(float v) {
     return ColorRed;
   }
   if (v < 13.5) {
-    return ColorGreen;
   }
   return ColorBlue;
 }
-
+//RES_MOD_10_28_17 add color for pressure
+Color BatteryMonitorPage::colorForPressure(float b) {
+   return ColorRed;
+}
 String BatteryMonitorPage::formatMeasurement(float measure, const char *unit) {
   // extra spaces at the end needed to clear previous value completely
   // (we use a non-fixed width font)
   char s[10];
+  //RES_MOD_10_28_17 change format to 6.2?
+  //snprintf(s, sizeof(s), "%6.2f %s  ", measure, unit);
+  if (unit = "V"){
   snprintf(s, sizeof(s), "%.1f %s  ", measure, unit);
-  return String(s);
+}
+  else {
+  snprintf(s, sizeof(s), "%8.4f %s  ", measure, unit);
+  }
+return String(s);
 }
 
 void BatteryMonitorPage::processMessage(const KMessage &message) {
   message.accept(*this);
 }
 
+//RES_MOD_10_28_17 My playing around with the display
+void BatteryMonitorPage::visit(const BarometerMeasurement &bm) {
+//double respressure = bm.getPressure();
+//RES_MOD_7_29_17 convert pressure to Bar not hBar - 5 decimal places
+//respressure = respressure/1000;
+//respressure = 101.3;
+DEBUG(" pressure from BatteryMonitorPage", bm.getTemperature());
+baroPressure->setText(formatMeasurement(bm.getTemperature(), "C"));
+baroPressure->setColor(colorForPressure(bm.getTemperature()));
+}
+
 void BatteryMonitorPage::visit(const VoltageMeasurement &vm) {
 if (vm.getLabel() == "house") {
-    houseVoltage->setText(formatMeasurement(vm.getVoltage(), "V"));
-    houseVoltage->setColor(colorForVoltage(vm.getVoltage()));
-  }
+   houseVoltage->setText(formatMeasurement(vm.getVoltage(), "V"));
+   houseVoltage->setColor(colorForVoltage(vm.getVoltage()));
+   DEBUG("print from Display", vm.getVoltage());
+   }
   if (vm.getLabel() == "supply") {
     supplyVoltage->setText(formatMeasurement(vm.getVoltage(), "V"));
     supplyVoltage->setColor(colorForVoltage(vm.getVoltage()));
   }
-  if (vm.getLabel() == "starter") {
-    starterVoltage->setText(formatMeasurement(vm.getVoltage(), "V"));
-    starterVoltage->setColor(colorForVoltage(vm.getVoltage()));
-  }
+  //if (vm.getLabel() == "starter") {
+    //Original below
+    //starterVoltage->setText(formatMeasurement(vm.getVoltage(), "V"));
+    //starterVoltage->setColor(colorForVoltage(vm.getVoltage()));
+  //}
 }
-

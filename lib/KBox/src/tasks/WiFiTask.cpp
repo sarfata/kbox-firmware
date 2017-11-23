@@ -41,11 +41,14 @@ void WiFiTask::loop() {
     if (rxBuf[rxIndex - 1] == '\n') {
       rxBuf[rxIndex - 1] = 0;
       DEBUG("WiFi: %s", rxBuf);
+      //RES_MOD_10_28_17  add a blank line in output
+      DEBUG("");
       rxIndex = 0;
     }
     if (rxIndex >= sizeof(rxBuf) - 1) {
       rxBuf[rxIndex] = 0;
       DEBUG("WiFi full: %s", rxBuf);
+      DEBUG("");
       rxIndex = 0;
     }
   }
@@ -62,13 +65,15 @@ void WiFiTask::loop() {
     }
 
     if (WiFiSerial.availableForWrite() <= 0) {
-      //DEBUG("Not sending because send buffer is full (need %i but %i available).", toSend.length(), WiFiSerial.availableForWrite());
+      //RES_MOD_9_6_17 comment debug
+    //DEBUG("Not sending because send buffer is full (need %i but %i available).", toSend.length(), WiFiSerial.availableForWrite());
       break;
     }
     size_t available = WiFiSerial.availableForWrite();
     String s = toSend;
     s.remove(available);
     size_t written = WiFiSerial.print(s);
+    //RES_MOD_9_6_17 comment debug
     //DEBUG("Sent %i/%i (%i avail) of %s", written, toSend.length(), available, toSend.c_str());
 
     if (written == toSend.length()) {
@@ -96,5 +101,3 @@ void WiFiTask::processMessage(const KMessage &m) {
   m.accept(v);
   sendQueue.add(v.toNMEA());
 }
-
-

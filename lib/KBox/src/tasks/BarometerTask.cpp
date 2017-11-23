@@ -41,8 +41,8 @@ void BarometerTask::setup() {
 void BarometerTask::fetchValues() {
   temperature = bmp280.readTemperature();
   pressure = bmp280.readPressure();
-
-  DEBUG("Read temperature=%.2f C and pressure=%.1f hPa", temperature, pressure/100);
+  //RES_MOD_10_28_17  clean up debug output to nmea cmmds only
+  //DEBUG("Read temperature=%.2f C and pressure=%.1f hPa", temperature, pressure/100);
   BarometerMeasurement m(temperature, pressure);
   sendMessage(m);
 }
