@@ -27,7 +27,7 @@
 #include <math.h>
 
 #define SKKnotToMs(x) x * 1852 / 3600
-#define SKStatuteMphToMs(x) x * 1609 / 3600
+#define SKStatuteMphToMs(x) x * 1609.344 / 3600
 #define SKKmphToMs(x) x * 1000 / 3600
 
 #define SKDegToRad(x) x * 2 * M_PI / 360
