@@ -70,7 +70,7 @@ class NMEASentenceReader {
     /**
      * Return the value of field i as a double or NaN if the field does not
      * exist, or is empty. If a conversion error occurs (the string is not a
-     * valid number, 0 will be returned.
+     * valid number), 0 will be returned.
      *
      * If i is omitted, auto-incrementation will be used.
      */
@@ -91,6 +91,17 @@ class NMEASentenceReader {
      * If i is omitted, auto-incrementation will be used.
      */
     const String getFieldAsString(int i = 0) const;
+
+    /**
+     * Return the value of field i and i+1 as an angle parsed as latitude or longitude.
+     *
+     * See http://www.catb.org/gpsd/NMEA.html#_nmea_encoding_conventions
+     *
+     * 12302.2323,E is 123 degrees East and 02.2323 minutes.
+     *
+     * Will return NaN if an error occurs while parsing the field.
+     */
+    double getFieldAsLatLon(int i = 0) const;
 };
 
 

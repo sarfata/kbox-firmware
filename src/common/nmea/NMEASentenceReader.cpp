@@ -99,3 +99,36 @@ double NMEASentenceReader::getFieldAsDouble(int id) const {
   }
   return strtod(f.c_str(), 0);
 }
+
+double NMEASentenceReader::getFieldAsLatLon(int id) const {
+  String value = getFieldAsString(id);
+  char sign = getFieldAsChar(id+1);
+
+  if (value.length() == 0 || sign == 0) {
+    return NAN;
+  }
+
+  // There are normally two digits for minutes before the '.':
+  //   DDMM.MMM
+  int degreesDigits = value.indexOf('.') - 2;
+  if (degreesDigits < 0) {
+    degreesDigits = 0;
+  }
+
+  String angle = value.substring(0, degreesDigits);
+  String minutes = value.substring(degreesDigits);
+
+  double latlon = angle.toInt() + strtod(minutes.c_str(), 0) / 60;
+
+  switch (sign) {
+    case 'N':
+    case 'E':
+      return latlon;
+    case 'S':
+    case 'W':
+      return -latlon;
+    default:
+      return NAN;
+  }
+}
+

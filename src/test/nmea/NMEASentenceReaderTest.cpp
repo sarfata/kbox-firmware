@@ -91,5 +91,37 @@ TEST_CASE("NMEASentenceReader") {
     CHECK( r.getSentenceCode() == "VDM" );
     CHECK( r.countFields() == 6 );
   }
+
+  SECTION("Reading angles") {
+    NMEASentenceReader r("$TST,2832.1834,N,08101.0536,W*");
+
+    CHECK( r.getFieldAsLatLon(1) == 28.536390 );
+    CHECK( r.getFieldAsLatLon(3) == -81.017560 );
+  }
+
+  SECTION("Reading angles close to 0") {
+    NMEASentenceReader r("$TST,002.1834,N,001.0536,W*");
+
+    CHECK( r.getFieldAsLatLon(1) == 0.036390 );
+    CHECK( r.getFieldAsLatLon(3) == Approx(-0.01756) );
+  }
+
+  SECTION("Reading angles close to 0 - and removing extra 0s") {
+    // I am not sure if that is actually valid...
+    NMEASentenceReader r("$TST,2.1834,N,1.0536,W*");
+
+    CHECK( r.getFieldAsLatLon(1) == 0.036390 );
+    CHECK( r.getFieldAsLatLon(3) == Approx(-0.01756) );
+  }
+
+  SECTION("Reading angles - with invalid sign") {
+    // I am not sure if that is actually valid...
+    NMEASentenceReader r("$TST,2.1834,1.0536,G,42*");
+
+    CHECK( isnan(r.getFieldAsLatLon(1)) );
+    CHECK( isnan(r.getFieldAsLatLon(2)) );
+    CHECK( isnan(r.getFieldAsLatLon(4)) );
+
+  }
 }
 

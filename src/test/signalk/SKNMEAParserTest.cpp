@@ -44,8 +44,8 @@ TEST_CASE("SKNMEAParserTest: Basic tests") {
     CHECK( update.getTimestamp().getTime() == 0 );
     CHECK( update.getNavigationSpeedOverGround() == SKKnotToMs(5.02) );
     CHECK( update.getNavigationCourseOverGroundTrue() == SKDegToRad(235.24) );
-    CHECK( update.getNavigationPosition().latitude == 37.513385 );
-    CHECK( update.getNavigationPosition().longitude == -122.274913 );
+    CHECK( update.getNavigationPosition().latitude == 37.85564166666666 );
+    CHECK( update.getNavigationPosition().longitude == -122.45818833333334 );
     CHECK( update.getNavigationPosition().altitude == 0 );
   }
 
