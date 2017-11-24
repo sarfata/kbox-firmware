@@ -27,6 +27,9 @@
 #include "BatteryMonitorPage.h"
 
 BatteryMonitorPage::BatteryMonitorPage(SKHub& hub) {
+
+  _maxVoltMeasurement = 24;
+
   static const int col1 = 5;
   static const int col2 = 200;
   static const int row1 = 26;
@@ -66,10 +69,14 @@ Color BatteryMonitorPage::colorForVoltage(float v) {
 }
 
 String BatteryMonitorPage::formatMeasurement(float measure, const char *unit) {
+  char s[10];
   // extra spaces at the end needed to clear previous value completely
   // (we use a non-fixed width font)
-  char s[10];
-  snprintf(s, sizeof(s), "%.1f %s  ", measure, unit);
+  if ( measure > _maxVoltMeasurement || measure < (- _maxVoltMeasurement) {
+    snprintf(s, sizeof(s), "--      ");
+  } else {
+    snprintf(s, sizeof(s), "%.1f %s  ", measure, unit);
+  }
   return String(s);
 }
 
