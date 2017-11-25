@@ -28,7 +28,6 @@
 #include "common/signalk/SKHub.h"
 #include "host/drivers/ILI9341GC.h"
 #include "host/pages/BatteryMonitorPage.h"
-#include "host/pages/IMUMonitorPage.h"
 #include "host/pages/StatsPage.h"
 #include "host/services/MFD.h"
 #include "host/services/ADCService.h"
@@ -103,9 +102,6 @@ void setup() {
 
   BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
   mfd.addPage(batPage);
-  
-  IMUMonitorPage *imuPage = new IMUMonitorPage(skHub);
-  mfd.addPage(imuPage);
 
   StatsPage *statsPage = new StatsPage();
   statsPage->setSDCardTask(sdcardTask);
