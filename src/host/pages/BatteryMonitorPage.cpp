@@ -67,14 +67,11 @@ Color BatteryMonitorPage::colorForVoltage(float v) {
   }
   return ColorBlue;
 }
-
 String BatteryMonitorPage::formatMeasurement(float measure, const char *unit) {
-  char s[10] =  "--       ";
   // extra spaces at the end needed to clear previous value completely
   // (we use a non-fixed width font)
-  if ((measure < _maxVoltMeasurement) && (measure > (-1 * _maxVoltMeasurement))) {
-    snprintf(s, sizeof(s), "%.1f %s  ", measure, unit);
-  }
+  char s[10];
+  snprintf(s, sizeof(s), "%.1f %s  ", measure, unit);
   return String(s);
 }
 
