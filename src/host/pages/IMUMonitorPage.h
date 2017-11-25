@@ -1,7 +1,10 @@
 /*
-  The MIT License
+  * Project:  KBox
+  * Purpose:  IMU Monitor Page for HDG, Cal, Heel & Pitch
+  * Author:   (c) Ronnie Zeiller, 2017
+  * KBox:     (c) 2016 Thomas Sarlandie thomas@sarlandie.net
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  The MIT License
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -26,17 +29,29 @@
 #include "common/ui/TextLayer.h"
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKSubscriber.h"
+#include "util/iirfilter.h"
 
-class BatteryMonitorPage : public Page, public SKSubscriber {
-  private:
-    TextLayer *houseVoltage, *houseCurrent, *engineVoltage, *supplyVoltage;
+class IMUMonitorPage : public Page, public SKSubscriber {
+private:
+  TextLayer *hdgTL, *heelTL, *pitchTL, *calTL;  // display cal planned for later
+  unsigned long int _nextPrint = 0;
+  uint16_t _IMUServiceInterval = 50;
 
-    Color colorForVoltage(float v);
-    String formatMeasurement(float measure, const char *unit);
-    float _maxVoltMeasurement;
-    
-  public:
-    BatteryMonitorPage(SKHub& hub);
+  iirfilter   IMU_HdgFilter;
+  iirfilter   IMU_HeelFilter;
+  iirfilter   IMU_PitchFilter;
 
-    virtual void updateReceived(const SKUpdate& up);
+  double _dampingHdg;
+  double _dampingHeelPitch;
+
+  double _IMU_HDGFiltered;
+  double _IMU_PitchFiltered;
+  double _IMU_HeelFiltered;
+
+
+public:
+  IMUMonitorPage(SKHub &hub);
+
+
+  virtual void updateReceived(const SKUpdate &up);
 };
