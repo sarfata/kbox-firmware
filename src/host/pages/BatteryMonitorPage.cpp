@@ -27,9 +27,6 @@
 #include "BatteryMonitorPage.h"
 
 BatteryMonitorPage::BatteryMonitorPage(SKHub& hub) {
-
-  _maxVoltMeasurement = 24;
-
   static const int col1 = 5;
   static const int col2 = 200;
   static const int row1 = 26;
