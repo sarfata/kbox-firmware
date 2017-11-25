@@ -69,8 +69,6 @@ void SKNMEAVisitor::visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p
 
   _sentences.add(sb.toNMEA() + "\r\n");
 };
-  _sentences.add(sb.toNMEA() + "\r\n");
-};
 
 void SKNMEAVisitor::visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) {
   NMEASentenceBuilder sb2("II", "HDM", 2);
