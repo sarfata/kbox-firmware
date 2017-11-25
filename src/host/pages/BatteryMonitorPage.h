@@ -33,7 +33,6 @@ class BatteryMonitorPage : public Page, public SKSubscriber {
 
     Color colorForVoltage(float v);
     String formatMeasurement(float measure, const char *unit);
-    float _maxVoltMeasurement;
 
   public:
     BatteryMonitorPage(SKHub& hub);
