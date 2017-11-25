@@ -71,7 +71,6 @@ String BatteryMonitorPage::formatMeasurement(float measure, const char *unit) {
   snprintf(s, sizeof(s), "%.1f %s  ", measure, unit);
   return String(s);
 }
-
 void BatteryMonitorPage::updateReceived(const SKUpdate& up) {
   if (up.hasElectricalBatteriesVoltage("house")) {
     const SKValue& vm = up.getElectricalBatteriesVoltage("house");
