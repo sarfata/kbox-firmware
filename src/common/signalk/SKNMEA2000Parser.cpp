@@ -44,6 +44,7 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
   }
 
   switch (msg.PGN) {
+    /*
     case 126992L: // System Time / Date
       //if ( cfEnableSystemDateTimeFromPGN_126992 ) {
         return parse126992(input, msg, timestamp);
@@ -59,6 +60,7 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
         return parse127250(input, msg, timestamp);
       //}
       break;
+    */
     case 128259L: // Boat speed
       //if ( cfEnableN2kToNmea_128259 ) {
         return parse128259(input, msg, timestamp);
@@ -69,6 +71,7 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
         return parse128267(input, msg, timestamp);
       //}
       break;
+    /*
     case 129026L: // COG SOG rapid
       //if ( cfEnableN2kToNMEA_129026 ) {
         return parse129026(input, msg, timestamp);
@@ -79,7 +82,7 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
         return parse130306(input, msg, timestamp);
       //}
       break;
-
+    */
     //case 126993: /* Heartbeat */
     //case 127251: // Rate of Turn
     //case 127257: // Attitude
@@ -158,7 +161,7 @@ const SKUpdate& SKNMEA2000Parser::parse127245(const SKSourceInput& input, const 
 // *****************************************************************************
 //   PGN 127250 VESSEL HEADING RAPID
 // *****************************************************************************
-const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
+const SKUpdate& SKNMEA2000Parser::parse127250(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
   unsigned char sid;
   tN2kHeadingReference HeadingReference;
   double Heading = 361; // not valid value
