@@ -27,11 +27,12 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-
+#include <Arduino.h>
 #include "SKUnits.h"
 #include "common/nmea/NMEASentenceBuilder.h"
 
 #include "SKNMEAVisitor.h"
+#include <KBoxLogging.h>
 
 // ***********************  Wind Speed and Angle  ************************
 //  Talker ID: WI Weather Instruments
@@ -75,6 +76,7 @@ void SKNMEAVisitor::visitSKEnvironmentWindAngleTrue(const SKUpdate &u, const SKP
   if (WindAngle<0||WindAngle>360||!u.hasEnvironmentWindSpeedTrue()) return;
 
   WindSpeed = u.getEnvironmentWindSpeedTrue();  // in m/s
+  DEBUG("WindSpeed: %f", WindSpeed);
 
   NMEASentenceBuilder sb( "II", "MWV", 5);
   sb.setField(1, WindAngle, 1 );
@@ -83,7 +85,7 @@ void SKNMEAVisitor::visitSKEnvironmentWindAngleTrue(const SKUpdate &u, const SKP
   sb.setField(4, "M");
   sb.setField(5, "A");
   _sentences.add(sb.toNMEA() + "\r\n");
-
+  //Serial.printf("%s\n", sb.toNMEA());
 
   NMEASentenceBuilder sb1( "II", "VWR", 8);
   // Wind direction Left/Right of bow
@@ -103,6 +105,7 @@ void SKNMEAVisitor::visitSKEnvironmentWindAngleTrue(const SKUpdate &u, const SKP
   sb1.setField(7, SKMsToKmh( WindSpeed ), 2);
   sb1.setField(8, "K");
   _sentences.add(sb1.toNMEA() + "\r\n");
+  //Serial.printf("%s\n", sb.toNMEA());
 }
 
 void SKNMEAVisitor::visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
@@ -114,6 +117,7 @@ void SKNMEAVisitor::visitSKEnvironmentOutsidePressure(const SKUpdate& u, const S
   sb.setField(3, "B");
   sb.setField(4, "Barometer");
   _sentences.add(sb.toNMEA() + "\r\n");
+  //Serial.printf("%s\n", sb.toNMEA());
 }
 
 void SKNMEAVisitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) {
@@ -123,6 +127,7 @@ void SKNMEAVisitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, const S
   sb.setField(3, "V");
   sb.setField(4, p.getIndex());
   _sentences.add(sb.toNMEA() + "\r\n");
+  //Serial.printf("%s\n", sb.toNMEA());
 }
 
 void SKNMEAVisitor::visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) {
@@ -145,6 +150,7 @@ void SKNMEAVisitor::visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p
   sb.setField(12, "Roll");
 
   _sentences.add(sb.toNMEA() + "\r\n");
+  //Serial.printf("%s\n", sb.toNMEA());
 };
 
 void SKNMEAVisitor::visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) {
@@ -153,6 +159,7 @@ void SKNMEAVisitor::visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SK
   sb.setField(2, "M");
 
   _sentences.add(sb.toNMEA() + "\r\n");
+  //Serial.printf("%s\n", sb.toNMEA());
 };
 
 //void SKNMEAVisitor::visitSKNavigationSpeedOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {
@@ -184,4 +191,5 @@ void SKNMEAVisitor::visitSKSteeringRudderAngle(const SKUpdate &u, const SKPath &
   sb.setField(4, "");
 
   _sentences.add(sb.toNMEA() + "\r\n");
+  //Serial.printf("%s\n", sb.toNMEA());
 }
