@@ -124,7 +124,7 @@ const SKUpdate& SKNMEA2000Parser::parse126992(const SKSourceInput& input, const 
       }
       */
     } else {
-      INFO("Unable to parse N2kMsg with PGN %i", msg.PGN);
+      INFO("Unable to parse NMEA2000 with PGN %i", msg.PGN);
     }
   // nothing todo at the moment
   return _invalidSku;
@@ -142,14 +142,18 @@ const SKUpdate& SKNMEA2000Parser::parse127245(const SKSourceInput& input, const 
   double AngleOrder;
 
   if (ParseN2kRudder(msg,RudderPosition,Instance,RudderDirectionOrder,AngleOrder) ) {
-    // do something.....
+    SKUpdateStatic<2> *update = new SKUpdateStatic<2>();
+    update->setTimestamp(timestamp);
 
+    SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+    update->setSource(source);
+    update->setSteeringRudderAngle(RudderPosition);
 
-    //_sku = update;
-    //return *_sku;
+    _sku = update;
+    return *_sku;
   }
   else {
-    INFO("Unable to parse N2kMsg with PGN %i", msg.PGN);
+    INFO("Unable to parse NMEA2000 with PGN %i", msg.PGN);
   }
   // nothing todo at the moment....
   return _invalidSku;
@@ -185,7 +189,7 @@ const SKUpdate& SKNMEA2000Parser::parse127250(const SKSourceInput& input, const 
     // return *_sku;
 
   } else {
-    INFO("Unable to parse N2kMsg with PGN %i", msg.PGN);
+    INFO("Unable to parse NMEA2000 with PGN %i", msg.PGN);
   }
   // as long as we do not fill values....
   return _invalidSku;
@@ -225,7 +229,7 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
     return *_sku;
   }
   else {
-    INFO("Unable to parse N2kMsg with PGN %i", msg.PGN);
+    INFO("Unable to parse NMEA2000 with PGN %i", msg.PGN);
     return _invalidSku;
   }
 }
@@ -265,7 +269,7 @@ const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const 
     return *_sku;
   }
   else {
-    INFO("Unable to parse N2kMsg with PGN %i", msg.PGN);
+    INFO("Unable to parse NMEA2000 with PGN %i", msg.PGN);
     return _invalidSku;
   }
 }
@@ -288,7 +292,7 @@ const SKUpdate& SKNMEA2000Parser::parse129026(const SKSourceInput& input, const 
 
   }
   else {
-    INFO("Unable to parse N2kMsg with PGN %i", msg.PGN);
+    INFO("Unable to parse NMEA2000 with PGN %i", msg.PGN);
   }
   // nothing todo at the moment....
   return _invalidSku;
@@ -316,7 +320,7 @@ const SKUpdate& SKNMEA2000Parser::parse130306(const SKSourceInput& input, const 
     //return *_sku;
   }
   else {
-    INFO("Unable to parse N2kMsg with PGN %i", msg.PGN);
+    INFO("Unable to parse NMEA2000 with PGN %i", msg.PGN);
 
   }
   // nothing todo at the moment....

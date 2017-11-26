@@ -43,6 +43,7 @@ class SKNMEAVisitor : SKVisitor {
     //void visitSKEnvironmentDepthBelowSurface(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     //void visitSKEnvironmentDepthTransducerToKeel(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     //void visitSKEnvironmentDepthSurfaceToTransducer(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    void visitSKEnvironmentWindAngleTrue(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     //void visitSKEnvironmentWaterTemperature(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     void visitSKEnvironmentOutsidePressure(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     void visitSKElectricalBatteriesVoltage(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
@@ -52,9 +53,10 @@ class SKNMEAVisitor : SKVisitor {
     //void visitSKNavigationLog(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     //void visitSKNavigationMagneticVariation(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     //void visitSKNavigationPosition(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
-    void visitSKNavigationSpeedOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
-    void visitSKNavigationSpeedThroughWater(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKNavigationSpeedOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKNavigationSpeedThroughWater(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     //void visitSKNavigationTripLog(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    void visitSKSteeringRudderAngle(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
 
 
   public:

@@ -149,6 +149,13 @@
       "type": "numberValue",
       "units": "m",
       "description": "Total distance traveled on this trip / since trip reset"
+    },
+
+    {
+      "path": "steering.rudderAngle",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Rudder Angle"
     }
   ]
 }
