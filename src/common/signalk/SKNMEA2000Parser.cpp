@@ -32,6 +32,9 @@
 #include <KBoxLogging.h>
 #include "SKNMEA2000Parser.h"
 
+// for debug Only
+#include "SKUnits.h"
+
 SKNMEA2000Parser::~SKNMEA2000Parser() {
   if (_sku) {
     delete(_sku);
@@ -43,6 +46,7 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
     delete(_sku);
   }
 
+  DEBUG("N2k Message PGN: %i", msg.PGN);
   switch (msg.PGN) {
     case 126992L: // System Time / Date
       //if ( cfEnableSystemDateTimeFromPGN_126992 ) {
@@ -51,6 +55,7 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
       break;
     case 127245L: // Rudder
       //if ( cfEnableN2kToNMEA_127245 ) {
+        DEBUG("Rudder message from NMEA2000");
         return parse127245(input, msg, timestamp);
       //}
       break;
@@ -148,7 +153,7 @@ const SKUpdate& SKNMEA2000Parser::parse127245(const SKSourceInput& input, const 
     SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
     update->setSource(source);
     update->setSteeringRudderAngle(RudderPosition);
-
+    DEBUG("Rudder: %d",SKRadToDeg(RudderPosition));
     _sku = update;
     return *_sku;
   }
