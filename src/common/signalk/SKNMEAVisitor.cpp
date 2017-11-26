@@ -33,15 +33,6 @@
 
 #include "SKNMEAVisitor.h"
 
-void SKNMEAVisitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) {
-  NMEASentenceBuilder sb("II", "XDR", 4);
-  sb.setField(1, "V");
-  sb.setField(2, v.getNumberValue(), 2);
-  sb.setField(3, "V");
-  sb.setField(4, p.getIndex());
-  _sentences.add(sb.toNMEA() + "\r\n");
-}
-
 void SKNMEAVisitor::visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   // XDR is not a very well defined sentence. Can be used for lots of things
   // apparently but that is better than nothing.
@@ -50,6 +41,15 @@ void SKNMEAVisitor::visitSKEnvironmentOutsidePressure(const SKUpdate& u, const S
   sb.setField(2, v.getNumberValue(), 5);
   sb.setField(3, "B");
   sb.setField(4, "Barometer");
+  _sentences.add(sb.toNMEA() + "\r\n");
+}
+
+void SKNMEAVisitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) {
+  NMEASentenceBuilder sb("II", "XDR", 4);
+  sb.setField(1, "V");
+  sb.setField(2, v.getNumberValue(), 2);
+  sb.setField(3, "V");
+  sb.setField(4, p.getIndex());
   _sentences.add(sb.toNMEA() + "\r\n");
 }
 
@@ -82,3 +82,15 @@ void SKNMEAVisitor::visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SK
 
   _sentences.add(sb2.toNMEA() + "\r\n");
 };
+
+void SKNMEAVisitor::visitSKNavigationSpeedOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+
+
+
+}
+
+void SKNMEAVisitor::visitSKNavigationSpeedThroughWater(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+
+
+
+}

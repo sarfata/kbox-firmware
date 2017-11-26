@@ -37,6 +37,54 @@
       "description": "Current water temperature"
     },
     {
+      "path": "environment.wind",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Wind Data"
+    },
+    {
+      "path": "environment.wind.angleApparent",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "AWA, Apparent Wind Angle"
+    },
+    {
+      "path": "environment.wind.angleTrue",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "TWA, True Wind Angle"
+    },
+    {
+      "path": "environment.wind.directionTrue",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "TWD, True Wind Direction"
+    },
+    {
+      "path": "environment.wind.directionMagnetic",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Wind Direction Magnetic"
+    },
+    {
+      "path": "environment.wind.speedTrue",
+      "type": "numberValue",
+      "units": "m/s",
+      "description": "TWS, True Wind Speed"
+    },
+    {
+      "path": "environment.wind.speedOverGround",
+      "type": "numberValue",
+      "units": "m/s",
+      "description": "GWS, Wind Speed Over Ground in Meters/Second"
+    },
+    {
+      "path": "environment.wind.speedApparent",
+      "type": "numberValue",
+      "units": "m/s",
+      "description": "AWS, Apparent Wind Speed"
+    },
+    {
       "path": "environment.outside.pressure",
       "type": "numberValue",
       "unit": "Pa",
