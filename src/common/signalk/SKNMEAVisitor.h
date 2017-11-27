@@ -43,7 +43,7 @@ class SKNMEAVisitor : SKVisitor {
     //void visitSKEnvironmentDepthBelowSurface(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     //void visitSKEnvironmentDepthTransducerToKeel(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     //void visitSKEnvironmentDepthSurfaceToTransducer(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
-    void visitSKEnvironmentWindAngleTrue(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    void visitSKEnvironmentWindAngleTrueWater(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     //void visitSKEnvironmentWaterTemperature(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     void visitSKEnvironmentOutsidePressure(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     void visitSKElectricalBatteriesVoltage(const SKUpdate &u, const SKPath &p, const SKValue &v) override;

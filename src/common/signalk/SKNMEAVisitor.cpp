@@ -62,7 +62,7 @@
 //  7) Speed
 //  8) K = Kilometers Per Hour
 // ************************************************************************
-void SKNMEAVisitor::visitSKEnvironmentWindAngleTrue(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+void SKNMEAVisitor::visitSKEnvironmentWindAngleTrueWater(const SKUpdate &u, const SKPath &p, const SKValue &v) {
 
   float WindAngle;
   float WindSpeed;
