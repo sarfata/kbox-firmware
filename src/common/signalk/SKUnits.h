@@ -30,5 +30,9 @@
 #define SKStatuteMphToMs(x) x * 1609.344 / 3600
 #define SKKmphToMs(x) x * 1000 / 3600
 
-#define SKDegToRad(x) x * 2 * M_PI / 360
-#define SKRadToDeg(x) x * 360.0 / (2 * M_PI)
+#define SKDegToRad(x) x * M_PI_2 / 360
+#define SKRadToDeg(x) x * 360.0 / (M_PI_2)
+
+
+#define SKMsToKnot(x) x * 3600.0 / 1852.0
+#define SKMsToKmh(x)  x * 3.60
