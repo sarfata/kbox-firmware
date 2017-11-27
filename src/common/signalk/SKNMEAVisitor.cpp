@@ -56,21 +56,16 @@ void SKNMEAVisitor::visitSKEnvironmentOutsidePressure(const SKUpdate& u, const S
 void SKNMEAVisitor::visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) {
   // Same comment on XDR. It's not very well standardized but at least its a way
   // to share the data.
-  NMEASentenceBuilder sb("II", "XDR", 12);
+  NMEASentenceBuilder sb( "II", "XDR", 8);
   sb.setField(1, "A");
-  sb.setField(2, SKRadToDeg(v.getAttitudeValue().yaw), 1);
+  sb.setField(2, SKRadToDeg(v.getAttitudeValue().pitch), 1);
   sb.setField(3, "D");
-  sb.setField(4, "Yaw");
+  sb.setField(4, "PTCH");
 
   sb.setField(5, "A");
-  sb.setField(6, SKRadToDeg(v.getAttitudeValue().pitch), 1);
+  sb.setField(6, SKRadToDeg(v.getAttitudeValue().roll), 1);
   sb.setField(7, "D");
-  sb.setField(8, "Pitch");
-
-  sb.setField(9, "A");
-  sb.setField(10, SKRadToDeg(v.getAttitudeValue().roll), 1);
-  sb.setField(11, "D");
-  sb.setField(12, "Roll");
+  sb.setField(8, "ROLL");
 
   _sentences.add(sb.toNMEA() + "\r\n");
 };

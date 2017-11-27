@@ -33,6 +33,13 @@ enum SKSourceInput {
   SKSourceInputNMEA2000
 };
 
+const String skSourceInputLabels[] = {
+  "InputUnknown",
+  "InputNMEA1",
+  "InputNMEA2",
+  "InputNMEA2000"
+};
+
 class SKSource {
   private:
     SKSourceInput _input;

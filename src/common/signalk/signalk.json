@@ -37,10 +37,64 @@
       "description": "Current water temperature"
     },
     {
+      "path": "environment.outside.apparentWindChillTemperature",
+      "type": "numberValue",
+      "unit": "K",
+      "description": "Current outside apparent wind chill temperature"
+    },
+    {
       "path": "environment.outside.pressure",
       "type": "numberValue",
       "unit": "Pa",
       "description": "Current outside air ambient pressure"
+    },
+    {
+      "path": "environment.wind.angleApparent",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "Apparent wind angle, negative to port"
+    },
+    {
+      "path": "environment.wind.angleTrueGround",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "True wind angle based on speed over ground, negative to port"
+    },
+    {
+      "path": "environment.wind.angleTrueWater",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "True wind angle based on speed through water, negative to port"
+    },
+    {
+      "path": "environment.wind.directionTrue",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "The wind direction relative to true north"
+    },
+    {
+      "path": "environment.wind.directionMagnetic",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "The wind direction relative to magnetic north"
+    },
+    {
+      "path": "environment.wind.speedTrue",
+      "type": "numberValue",
+      "unit": "m/s",
+      "description": "Wind speed over water (as calculated from speedApparent and vessel's speed through water)"
+    },
+    {
+      "path": "environment.wind.speedOverGround",
+      "type": "numberValue",
+      "unit": "m/s",
+      "description": "Wind speed over ground (as calculated from speedApparent and vessel's speed over ground)"
+    },
+    {
+      "path": "environment.wind.speedApparent",
+      "type": "numberValue",
+      "unit": "m/s",
+      "description": "Apparent wind speed"
     },
 
     {
