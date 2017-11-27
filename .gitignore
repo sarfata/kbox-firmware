@@ -32,3 +32,6 @@ node_modules
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Platformio likes to auto-create this
+lib/readme.txt
