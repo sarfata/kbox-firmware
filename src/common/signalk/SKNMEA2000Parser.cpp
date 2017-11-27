@@ -31,6 +31,7 @@
 #include <N2kMessages.h>
 #include <KBoxLogging.h>
 #include "SKNMEA2000Parser.h"
+#include "SKUnits.h"
 
 SKNMEA2000Parser::~SKNMEA2000Parser() {
   if (_sku) {
@@ -43,17 +44,57 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
     delete(_sku);
   }
 
-  // Boat speed
-  if (msg.PGN == 128259) {
-    return parse128259(input, msg, timestamp);
-  }
-  // Water Depth
-  if (msg.PGN == 128267) {
-    return parse128267(input, msg, timestamp);
-  }
+  DEBUG("N2k Message PGN: %i", msg.PGN);
+  switch (msg.PGN) {
+    /*
+    case 126992L: // System Time / Date
+        return parse126992(input, msg, timestamp);
+      break;
+    */
+    case 127245L: // Rudder
+        DEBUG("Rudder message from NMEA2000");
+        return parse127245(input, msg, timestamp);
+      break;
+      /*
+    case 127250L: // Vessel Heading
+        return parse127250(input, msg, timestamp);
+      break;
+      */
+    case 128259L: // Boat speed
+        return parse128259(input, msg, timestamp);
+      break;
+    case 128267L: // Water depth
+        return parse128267(input, msg, timestamp);
+      break;
+      /*
+    case 129026L: // COG SOG rapid
+        return parse129026(input, msg, timestamp);
+      break;
+      */
+    case 130306L: // Wind Speed
+        return parse130306(input, msg, timestamp);
+      break;
 
-  DEBUG("No known conversion for PGN %i", msg.PGN);
-  return _invalidSku;
+    //case 126993: // Heartbeat
+    //case 127251: // Rate of Turn
+    //case 127257: // Attitude
+    //case 127488: // Engine parameters rapid
+    //case 127493: // Transmission parameters: dynamic
+    //case 127501: // Binary status report
+    //case 127505: // Fluid level
+    //case 127508: // Battery Status
+    //case 127513: // Battery Configuration Status
+    //case 129025: // Lat/lon rapid
+    //case 129283: // Cross Track Error
+    //case 130310: // Outside Environmental parameters
+    //case 130311: // Environmental parameters
+    //case 130312: // Temperature
+    //case 130314: // Pressure
+    //case 130316: // Temperature extended range
+    default:
+      DEBUG("No known conversion for PGN %i", msg.PGN);
+      return _invalidSku;
+  } // end switch msg.PGN
 }
 
 const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
@@ -80,7 +121,7 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
     return *_sku;
   }
   else {
-    INFO("Unable to parse N2kMsg with PGN %i", msg.PGN);
+    DEBUG("Unable to parse N2kMsg with PGN %i", msg.PGN);
     return _invalidSku;
   }
 }
@@ -99,23 +140,102 @@ const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const 
 
     update->setEnvironmentDepthBelowTransducer(depthBelowTransducer);
 
-    if (!N2kIsNA(offset)) {
-      // When offset is negative, it's the distance between transducer and keel
-      if (offset < 0) {
-        update->setEnvironmentDepthTransducerToKeel(offset * -1);
-        update->setEnvironmentDepthBelowKeel(depthBelowTransducer + offset);
-      }
-      else if (offset > 0) {
-        update->setEnvironmentDepthSurfaceToTransducer(offset);
-        update->setEnvironmentDepthBelowSurface(depthBelowTransducer + offset);
-      }
+    if (N2kIsNA(offset)) {
+      // When no offset then offset should be Zero
+      offset = 0;
+    }
+    // When offset is negative, it's the distance between transducer and keel
+    if (offset < 0) {
+      update->setEnvironmentDepthTransducerToKeel(offset * -1);
+      update->setEnvironmentDepthBelowKeel(depthBelowTransducer + offset);
+    }
+    else if (offset > 0) {
+      update->setEnvironmentDepthSurfaceToTransducer(offset);
+      update->setEnvironmentDepthBelowSurface(depthBelowTransducer + offset);
     }
 
     _sku = update;
     return *_sku;
   }
   else {
-    INFO("Unable to parse N2kMsg with PGN %i", msg.PGN);
+    DEBUG("Unable to parse N2kMsg with PGN %i", msg.PGN);
+    return _invalidSku;
+  }
+}
+
+// *****************************************************************************
+//   PGN 130306 W I N D
+//    tN2kWindReference:
+//      N2kWind_True_North=0,
+//      N2kWind_Magnetic=1,
+//      N2kWind_Apprent=2,
+//      N2kWind_True_boat=3
+// *****************************************************************************
+const SKUpdate& SKNMEA2000Parser::parse130306(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
+  unsigned char sid;
+  double windSpeed;     // Knots
+  double windAngle;     // in Radians 0... 2*pi
+  tN2kWindReference windReference;
+
+  if (ParseN2kPGN130306(msg,sid,windSpeed,windAngle,windReference) ) {
+    SKUpdateStatic<2> *update = new SKUpdateStatic<2>();
+    update->setTimestamp(timestamp);
+
+    SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+    update->setSource(source);
+
+    if (!N2kIsNA( windAngle) && !N2kIsNA( windSpeed)) {
+      if (windReference == N2kWind_Apprent) {
+        // -> m/s (Meters per second)
+        update->setEnvironmentWindSpeedApparent(SKKnotToMs(windSpeed));
+        DEBUG("AWS: %d kts",windSpeed);
+        // -> Apparent wind angle, rad, negative to port
+        if (windAngle >M_PI) windAngle *= -1;
+        update->setEnvironmentWindAngleApparent(windAngle);
+        DEBUG("AWA: %d °",SKRadToDeg(windSpeed));
+      }
+    }
+    // We do not take True Wind Speed as we do not know how the system has calculated it!!
+    // Some instruments take SOG/COG then True Wind => Ground Wind
+
+    _sku = update;
+    return *_sku;
+  }
+  else {
+    DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
+    return _invalidSku;
+  }
+}
+
+//  ***********************************************
+//   PGN 127245 Rudder
+//        →  sid
+//        →  RudderPosition [rad]
+// *  ********************************************** */
+const SKUpdate& SKNMEA2000Parser::parse127245(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
+  unsigned char instance;
+  tN2kRudderDirectionOrder rudderDirectionOrder;
+  double rudderPosition;
+  double angleOrder;
+
+  if (ParseN2kRudder(msg,rudderPosition,instance,rudderDirectionOrder,angleOrder) ) {
+    SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
+    update->setTimestamp(timestamp);
+
+    SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+    update->setSource(source);
+
+    if (!N2kIsNA(rudderPosition) && (rudderPosition < M_PI_2 / 2) && (rudderPosition > M_PI_2 / 2) ) {
+      // -> Current rudder angle, +ve is rudder to Starboard
+      update->setSteeringRudderAngle(rudderPosition);
+      DEBUG("Rudder: %d",SKRadToDeg(rudderPosition));
+    }
+
+    _sku = update;
+    return *_sku;
+  }
+  else {
+    DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
     return _invalidSku;
   }
 }
