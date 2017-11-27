@@ -1,0 +1,37 @@
+[
+  {
+    "nmea": "$IIMWV,056,R,5.19,N,A*1D",
+    "expectedValues": [
+      { "path": "environment.wind.angleApparent", "value": 0.97738438134 },
+      { "path": "environment.wind.speedApparent", "value": 2.669967343058394 }
+    ]
+  },
+  {
+    "nmea": "$IIMWV,027,T,3.82,N,A*19",
+    "expectedValues": [
+      { "path": "environment.wind.speedTrue", "value": 1.965178275622941 },
+      { "path": "environment.wind.angleTrueWater", "value": 0.47123889814606673 }
+    ]
+  },
+  {
+    "comment": "Test speed in meters/second",
+    "nmea": "$WIMWV,47.2,R,18.9,M,A*21",
+    "expectedValues": [
+      { "path": "environment.wind.angleApparent", "value": 0.823795407129 },
+      { "path": "environment.wind.speedApparent", "value": 18.9 }
+    ]
+  },
+  {
+    "comment": "Test speed in statute miles. Not clear on this one.",
+    "nmea": "$WIMWV,47.2,R,10,S,A*20",
+    "expectedValues": [
+      { "path": "environment.wind.angleApparent", "value": 0.823795407129 },
+      { "path": "environment.wind.speedApparent", "value": 4.47039 }
+    ]
+  },
+  {
+    "comment": "Test invalid checksum",
+    "nmea": "$IIMWV,056,R,5.19,N,A*00",
+    "expectedValues": [ ]
+  }
+]

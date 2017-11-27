@@ -1,29 +1,17 @@
 [
   {
-    "nmea": "$GPRMC,004119.000,A,3751.3385,N,12227.4913,W,5.02,235.24,141116,,,D*75",
-    "expectedValues": [
-      { "path": "navigation.position", "value": { "latitude": 37.513385, "longitude": -122.274913, "altitude": 0 } },
-      { "path": "navigation.speedOverGround", "value": 2.582511111 },
-      { "path": "navigation.courseOverGroundTrue", "value": 4.105712532 }
-    ]
-  },
-  {
     "nmea": "$PCDIN,01F503,000C9F52,23,470000FFFF00FFFF*28",
     "expectedValues": [
       { "path": "navigation.speedThroughWater", "value": 0 }
     ]
-  },
-  {
-    "nmea": "$PCDIN,01F11A,000C9E34,00,0000000000000000*5E",
-    "expectedValues": [
-      { "path": "navigation.magneticVariation", "value": 0 }
-    ]
+    ,"ignoreFail": true
   },
   {
     "nmea": "$PCDIN,01FD07,000C9F55,23,47C0D370FF7FFFFF*28",
     "expectedValues": [
       { "path": "environment.water.temperature", "value": 15.68 }
     ]
+    ,"ignoreFail": true
   },
   {
     "nmea": "$PCDIN,01F50B,000C9F59,23,45590100009203FF*55",
@@ -39,5 +27,6 @@
       { "path": "navigation.log", "value": 275071 },
       { "path": "navigation.trip.log", "value": 275071 }
     ]
+    ,"ignoreFail": true
   }
 ]

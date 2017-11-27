@@ -23,6 +23,7 @@
 */
 
 #include <math.h>
+#include <KBoxLogging.h>
 #include "common/nmea/NMEASentenceReader.h"
 #include "SKUnits.h"
 #include "SKNMEAParser.h"
@@ -36,18 +37,24 @@ SKNMEAParser::~SKNMEAParser() {
 const SKUpdate& SKNMEAParser::parse(const SKSourceInput& input, const String& sentence, const SKTime& time) {
   if (_sku) {
     delete(_sku);
+    _sku = 0;
   }
 
   NMEASentenceReader reader = NMEASentenceReader(sentence);
 
   if (!reader.isValid()) {
+    DEBUG("%s: Invalid sentence %s", skSourceInputLabels[input].c_str(), sentence.c_str());
     return _invalidSku;
   }
 
   if (reader.getSentenceCode() == "RMC") {
     return parseRMC(input, reader, time);
   }
+  if (reader.getSentenceCode() == "MWV") {
+    return parseMWV(input, reader, time);
+  }
 
+  DEBUG("%s: %s%s - Unable to parse sentence", skSourceInputLabels[input].c_str(), reader.getTalkerId().c_str(), reader.getSentenceCode().c_str());
   return _invalidSku;
 }
 
@@ -77,7 +84,78 @@ const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceR
   if (!isnan(cog)) {
     rmc->setValue(SKPathNavigationCourseOverGroundTrue, cog);
   }
+  // _sku is deleted every time a new sentence is parsed
   _sku = rmc;
   return *_sku;
 }
 
+const SKUpdate& SKNMEAParser::parseMWV(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& time) {
+  if (reader.getFieldAsChar(5) != 'A') {
+    return _invalidSku;
+  }
+
+  double windSpeed = reader.getFieldAsDouble(3);
+  double windAngle = reader.getFieldAsDouble(1);
+  bool isApparentWind;
+
+  if (isnan(windSpeed) || isnan(windAngle)) {
+    return _invalidSku;
+  }
+
+  switch (reader.getFieldAsChar(4)) {
+    case 'K':
+      windSpeed = SKKmphToMs(windSpeed);
+      break;
+    case 'M':
+      // do nothing. wind speed already in m/s.
+      break;
+    case 'N':
+      windSpeed = SKKnotToMs(windSpeed);
+      break;
+    case 'S':
+      windSpeed = SKStatuteMphToMs(windSpeed);
+      break;
+    default:
+      return _invalidSku;
+  }
+
+  if (reader.getFieldAsChar(2) == 'R') {
+    isApparentWind = true;
+  }
+  else if (reader.getFieldAsChar(2) == 'T') {
+    isApparentWind = false;
+  }
+  else {
+    return _invalidSku;
+  }
+
+  // Wind sensors return a number between 0 and 360 but we want an
+  // angle in radian with negative values when wind coming from port
+  if (windAngle > 180) {
+    windAngle = windAngle - 360;
+  }
+  windAngle = SKDegToRad(windAngle);
+
+  SKUpdateStatic<2>* wmv = new SKUpdateStatic<2>();
+  wmv->setTimestamp(time);
+
+  SKSource source = SKSource::sourceForNMEA0183(input, reader.getTalkerId(), reader.getSentenceCode());
+  wmv->setSource(source);
+
+  if (isApparentWind) {
+    wmv->setEnvironmentWindAngleApparent(windAngle);
+    wmv->setEnvironmentWindSpeedApparent(windSpeed);
+  }
+  else {
+    // Here we are assuming that if we get a true wind, it is true relative to
+    // boat speed in water.  This might be incorrect for some elaborate
+    // computers that would take GPS data and provide a true wind over ground.
+    // TODO: make this a configuration option
+    wmv->setEnvironmentWindAngleTrueWater(windAngle);
+    wmv->setEnvironmentWindSpeedTrue(windSpeed);
+  }
+
+  // _sku is deleted every time a new sentence is parsed
+  _sku = wmv;
+  return *_sku;
+}

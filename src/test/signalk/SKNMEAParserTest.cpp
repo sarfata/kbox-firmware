@@ -26,7 +26,7 @@
 #include "common/signalk/SKUnits.h"
 #include "common/signalk/SKNMEAParser.h"
 
-TEST_CASE("SKNMEAParserTest: Basic tests") {
+TEST_CASE("SKNMEAParser: RMC") {
   SKNMEAParser p;
 
   SECTION("Parse invalid sentence") {
@@ -55,6 +55,71 @@ TEST_CASE("SKNMEAParserTest: Basic tests") {
     // This behavior is borrowed from signalk-parser-nmea0183
     // TODO: We should report an alarm here instead of nothing.
     CHECK( update.getSize() == 0 );
+  }
+}
+
+TEST_CASE("SKNMEAParser: MWV") {
+  SKNMEAParser p;
+
+  // Ron:
+  //$IIMWV,056,R,5.19,N,A*1D
+  //$IIMWV,027,T,3.82,N,A*19
+  //Johan:
+  //$WIMWV,168.1,R,5.6,S,A*33
+  //LCJ CV7
+  //$IIMWV,227.0,R,000.0,N,A*3A
+  SECTION("MWV relative") {
+    const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "$IIMWV,056,R,5.19,N,A*1D", SKTime(42));
+
+    CHECK( update.getSize() == 2 );
+    CHECK( update.getSource() != SKSourceUnknown );
+    CHECK( update.getContext() == SKContextSelf );
+    CHECK( update.getTimestamp().getTime() == 42 );
+    CHECK( update.getEnvironmentWindSpeedApparent() == SKKnotToMs(5.19) );
+    CHECK( update.getEnvironmentWindAngleApparent() == SKDegToRad(56) );
+  }
+  SECTION("MWV true") {
+    const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "$IIMWV,027,T,3.82,N,A*19", SKTime(42));
+
+    CHECK( update.getSize() == 2 );
+    CHECK( update.getSource() != SKSourceUnknown );
+    CHECK( update.getContext() == SKContextSelf );
+    CHECK( update.getTimestamp().getTime() == 42 );
+    CHECK( update.getEnvironmentWindSpeedTrue() == SKKnotToMs(3.82) );
+    CHECK( update.getEnvironmentWindAngleTrueWater() == SKDegToRad(27) );
+  }
+  SECTION("MWV relative - unit S") {
+    // Unit S seems to be knots but I cannot find a real source here.
+    const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "$WIMWV,168.1,R,5.6,S,A*33", SKTime(42));
+
+    CHECK( update.getEnvironmentWindSpeedApparent() == SKStatuteMphToMs(5.6) );
+  }
+  SECTION("MWV relative - unit M") {
+    // Unit S seems to be knots but I cannot find a real source here.
+    const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "$WIMWV,168.1,R,5.6,M,A*2D", SKTime(42));
+
+    CHECK( update.getEnvironmentWindSpeedApparent() == 5.6 );
+  }
+  SECTION("MWV relative - unit K") {
+    // Unit S seems to be knots but I cannot find a real source here.
+    const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "$WIMWV,168.1,R,5.6,K,A*2B", SKTime(42));
+
+    CHECK( update.getEnvironmentWindSpeedApparent() == SKKmphToMs(5.6) );
+  }
+  SECTION("MWV with invalid sensor status (V)") {
+    const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "$WIMWV,168.1,R,5.6,S,V*24", SKTime(42));
+
+    CHECK( update.getSize() == 0 );
+  }
+}
+
+TEST_CASE("SKNMEAParser: XDR wind temperature") {
+  SKNMEAParser p;
+
+  // From LCJ Wind sensor:
+  // $WIXDR,C,030.0,C,,*51
+  //
+  SECTION("XDR with temperature in C") {
   }
 }
 
