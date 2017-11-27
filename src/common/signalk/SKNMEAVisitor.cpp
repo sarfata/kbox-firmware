@@ -33,6 +33,9 @@
 
 #include "SKNMEAVisitor.h"
 
+// debug only
+#include <KBoxLogging.h>
+
 void SKNMEAVisitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   NMEASentenceBuilder sb("II", "XDR", 4);
   sb.setField(1, "V");
@@ -93,7 +96,7 @@ void SKNMEAVisitor::visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SK
 //  4) Wind Speed Units, K/M/N
 //  5) Status, A = Data Valid
 //
-//      VWR Relative Wind Speed and Angle
+//      VWR Relative Wind Speed and Angle  --> implemented
 //              1  2  3  4  5  6  7  8
 //              |  |  |  |  |  |  |  |
 //      $--VWR,x.x,a,x.x,N,x.x,M,x.x,K*hh
@@ -110,7 +113,6 @@ void SKNMEAVisitor::visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const
 
   float windAngle;
   float windSpeed;
-
   windAngle = SKRadToDeg(v.getNumberValue());
 
   // Validation
@@ -122,18 +124,18 @@ void SKNMEAVisitor::visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const
   NMEASentenceBuilder sb( "II", "VWR", 8);
   sb.setField(1, windAngle, 2 );
   // Wind direction Left/Right of bow
-  if ( windAngle >= 0 && windAngle <= 180 ) {
+  if (windAngle >= 0 && windAngle <= 180) {
     // 0 to 180° from starboard
     sb.setField(2, "R");
   } else {
     sb.setField(2, "L");
   }
-  sb.setField(3, SKMsToKnots( windSpeed ), 2 );
+  sb.setField(3, SKMsToKnot(windSpeed), 2 );
   sb.setField(4, "N");
   sb.setField(5, windSpeed, 2);
   sb.setField(6, "M");
-  sb.setField(7, SKMsToKmh( windSpeed ), 2);
+  sb.setField(7, SKMsToKmh(windSpeed), 2);
   sb.setField(8, "K");
-  _sentences.add(sb1.toNMEA() + "\r\n");
-  Serial.printf("%s\n", sb.toNMEA());
+  _sentences.add(sb.toNMEA() + "\r\n");
+  DEBUG("%s\n", sb.toNMEA());
 }
