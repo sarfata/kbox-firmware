@@ -30,6 +30,7 @@ install:
     - pip install -U platformio cpp-coveralls
 
 script:
+    - platformio update
     # This builds all the target
     - platformio run
     # Run the few unit tests (C code running on computer)
