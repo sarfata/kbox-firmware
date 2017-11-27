@@ -122,6 +122,12 @@
       "description": "Current magnetic heading of the vessel"
     },
     {
+      "path": "navigation.headingTrue",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Current True heading of the vessel"
+    },
+    {
       "path": "navigation.log",
       "type": "numberValue",
       "units": "m",
