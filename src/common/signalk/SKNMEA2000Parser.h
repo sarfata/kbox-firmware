@@ -46,14 +46,19 @@ class SKNMEA2000Parser {
     /**
      * Parse a NMEA2000 @param msg received on @param input and returns a
      * constant reference to a `SKUpdate` instance that will remain valid until
-     * the next call to `parse()` (or when you destroy this object).  
+     * the next call to `parse()` (or when you destroy this object).
      * Once `parse()` is called again, or the parser is destroyed, the
      * reference is no longer valid!
      */
     const SKUpdate& parse(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
 
   private:
+    // PGN 128259 Boat Speed
     const SKUpdate& parse128259(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
+    // PGN 128267 Water depth
     const SKUpdate& parse128267(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
+    // PGN 130306 Wind Speed
+    const SKUpdate& parse130306(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
+    // PGN 127245 Rudder
+    const SKUpdate& parse127245(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);    
 };
-
