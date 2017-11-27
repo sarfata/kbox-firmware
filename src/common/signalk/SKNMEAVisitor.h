@@ -38,11 +38,26 @@ class SKNMEAVisitor : SKVisitor {
   private:
     LinkedList<String> _sentences;
 
-
-    void visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
-    void visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+    //void visitSKEnvironmentDepthBelowKeel(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKEnvironmentDepthBelowTransducer(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKEnvironmentDepthBelowSurface(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKEnvironmentDepthTransducerToKeel(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKEnvironmentDepthSurfaceToTransducer(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    void visitSKEnvironmentWindAngleTrueWater(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKEnvironmentWaterTemperature(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    void visitSKEnvironmentOutsidePressure(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    void visitSKElectricalBatteriesVoltage(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     void visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKNavigationCourseOverGroundTrue(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     void visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKNavigationLog(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKNavigationMagneticVariation(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKNavigationPosition(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKNavigationSpeedOverGround(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKNavigationSpeedThroughWater(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    //void visitSKNavigationTripLog(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    void visitSKSteeringRudderAngle(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+
 
   public:
     /**

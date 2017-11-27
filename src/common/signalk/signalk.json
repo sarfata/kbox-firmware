@@ -31,12 +31,6 @@
       "description": "Depth transducer is below the surface"
     },
     {
-      "path": "environment.water.temperature",
-      "type": "numberValue",
-      "units": "K",
-      "description": "Current water temperature"
-    },
-    {
       "path": "environment.outside.apparentWindChillTemperature",
       "type": "numberValue",
       "unit": "K",
@@ -47,6 +41,12 @@
       "type": "numberValue",
       "unit": "Pa",
       "description": "Current outside air ambient pressure"
+    },
+    {
+      "path": "environment.water.temperature",
+      "type": "numberValue",
+      "units": "K",
+      "description": "Current water temperature"
     },
     {
       "path": "environment.wind.angleApparent",
@@ -96,7 +96,6 @@
       "unit": "m/s",
       "description": "Apparent wind speed"
     },
-
     {
       "path": "electrical.batteries.%%.voltage",
       "type": "numberValue",
@@ -155,6 +154,12 @@
       "type": "numberValue",
       "units": "m",
       "description": "Total distance traveled on this trip / since trip reset"
+    },
+    {
+      "path": "steering.rudderAngle",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Rudder Angle"
     }
   ]
 }

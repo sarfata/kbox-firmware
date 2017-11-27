@@ -32,3 +32,6 @@
 
 #define SKDegToRad(x) x * 2 * M_PI / 360
 #define SKRadToDeg(x) x * 360.0 / (2 * M_PI)
+
+#define SKMsToKnots(x) x * 3600.0 / 1852.0
+#define SKMsToKmh(x)   x * 3.60
