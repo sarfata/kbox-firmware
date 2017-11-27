@@ -77,3 +77,63 @@ void SKNMEAVisitor::visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SK
 
   _sentences.add(sb2.toNMEA() + "\r\n");
 };
+
+// ***********************  Wind Speed and Angle  ************************
+//  Talker ID: WI Weather Instruments
+//             VW Velocity Sensor, Mechanical?
+//  also seen: IIVWR
+//
+//  NMEA0183  MWV Wind Speed and Angle  --> Deprecated
+//              1  2  3  4
+//              |  |  |  |
+//      $--MWV,x.x,a,x.x,a*hh
+//  1) Wind Angle, 0 to 360 degrees
+//  2) Reference, R = Relative, T = True
+//  3) Wind Speed
+//  4) Wind Speed Units, K/M/N
+//  5) Status, A = Data Valid
+//
+//      VWR Relative Wind Speed and Angle
+//              1  2  3  4  5  6  7  8
+//              |  |  |  |  |  |  |  |
+//      $--VWR,x.x,a,x.x,N,x.x,M,x.x,K*hh
+//  1) Wind direction magnitude in degrees
+//  2) Wind direction Left/Right of bow
+//  3) Speed
+//  4) N = Knots
+//  5) Speed
+//  6) M = Meters Per Second
+//  7) Speed
+//  8) K = Kilometers Per Hour
+// ************************************************************************
+void SKNMEAVisitor::visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+
+  float windAngle;
+  float windSpeed;
+
+  windAngle = SKRadToDeg(v.getNumberValue());
+
+  // Validation
+  if (windAngle>180||!u.hasEnvironmentWindSpeedApparent()) return;
+
+  windSpeed = u.getEnvironmentWindSpeedTrue();  // in m/s
+  DEBUG("WindSpeed: %f", windSpeed);
+
+  NMEASentenceBuilder sb( "II", "VWR", 8);
+  sb.setField(1, windAngle, 2 );
+  // Wind direction Left/Right of bow
+  if ( windAngle >= 0 && windAngle <= 180 ) {
+    // 0 to 180° from starboard
+    sb.setField(2, "R");
+  } else {
+    sb.setField(2, "L");
+  }
+  sb.setField(3, SKMsToKnots( windSpeed ), 2 );
+  sb.setField(4, "N");
+  sb.setField(5, windSpeed, 2);
+  sb.setField(6, "M");
+  sb.setField(7, SKMsToKmh( windSpeed ), 2);
+  sb.setField(8, "K");
+  _sentences.add(sb1.toNMEA() + "\r\n");
+  Serial.printf("%s\n", sb.toNMEA());
+}
