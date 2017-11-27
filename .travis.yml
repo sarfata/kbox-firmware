@@ -22,15 +22,12 @@ python:
 dist: trusty
 
 sudo: false
-cache:
-    directories:
-        - "~/.platformio"
+cache: pip
 
 install:
     - pip install -U platformio cpp-coveralls
 
 script:
-    - platformio update
     # This builds all the target
     - platformio run
     # Run the few unit tests (C code running on computer)
