@@ -83,5 +83,35 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
     CHECK( update.getEnvironmentDepthBelowKeel() == 40.8 );
     CHECK( update.getEnvironmentDepthTransducerToKeel() == 1.2 );
   }
-}
 
+  SECTION("127250: VESSEL True HEADING RAPID ") {
+    SetN2kPGN127250(msg, 0, 180, N2kDoubleNA, N2kDoubleNA, N2khr_true);
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    CHECK( update.getSize() == 1);
+    CHECK( update.getNavigationHeadingTrue() == 180 );
+  }
+
+  SECTION("127250: VESSEL Magnetic HEADING RAPID ") {
+    SetN2kPGN127250(msg, 0, 180, -2, 3, 181);
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    CHECK( update.getSize() == 2);
+    CHECK( update.getNavigationHeadingMagnetic() == 181 );
+    // CHECK( update.NavigationMagneticDeviation() == -2 );
+    CHECK( update.NavigationMagneticVariation() == 3 );
+  }
+
+  SECTION("127245: Rudder Angle") {
+    SetN2kPGN127245(msg, 0, -3.5, 0);
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    CHECK( update.getSize() == 1);
+    CHECK( update.getSteeringRudderAngle() == -3.5 );
+  }
+
+  SECTION("130306: W I N D") {
+    SetN2kPGN130306(msg, 0, 12.4, 28.9);
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    CHECK( update.getSize() == 2);
+    CHECK( update.getEnvironmentWindSpeedApparent() == 12.4 );
+    CHECK( update.getEnvironmentWindAngleApparent() == 28.9 );
+  }
+}
