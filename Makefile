@@ -57,3 +57,6 @@ lcov: test
 sktool:
 	platformio run -e sktool
 
+validation: sktool
+	src/sktool/sktool-test.py --implementation sktool src/sktool/tests/*json
+

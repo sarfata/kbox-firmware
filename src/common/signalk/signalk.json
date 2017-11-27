@@ -31,58 +31,10 @@
       "description": "Depth transducer is below the surface"
     },
     {
-      "path": "environment.water.temperature",
+      "path": "environment.outside.apparentWindChillTemperature",
       "type": "numberValue",
-      "units": "K",
-      "description": "Current water temperature"
-    },
-    {
-      "path": "environment.wind",
-      "type": "numberValue",
-      "units": "rad",
-      "description": "Wind Data"
-    },
-    {
-      "path": "environment.wind.angleApparent",
-      "type": "numberValue",
-      "units": "rad",
-      "description": "AWA, Apparent Wind Angle"
-    },
-    {
-      "path": "environment.wind.angleTrue",
-      "type": "numberValue",
-      "units": "rad",
-      "description": "TWA, True Wind Angle"
-    },
-    {
-      "path": "environment.wind.directionTrue",
-      "type": "numberValue",
-      "units": "rad",
-      "description": "TWD, True Wind Direction"
-    },
-    {
-      "path": "environment.wind.directionMagnetic",
-      "type": "numberValue",
-      "units": "rad",
-      "description": "Wind Direction Magnetic"
-    },
-    {
-      "path": "environment.wind.speedTrue",
-      "type": "numberValue",
-      "units": "m/s",
-      "description": "TWS, True Wind Speed"
-    },
-    {
-      "path": "environment.wind.speedOverGround",
-      "type": "numberValue",
-      "units": "m/s",
-      "description": "GWS, Wind Speed Over Ground in Meters/Second"
-    },
-    {
-      "path": "environment.wind.speedApparent",
-      "type": "numberValue",
-      "units": "m/s",
-      "description": "AWS, Apparent Wind Speed"
+      "unit": "K",
+      "description": "Current outside apparent wind chill temperature"
     },
     {
       "path": "environment.outside.pressure",
@@ -90,7 +42,60 @@
       "unit": "Pa",
       "description": "Current outside air ambient pressure"
     },
-
+    {
+      "path": "environment.water.temperature",
+      "type": "numberValue",
+      "units": "K",
+      "description": "Current water temperature"
+    },
+    {
+      "path": "environment.wind.angleApparent",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "Apparent wind angle, negative to port"
+    },
+    {
+      "path": "environment.wind.angleTrueGround",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "True wind angle based on speed over ground, negative to port"
+    },
+    {
+      "path": "environment.wind.angleTrueWater",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "True wind angle based on speed through water, negative to port"
+    },
+    {
+      "path": "environment.wind.directionTrue",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "The wind direction relative to true north"
+    },
+    {
+      "path": "environment.wind.directionMagnetic",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "The wind direction relative to magnetic north"
+    },
+    {
+      "path": "environment.wind.speedTrue",
+      "type": "numberValue",
+      "unit": "m/s",
+      "description": "Wind speed over water (as calculated from speedApparent and vessel's speed through water)"
+    },
+    {
+      "path": "environment.wind.speedOverGround",
+      "type": "numberValue",
+      "unit": "m/s",
+      "description": "Wind speed over ground (as calculated from speedApparent and vessel's speed over ground)"
+    },
+    {
+      "path": "environment.wind.speedApparent",
+      "type": "numberValue",
+      "unit": "m/s",
+      "description": "Apparent wind speed"
+    },
     {
       "path": "electrical.batteries.%%.voltage",
       "type": "numberValue",
@@ -150,7 +155,6 @@
       "units": "m",
       "description": "Total distance traveled on this trip / since trip reset"
     },
-
     {
       "path": "steering.rudderAngle",
       "type": "numberValue",
