@@ -1,0 +1,11 @@
+[
+  {
+    "nmea": "$GPRMC,004119.000,A,3751.3385,N,12227.4913,W,5.02,235.24,141116,,,D*75",
+    "expectedValues": [
+      { "path": "navigation.position", "value": { "latitude": 37.85564166666666, "longitude": -122.45818833333334 } },
+      { "path": "navigation.speedOverGround", "value": 2.582511111 },
+      { "path": "navigation.courseOverGroundTrue", "value": 4.105712532 }
+    ]
+    ,"ignoreFail": true
+  }
+]

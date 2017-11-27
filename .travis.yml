@@ -22,18 +22,20 @@ python:
 dist: trusty
 
 sudo: false
-cache:
-    directories:
-        - "~/.platformio"
+cache: pip
 
 install:
     - pip install -U platformio cpp-coveralls
+    - pip install -r src/sktool/requirements.txt
 
 script:
     # This builds all the target
     - platformio run
     # Run the few unit tests (C code running on computer)
     - make test
+    # Run the sktool-test.py script to validate that SignalK output is valid and
+    # matches what we expect.
+    - make validation
 
 after_success:
     - coveralls --exclude src/test --exclude /lib --exclude lib --exclude .piolibdeps

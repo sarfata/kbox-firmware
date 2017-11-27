@@ -52,5 +52,6 @@ class SKNMEAParser {
 
   private:
     const SKUpdate& parseRMC(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& timestamp);
+    const SKUpdate& parseMWV(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& timestamp);
 };
 
