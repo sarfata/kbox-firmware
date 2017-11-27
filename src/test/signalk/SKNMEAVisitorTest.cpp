@@ -84,7 +84,7 @@ TEST_CASE("SKNMEAVisitorTest") {
 
     if (v.getSentences().size() > 0) {
       String s = *(v.getSentences().begin());
-      CHECK( s == "$IIXDR,A,4.2,D,Yaw,A,10.1,D,Pitch,A,29.0,D,Roll*5C\r\n" );
+      CHECK( s == "$IIXDR,A,10.1,D,PTCH,A,29.0,D,ROLL*57\r\n" );
     }
   }
 
