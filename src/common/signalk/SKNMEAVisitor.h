@@ -44,6 +44,8 @@ class SKNMEAVisitor : SKVisitor {
     void visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     void visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     void visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    void visitSKSteeringRudderAngle(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+
 
   public:
     /**
