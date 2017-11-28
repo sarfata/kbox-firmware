@@ -24,7 +24,6 @@
 
 #include <stdio.h>
 #include <NMEA2000.h>
-#include <Seasmart.h>
 #include <N2kMessages.h>
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
