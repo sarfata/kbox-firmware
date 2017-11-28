@@ -137,5 +137,5 @@ void SKNMEAVisitor::visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const
   sb.setField(7, SKMsToKmh(windSpeed), 2);
   sb.setField(8, "K");
   _sentences.add(sb.toNMEA() + "\r\n");
-  DEBUG("%s\n", sb.toNMEA());
+  DEBUG( sb.toNMEA().c_str() );
 }
