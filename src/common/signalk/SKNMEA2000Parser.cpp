@@ -55,11 +55,9 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
         DEBUG("Rudder message from NMEA2000");
         return parse127245(input, msg, timestamp);
       break;
-      /*
     case 127250L: // Vessel Heading
         return parse127250(input, msg, timestamp);
       break;
-      */
     case 128259L: // Boat speed
         return parse128259(input, msg, timestamp);
       break;
@@ -96,7 +94,15 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
       return _invalidSku;
   } // end switch msg.PGN
 }
-
+// *****************************************************************************
+//  PGN 128259  Boat speed
+//  swrt --> tN2kSpeedWaterReferenceType:
+//                N2kSWRT_Paddle_wheel=0,
+//                N2kSWRT_Pitot_tube=1,
+//                N2kSWRT_Doppler_log=2,
+//                N2kSWRT_Ultra_Sound=3,
+//                N2kSWRT_Electro_magnetic=4
+// *****************************************************************************
 const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
   unsigned char sid;
   double waterSpeed;
@@ -111,6 +117,8 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
     update->setSource(source);
 
     if (!N2kIsNA(waterSpeed)) {
+      // Vessel speed through the water
+      // -> Units: m/s (Meters per second)
       update->setNavigationSpeedThroughWater(waterSpeed);
     }
     if (!N2kIsNA(groundSpeed)) {
@@ -125,7 +133,9 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
     return _invalidSku;
   }
 }
-
+// ****************************************************************************
+//  PGN 128267  Water depth
+// ****************************************************************************
 const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
   unsigned char sid;
   double depthBelowTransducer;
@@ -238,4 +248,57 @@ const SKUpdate& SKNMEA2000Parser::parse127245(const SKSourceInput& input, const 
     DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
     return _invalidSku;
   }
+}
+// *****************************************************************************
+//    PGN 127250 VESSEL HEADING RAPID
+//    Heading sensor value with a flag for True or Magnetic.
+//    Heading               Heading in radians
+//      - Deviation         Magnetic deviation in radians. Use N2kDoubleNA for undefined value.
+//      - Variation         Magnetic variation in radians. Use N2kDoubleNA for undefined value.
+//      tN2kHeadingReference
+//        N2khr_true=0,
+//        N2khr_magnetic=1
+// *****************************************************************************
+const SKUpdate& SKNMEA2000Parser::parse127250(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
+  unsigned char sid;
+  tN2kHeadingReference headingReference;
+  double heading = N2kDoubleNA;
+  double deviation = N2kDoubleNA;
+  double variation = N2kDoubleNA;
+
+  if (ParseN2kHeading(msg,sid,heading,deviation,variation,headingReference) ) {
+
+    if (headingReference == N2khr_magnetic) {
+      // Deviation and Variation could be sent
+      // (Timo's NMEA Simulator is sending Dev and Var at magnetic HDG only)
+      heading += deviation + variation;
+      //TODO put 3 when updated to deviation
+      SKUpdateStatic<2> *update = new SKUpdateStatic<2>();
+      update->setTimestamp(timestamp);
+
+      SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+      update->setSource(source);
+      update->setNavigationHeadingMagnetic(heading);
+      if (!N2kIsNA(variation))
+        update->setNavigationMagneticVariation(variation);
+        /* coming when Signal K adds deviation
+        if (!N2kIsNA(deviation))
+          update->setNavigationMagneticDeviation(deviation);
+        */
+      _sku = update;
+      return *_sku;
+    }
+    if ( headingReference == N2khr_true ) {
+      SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
+      update->setTimestamp(timestamp);
+
+      SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+      update->setSource(source);
+      update->setNavigationHeadingTrue(heading);
+      _sku = update;
+      return *_sku;
+    }
+  }
+  DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
+  return _invalidSku;
 }
