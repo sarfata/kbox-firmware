@@ -60,5 +60,7 @@ class SKNMEA2000Parser {
     // PGN 130306 Wind Speed
     const SKUpdate& parse130306(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
     // PGN 127245 Rudder
-    const SKUpdate& parse127245(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);    
+    const SKUpdate& parse127245(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
+    // PGN 127250 VESSEL HEADING RAPID
+    const SKUpdate& parse127250(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
 };
