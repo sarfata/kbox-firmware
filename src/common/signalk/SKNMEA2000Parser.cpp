@@ -43,8 +43,8 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
   if (_sku) {
     delete(_sku);
   }
-
-  DEBUG("N2k Message PGN: %i", msg.PGN);
+  //RONDEBUG
+  //DEBUG("N2k Message PGN: %i", msg.PGN);
   switch (msg.PGN) {
     /*
     case 126992L: // System Time / Date
@@ -52,7 +52,6 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
       break;
     */
     case 127245L: // Rudder
-        DEBUG("Rudder message from NMEA2000");
         return parse127245(input, msg, timestamp);
       break;
     case 127250L: // Vessel Heading
