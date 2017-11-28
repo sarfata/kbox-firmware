@@ -36,9 +36,6 @@ class KMessageNMEAVisitor : public KVisitor {
   private:
     String nmeaContent;
 
-    //RON
-    SKNMEA2000Parser nmea2000Parser = SKNMEA2000Parser();
-
   public:
     void visit(const NMEASentence& s);
     void visit(const NMEA2000Message &n2km);
