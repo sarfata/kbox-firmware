@@ -33,6 +33,7 @@
 #include "common/algo/crc.h"
 #include "common/version/KBoxVersion.h"
 #include "host/util/PersistentStorage.h"
+#include "common/signalk/SKNMEAVisitor.h"
 #include "NMEA2000Service.h"
 
 static NMEA2000Service *handlerContext;
