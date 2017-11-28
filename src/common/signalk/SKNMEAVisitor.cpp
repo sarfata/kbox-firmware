@@ -43,6 +43,7 @@ void SKNMEAVisitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, const S
   sb.setField(3, "V");
   sb.setField(4, p.getIndex());
   _sentences.add(sb.toNMEA() + "\r\n");
+  DEBUG( sb.toNMEA().c_str() );
 }
 
 void SKNMEAVisitor::visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) {
@@ -54,6 +55,7 @@ void SKNMEAVisitor::visitSKEnvironmentOutsidePressure(const SKUpdate& u, const S
   sb.setField(3, "B");
   sb.setField(4, "Barometer");
   _sentences.add(sb.toNMEA() + "\r\n");
+  DEBUG( sb.toNMEA().c_str() );
 }
 
 void SKNMEAVisitor::visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) {
@@ -71,14 +73,16 @@ void SKNMEAVisitor::visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p
   sb.setField(8, "ROLL");
 
   _sentences.add(sb.toNMEA() + "\r\n");
+  DEBUG( sb.toNMEA().c_str() );
 };
 
 void SKNMEAVisitor::visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) {
-  NMEASentenceBuilder sb2("II", "HDM", 2);
-  sb2.setField(1, SKRadToDeg(v.getNumberValue()), 1);
-  sb2.setField(2, "M");
+  NMEASentenceBuilder sb("II", "HDM", 2);
+  sb.setField(1, SKRadToDeg(v.getNumberValue()), 1);
+  sb.setField(2, "M");
 
-  _sentences.add(sb2.toNMEA() + "\r\n");
+  _sentences.add(sb.toNMEA() + "\r\n");
+  DEBUG( sb.toNMEA().c_str() );
 };
 
 // ***********************  Wind Speed and Angle  ************************
@@ -138,4 +142,29 @@ void SKNMEAVisitor::visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const
   sb.setField(8, "K");
   _sentences.add(sb.toNMEA() + "\r\n");
   DEBUG( sb.toNMEA().c_str() );
+}
+
+//  ***********************************************
+//    RSA Rudder Sensor Angle
+//    Talker-ID: AG - Autopilot general
+//    also seen: ERRSA
+//    Expedition: IIXDR
+//
+//            1  2  3  4
+//            |  |  |  |
+//    $--RSA,x.x,A,x.x,A*hh
+//      1) Starboard (or single) rudder sensor, "-" means Turn To Port
+//      2) Status, A means data is valid
+//      3) Port rudder sensor
+//      4) Status, A means data is valid
+// *********************************************** */
+void SKNMEAVisitor::visitSKSteeringRudderAngle(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+  NMEASentenceBuilder sb("II", "RSA", 4);
+  sb.setField(1, SKRadToDeg( v.getNumberValue() ),1 );
+  sb.setField(2, "A");
+  sb.setField(3, "");
+  sb.setField(4, "");
+  _sentences.add(sb.toNMEA() + "\r\n");
+  DEBUG( sb.toNMEA().c_str() );
+  //Serial.printf("%s\n", sb.toNMEA());
 }
