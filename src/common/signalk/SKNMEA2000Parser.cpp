@@ -293,3 +293,11 @@ const SKUpdate& SKNMEA2000Parser::parse127250(const SKSourceInput& input, const 
   DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
   return _invalidSku;
 }
+
+// *****************************************************************************
+//    PGN 128000 Nautical Leeway Angle (new 2017)
+// https://www.nmea.org/Assets/20170204%20nmea%202000%20leeway%20pgn%20final.pdf
+// Upcoming in Timos library:
+// void SetN2kPGN128000(tN2kMsg &N2kMsg, unsigned char SID, double Leeway) {
+// N2kMsg.Add2ByteDouble(Leeway,0.0001);
+// *****************************************************************************
