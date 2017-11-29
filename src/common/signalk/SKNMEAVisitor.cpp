@@ -85,7 +85,7 @@ void SKNMEAVisitor::visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SK
 //             VW Velocity Sensor, Mechanical?
 //  also seen: IIVWR
 //
-//  NMEA0183  MWV Wind Speed and Angle  --> recommanded
+//  NMEA0183  MWV Wind Speed and Angle  --> recommended
 //              1  2  3  4
 //              |  |  |  |
 //      $--MWV,x.x,a,x.x,a*hh
@@ -94,19 +94,6 @@ void SKNMEAVisitor::visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SK
 //  3) Wind Speed
 //  4) Wind Speed Units: K = km/s, M = m/s, N = Knots
 //  5) Status, A = Data Valid
-//
-//      VWR Relative Wind Speed and Angle  --> deprecated
-//              1  2  3  4  5  6  7  8
-//              |  |  |  |  |  |  |  |
-//      $--VWR,x.x,a,x.x,N,x.x,M,x.x,K*hh
-//  1) Wind direction magnitude in degrees
-//  2) Wind direction Left/Right of bow
-//  3) Speed
-//  4) N = Knots
-//  5) Speed
-//  6) M = Meters Per Second
-//  7) Speed
-//  8) K = Kilometers Per Hour
 // ************************************************************************
 void SKNMEAVisitor::visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const SKPath &p, const SKValue &v) {
 
