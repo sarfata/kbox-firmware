@@ -150,3 +150,13 @@ void SKNMEAVisitor::visitSKSteeringRudderAngle(const SKUpdate &u, const SKPath &
   sb.setField(4, "");
   _sentences.add(sb.toNMEA() + "\r\n");
 }
+
+//  ***********************************************
+//  New NMEA 0183 sentence Leeway
+//  https://www.nmea.org/Assets/20170303%20nautical%20leeway%20angle%20measurement%20sentence%20amendment.pdf
+//         1  2
+//         |  |
+//  $--LWY,A,x.x*hh<CR><LF>
+//      1) Valid or not A/V
+//      2) leeway in degrees and decimal degrees, positiv slipping to starboard
+//  ***********************************************
