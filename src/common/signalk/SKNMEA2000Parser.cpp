@@ -223,7 +223,8 @@ const SKUpdate& SKNMEA2000Parser::parse127245(const SKSourceInput& input, const 
   double angleOrder = N2kDoubleNA;
 
   if (ParseN2kRudder(msg,rudderPosition,instance,rudderDirectionOrder,angleOrder)) {
-    if (!N2kIsNA(rudderPosition) && (rudderPosition < M_PI) && (rudderPosition > M_PI)) {
+    // validation check max +/- 45°
+    if (!N2kIsNA(rudderPosition) && (rudderPosition <= M_PI_4) && (rudderPosition >= M_PI_4) ) {
       SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
       update->setTimestamp(timestamp);
 
