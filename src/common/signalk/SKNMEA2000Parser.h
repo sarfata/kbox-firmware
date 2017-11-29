@@ -63,12 +63,13 @@ class SKNMEA2000Parser {
     const SKUpdate& parse128259(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
     // PGN 128267 Water depth
     const SKUpdate& parse128267(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
-    // PGN 130306 Wind Speed
-    const SKUpdate& parse130306(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
     // PGN 129025 Position
     const SKUpdate& parse129025(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
     // PGN 129026 COG & SOG, Rapid Update
     const SKUpdate& parse129026(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
+    // PGN 130306 Wind Speed
+    const SKUpdate& parse130306(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp);
+    
 
 
     // Magnetic variation
