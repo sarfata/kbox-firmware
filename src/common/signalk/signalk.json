@@ -167,7 +167,13 @@
       "path": "steering.rudderAngle",
       "type": "numberValue",
       "units": "rad",
-      "description": "Rudder Angle"
+      "description": "Current rudder angle"
+    },
+    {
+      "path": "steering.rudderAngleTarget",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "The angle the rudder should move to"
     }
   ]
 }
