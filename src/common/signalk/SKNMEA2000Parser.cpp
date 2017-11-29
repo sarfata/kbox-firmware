@@ -43,8 +43,7 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
   if (_sku) {
     delete(_sku);
   }
-  //RONDEBUG
-  //DEBUG("N2k Message PGN: %i", msg.PGN);
+
   switch (msg.PGN) {
     /*
     case 126992L: // System Time / Date
@@ -137,39 +136,39 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
 // ****************************************************************************
 const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
   unsigned char sid;
-  double depthBelowTransducer;
-  double offset;
+  double depthBelowTransducer =N2kDoubleNA;
+  double offset = N2kDoubleNA;
 
   if (ParseN2kWaterDepth(msg, sid, depthBelowTransducer, offset)) {
-    SKUpdateStatic<3> *update = new SKUpdateStatic<3>();
-    update->setTimestamp(timestamp);
+    if (!N2kIsNA(depthBelowTransducer)) {
+      SKUpdateStatic<3> *update = new SKUpdateStatic<3>();
+      update->setTimestamp(timestamp);
 
-    SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
-    update->setSource(source);
+      SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+      update->setSource(source);
 
-    update->setEnvironmentDepthBelowTransducer(depthBelowTransducer);
+      update->setEnvironmentDepthBelowTransducer(depthBelowTransducer);
 
-    if (N2kIsNA(offset)) {
-      // When no offset then offset should be Zero
-      offset = 0;
+      if (N2kIsNA(offset)) {
+        // When no offset then offset should be Zero
+        offset = 0;
+      }
+      // When offset is negative, it's the distance between transducer and keel
+      if (offset < 0) {
+        update->setEnvironmentDepthTransducerToKeel(offset * -1);
+        update->setEnvironmentDepthBelowKeel(depthBelowTransducer + offset);
+      }
+      else if (offset >= 0) {
+        update->setEnvironmentDepthSurfaceToTransducer(offset);
+        update->setEnvironmentDepthBelowSurface(depthBelowTransducer + offset);
+      }
+
+      _sku = update;
+      return *_sku;
     }
-    // When offset is negative, it's the distance between transducer and keel
-    if (offset < 0) {
-      update->setEnvironmentDepthTransducerToKeel(offset * -1);
-      update->setEnvironmentDepthBelowKeel(depthBelowTransducer + offset);
-    }
-    else if (offset > 0) {
-      update->setEnvironmentDepthSurfaceToTransducer(offset);
-      update->setEnvironmentDepthBelowSurface(depthBelowTransducer + offset);
-    }
-
-    _sku = update;
-    return *_sku;
   }
-  else {
-    DEBUG("Unable to parse N2kMsg with PGN %i", msg.PGN);
-    return _invalidSku;
-  }
+  DEBUG("Unable to parse N2kMsg with PGN %i", msg.PGN);
+  return _invalidSku;
 }
 
 // *****************************************************************************
@@ -177,31 +176,27 @@ const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const 
 //    tN2kWindReference:
 //      N2kWind_True_North=0,
 //      N2kWind_Magnetic=1,
-//      N2kWind_Apprent=2,
+//      N2kWind_Apparent=2,
 //      N2kWind_True_boat=3
 // *****************************************************************************
 const SKUpdate& SKNMEA2000Parser::parse130306(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
   unsigned char sid;
-  double windSpeed;     // Knots
-  double windAngle;     // in Radians 0... 2*pi
+  double windSpeed;     // m/s
+  double windAngle;     // in Rad
   tN2kWindReference windReference;
 
-  if (ParseN2kPGN130306(msg,sid,windSpeed,windAngle,windReference) ) {
+  if (ParseN2kPGN130306(msg,sid,windSpeed,windAngle,windReference)) {
     SKUpdateStatic<2> *update = new SKUpdateStatic<2>();
     update->setTimestamp(timestamp);
 
     SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
     update->setSource(source);
 
-    if (!N2kIsNA( windAngle) && !N2kIsNA( windSpeed)) {
+    if (!N2kIsNA(windAngle) && !N2kIsNA(windSpeed)) {
       if (windReference == N2kWind_Apprent) {
-        // -> m/s (Meters per second)
-        update->setEnvironmentWindSpeedApparent(SKKnotToMs(windSpeed));
-        DEBUG("AWS: %d kts",windSpeed);
-        // -> Apparent wind angle, rad, negative to port
+        update->setEnvironmentWindSpeedApparent(windSpeed);
         if (windAngle >M_PI) windAngle *= -1;
         update->setEnvironmentWindAngleApparent(windAngle);
-        DEBUG("AWA: %d °",SKRadToDeg(windSpeed));
       }
     }
     // We do not take True Wind Speed as we do not know how the system has calculated it!!
@@ -227,14 +222,14 @@ const SKUpdate& SKNMEA2000Parser::parse127245(const SKSourceInput& input, const 
   double rudderPosition;
   double angleOrder;
 
-  if (ParseN2kRudder(msg,rudderPosition,instance,rudderDirectionOrder,angleOrder) ) {
+  if (ParseN2kRudder(msg,rudderPosition,instance,rudderDirectionOrder,angleOrder)) {
     SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
     update->setTimestamp(timestamp);
 
     SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
     update->setSource(source);
 
-    if (!N2kIsNA(rudderPosition) && (rudderPosition < M_PI_2 / 2) && (rudderPosition > M_PI_2 / 2) ) {
+    if (!N2kIsNA(rudderPosition) && (rudderPosition < M_PI_2 / 2) && (rudderPosition > M_PI_2 / 2)) {
       // -> Current rudder angle, +ve is rudder to Starboard
       update->setSteeringRudderAngle(rudderPosition);
       DEBUG("Rudder: %d",SKRadToDeg(rudderPosition));
@@ -265,37 +260,36 @@ const SKUpdate& SKNMEA2000Parser::parse127250(const SKSourceInput& input, const 
   double deviation = N2kDoubleNA;
   double variation = N2kDoubleNA;
 
-  if (ParseN2kHeading(msg,sid,heading,deviation,variation,headingReference) ) {
+  if (ParseN2kHeading(msg,sid,heading,deviation,variation,headingReference)) {
+    if (!N2kIsNA(heading) && heading >= 0 && heading <= M_PI_2) {
+      if (headingReference == N2khr_magnetic) {
+        //TODO put 3 when updated to deviation
+        SKUpdateStatic<2> *update = new SKUpdateStatic<2>();
+        update->setTimestamp(timestamp);
 
-    if (headingReference == N2khr_magnetic) {
-      // Deviation and Variation could be sent
-      // (Timo's NMEA Simulator is sending Dev and Var at magnetic HDG only)
-      heading += deviation + variation;
-      //TODO put 3 when updated to deviation
-      SKUpdateStatic<2> *update = new SKUpdateStatic<2>();
-      update->setTimestamp(timestamp);
+        SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+        update->setSource(source);
+        update->setNavigationHeadingMagnetic(heading);
+        if (!N2kIsNA(variation))
+          update->setNavigationMagneticVariation(variation);
+          /* coming when Signal K adds deviation
+          if (!N2kIsNA(deviation))
+            update->setNavigationMagneticDeviation(deviation);
+          */
+        _sku = update;
+        return *_sku;
+      }
 
-      SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
-      update->setSource(source);
-      update->setNavigationHeadingMagnetic(heading);
-      if (!N2kIsNA(variation))
-        update->setNavigationMagneticVariation(variation);
-        /* coming when Signal K adds deviation
-        if (!N2kIsNA(deviation))
-          update->setNavigationMagneticDeviation(deviation);
-        */
-      _sku = update;
-      return *_sku;
-    }
-    if ( headingReference == N2khr_true ) {
-      SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
-      update->setTimestamp(timestamp);
+      if (headingReference == N2khr_true) {
+        SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
+        update->setTimestamp(timestamp);
 
-      SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
-      update->setSource(source);
-      update->setNavigationHeadingTrue(heading);
-      _sku = update;
-      return *_sku;
+        SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+        update->setSource(source);
+        update->setNavigationHeadingTrue(heading);
+        _sku = update;
+        return *_sku;
+      }
     }
   }
   DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
