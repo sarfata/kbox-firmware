@@ -74,6 +74,7 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
     //case 126993: // Heartbeat
     //case 127251: // Rate of Turn
     //case 127257: // Attitude
+    //case 127258:  // Magnetic Variation
     //case 127488: // Engine parameters rapid
     //case 127493: // Transmission parameters: dynamic
     //case 127501: // Binary status report
