@@ -136,7 +136,7 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
 // ****************************************************************************
 const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
   unsigned char sid;
-  double depthBelowTransducer =N2kDoubleNA;
+  double depthBelowTransducer = N2kDoubleNA;
   double offset = N2kDoubleNA;
 
   if (ParseN2kWaterDepth(msg, sid, depthBelowTransducer, offset)) {
@@ -229,10 +229,9 @@ const SKUpdate& SKNMEA2000Parser::parse127245(const SKSourceInput& input, const 
     SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
     update->setSource(source);
 
-    if (!N2kIsNA(rudderPosition) && (rudderPosition < M_PI_2 / 2) && (rudderPosition > M_PI_2 / 2)) {
+    if (!N2kIsNA(rudderPosition) && (rudderPosition < M_PI) && (rudderPosition > M_PI)) {
       // -> Current rudder angle, +ve is rudder to Starboard
       update->setSteeringRudderAngle(rudderPosition);
-      DEBUG("Rudder: %d",SKRadToDeg(rudderPosition));
     }
 
     _sku = update;
