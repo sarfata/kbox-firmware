@@ -74,7 +74,7 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
     case 129026L: // COG SOG rapid
         return parse129026(input, msg, timestamp);
       break;
-    //case 129301L:  // Time to/from Mark
+    //case 129301L:  // Time to/from Mark 
     case 130306L: // Wind Speed
         return parse130306(input, msg, timestamp);
       break;
@@ -350,8 +350,8 @@ const SKUpdate& SKNMEA2000Parser::parse129026(const SKSourceInput& input, const 
 // *****************************************************************************
 const SKUpdate& SKNMEA2000Parser::parse130306(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
   unsigned char sid;
-  double windSpeed = N2kDoubleNA;     // m/s
-  double windAngle = N2kDoubleNA;     // in Rad
+  double windSpeed = N2kDoubleNA;
+  double windAngle = N2kDoubleNA;
   tN2kWindReference windReference;
 
   if (ParseN2kPGN130306(msg,sid,windSpeed,windAngle,windReference)) {
