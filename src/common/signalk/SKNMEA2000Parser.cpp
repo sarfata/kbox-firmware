@@ -45,54 +45,168 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
   }
 
   switch (msg.PGN) {
-    /*
     case 126992L: // System Time / Date
         return parse126992(input, msg, timestamp);
       break;
-    */
     case 127245L: // Rudder
         return parse127245(input, msg, timestamp);
       break;
     case 127250L: // Vessel Heading
         return parse127250(input, msg, timestamp);
       break;
+    //case 127251L: // Rate of Turn
+    //case 127257L: // Attitude Yaw, Pitch, Roll
+    //    return parse127257(input, msg, timestamp);
+    //  break;
+    //case 127258L:  // Magnetic Variation
+    //    return parse127258(input, msg, timestamp);
+    //  break;
     case 128259L: // Boat speed
         return parse128259(input, msg, timestamp);
       break;
     case 128267L: // Water depth
         return parse128267(input, msg, timestamp);
       break;
-      /*
+    //case 128275L: // Distance Log
+    case 129025L: // Position, Rapid Update Lat/Lon
+        return parse129025(input, msg, timestamp);
+      break;
     case 129026L: // COG SOG rapid
         return parse129026(input, msg, timestamp);
       break;
-      */
+    //case 129301L:  // Time to/from Mark
     case 130306L: // Wind Speed
         return parse130306(input, msg, timestamp);
       break;
 
-    //case 126993: // Heartbeat
-    //case 127251: // Rate of Turn
-    //case 127257: // Attitude
-    //case 127258:  // Magnetic Variation
     //case 127488: // Engine parameters rapid
     //case 127493: // Transmission parameters: dynamic
     //case 127501: // Binary status report
     //case 127505: // Fluid level
     //case 127508: // Battery Status
     //case 127513: // Battery Configuration Status
-    //case 129025: // Lat/lon rapid
     //case 129283: // Cross Track Error
-    //case 130310: // Outside Environmental parameters
-    //case 130311: // Environmental parameters
-    //case 130312: // Temperature
-    //case 130314: // Pressure
+    //case 130314: // Actual Pressure
     //case 130316: // Temperature extended range
+    //case 130577L: // Direction Data
+    //case 130578L: // Vessel Speed Components
     default:
       DEBUG("No known conversion for PGN %i", msg.PGN);
       return _invalidSku;
   } // end switch msg.PGN
 }
+
+// *****************************************************************************
+//  PGN 126992  System Time Date UTC
+// *****************************************************************************
+//  - SystemDate    Days since 1970-01-01
+//  - SystemTime    seconds since midnight
+//  - TimeSource    "GPS", "GLONASS", "radio station", "local cesium clock", "local rubidium clock", "local crystal clock"
+// *****************************************************************************
+const SKUpdate& SKNMEA2000Parser::parse126992(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
+  unsigned char sid;          // Sequence ID
+  uint16_t systemDate;        // Days since 1970-01-01
+  double systemTime;          // seconds since midnight with 2 digits
+  tN2kTimeSource timeSource;  // see tN2kTimeSource (z.B.: GPS)
+
+  if (ParseN2kSystemTime(msg,sid,systemDate,systemTime,timeSource) ) {
+    /*
+    TODO: Signal K for /environment/time + 3 fields
+    SKUpdateStatic<2> *update = new SKUpdateStatic<2>();
+    update->setTimestamp(timestamp);
+
+    _sku = update;
+    return *_sku;
+    */
+  }
+
+  DEBUG("Unable to parse N2kMsg with PGN %i", msg.PGN);
+  return _invalidSku;
+}
+
+//  ***********************************************
+//   PGN 127245 Rudder
+//        →  sid
+//        →  RudderPosition [rad]
+// *  ********************************************** */
+const SKUpdate& SKNMEA2000Parser::parse127245(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
+  unsigned char instance;
+  tN2kRudderDirectionOrder rudderDirectionOrder;
+  double rudderPosition = N2kDoubleNA;
+  double angleOrder = N2kDoubleNA;
+
+  if (ParseN2kRudder(msg,rudderPosition,instance,rudderDirectionOrder,angleOrder)) {
+    // validation check max +/- 45°
+    if (!N2kIsNA(rudderPosition) && (rudderPosition <= M_PI_4) && (rudderPosition >= M_PI_4) ) {
+      SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
+      update->setTimestamp(timestamp);
+
+      SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+      update->setSource(source);
+      // -> Current rudder angle, +ve is rudder to Starboard
+      update->setSteeringRudderAngle(rudderPosition);
+
+      _sku = update;
+      return *_sku;
+    }
+  }
+  DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
+  return _invalidSku;
+}
+
+// *****************************************************************************
+//    PGN 127250 VESSEL HEADING RAPID
+//    Heading sensor value with a flag for True or Magnetic.
+//    Heading               Heading in radians
+//      - Deviation         Magnetic deviation in radians. Use N2kDoubleNA for undefined value.
+//      - Variation         Magnetic variation in radians. Use N2kDoubleNA for undefined value.
+//      tN2kHeadingReference
+//        N2khr_true=0,
+//        N2khr_magnetic=1
+// *****************************************************************************
+const SKUpdate& SKNMEA2000Parser::parse127250(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
+  unsigned char sid;
+  tN2kHeadingReference headingReference;
+  double heading = N2kDoubleNA;
+  double deviation = N2kDoubleNA;
+  double variation = N2kDoubleNA;
+
+  if (ParseN2kHeading(msg,sid,heading,deviation,variation,headingReference)) {
+    if (!N2kIsNA(heading) && heading >= 0 && heading <= 2 * M_PI) {
+      if (headingReference == N2khr_magnetic) {
+        //TODO put 3 when updated to deviation
+        SKUpdateStatic<2> *update = new SKUpdateStatic<2>();
+        update->setTimestamp(timestamp);
+
+        SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+        update->setSource(source);
+        update->setNavigationHeadingMagnetic(heading);
+        if (!N2kIsNA(variation))
+          update->setNavigationMagneticVariation(variation);
+          /* coming when Signal K adds deviation
+          if (!N2kIsNA(deviation))
+            update->setNavigationMagneticDeviation(deviation);
+          */
+        _sku = update;
+        return *_sku;
+      }
+
+      if (headingReference == N2khr_true) {
+        SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
+        update->setTimestamp(timestamp);
+
+        SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+        update->setSource(source);
+        update->setNavigationHeadingTrue(heading);
+        _sku = update;
+        return *_sku;
+      }
+    }
+  }
+  DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
+  return _invalidSku;
+}
+
 // *****************************************************************************
 //  PGN 128259  Boat speed
 //  swrt --> tN2kSpeedWaterReferenceType:
@@ -116,8 +230,6 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
     update->setSource(source);
 
     if (!N2kIsNA(waterSpeed)) {
-      // Vessel speed through the water
-      // -> Units: m/s (Meters per second)
       update->setNavigationSpeedThroughWater(waterSpeed);
     }
     if (!N2kIsNA(groundSpeed)) {
@@ -169,6 +281,58 @@ const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const 
     }
   }
   DEBUG("Unable to parse N2kMsg with PGN %i", msg.PGN);
+  return _invalidSku;
+}
+
+// *****************************************************************************
+//    129025L: // Position, Rapid Update Lat/Lon
+// *****************************************************************************
+const SKUpdate& SKNMEA2000Parser::parse129025(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
+  double latitude;
+  double longitude;
+
+  if (ParseN2kPositionRapid(msg, latitude, longitude)) {
+    SKUpdateStatic<2> *update = new SKUpdateStatic<2>();
+    update->setTimestamp(timestamp);
+
+    SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+    update->setSource(source);
+    update->setNavigationPosition(SKTypePosition(latitude, longitude, 0));
+
+    _sku = update;
+    return *_sku;
+  }
+  DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
+  return _invalidSku;
+}
+
+// *****************************************************************************
+//    129026: // COG SOG rapid
+//    1 Sequence ID
+//    2 COG Reference
+//    3 NMEA Reserved
+//    4 Course Over Ground
+//    5 Speed Over Ground
+// *****************************************************************************
+const SKUpdate& SKNMEA2000Parser::parse129026(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
+  unsigned char sid;
+  tN2kHeadingReference headingReference;
+  double COG;
+  double SOG;
+
+  if (ParseN2kCOGSOGRapid(msg,sid,headingReference,COG,SOG)) {
+    SKUpdateStatic<2> *update = new SKUpdateStatic<2>();
+    update->setTimestamp(timestamp);
+
+    SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+    update->setSource(source);
+    update->setNavigationCourseOverGroundTrue(COG);
+    update->setNavigationSpeedOverGround(SOG);
+
+    _sku = update;
+    return *_sku;
+  }
+  DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
   return _invalidSku;
 }
 
@@ -243,87 +407,8 @@ const SKUpdate& SKNMEA2000Parser::parse130306(const SKSourceInput& input, const 
   }
 }
 
-//  ***********************************************
-//   PGN 127245 Rudder
-//        →  sid
-//        →  RudderPosition [rad]
-// *  ********************************************** */
-const SKUpdate& SKNMEA2000Parser::parse127245(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
-  unsigned char instance;
-  tN2kRudderDirectionOrder rudderDirectionOrder;
-  double rudderPosition = N2kDoubleNA;
-  double angleOrder = N2kDoubleNA;
 
-  if (ParseN2kRudder(msg,rudderPosition,instance,rudderDirectionOrder,angleOrder)) {
-    // validation check max +/- 45°
-    if (!N2kIsNA(rudderPosition) && (rudderPosition <= M_PI_4) && (rudderPosition >= M_PI_4) ) {
-      SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
-      update->setTimestamp(timestamp);
 
-      SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
-      update->setSource(source);
-      // -> Current rudder angle, +ve is rudder to Starboard
-      update->setSteeringRudderAngle(rudderPosition);
-
-      _sku = update;
-      return *_sku;
-    }
-  }
-  DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
-  return _invalidSku;
-}
-// *****************************************************************************
-//    PGN 127250 VESSEL HEADING RAPID
-//    Heading sensor value with a flag for True or Magnetic.
-//    Heading               Heading in radians
-//      - Deviation         Magnetic deviation in radians. Use N2kDoubleNA for undefined value.
-//      - Variation         Magnetic variation in radians. Use N2kDoubleNA for undefined value.
-//      tN2kHeadingReference
-//        N2khr_true=0,
-//        N2khr_magnetic=1
-// *****************************************************************************
-const SKUpdate& SKNMEA2000Parser::parse127250(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
-  unsigned char sid;
-  tN2kHeadingReference headingReference;
-  double heading = N2kDoubleNA;
-  double deviation = N2kDoubleNA;
-  double variation = N2kDoubleNA;
-
-  if (ParseN2kHeading(msg,sid,heading,deviation,variation,headingReference)) {
-    if (!N2kIsNA(heading) && heading >= 0 && heading <= 2 * M_PI) {
-      if (headingReference == N2khr_magnetic) {
-        //TODO put 3 when updated to deviation
-        SKUpdateStatic<2> *update = new SKUpdateStatic<2>();
-        update->setTimestamp(timestamp);
-
-        SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
-        update->setSource(source);
-        update->setNavigationHeadingMagnetic(heading);
-        if (!N2kIsNA(variation))
-          update->setNavigationMagneticVariation(variation);
-          /* coming when Signal K adds deviation
-          if (!N2kIsNA(deviation))
-            update->setNavigationMagneticDeviation(deviation);
-          */
-        _sku = update;
-        return *_sku;
-      }
-
-      if (headingReference == N2khr_true) {
-        SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
-        update->setTimestamp(timestamp);
-
-        SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
-        update->setSource(source);
-        update->setNavigationHeadingTrue(heading);
-        _sku = update;
-        return *_sku;
-      }
-    }
-  }
-  DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
-  return _invalidSku;
-}
 
 // *****************************************************************************
 //    PGN 128000 Nautical Leeway Angle (new 2017)
