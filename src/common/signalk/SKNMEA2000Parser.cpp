@@ -257,7 +257,7 @@ const SKUpdate& SKNMEA2000Parser::parse127250(const SKSourceInput& input, const 
   double variation = N2kDoubleNA;
 
   if (ParseN2kHeading(msg,sid,heading,deviation,variation,headingReference)) {
-    if (!N2kIsNA(heading) && heading >= 0 && heading <= M_PI_2) {
+    if (!N2kIsNA(heading) && heading >= 0 && heading <= 2 * M_PI) {
       if (headingReference == N2khr_magnetic) {
         //TODO put 3 when updated to deviation
         SKUpdateStatic<2> *update = new SKUpdateStatic<2>();
