@@ -85,17 +85,17 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
   }
 
   SECTION("127250: VESSEL True HEADING RAPID") {
-    SetN2kTrueHeading(msg, 0, 0.7854);  // 180°
+    SetN2kTrueHeading(msg, 0, SKDegToRad(180));
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 1);
-    CHECK( update.getNavigationHeadingTrue() == 0.7854 );
+    CHECK( (update.getNavigationHeadingTrue() - SKDegToRad(180)) < 0.01 );
   }
 
   SECTION("127250: VESSEL Magnetic HEADING RAPID") {
     SetN2kMagneticHeading(msg, 0, 0.7898, -1.5883, 0.014); // 181°, -2°, 3.2°
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 2);
-    CHECK( update.getNavigationHeadingMagnetic() == 0.7898 );
+    CHECK( (update.getNavigationHeadingMagnetic() - 0.7898) < 0.01 );
     // CHECK( update.getNavigationMagneticDeviation() == -1.5883 );
     CHECK( update.getNavigationMagneticVariation() == 0.014 );
   }
@@ -109,10 +109,10 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
 
   SECTION("130306: W I N D") {
     //TODO: watch if Timo will correct Typo
-    SetN2kWindSpeed(msg, 0, 12.4, 0.13, N2kWind_Apprent);   // 29.8°
+    SetN2kWindSpeed(msg, 0, 12.4, SKDegToRad(29.8), N2kWind_Apprent);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 2);
     CHECK( update.getEnvironmentWindSpeedApparent() == 12.4 );
-    CHECK( update.getEnvironmentWindAngleApparent() == 0.13 );
+    CHECK( (update.getEnvironmentWindAngleApparent() - SKDegToRad(29.8)) < 0.01 );
   }
 }
