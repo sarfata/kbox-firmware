@@ -174,16 +174,20 @@ const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const 
 
 // *****************************************************************************
 //   PGN 130306 W I N D
+// The boat referenced true wind is given by the vector sum of Apparent wind and vessel's heading and speed though the water.
+// The ground referenced true wind is given by the vector sum of Apparent wind and vessel's heading and speed over ground.
+// References and calculations : https://www.rocktheboatmarinestereo.com/specs/MSNRX200I.pdf
 //    tN2kWindReference:
-//      N2kWind_True_North=0,
-//      N2kWind_Magnetic=1,
-//      N2kWind_Apparent=2,
-//      N2kWind_True_boat=3
+//      N2kWind_True_North=0    => Ground Wind, calculated using SOG/COG, referenced to true north
+//      N2kWind_Magnetic=1      => Ground Wind, calculated by SOG/COG, referenced to magnetic north
+//      N2kWind_Apparent=2      => Apparent Wind, measured on boat, relative to vessel centerline
+//      N2kWind_True_boat=3     => Ground Wind, calculated using SOG/COG, relative to centerline
+//      N2kWind_True_water=4    => Theoretical Wind, calc using Heading/STW, relative to centerline vessel, referenced to water
 // *****************************************************************************
 const SKUpdate& SKNMEA2000Parser::parse130306(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
   unsigned char sid;
-  double windSpeed;     // m/s
-  double windAngle;     // in Rad
+  double windSpeed = N2kDoubleNA;     // m/s
+  double windAngle = N2kDoubleNA;     // in Rad
   tN2kWindReference windReference;
 
   if (ParseN2kPGN130306(msg,sid,windSpeed,windAngle,windReference)) {
@@ -194,14 +198,41 @@ const SKUpdate& SKNMEA2000Parser::parse130306(const SKSourceInput& input, const 
     update->setSource(source);
 
     if (!N2kIsNA(windAngle) && !N2kIsNA(windSpeed)) {
-      if (windReference == N2kWind_Apprent) {
+      if (windReference == N2kWind_True_North) {
+        // Ground Wind Speed
+        update->setEnvironmentWindSpeedOverGround(windSpeed);
+        // Ground Wind Direction
+        update->setEnvironmentWindDirectionTrue(windAngle);
+      }
+      else if (windReference == N2kWind_Magnetic) {
+        // Ground Wind Speed
+        update->setEnvironmentWindSpeedOverGround(windSpeed);
+        // Ground Wind Direction refered to magnetic north
+        update->setEnvironmentWindDirectionMagnetic(windAngle);
+      }
+      //TODO: correct if Timos Typo will be corrected in library
+      else if (windReference == N2kWind_Apprent) {
+        // AWS Apparent Wind Speed
         update->setEnvironmentWindSpeedApparent(windSpeed);
-        if (windAngle >M_PI) windAngle *= -1;
+        // AWA pos coming from starboard, neg from port, relative to centerline vessel
+        if (windAngle > M_PI) windAngle *= -1;
         update->setEnvironmentWindAngleApparent(windAngle);
       }
+      else if (windReference == N2kWind_True_boat) {
+        // Ground Wind
+        update->setEnvironmentWindSpeedTrue(windSpeed);
+        // Ground Wind +/- starboard/port
+        if (windAngle >M_PI) windAngle *= -1;
+        update->setEnvironmentWindAngleTrueGround(windAngle);
+      }
+      else if (windReference == N2kWind_True_water) {
+        // TWS (water refered) True "Sailing" Wind
+        update->setEnvironmentWindSpeedTrue(windSpeed);
+        // TWA (water refered) +/- starboard/port
+        if (windAngle >M_PI) windAngle *= -1;
+        update->setEnvironmentWindAngleTrueWater(windAngle);
+      }
     }
-    // We do not take True Wind Speed as we do not know how the system has calculated it!!
-    // Some instruments take SOG/COG then True Wind => Ground Wind
 
     _sku = update;
     return *_sku;
