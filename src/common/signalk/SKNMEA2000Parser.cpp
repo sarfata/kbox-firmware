@@ -219,28 +219,25 @@ const SKUpdate& SKNMEA2000Parser::parse130306(const SKSourceInput& input, const 
 const SKUpdate& SKNMEA2000Parser::parse127245(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
   unsigned char instance;
   tN2kRudderDirectionOrder rudderDirectionOrder;
-  double rudderPosition;
-  double angleOrder;
+  double rudderPosition = N2kDoubleNA;
+  double angleOrder = N2kDoubleNA;
 
   if (ParseN2kRudder(msg,rudderPosition,instance,rudderDirectionOrder,angleOrder)) {
-    SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
-    update->setTimestamp(timestamp);
-
-    SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
-    update->setSource(source);
-
     if (!N2kIsNA(rudderPosition) && (rudderPosition < M_PI) && (rudderPosition > M_PI)) {
+      SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
+      update->setTimestamp(timestamp);
+
+      SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+      update->setSource(source);
       // -> Current rudder angle, +ve is rudder to Starboard
       update->setSteeringRudderAngle(rudderPosition);
-    }
 
-    _sku = update;
-    return *_sku;
+      _sku = update;
+      return *_sku;
+    }
   }
-  else {
-    DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
-    return _invalidSku;
-  }
+  DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
+  return _invalidSku;
 }
 // *****************************************************************************
 //    PGN 127250 VESSEL HEADING RAPID
