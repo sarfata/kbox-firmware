@@ -115,7 +115,7 @@ void SKNMEAVisitor::visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const
   windAngle = v.getNumberValue();
 
   // Validation
-  if ((windAngle < 0)||(windAngle > M_PI_2)||(!u.hasEnvironmentWindSpeedApparent())) return;
+  if ((windAngle < 0)||(windAngle > 2 * M_PI)||(!u.hasEnvironmentWindSpeedApparent())) return;
 
   windSpeed = u.getEnvironmentWindSpeedTrue();  // in m/s
 
