@@ -85,34 +85,34 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
   }
 
   SECTION("127250: VESSEL True HEADING RAPID") {
-    SetN2kTrueHeading(msg, 0, SKDegToRad(180));
+    SetN2kTrueHeading(msg, 0, 0.7854);  // 180°
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 1);
-    CHECK( update.getNavigationHeadingTrue() == SKDegToRad(180) );
+    CHECK( update.getNavigationHeadingTrue() == 0.7854 );
   }
 
   SECTION("127250: VESSEL Magnetic HEADING RAPID") {
-    SetN2kMagneticHeading(msg, 0, SKDegToRad(181), SKDegToRad(-2), SKDegToRad(3.2));
+    SetN2kMagneticHeading(msg, 0, 0.7898, -1.5883, 0.014); // 181°, -2°, 3.2°
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 2);
-    CHECK( update.getNavigationHeadingMagnetic() == SKDegToRad(181) );
-    // CHECK( update.getNavigationMagneticDeviation() == SKDegToRad(-2) );
-    CHECK( update.getNavigationMagneticVariation() == SKDegToRad(3.2) );
+    CHECK( update.getNavigationHeadingMagnetic() == 0.7898 );
+    // CHECK( update.getNavigationMagneticDeviation() == -1.5883 );
+    CHECK( update.getNavigationMagneticVariation() == 0.014 );
   }
 
   SECTION("127245: Rudder Angle") {
-    SetN2kRudder(msg,SKDegToRad(-3.6), 0, N2kRDO_NoDirectionOrder, N2kDoubleNA);
+    SetN2kRudder(msg, -0.0157, 0, N2kRDO_NoDirectionOrder, N2kDoubleNA);  // -3.6°
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 1);
-    CHECK( update.getSteeringRudderAngle() == SKDegToRad(-3.6) );
+    CHECK( update.getSteeringRudderAngle() == -0.0157 );
   }
 
   SECTION("130306: W I N D") {
     //TODO: watch if Timo will correct Typo
-    SetN2kWindSpeed(msg, 0, 12.4, SKDegToRad(29.8), N2kWind_Apprent);
+    SetN2kWindSpeed(msg, 0, 12.4, 0.13, N2kWind_Apprent);   // 29.8°
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 2);
     CHECK( update.getEnvironmentWindSpeedApparent() == 12.4 );
-    CHECK( update.getEnvironmentWindAngleApparent() == SKDegToRad(29.8) );
+    CHECK( update.getEnvironmentWindAngleApparent() == 0.13 );
   }
 }
