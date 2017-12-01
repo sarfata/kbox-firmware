@@ -101,10 +101,11 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
   }
 
   SECTION("127245: Rudder Angle") {
-    SetN2kRudder(msg, -0.0157, 0, N2kRDO_NoDirectionOrder, N2kDoubleNA);  // -3.6°
+    SetN2kRudder(msg, SKDegToRad(-3.6), 0, N2kRDO_NoDirectionOrder, N2kDoubleNA);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 1);
-    CHECK( update.getSteeringRudderAngle() == -0.0157 );
+    // Some precision is lost because NMEA2000 rounds this value to 0.0001 precision
+    CHECK( update.getSteeringRudderAngle() == Approx(SKDegToRad(-3.6)).epsilon(0.0001) );
   }
 
   SECTION("130306: W I N D") {
@@ -113,6 +114,6 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 2);
     CHECK( update.getEnvironmentWindSpeedApparent() == 12.4 );
-    CHECK( (update.getEnvironmentWindAngleApparent() - SKDegToRad(29.8)) < 0.01 );
+    CHECK( update.getEnvironmentWindAngleApparent() == Approx(SKDegToRad(29.8)) );
   }
 }
