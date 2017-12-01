@@ -267,7 +267,7 @@ const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const 
         update->setEnvironmentDepthTransducerToKeel(offset * -1);
         update->setEnvironmentDepthBelowKeel(depthBelowTransducer + offset);
       }
-      else if (offset >= 0) {
+      else if (offset > 0) {
         update->setEnvironmentDepthSurfaceToTransducer(offset);
         update->setEnvironmentDepthBelowSurface(depthBelowTransducer + offset);
       }
