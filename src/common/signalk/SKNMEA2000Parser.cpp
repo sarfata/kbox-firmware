@@ -375,21 +375,21 @@ const SKUpdate& SKNMEA2000Parser::parse130306(const SKSourceInput& input, const 
           // AWS Apparent Wind Speed
           update->setEnvironmentWindSpeedApparent(windSpeed);
           // AWA pos coming from starboard, neg from port, relative to centerline vessel
-          if (windAngle > M_PI) windAngle += - M_2PI;
+          if (windAngle > M_PI) windAngle += - M_2xPI;
           update->setEnvironmentWindAngleApparent(windAngle);
         break;
         case N2kWind_True_boat:
           // Ground Wind
           update->setEnvironmentWindSpeedOverGround(windSpeed);
           // Ground Wind +/- starboard/port
-          if (windAngle >M_PI) windAngle += - M_2PI;
+          if (windAngle >M_PI) windAngle += - M_2xPI;
           update->setEnvironmentWindAngleTrueGround(windAngle);
         break;
         case N2kWind_True_water:
           // TWS (water refered) True "Sailing" Wind
           update->setEnvironmentWindSpeedTrue(windSpeed);
           // TWA (water refered) +/- starboard/port
-          if (windAngle >M_PI) windAngle += - M_2PI;
+          if (windAngle >M_PI) windAngle += - M_2xPI;
           update->setEnvironmentWindAngleTrueWater(windAngle);
         break;
       }
