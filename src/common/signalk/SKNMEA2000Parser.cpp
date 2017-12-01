@@ -74,7 +74,7 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
     case 129026L: // COG SOG rapid
         return parse129026(input, msg, timestamp);
       break;
-    //case 129301L:  // Time to/from Mark 
+    //case 129301L:  // Time to/from Mark
     case 130306L: // Wind Speed
         return parse130306(input, msg, timestamp);
       break;
@@ -136,8 +136,7 @@ const SKUpdate& SKNMEA2000Parser::parse127245(const SKSourceInput& input, const 
   double angleOrder = N2kDoubleNA;
 
   if (ParseN2kRudder(msg,rudderPosition,instance,rudderDirectionOrder,angleOrder)) {
-    // validation check max +/- 45°
-    if (!N2kIsNA(rudderPosition) && (rudderPosition <= M_PI_4) && (rudderPosition >= M_PI_4) ) {
+    if (!N2kIsNA(rudderPosition)) {
       SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
       update->setTimestamp(timestamp);
 
@@ -231,9 +230,6 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
 
     if (!N2kIsNA(waterSpeed)) {
       update->setNavigationSpeedThroughWater(waterSpeed);
-    }
-    if (!N2kIsNA(groundSpeed)) {
-      update->setNavigationSpeedOverGround(groundSpeed);
     }
 
     _sku = update;
@@ -362,39 +358,40 @@ const SKUpdate& SKNMEA2000Parser::parse130306(const SKSourceInput& input, const 
     update->setSource(source);
 
     if (!N2kIsNA(windAngle) && !N2kIsNA(windSpeed)) {
-      if (windReference == N2kWind_True_North) {
-        // Ground Wind Speed
-        update->setEnvironmentWindSpeedOverGround(windSpeed);
-        // Ground Wind Direction
-        update->setEnvironmentWindDirectionTrue(windAngle);
-      }
-      else if (windReference == N2kWind_Magnetic) {
-        // Ground Wind Speed
-        update->setEnvironmentWindSpeedOverGround(windSpeed);
-        // Ground Wind Direction refered to magnetic north
-        update->setEnvironmentWindDirectionMagnetic(windAngle);
-      }
-      //TODO: correct if Timos Typo will be corrected in library
-      else if (windReference == N2kWind_Apprent) {
-        // AWS Apparent Wind Speed
-        update->setEnvironmentWindSpeedApparent(windSpeed);
-        // AWA pos coming from starboard, neg from port, relative to centerline vessel
-        if (windAngle > M_PI) windAngle *= -1;
-        update->setEnvironmentWindAngleApparent(windAngle);
-      }
-      else if (windReference == N2kWind_True_boat) {
-        // Ground Wind
-        update->setEnvironmentWindSpeedTrue(windSpeed);
-        // Ground Wind +/- starboard/port
-        if (windAngle >M_PI) windAngle *= -1;
-        update->setEnvironmentWindAngleTrueGround(windAngle);
-      }
-      else if (windReference == N2kWind_True_water) {
-        // TWS (water refered) True "Sailing" Wind
-        update->setEnvironmentWindSpeedTrue(windSpeed);
-        // TWA (water refered) +/- starboard/port
-        if (windAngle >M_PI) windAngle *= -1;
-        update->setEnvironmentWindAngleTrueWater(windAngle);
+      switch(windReference) {
+        case N2kWind_True_North:
+          // Ground Wind Speed
+          update->setEnvironmentWindSpeedOverGround(windSpeed);
+          // Ground Wind Direction
+          update->setEnvironmentWindDirectionTrue(windAngle);
+        break;
+        case N2kWind_Magnetic:
+          // Ground Wind Speed
+          update->setEnvironmentWindSpeedOverGround(windSpeed);
+          // Ground Wind Direction refered to magnetic north
+          update->setEnvironmentWindDirectionMagnetic(windAngle);
+        break;
+        case  N2kWind_Apprent:
+          // AWS Apparent Wind Speed
+          update->setEnvironmentWindSpeedApparent(windSpeed);
+          // AWA pos coming from starboard, neg from port, relative to centerline vessel
+          if (windAngle > M_PI) windAngle = NORMALIZE_ANGLE(windAngle);
+          update->setEnvironmentWindAngleApparent(windAngle);
+        break;
+        case N2kWind_True_boat:
+          // Ground Wind
+          update->setEnvironmentWindSpeedTrue(windSpeed);
+          // Ground Wind +/- starboard/port
+          if (windAngle >M_PI) windAngle = NORMALIZE_ANGLE(windAngle);
+          update->setEnvironmentWindAngleTrueGround(windAngle);
+        break;
+        case N2kWind_True_water:
+          // TWS (water refered) True "Sailing" Wind
+          update->setEnvironmentWindSpeedTrue(windSpeed);
+          // TWA (water refered) +/- starboard/port
+          if (windAngle >M_PI) windAngle = NORMALIZE_ANGLE(windAngle);
+          update->setEnvironmentWindAngleTrueWater(windAngle);
+        break;
       }
     }
 
@@ -406,9 +403,6 @@ const SKUpdate& SKNMEA2000Parser::parse130306(const SKSourceInput& input, const 
     return _invalidSku;
   }
 }
-
-
-
 
 // *****************************************************************************
 //    PGN 128000 Nautical Leeway Angle (new 2017)
