@@ -139,22 +139,17 @@ List of contributors:
 
 The original code of this project is distributed under the MIT license.
 
-Please note that most of the libraries have their own license. Some are under
-the GPL. [Because of License compatibility
-rules](https://en.wikipedia.org/wiki/License_compatibility#GPL_compatibility),
-this means that the full package of the KBox code + these libraries currently
-falls under the GPL license.
-
-Contact me if you need a distribution of only the MIT code to re-use it
-separately.
+Please note that most of the libraries have their own license:
 
  - [Adafruit Sensor](https://github.com/adafruit/Adafruit_BMP280_Library) is
  under the Apache license
  - [Adafruit BMP280](https://github.com/adafruit/Adafruit_BMP280_Library) is under the BSD license
  - [Adafruit BNO055](https://github.com/adafruit/Adafruit_BNO055/) is under the MIT license
  - [ADC library](https://github.com/pedvide/ADC) is a permissive custom license
- - [FlexCAN](https://github.com/teachop/FlexCAN_Library) does not seem to have a
- license [yet](https://github.com/teachop/FlexCAN_Library/issues/12)
+ - [Arduino JSON](https://github.com/bblanchon/ArduinoJson) is under the MIT
+   license
+ - [FlexCAN](https://github.com/teachop/FlexCAN_Library) is licensed under "The
+   Unlicense"
  - [i2c_t3](https://github.com/nox771/i2c_t3) is under the LGPL
  - [ILI9341_t3](https://github.com/PaulStoffregen/ILI9341_t3) is under the MIT
    license
@@ -163,13 +158,17 @@ separately.
  - [NMEA2000_teensy](https://github.com/sarfata/NMEA2000_teensy) is under the
    MIT license
  - [Time](https://github.com/PaulStoffregen/Time) is under the LGPL
- - [SdFat](https://github.com/greiman/SdFat) is under the GPL
- - [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP) is under the LGPL
+ - [SdFat](https://github.com/greiman/SdFat) is under the MIT license
+ - [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP) and
+   [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) are under
+   the LGPL
  - The Teensy core files are distributed under the MIT license with [a specific
    clause](https://forum.pjrc.com/threads/25996-Question-about-licensing-of-core-files).
    The KBox hardware includes [a bootloader chip sold by pjrc.com](http://www.pjrc.com/store/ic_mkl02.html)
    and supports the Teensy project.
- - [ESPTool](https://github.com/themadinventor/esptool) is under the GPL
+
+To work on KBox and program the WiFi module, you will also use
+[ESPTool](https://github.com/themadinventor/esptool) which is under the GPL.
 
 **[Fair winds and following seas](https://en.wikipedia.org/wiki/Following_sea)
 to the authors of these libraries! Without them, this project would not have
