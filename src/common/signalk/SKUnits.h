@@ -26,7 +26,7 @@
 
 #include <math.h>
 
-#define M_2PI 6.283185307179586
+#define M_2xPI 6.283185307179586
 
 #define SKKnotToMs(x) x * 1852 / 3600
 #define SKStatuteMphToMs(x) x * 1609.344 / 3600
@@ -41,4 +41,4 @@
 #define SKMsToKmh(x)  x * 3.60
 
 // #define NORMALIZE_ANGLE(x) fmod(x, 2*M_PI)-M_PI
-#define NORMALIZE_ANGLE(x) fmod( x + M_2PI, M_2PI )
+#define NORMALIZE_ANGLE(x) fmod( x + M_2xPI, M_2xPI )
