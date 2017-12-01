@@ -147,7 +147,7 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 2);
     CHECK( update.getEnvironmentWindSpeedOverGround() == 12.4 );
-    CHECK( update.getEnvironmentWindAngleTrueGround() == Approx(SKDegToRad(-1)) );
+    CHECK( update.getEnvironmentWindAngleTrueGround() == Approx(SKDegToRad(-1)).epsilon(0.0001) );
   }
 
   SECTION("130306: TWS, TWA (centerline & water referenced) from port") {
