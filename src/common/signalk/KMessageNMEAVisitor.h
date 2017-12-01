@@ -23,7 +23,6 @@
 */
 
 #include "KMessage.h"
-#include "SKNMEA2000Parser.h"
 
 /**
  * Converts KMessage objects into NMEA equivalents which are added
