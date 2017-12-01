@@ -36,3 +36,5 @@
 
 #define SKMsToKnot(x) x * 3600.0 / 1852.0
 #define SKMsToKmh(x)  x * 3.60
+
+#define NORMALIZE_ANGLE(x) fmod(x, 2*M_PI)-M_PI
