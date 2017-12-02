@@ -26,19 +26,14 @@
 
 #include <math.h>
 
-#define M_2xPI 6.283185307179586
-
 #define SKKnotToMs(x) x * 1852 / 3600
 #define SKStatuteMphToMs(x) x * 1609.344 / 3600
 #define SKKmphToMs(x) x * 1000 / 3600
 
-// x * 2 * M_PI / 360
-#define SKDegToRad(x) x * 0.017453292519943
-// x * 360.0 / (2 * M_PI)
-#define SKRadToDeg(x) x * 57.295779513082321
-// x * 3600.0 / 1852.0
-#define SKMsToKnot(x) x * 1.943844492440605
-#define SKMsToKmh(x)  x * 3.60
+#define SKDegToRad(x)   x * 2 * M_PI / 360
+#define SKRadToDeg(x)   x * 360.0 / (2 * M_PI)
+#define SKMsToKnot(x)   x * 3600.0 / 1852.0
+#define SKMsToKmh(x)    x * 3.60
 
-// #define NORMALIZE_ANGLE(x) fmod(x, 2*M_PI)-M_PI
-#define NORMALIZE_ANGLE(x) fmod( x + M_2xPI, M_2xPI )
+//TODO check #define NORMALIZE_ANGLE(x) fmod(x, 2*M_PI)-M_PI
+#define NORMALIZE_ANGLE(x) fmod( x + 2 * M_PI, 2*M_PI )
