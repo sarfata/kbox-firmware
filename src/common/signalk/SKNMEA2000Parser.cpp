@@ -217,8 +217,8 @@ const SKUpdate& SKNMEA2000Parser::parse127250(const SKSourceInput& input, const 
 // *****************************************************************************
 const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
   unsigned char sid;
-  double waterSpeed;
-  double groundSpeed;
+  double waterSpeed = N2kDoubleNA;
+  double groundSpeed = N2kDoubleNA;
   tN2kSpeedWaterReferenceType swrt;
 
   if (ParseN2kBoatSpeed(msg, sid, waterSpeed, groundSpeed, swrt)) {
@@ -258,10 +258,6 @@ const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const 
 
       update->setEnvironmentDepthBelowTransducer(depthBelowTransducer);
 
-      if (N2kIsNA(offset)) {
-        // When no offset then offset should be Zero
-        offset = 0;
-      }
       // When offset is negative, it's the distance between transducer and keel
       if (offset < 0) {
         update->setEnvironmentDepthTransducerToKeel(offset * -1);
@@ -368,28 +364,28 @@ const SKUpdate& SKNMEA2000Parser::parse130306(const SKSourceInput& input, const 
         case N2kWind_Magnetic:
           // Ground Wind Speed
           update->setEnvironmentWindSpeedOverGround(windSpeed);
-          // Ground Wind Direction refered to magnetic north
+          // Ground Wind Direction referred to magnetic north
           update->setEnvironmentWindDirectionMagnetic(windAngle);
         break;
-        case  N2kWind_Apprent:
+        case  N2kWind_Apparent:
           // AWS Apparent Wind Speed
           update->setEnvironmentWindSpeedApparent(windSpeed);
           // AWA pos coming from starboard, neg from port, relative to centerline vessel
-          if (windAngle > M_PI) windAngle += - M_2xPI;
+          if (windAngle > M_PI) windAngle += - 2 * M_PI;
           update->setEnvironmentWindAngleApparent(windAngle);
         break;
         case N2kWind_True_boat:
           // Ground Wind
           update->setEnvironmentWindSpeedOverGround(windSpeed);
           // Ground Wind +/- starboard/port
-          if (windAngle >M_PI) windAngle += - M_2xPI;
+          if (windAngle >M_PI) windAngle += - 2 * M_PI;
           update->setEnvironmentWindAngleTrueGround(windAngle);
         break;
         case N2kWind_True_water:
-          // TWS (water refered) True "Sailing" Wind
+          // TWS (water referred) True "Sailing" Wind
           update->setEnvironmentWindSpeedTrue(windSpeed);
-          // TWA (water refered) +/- starboard/port
-          if (windAngle >M_PI) windAngle += - M_2xPI;
+          // TWA (water referred) +/- starboard/port
+          if (windAngle >M_PI) windAngle += - 2 * M_PI;
           update->setEnvironmentWindAngleTrueWater(windAngle);
         break;
       }
