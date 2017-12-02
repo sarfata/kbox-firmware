@@ -85,22 +85,25 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
   }
 
   SECTION("127250: VESSEL True HEADING RAPID") {
+    // sid,heading
     SetN2kTrueHeading(msg, 0, SKDegToRad(180));
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 1);
-    CHECK( (update.getNavigationHeadingTrue() - SKDegToRad(180)) < 0.01 );
+    CHECK( update.getNavigationHeadingTrue() == Approx(SKDegToRad(180)).epsilon(0.0001) );
   }
 
   SECTION("127250: VESSEL Magnetic HEADING RAPID") {
-    SetN2kMagneticHeading(msg, 0, 0.7898, -1.5883, 0.014); // 181°, -2°, 3.2°
+    // // sid,heading,deviation,variation
+    SetN2kMagneticHeading(msg, 0, SKDegToRad(352), SKDegToRad(-2), SKDegToRad(3.2));
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 2);
-    CHECK( (update.getNavigationHeadingMagnetic() - 0.7898) < 0.01 );
+    CHECK( update.getNavigationHeadingMagnetic() == Approx(SKDegToRad(352)).epsilon(0.0001) );
     // CHECK( update.getNavigationMagneticDeviation() == -1.5883 );
-    CHECK( update.getNavigationMagneticVariation() == 0.014 );
+    CHECK( update.getNavigationMagneticVariation() == Approx(SKDegToRad(3.2)).epsilon(0.0001) );
   }
 
   SECTION("127245: Rudder Angle") {
+    // rudderPosition,instance,rudderDirectionOrder,angleOrder
     SetN2kRudder(msg, SKDegToRad(-3.6), 0, N2kRDO_NoDirectionOrder, N2kDoubleNA);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 1);
@@ -139,7 +142,7 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 2);
     CHECK( update.getEnvironmentWindSpeedApparent() == 12.4 );
-    CHECK( update.getEnvironmentWindAngleApparent() == Approx(SKDegToRad(-30)) );
+    CHECK( update.getEnvironmentWindAngleApparent() == Approx(SKDegToRad(-30)).epsilon(0.0001) );
   }
 
   SECTION("130306: Ground Wind Speed and Angle TWS, TWA port") {
@@ -155,6 +158,6 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 2);
     CHECK( update.getEnvironmentWindSpeedTrue() == 12.4 );
-    CHECK( update.getEnvironmentWindAngleTrueWater() == Approx(SKDegToRad(-175)) );
+    CHECK( update.getEnvironmentWindAngleTrueWater() == Approx(SKDegToRad(-175)).epsilon(0.0001) );
   }
 }
