@@ -241,6 +241,7 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
   DEBUG("Unable to parse N2kMsg with PGN %i", msg.PGN);
   return _invalidSku;
 }
+
 // ****************************************************************************
 //  PGN 128267  Water depth
 // ****************************************************************************
@@ -260,13 +261,15 @@ const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const 
       update->setEnvironmentDepthBelowTransducer(depthBelowTransducer);
 
       // When offset is negative, it's the distance between transducer and keel
-      if (offset < 0) {
-        update->setEnvironmentDepthTransducerToKeel(offset * -1);
-        update->setEnvironmentDepthBelowKeel(depthBelowTransducer + offset);
-      }
-      else if (offset > 0) {
-        update->setEnvironmentDepthSurfaceToTransducer(offset);
-        update->setEnvironmentDepthBelowSurface(depthBelowTransducer + offset);
+      if (!N2kIsNA(offset)) {
+        if (offset < 0) {
+          update->setEnvironmentDepthTransducerToKeel(offset * -1);
+          update->setEnvironmentDepthBelowKeel(depthBelowTransducer + offset);
+        }
+        else if (offset > 0) {
+          update->setEnvironmentDepthSurfaceToTransducer(offset);
+          update->setEnvironmentDepthBelowSurface(depthBelowTransducer + offset);
+        }
       }
 
       _sku = update;
