@@ -149,6 +149,7 @@ const SKUpdate& SKNMEA2000Parser::parse127245(const SKSourceInput& input, const 
       return *_sku;
     }
   }
+
   DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
   return _invalidSku;
 }
@@ -202,6 +203,7 @@ const SKUpdate& SKNMEA2000Parser::parse127250(const SKSourceInput& input, const 
       }
     }
   }
+
   DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
   return _invalidSku;
 }
@@ -235,10 +237,9 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
     _sku = update;
     return *_sku;
   }
-  else {
-    DEBUG("Unable to parse N2kMsg with PGN %i", msg.PGN);
-    return _invalidSku;
-  }
+
+  DEBUG("Unable to parse N2kMsg with PGN %i", msg.PGN);
+  return _invalidSku;
 }
 // ****************************************************************************
 //  PGN 128267  Water depth
@@ -272,6 +273,7 @@ const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const 
       return *_sku;
     }
   }
+
   DEBUG("Unable to parse N2kMsg with PGN %i", msg.PGN);
   return _invalidSku;
 }
@@ -294,6 +296,7 @@ const SKUpdate& SKNMEA2000Parser::parse129025(const SKSourceInput& input, const 
     _sku = update;
     return *_sku;
   }
+
   DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
   return _invalidSku;
 }
@@ -324,6 +327,7 @@ const SKUpdate& SKNMEA2000Parser::parse129026(const SKSourceInput& input, const 
     _sku = update;
     return *_sku;
   }
+
   DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
   return _invalidSku;
 }
@@ -394,10 +398,9 @@ const SKUpdate& SKNMEA2000Parser::parse130306(const SKSourceInput& input, const 
     _sku = update;
     return *_sku;
   }
-  else {
-    DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
-    return _invalidSku;
-  }
+
+  DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
+  return _invalidSku;
 }
 
 // *****************************************************************************
