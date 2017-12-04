@@ -47,7 +47,7 @@ inline double SKNormalizeDirection(double x) {
 }
 
 /**
- * Normalizes any angle in radians to the range [-PI,2*M_PI)
+ * Normalizes any angle in radians to the range [-M_PI,M_PI)
  */
 inline double SKNormalizeAngle(double x) {
   x = fmod(x + M_PI, 2 * M_PI);
