@@ -91,9 +91,8 @@ void SKNMEAVisitor::visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SK
 //      $--MWV,x.x,a,x.x,a*hh
 //  1) Wind Angle, 0 to 360 degrees
 //  2) Reference, R = Relative, T = True
-//  3) Wind Speed
-//  4) Wind Speed Units: K = km/s, M = m/s, N = Knots
-//  5) Status, A = Data Valid
+//  3) Wind Speed Units: K = km/s, M = m/s, N = Knots
+//  4) Status, A = Data Valid
 // ************************************************************************
 void SKNMEAVisitor::visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const SKPath &p, const SKValue &v) {
 
@@ -107,7 +106,7 @@ void SKNMEAVisitor::visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const
   windSpeed = u.getEnvironmentWindSpeedTrue();  // in m/s
 
   NMEASentenceBuilder sb( "II", "MWV", 5);
-  sb.setField(1, SKRadToDeg(windAngle), 2 );
+  sb.setField(1, SKRadToDeg(SKNormalizeDirection(windAngle)), 2 );
   sb.setField(2, "R");
   sb.setField(3, windSpeed, 2 );
   sb.setField(4, "M");
