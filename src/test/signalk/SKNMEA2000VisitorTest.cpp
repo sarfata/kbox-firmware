@@ -22,13 +22,18 @@
   THE SOFTWARE.
 */
 
+
 #include <stdint.h>
 #include <N2kMsg.h>
 #include <N2kMessages.h>
 #include "../KBoxTest.h"
-#include "common/signalk/SKNMEA2000Visitor.h"
 #include "common/signalk/SKUpdateStatic.h"
+#include "common/signalk/SKNMEA2000Visitor.h"
+#include "common/signalk/SKUnits.h"
 #include "util.h"
+
+#define ApproxN2kWindSpeed(x) Approx(x).epsilon(0.01)
+#define ApproxN2kWindAngle(x) Approx(x).epsilon(0.0001)
 
 TEST_CASE("NMEA2000Visitor") {
   SKNMEA2000Visitor visitor;
@@ -155,6 +160,136 @@ TEST_CASE("NMEA2000Visitor") {
       CHECK( deviation == N2kDoubleNA );
       CHECK( variation == N2kDoubleNA );
       CHECK( ref == N2khr_magnetic );
+    }
+  }
+
+  SECTION("WIND") {
+    SKUpdateStatic<2> windUpdate;
+
+    SECTION("Apparent wind angle and apparent wind speed") {
+      windUpdate.setEnvironmentWindAngleApparent(SKDegToRad(-30));
+      windUpdate.setEnvironmentWindSpeedApparent(SKKnotToMs(4.5));
+
+      visitor.processUpdate(windUpdate);
+
+      CHECK( visitor.getMessages().size() == 1 );
+
+      const tN2kMsg *mWind = findMessage(visitor.getMessages(), 130306, 0);
+
+      CHECK( mWind );
+      if (mWind) {
+        unsigned char sid;
+        double windSpeed;
+        double windAngle;
+        tN2kWindReference windReference;
+
+        CHECK( ParseN2kPGN130306(*mWind, sid, windSpeed, windAngle, windReference) );
+
+        CHECK( windSpeed == ApproxN2kWindSpeed(SKKnotToMs(4.5)) );
+        CHECK( windAngle == ApproxN2kWindAngle(SKDegToRad(360 + -30)) );
+        CHECK( windReference == N2kWind_Apparent );
+      }
+    }
+
+    SECTION("True wind angle relative to boat and speed in water") {
+      // Both Raymarine i70 and B&G Vulcan 7 seem to ignore N2kWind_True_water
+      windUpdate.setEnvironmentWindAngleTrueWater(SKDegToRad(-30));
+      windUpdate.setEnvironmentWindSpeedTrue(SKKnotToMs(4.5));
+
+      visitor.processUpdate(windUpdate);
+
+      CHECK( visitor.getMessages().size() == 1 );
+
+      const tN2kMsg *mWind = findMessage(visitor.getMessages(), 130306, 0);
+
+      CHECK( mWind );
+      if (mWind) {
+        unsigned char sid;
+        double windSpeed;
+        double windAngle;
+        tN2kWindReference windReference;
+
+        CHECK( ParseN2kPGN130306(*mWind, sid, windSpeed, windAngle, windReference) );
+
+        CHECK( windSpeed == ApproxN2kWindSpeed(SKKnotToMs(4.5)) );
+        CHECK( windAngle == ApproxN2kWindAngle(SKDegToRad(360 + -30)) );
+        CHECK( windReference == N2kWind_True_water );
+      }
+    }
+
+    SECTION("True wind angle relative to boat and speed over ground") {
+      windUpdate.setEnvironmentWindAngleTrueGround(SKDegToRad(-30));
+      windUpdate.setEnvironmentWindSpeedOverGround(SKKnotToMs(4.5));
+
+      visitor.processUpdate(windUpdate);
+
+      CHECK( visitor.getMessages().size() == 1 );
+
+      const tN2kMsg *mWind = findMessage(visitor.getMessages(), 130306, 0);
+
+      CHECK( mWind );
+      if (mWind) {
+        unsigned char sid;
+        double windSpeed;
+        double windAngle;
+        tN2kWindReference windReference;
+
+        CHECK( ParseN2kPGN130306(*mWind, sid, windSpeed, windAngle, windReference) );
+
+        CHECK( windSpeed == ApproxN2kWindSpeed(SKKnotToMs(4.5)) );
+        CHECK( windAngle == ApproxN2kWindAngle(SKDegToRad(360 + -30)) );
+        CHECK( windReference == N2kWind_True_boat );
+      }
+    }
+
+    SECTION("True wind direction magnetic") {
+      windUpdate.setEnvironmentWindDirectionMagnetic(SKDegToRad(270));
+      windUpdate.setEnvironmentWindSpeedOverGround(SKKnotToMs(4.5));
+
+      visitor.processUpdate(windUpdate);
+
+      CHECK( visitor.getMessages().size() == 1 );
+
+      const tN2kMsg *mWind = findMessage(visitor.getMessages(), 130306, 0);
+
+      CHECK( mWind );
+      if (mWind) {
+        unsigned char sid;
+        double windSpeed;
+        double windAngle;
+        tN2kWindReference windReference;
+
+        CHECK( ParseN2kPGN130306(*mWind, sid, windSpeed, windAngle, windReference) );
+
+        CHECK( windSpeed == ApproxN2kWindSpeed(SKKnotToMs(4.5)) );
+        CHECK( windAngle == ApproxN2kWindAngle(SKDegToRad(270)) );
+        CHECK( windReference == N2kWind_Magnetic );
+      }
+    }
+
+    SECTION("True wind direction true") {
+      windUpdate.setEnvironmentWindDirectionTrue(SKDegToRad(270));
+      windUpdate.setEnvironmentWindSpeedOverGround(SKKnotToMs(4.5));
+
+      visitor.processUpdate(windUpdate);
+
+      CHECK( visitor.getMessages().size() == 1 );
+
+      const tN2kMsg *mWind = findMessage(visitor.getMessages(), 130306, 0);
+
+      CHECK( mWind );
+      if (mWind) {
+        unsigned char sid;
+        double windSpeed;
+        double windAngle;
+        tN2kWindReference windReference;
+
+        CHECK( ParseN2kPGN130306(*mWind, sid, windSpeed, windAngle, windReference) );
+
+        CHECK( windSpeed == ApproxN2kWindSpeed(SKKnotToMs(4.5)) );
+        CHECK( windAngle == ApproxN2kWindAngle(SKDegToRad(270)) );
+        CHECK( windReference == N2kWind_True_North );
+      }
     }
   }
 }

@@ -22,11 +22,13 @@
   THE SOFTWARE.
 */
 
+#include "SKNMEA2000Visitor.h"
+
 #include <N2kMsg.h>
 #include <N2kMessages.h>
-#include "SKNMEA2000Visitor.h"
 #include "SKUpdate.h"
 #include "SKValue.h"
+#include "SKUnits.h"
 
 SKNMEA2000Visitor::SKNMEA2000Visitor() {
 }
@@ -61,6 +63,52 @@ void SKNMEA2000Visitor::visitSKEnvironmentOutsidePressure(const SKUpdate& u, con
   //SetN2kPressure(*msg, /* sid */ 0, /* source */ 0, N2kps_Atmospheric, v.getNumberValue());
 
   _messages.add(msg);
+}
+
+
+void SKNMEA2000Visitor::generateWind(double windAngle, double windSpeed, tN2kWindReference windReference) {
+  tN2kMsg *msg = new tN2kMsg();
+
+  // We need to normalize wind to a direction because it is stored as un
+  // unsigned double.
+  SetN2kWindSpeed(*msg, 0, windSpeed, SKNormalizeDirection(windAngle), windReference);
+
+  _messages.add(msg);
+}
+
+void SKNMEA2000Visitor::visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+  // Look if we have an update for speed too
+  if (!u.hasEnvironmentWindSpeedApparent()) return;
+
+  generateWind(u.getEnvironmentWindAngleApparent(), u.getEnvironmentWindSpeedApparent(), N2kWind_Apparent);
+}
+
+void SKNMEA2000Visitor::visitSKEnvironmentWindAngleTrueWater(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+  // Look if we have an update for speed too
+  if (!u.hasEnvironmentWindSpeedTrue()) return;
+
+  generateWind(u.getEnvironmentWindAngleTrueWater(), u.getEnvironmentWindSpeedTrue(), N2kWind_True_water);
+}
+
+void SKNMEA2000Visitor::visitSKEnvironmentWindAngleTrueGround(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+  // Look if we have an update for speed too
+  if (!u.hasEnvironmentWindSpeedOverGround()) return;
+
+  generateWind(u.getEnvironmentWindAngleTrueGround(), u.getEnvironmentWindSpeedOverGround(), N2kWind_True_boat);
+}
+
+void SKNMEA2000Visitor::visitSKEnvironmentWindDirectionMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+  // Look if we have an update for speed too
+  if (!u.hasEnvironmentWindSpeedOverGround()) return;
+
+  generateWind(u.getEnvironmentWindDirectionMagnetic(), u.getEnvironmentWindSpeedOverGround(), N2kWind_Magnetic);
+}
+
+void SKNMEA2000Visitor::visitSKEnvironmentWindDirectionTrue(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+  // Look if we have an update for speed too
+  if (!u.hasEnvironmentWindSpeedOverGround()) return;
+
+  generateWind(u.getEnvironmentWindDirectionTrue(), u.getEnvironmentWindSpeedOverGround(), N2kWind_True_North);
 }
 
 void SKNMEA2000Visitor::visitSKNavigationPosition(const SKUpdate& u, const SKPath &p, const SKValue &v) {
