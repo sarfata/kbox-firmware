@@ -24,10 +24,9 @@
 
 #pragma once
 
+#include <N2kMessages.h>
 #include "common/algo/List.h"
 #include "SKVisitor.generated.h"
-
-class tN2kMsg;
 
 /**
  * Converts one or multiple SignalK updates into a series of N2KMessages.
@@ -42,10 +41,17 @@ class SKNMEA2000Visitor : SKVisitor {
   protected:
     void visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
     void visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+    void visitSKEnvironmentWindAngleTrueGround(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+    void visitSKEnvironmentWindAngleTrueWater(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+    void visitSKEnvironmentWindAngleApparent(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+    void visitSKEnvironmentWindDirectionTrue(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+    void visitSKEnvironmentWindDirectionMagnetic(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
     void visitSKNavigationAttitude(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
     void visitSKNavigationHeadingMagnetic(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
     void visitSKNavigationPosition(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
     void visitSKNavigationSpeedOverGround(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+
+    void generateWind(double windAngle, double windSpeed, tN2kWindReference windReference);
 
   public:
     SKNMEA2000Visitor();
