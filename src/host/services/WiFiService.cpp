@@ -69,7 +69,7 @@ void WiFiService::processMessage(const KMessage &m) {
   KMessageNMEAVisitor v;
   m.accept(v);
 
-  String data = v.toNMEA();
+  String data = v.getNMEAContent();
 
   // TODO
   // Should not limit like this to only 256 because there could be many nmea lines in this message.
@@ -104,4 +104,3 @@ void WiFiService::updateReceived(const SKUpdate& u) {
   k.write(0);
   _slip.writeFrame(k.getBytes(), k.getSize());
 }
-

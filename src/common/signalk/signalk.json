@@ -122,6 +122,12 @@
       "description": "Current magnetic heading of the vessel"
     },
     {
+      "path": "navigation.headingTrue",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Current True heading of the vessel"
+    },
+    {
       "path": "navigation.log",
       "type": "numberValue",
       "units": "m",
@@ -155,6 +161,26 @@
       "type": "numberValue",
       "units": "m",
       "description": "Total distance traveled on this trip / since trip reset"
+    },
+
+    {
+      "path": "steering.rudderAngle",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Current rudder angle"
+    },
+    {
+      "path": "steering.rudderAngleTarget",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "The angle the rudder should move to"
+    },
+
+    {
+      "path": "performance.leeway",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Current Leeway"
     }
   ]
 }

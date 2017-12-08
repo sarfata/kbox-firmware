@@ -33,6 +33,9 @@
 
 #include "SKNMEAVisitor.h"
 
+// debug only
+#include <KBoxLogging.h>
+
 void SKNMEAVisitor::visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) {
   NMEASentenceBuilder sb("II", "XDR", 4);
   sb.setField(1, "V");
@@ -61,7 +64,6 @@ void SKNMEAVisitor::visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p
   sb.setField(2, SKRadToDeg(v.getAttitudeValue().pitch), 1);
   sb.setField(3, "D");
   sb.setField(4, "PTCH");
-
   sb.setField(5, "A");
   sb.setField(6, SKRadToDeg(v.getAttitudeValue().roll), 1);
   sb.setField(7, "D");
@@ -71,9 +73,82 @@ void SKNMEAVisitor::visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p
 };
 
 void SKNMEAVisitor::visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) {
-  NMEASentenceBuilder sb2("II", "HDM", 2);
-  sb2.setField(1, SKRadToDeg(v.getNumberValue()), 1);
-  sb2.setField(2, "M");
+  NMEASentenceBuilder sb("II", "HDM", 2);
+  sb.setField(1, SKRadToDeg(v.getNumberValue()), 1);
+  sb.setField(2, "M");
 
-  _sentences.add(sb2.toNMEA() + "\r\n");
+  _sentences.add(sb.toNMEA() + "\r\n");
 };
+
+// ***********************  Wind Speed and Angle  ************************
+//  Talker ID: WI Weather Instruments
+//             VW Velocity Sensor, Mechanical?
+//  also seen: IIVWR
+//
+//
+//  NMEA0183  MWV Wind Speed and Angle  --> recommended
+//              1  2  3  4 5
+//              |  |  |  | |
+//      $--MWV,x.x,a,x.x,a,A*hh
+//  1) Wind Angle, 0 to 360 degrees
+//  2) Reference, R = Relative, T = True
+//  3) Wind Speed
+//  4) Wind Speed Units: K = km/s, M = m/s, N = Knots
+//  5) Status, A = Data Valid
+// ************************************************************************
+void SKNMEAVisitor::generateMWV(double windAngle, double windSpeed, bool apparent) {
+  NMEASentenceBuilder sb( "II", "MWV", 5);
+  sb.setField(1, SKRadToDeg(SKNormalizeDirection(windAngle)), 1);
+  sb.setField(2, apparent ? "R" : "T");
+  sb.setField(3, windSpeed, 2 );
+  sb.setField(4, "M");
+  sb.setField(5, "A");
+  _sentences.add(sb.toNMEA() + "\r\n");
+}
+
+void SKNMEAVisitor::visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+  // Look if we have an update for speed too
+  if (!u.hasEnvironmentWindSpeedApparent()) return;
+
+  generateMWV(u.getEnvironmentWindAngleApparent(), u.getEnvironmentWindSpeedApparent(), true);
+}
+
+void SKNMEAVisitor::visitSKEnvironmentWindAngleTrueWater(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+  // Look if we have an update for speed too
+  if (!u.hasEnvironmentWindSpeedTrue()) return;
+
+  generateMWV(u.getEnvironmentWindAngleTrueWater(), u.getEnvironmentWindSpeedTrue(), false);
+}
+
+//  ***********************************************
+//    RSA Rudder Sensor Angle
+//    Talker-ID: AG - Autopilot general
+//    also seen: ERRSA
+//    Expedition: IIXDR
+//
+//            1  2  3  4
+//            |  |  |  |
+//    $--RSA,x.x,A,x.x,A*hh
+//      1) Starboard (or single) rudder sensor, "-" means Turn To Port
+//      2) Status, A means data is valid
+//      3) Port rudder sensor
+//      4) Status, A means data is valid
+// *********************************************** */
+void SKNMEAVisitor::visitSKSteeringRudderAngle(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+  NMEASentenceBuilder sb("II", "RSA", 4);
+  sb.setField(1, SKRadToDeg( v.getNumberValue() ),1 );
+  sb.setField(2, "A");
+  sb.setField(3, "");
+  sb.setField(4, "");
+  _sentences.add(sb.toNMEA() + "\r\n");
+}
+
+//  ***********************************************
+//  New NMEA 0183 sentence Leeway
+//  https://www.nmea.org/Assets/20170303%20nautical%20leeway%20angle%20measurement%20sentence%20amendment.pdf
+//         1  2
+//         |  |
+//  $--LWY,A,x.x*hh<CR><LF>
+//      1) Valid or not A/V
+//      2) leeway in degrees and decimal degrees, positiv slipping to starboard
+//  ***********************************************

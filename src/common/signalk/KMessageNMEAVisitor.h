@@ -39,7 +39,7 @@ class KMessageNMEAVisitor : public KVisitor {
     void visit(const NMEASentence& s);
     void visit(const NMEA2000Message &n2km);
 
-    String toNMEA() const {
+    String getNMEAContent() const {
       return nmeaContent;
     };
 

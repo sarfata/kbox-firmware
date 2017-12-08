@@ -32,7 +32,7 @@ TEST_CASE("Visiting a NMEA0183 sentence message") {
 
   KMessageNMEAVisitor v;
   s.accept(v);
-  CHECK( v.toNMEA() == "$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79\r\n" );
+  CHECK( v.getNMEAContent() == "$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79\r\n" );
 }
 
 TEST_CASE("Visiting a NMEA2000 object") {
@@ -52,5 +52,5 @@ TEST_CASE("Visiting a NMEA2000 object") {
   KMessageNMEAVisitor v;
   m.accept(v);
   // Confirmed with canboat-analyzer that this matches the packet above.
-  CHECK( v.toNMEA() == "$PCDIN,01F119,00000000,0F,2AAF00D1067414FF*59\r\n" );
+  CHECK( v.getNMEAContent() == "$PCDIN,01F119,00000000,0F,2AAF00D1067414FF*59\r\n" );
 }

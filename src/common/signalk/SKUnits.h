@@ -26,9 +26,35 @@
 
 #include <math.h>
 
-#define SKKnotToMs(x) x * 1852 / 3600
-#define SKStatuteMphToMs(x) x * 1609.344 / 3600
-#define SKKmphToMs(x) x * 1000 / 3600
+#define SKKnotToMs(x) (x) * 1852 / 3600
+#define SKStatuteMphToMs(x) (x) * 1609.344 / 3600
+#define SKKmphToMs(x) (x) * 1000 / 3600
 
-#define SKDegToRad(x) x * 2 * M_PI / 360
-#define SKRadToDeg(x) x * 360.0 / (2 * M_PI)
+#define SKDegToRad(x)   (x) * 2 * M_PI / 360
+#define SKRadToDeg(x)   (x) * 360.0 / (2 * M_PI)
+#define SKMsToKnot(x)   (x) * 3600.0 / 1852.0
+#define SKMsToKmh(x)    (x) * 3.60
+
+/**
+ * Normalizes any angle in radians to the range [0,2*M_PI)
+ */
+inline double SKNormalizeDirection(double x) {
+  x = fmod(x, 2 * M_PI);
+  if (x < 0) {
+    x += 2 * M_PI;
+  }
+  return x;
+}
+
+/**
+ * Normalizes any angle in radians to the range [-M_PI,M_PI)
+ */
+inline double SKNormalizeAngle(double x) {
+  x = fmod(x + M_PI, 2 * M_PI);
+  if (x < 0) {
+    x += 2 * M_PI;
+  }
+  return x - M_PI;
+}
+
+

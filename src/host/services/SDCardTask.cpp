@@ -57,7 +57,7 @@ void SDCardTask::processMessage(const KMessage &m) {
   // FIXME: Should probably implement a custom visitor for logging.
   KMessageNMEAVisitor v;
   m.accept(v);
-  receivedMessages.add(Loggable("", v.toNMEA()));
+  receivedMessages.add(Loggable("", v.getNMEAContent()));
 }
 
 void SDCardTask::loop() {
@@ -159,7 +159,7 @@ uint64_t SDCardTask::getFreeSpace() const {
   // the running led stops flashing (although we do still call digitalWrite on it)
   // the serial ports start messing up big time (missing a lot of data)
   // eventually other things crash...
-  // Could be a memory problem or something like that. Have not found 
+  // Could be a memory problem or something like that. Have not found
   // it yet but the culprit is this line so for now it is disabled.
   uint64_t space = 0; //logFile->volume()->freeClusterCount();
   space *= logFile->volume()->blocksPerCluster();
