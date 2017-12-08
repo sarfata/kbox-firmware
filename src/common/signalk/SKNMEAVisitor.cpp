@@ -85,33 +85,39 @@ void SKNMEAVisitor::visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SK
 //             VW Velocity Sensor, Mechanical?
 //  also seen: IIVWR
 //
+//
 //  NMEA0183  MWV Wind Speed and Angle  --> recommended
-//              1  2  3  4
-//              |  |  |  |
-//      $--MWV,x.x,a,x.x,a*hh
+//              1  2  3  4 5
+//              |  |  |  | |
+//      $--MWV,x.x,a,x.x,a,A*hh
 //  1) Wind Angle, 0 to 360 degrees
 //  2) Reference, R = Relative, T = True
-//  3) Wind Speed Units: K = km/s, M = m/s, N = Knots
-//  4) Status, A = Data Valid
+//  3) Wind Speed
+//  4) Wind Speed Units: K = km/s, M = m/s, N = Knots
+//  5) Status, A = Data Valid
 // ************************************************************************
-void SKNMEAVisitor::visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const SKPath &p, const SKValue &v) {
-
-  float windAngle;
-  float windSpeed;
-  windAngle = v.getNumberValue();
-
-  // Look if we have an update for speed too
-  if (!u.hasEnvironmentWindSpeedApparent()) return;
-
-  windSpeed = u.getEnvironmentWindSpeedTrue();  // in m/s
-
+void SKNMEAVisitor::generateMWV(double windAngle, double windSpeed, bool apparent) {
   NMEASentenceBuilder sb( "II", "MWV", 5);
-  sb.setField(1, SKRadToDeg(SKNormalizeDirection(windAngle)), 2 );
-  sb.setField(2, "R");
+  sb.setField(1, SKRadToDeg(SKNormalizeDirection(windAngle)), 1);
+  sb.setField(2, apparent ? "R" : "T");
   sb.setField(3, windSpeed, 2 );
   sb.setField(4, "M");
   sb.setField(5, "A");
   _sentences.add(sb.toNMEA() + "\r\n");
+}
+
+void SKNMEAVisitor::visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+  // Look if we have an update for speed too
+  if (!u.hasEnvironmentWindSpeedApparent()) return;
+
+  generateMWV(u.getEnvironmentWindAngleApparent(), u.getEnvironmentWindSpeedApparent(), true);
+}
+
+void SKNMEAVisitor::visitSKEnvironmentWindAngleTrueWater(const SKUpdate &u, const SKPath &p, const SKValue &v) {
+  // Look if we have an update for speed too
+  if (!u.hasEnvironmentWindSpeedTrue()) return;
+
+  generateMWV(u.getEnvironmentWindAngleTrueWater(), u.getEnvironmentWindSpeedTrue(), false);
 }
 
 //  ***********************************************

@@ -41,11 +41,13 @@ class SKNMEAVisitor : SKVisitor {
 
     void visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
     void visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+    void visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
+    void visitSKEnvironmentWindAngleTrueWater(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     void visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     void visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
-    void visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
     void visitSKSteeringRudderAngle(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
 
+    void generateMWV(double windAngle, double windSpeed, bool apparent);
 
   public:
     /**
