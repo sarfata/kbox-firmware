@@ -35,3 +35,6 @@ Temporary Items
 
 # Platformio likes to auto-create this
 lib/readme.txt
+
+# Netbeans project folder
+nbproject
