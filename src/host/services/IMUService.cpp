@@ -22,6 +22,7 @@
   THE SOFTWARE.
 */
 
+#include <KBoxConfig.h>
 #include <KBoxLogging.h>
 #include "common/signalk/SKUpdateStatic.h"
 #include "common/signalk/SKUnits.h"
@@ -55,9 +56,13 @@ void IMUService::loop() {
   pitch = eulerAngles.y();
   heading = fmod(eulerAngles.x() + 270, 360);
 
-  if (sysCalib == 3) {
-    update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(roll), /* pitch */ SKDegToRad(pitch), /* yaw */ 0));
+  if (magCalib >= cfHdgMinCal) {
     update.setNavigationHeadingMagnetic(SKDegToRad(heading));
+    _skHub.publish(update);
+  }
+	
+	if (accelCalib >= cfHeelPitchMinCal && gyroCalib >= cfHeelPitchMinCal) {
+    update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(roll), /* pitch */ SKDegToRad(pitch), /* yaw */ 0));
     _skHub.publish(update);
   }
 }
