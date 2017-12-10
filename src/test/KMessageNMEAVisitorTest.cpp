@@ -32,16 +32,7 @@ TEST_CASE("Visiting a NMEA0183 sentence message") {
 
   KMessageNMEAVisitor v;
   s.accept(v);
-  CHECK( v.toNMEA() == "$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79\r\n" );
-}
-
-TEST_CASE("Visiting a IMU object") {
-  IMUMessage m(3, DegToRad(232.423), DegToRad(4.19), DegToRad(10.122331), DegToRad(29.028));
-
-  KMessageNMEAVisitor v;
-  m.accept(v);
-  CHECK( v.toNMEA() == "$IIXDR,A,4.2,D,Yaw,A,10.1,D,Pitch,A,29.0,D,Roll,,3,,Calibration*25\r\n"
-                       "$IIHDM,232.42,M*17\r\n" );
+  CHECK( v.getNMEAContent() == "$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79\r\n" );
 }
 
 TEST_CASE("Visiting a NMEA2000 object") {
