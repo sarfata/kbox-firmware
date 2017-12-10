@@ -32,19 +32,22 @@ NetServer server(10110);
 
 static const uint32_t connectedColor = rgb.Color(0x00, 0xff, 0x00);
 static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0xff);
+//RES_MOD_8_2_17 add HeronRpi static parameters
+const char*  ssid = "HeronRpi";
+const char*  password = "password";
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-
+//RREMOD_8_4_17 mod wifi to connect to HeronRpi network
 void setup() {
   DEBUG_INIT();
 
   rgb.begin();
   rgb.setPixelColor(0, 0, 0, 0xff);
   rgb.show();
-
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP("KBox");
+  //RES_MOD_8_2_17 comment out softAP setup - 2 lines use station class
+  //WiFi.mode(WIFI_AP);
+  //WiFi.softAP("KBox");
 
   Serial.begin(115200);
   Serial.setTimeout(0);
@@ -54,7 +57,24 @@ void setup() {
   // upload are done and restart normal operation.
   delay(1000);
 
-  DEBUG("Starting KBox WiFi module");
+  //DEBUG("Starting KBox WiFi module");
+
+  //RES_MOD_8_2_17 use wifi.begin instead -up to } is mine
+  DEBUG("Starting Kbox WiFi to connect to HeronRpi");
+  WiFi.begin(ssid, password);
+  DEBUG("Connecting to", ssid);
+  int i = 0;
+  //RES_MOD_8_2_17 wait for the wifi to connect
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    DEBUG("waiting to connect", ++i);
+
+  }
+  //RES_MOD_9_6_17  serial print when connected
+  DEBUG("Connection established");
+  DEBUG("Connected to  %s", WiFi.localIP().toString().c_str());
+
+  //RES_MOD_8_2_17 end of my add
 }
 
 uint8_t buffer[1024];
@@ -90,4 +110,3 @@ void loop() {
   }
   rgb.show();
 }
-

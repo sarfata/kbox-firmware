@@ -23,26 +23,12 @@
 */
 
 #include "KMessageNMEAVisitor.h"
+#include "KBoxDebug.h"
 #include "util/NMEASentenceBuilder.h"
 #include "util/nmea2000.h"
 
 void KMessageNMEAVisitor::visit(const NMEASentence& s) {
   nmeaContent += s.getSentence() + "\r\n";
-}
-
-void KMessageNMEAVisitor::visit(const BarometerMeasurement &bm) {
-  // XDR is not a very well defined sentence. Can be used for lots of things
-  // apparently but that is better than nothing.
-  NMEASentenceBuilder sb("II", "XDR", 8);
-  sb.setField(1, "P");
-  sb.setField(2, bm.getPressure(), 5);
-  sb.setField(3, "B");
-  sb.setField(4, "Barometer");
-  sb.setField(5, "T");
-  sb.setField(6, bm.getTemperature());
-  sb.setField(7, "C");
-  sb.setField(8, "TempAir");
-  nmeaContent += sb.toNMEA() + "\r\n";
 }
 
 void KMessageNMEAVisitor::visit(const VoltageMeasurement &vm) {
@@ -63,37 +49,66 @@ void KMessageNMEAVisitor::visit(const NMEA2000Message &n2km) {
   free(s);
 }
 
+void KMessageNMEAVisitor::visit(const BarometerMeasurement &bm) {
+  // XDR is not a very well defined sentence. Can be used for lots of things
+  // apparently but that is better than nothing.
+  double respressure = bm.getPressure();
+  //RES_MOD_7_29_17 convert pressure to Bar not hBar - 5 decimal places
+  respressure = respressure/100000;
+  NMEASentenceBuilder sb("II", "XDR", 8);
+  sb.setField(1, "P");
+  sb.setField(2, respressure, 5);
+  sb.setField(3, "B");
+  sb.setField(4, "Barometer");
+  sb.setField(5, "C");
+  sb.setField(6, bm.getTemperature());
+  sb.setField(7, "C");
+  sb.setField(8, "TempAir");
+  nmeaContent += sb.toNMEA() + "\r\n";
+  }
 
-inline static double RadToDeg(double v) { return v*180.0/3.1415926535897932384626433832795; }
-
+	//RES_MOD_7_29_17  for OpenCPN drop yaw data now only 12 instead of 16 data
+	// part of message, switch pitch and roll to match my mount
 void KMessageNMEAVisitor::visit(const IMUMessage &imu) {
-  NMEASentenceBuilder sb("II", "XDR", 16);
+  NMEASentenceBuilder sb("II", "XDR", 12);
+	//sb.setField(1, "A");
+	//sb.setField(2, imu.getYaw(), 1);
+	//sb.setField(3, "D");
+	//sb.setField(4, "Yaw");
+
+  //RES_MOD_7_29_17 DEFINE  NEW VARIABLEs TO ADD OFFSET to pitch and roll
+  // and switch pitch and roll for my mounting, adjust SetField
+  double resrolloffset = imu.getPitch();
+  double resptchoffset = imu.getRoll();
+  resrolloffset = - resrolloffset;
+  resptchoffset = - resptchoffset;
   sb.setField(1, "A");
-  sb.setField(2, RadToDeg(imu.getYaw()), 1);
+  //RES_MOD_7_29_17 use new variable
+  //sb.setField(6, imu.getPitch(), 1);
+  sb.setField(2, resrolloffset, 1);
   sb.setField(3, "D");
-  sb.setField(4, "Yaw");
+  //make pitch to be roll
+  sb.setField(4, "ROLL");
 
   sb.setField(5, "A");
-  sb.setField(6, RadToDeg(imu.getPitch()), 1);
+  //sb.setField(10, imu.getRoll(), 1);
+  sb.setField(6, resptchoffset, 1);
   sb.setField(7, "D");
-  sb.setField(8, "Pitch");
+  // make roll to be pitch; PTCH in OpenCPN
+  sb.setField(8, "PTCH");
 
-  sb.setField(9, "A");
-  sb.setField(10, RadToDeg(imu.getRoll()), 1);
-  sb.setField(11, "D");
-  sb.setField(12, "Roll");
-
-  sb.setField(13, "");
-  sb.setField(14, imu.getCalibration());
-  sb.setField(15, "");
-  sb.setField(16, "Calibration");
+  sb.setField(9, "");
+  sb.setField(10, imu.getCalibration());
+  sb.setField(11, "");
+  sb.setField(12, "Calibration");
 
   nmeaContent += sb.toNMEA() + "\r\n";
 
-  NMEASentenceBuilder sb2("II", "HDM", 2);
-  sb2.setField(1, RadToDeg(imu.getCourse()));
-  sb2.setField(2, "M");
+  //RES_MOD_10_28_17 remove HDM output, as repeated from GPS
+  //NMEASentenceBuilder sb2("II", "HDM", 2);
+  //sb2.setField(1, imu.getCourse());
+  //sb2.setField(2, "M");
 
-  nmeaContent += sb2.toNMEA() + "\r\n";
+  //nmeaContent += sb2.toNMEA() + "\r\n";
+
 }
-

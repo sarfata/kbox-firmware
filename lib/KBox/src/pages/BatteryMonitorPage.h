@@ -25,17 +25,26 @@
 #include "MFD.h"
 #include "KMessage.h"
 #include "ui/TextLayer.h"
+//RES_MOD_10_28_17 indclude DEBUG
+#include "KBoxDebug.h"
 
 class BatteryMonitorPage : public Page, public KReceiver, public KVisitor {
   private:
-    TextLayer *houseVoltage, *houseCurrent, *starterVoltage, *supplyVoltage;
+    //RES_MOD_10_28_17 substatue baroPressure for starterVoltage
+    TextLayer *houseVoltage, *houseCurrent, *baroPressure, *supplyVoltage;
 
     Color colorForVoltage(float v);
     String formatMeasurement(float measure, const char *unit);
+
+    //RES_MOD_10_28_17 setup color for Pressure
+    Color colorForPressure(float b);
+
 
   public:
     BatteryMonitorPage();
 
     void processMessage(const KMessage& message);
     void visit(const VoltageMeasurement&);
+    //RES_MOD_10_28_17 add this to public
+    void visit(const BarometerMeasurement&);
 };

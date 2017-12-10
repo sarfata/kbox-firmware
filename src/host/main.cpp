@@ -40,7 +40,8 @@ void setup() {
   // https://forum.pjrc.com/threads/27827-Float-in-sscanf-on-Teensy-3-1
   asm(".global _printf_float");
 
-  delay(3000);
+  //RES_MOD_7_25_17 increase delay to 5 seconds to allow putty to start
+  delay(5000);
 
   DEBUG_INIT();
   DEBUG("Starting");
@@ -52,8 +53,9 @@ void setup() {
   WiFiTask *wifi = new WiFiTask();
 
   // Create all the generating tasks and connect them
-  NMEA2000Task *n2kTask = new NMEA2000Task();
-  n2kTask->connectTo(*wifi);
+  //RES_MOD_9_12  comment out all NMEA2000tasks except voltage
+  //NMEA2000Task *n2kTask = new NMEA2000Task();
+  //n2kTask->connectTo(*wifi);
 
   ADCTask *adcTask = new ADCTask(kbox.getADC());
 
@@ -61,7 +63,7 @@ void setup() {
   VoltageN2kConverter *voltageConverter = new VoltageN2kConverter();
   adcTask->connectTo(*voltageConverter);
   voltageConverter->connectTo(*wifi);
-  voltageConverter->connectTo(*n2kTask);
+  //voltageConverter->connectTo(*n2kTask);
 
   NMEAReaderTask *reader1 = new NMEAReaderTask(NMEA1_SERIAL);
   NMEAReaderTask *reader2 = new NMEAReaderTask(NMEA2_SERIAL);
@@ -70,30 +72,33 @@ void setup() {
 
   IMUTask *imuTask = new IMUTask();
   imuTask->connectTo(*wifi);
-  imuTask->connectTo(*n2kTask);
+  //imuTask->connectTo(*n2kTask);
 
   BarometerTask *baroTask = new BarometerTask();
+  //RES_Mod_7_29_17 add baromoeter task to wifi before n2kTask
+  baroTask->connectTo(*wifi);
 
-  BarometerN2kConverter *bn2k = new BarometerN2kConverter();
-  bn2k->connectTo(*wifi);
-  bn2k->connectTo(*n2kTask);
+  //BarometerN2kConverter *bn2k = new BarometerN2kConverter();
+  //bn2k->connectTo(*wifi);
+  //bn2k->connectTo(*n2kTask);
 
-  baroTask->connectTo(*bn2k);
+  //baroTask->connectTo(*bn2k);
 
   SDCardTask *sdcardTask = new SDCardTask();
   reader1->connectTo(*sdcardTask);
   reader2->connectTo(*sdcardTask);
   adcTask->connectTo(*sdcardTask);
-  n2kTask->connectTo(*sdcardTask);
+  //n2kTask->connectTo(*sdcardTask);
   baroTask->connectTo(*sdcardTask);
   imuTask->connectTo(*sdcardTask);
 
   // Add all the tasks
   kbox.addTask(new IntervalTask(new RunningLightTask(), 250));
   kbox.addTask(new IntervalTask(adcTask, 1000));
-  kbox.addTask(new IntervalTask(imuTask, 50));
+  //RES_Mod_7_29_17 - change imyu internval to 250
+  kbox.addTask(new IntervalTask(imuTask, 1000));
   kbox.addTask(new IntervalTask(baroTask, 1000));
-  kbox.addTask(n2kTask);
+  //kbox.addTask(n2kTask);
   kbox.addTask(reader1);
   kbox.addTask(reader2);
   kbox.addTask(wifi);
@@ -106,7 +111,7 @@ void setup() {
   StatsPage *statsPage = new StatsPage();
   statsPage->setNmea1Task(reader1);
   statsPage->setNmea2Task(reader2);
-  statsPage->setNMEA2000Task(n2kTask);
+  //statsPage->setNMEA2000Task(n2kTask);
   statsPage->setTaskManager(&(kbox.getTaskManager()));
   statsPage->setSDCardTask(sdcardTask);
 
@@ -137,6 +142,16 @@ void loop() {
     CPU_RESTART;
   }
   else {
-    kbox.loop();
+      kbox.loop();
+      //RES_MOD_10_28_17 add serial read to empty buffer from Rpi
+      //and repeat to Nmeaouput1 what the Rpi repeats
+      //int c = Serial.read();
+      //while (Serial.read()>0){
+      //int c_rd = 0;
+      while (Serial.read() > 0) {
+      //  DEBUG("USB input");
+      NMEA1_SERIAL.write(Serial.read());
+      }
+
   }
 }

@@ -47,9 +47,9 @@ class KMessage {
 class KVisitor {
   public:
     virtual void visit(const NMEASentence &) {};
-    virtual void visit(const BarometerMeasurement &) {};
     virtual void visit(const VoltageMeasurement &) {};
     virtual void visit(const NMEA2000Message &) {};
+    virtual void visit(const BarometerMeasurement &) {};
     virtual void visit(const IMUMessage &) {};
 };
 
@@ -180,14 +180,15 @@ class IMUMessage: public KMessage {
      * Pitch in radians. Positive when bow rises.
      */
     double getPitch() const {
-      return pitch;
+          return pitch;
     };
 
     /*
      * Roll in radians. Positive when tilted right.
      */
+
     double getRoll() const {
-      return roll;
+        return roll;
     };
 };
 

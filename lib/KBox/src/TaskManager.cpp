@@ -63,7 +63,8 @@ void TaskManager::loop() {
   loopStats.recordRun(loopTimer);
 
   if (statDisplayTimer > statDisplayInterval) {
-    displayStats();
+  //RES_MOD_10_28_17 remove stat display
+    //    displayStats();
     statDisplayTimer = 0;
   }
 }
