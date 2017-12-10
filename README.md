@@ -68,39 +68,43 @@ Because KBox is open-source, you can do a lot more things with it:
 
 ### Current software status
 
-As of June 2017, the KBox firmware supports:
+As of December 2017, the KBox firmware:
 
- - General functionnality
-   - Creating a new WiFi network (KBox) or joining an existing network (via simple
+ - General functionality
+   - Creates a new WiFi network (KBox) or can join an existing network (via simple
      code modification and recompiling)
-   - Support up to 8 simultaneous TCP clients connected on port 4242
-   - Serving web pages (will be used for web interface - in development)
-   - Websocket connections (SignalK support coming soon!)
- - NMEA0183 reception and forwarding
-   - Receiving NMEA0183 sentence from an external source and forwarding them to
-     WiFi clients via a TCP socket
-   - NMEA0183 RMC sentences are decoded and converted to SignalK data in memory 
-     and can be converted to other format (like NMEA2000)
- - NMEA2000:
-   - Receiving NMEA2000 packets and translating them to `$PCDIN` nmea sentences to
-     all WiFi clients. iNavX will decode this just fine as well as a few other
-     programs.
-   - Sending SOG and COG (from NMEA RMC messages) to other NMEA2000 clients
+   - Supports up to 8 simultaneous TCP clients connected on port 10110
+   - Integrated web server
+ - NMEA0183
+   - Forwards all NMEA0183 sentences to WiFi clients via TCP
+   - Converts RMC (GPS speed and coordinates) and MWV (Wind) to SignalK
+ - NMEA2000
+   - Forwards all NMEA2000 messages to WiFi (even the ones not understood by
+     KBox) in Seasmart format (they look like NMEA sentences and start with
+     `$PCDIN`)
+   - Converts PGN 127245 (Rudder), 127250 (heading), 128259 (boat speed), 128267
+     (depth), 129025 (position rapid lat/lon), 129026 (sog/cog rapid) and 130306
+     (wind speed and angle/direction) to SignalK
+   - Generates PGN 127508 (battery), 130310 (baro pressure), 130306 (wind),
+     127257 (attitude), 127250 (magnetic heading), 129026 (sog/cog rapid) from
+     SignalK
  - Sensors
-   - Sending nmea2000 bus voltage as well as all three battery banks voltage to
-     WiFi clients via $PCDIN nmea 2000 messages, and to the NMEA2000 network.
-   - Sending current pressure via nmea 2000 $PCDIN messages to wifi clients and
-     to the NMEA2000 network.
-   - Sending roll, pitch and magnetic heading via NMEA2000 and WiFi
+   - Measure nmea2000 bus voltage as well as all three battery banks voltage.
+   - Measure barometric pressure
+   - Measure roll, pitch and magnetic heading
+   - Sensor data is available in SignalK and is automatically converted to the
+     relevant NMEA and NMEA2000 messages
+ - SignalK:
+   - All updates generated from NMEA, NMEA2000 and internal sensors are
+     available over websocket
  - Data logging
    - All NMEA and NMEA2000 messages are logged to the SDCard
  - Display
    - Battery monitor page: shows voltages of all battery
    - Stats page: shows number of received and transmitted messages on all interfaces
-   
-Current focus is on improving the support of SignalK so that you can get your boat
-data in JSON directly from KBox (without a separate RaspberryPi to do the conversion)
-and on ease of configuration and use.
+
+For more information on current work and future updates, please refer to our
+[issue tracker](https://github.com/sarfata/kbox-firmware/issues).
 
 ## KBox firmware overview
 
@@ -143,7 +147,8 @@ List of contributors:
  - [Thomas Sarlandie](https://github.com/sarfata/)
  - [Neftaly Hernandez](https://github.com/neftaly)
  - [Heiko Behrens](https://github.com/HBehrens)
- 
+ - [Ronnie Zeiller](https://github.com/ronzeiller)
+
 ## License
 
 The original code of this project is distributed under the MIT license.
@@ -182,3 +187,9 @@ To work on KBox and program the WiFi module, you will also use
 **[Fair winds and following seas](https://en.wikipedia.org/wiki/Following_sea)
 to the authors of these libraries! Without them, this project would not have
 been possible!**
+
+## Changelog
+
+ * 2017 12 07
+   * Merge develop branch into master - Start the changelog
+   * The old master branch is not in `kbox-v0`
