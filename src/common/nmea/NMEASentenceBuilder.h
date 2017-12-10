@@ -23,6 +23,7 @@
 */
 
 #include <WString.h>
+#include "signalk/SKNMEASentence.h"
 
 /** A utility class to generate a properly formatted and checksum'd NMEA
  * sentence.
@@ -61,5 +62,5 @@ class NMEASentenceBuilder {
     /** Returns a string with a properly formatted NMEA sentence, terminated by
      * a checksum and "\r\n\0".
      */
-    String toNMEA();
+    SKNMEASentence toNMEA();
 };

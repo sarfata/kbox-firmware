@@ -22,25 +22,36 @@
   THE SOFTWARE.
 */
 
+#include "common/algo/List.h"
 #include "common/signalk/SKUnits.h"
-#include "common/signalk/SKNMEAVisitor.h"
+#include "common/signalk/SKNMEAConverter.h"
 #include "common/signalk/SKUpdateStatic.h"
 #include "../KBoxTest.h"
 
-TEST_CASE("SKNMEAVisitorTest") {
-  SKNMEAVisitor v;
+class NMEAOut : public LinkedList<SKNMEASentence>, public SKNMEAOutput {
+  public:
+    bool write(const SKNMEASentence& s) override {
+      add(s);
+      return true;
+    };
+
+};
+
+TEST_CASE("SKNMEAConverterTest") {
+  SKNMEAConverter converter;
+  NMEAOut out;
 
   SECTION("ElectricalBatteriesVoltage") {
     SKUpdateStatic<3> u;
     u.setElectricalBatteriesVoltage("Supply", 12.42);
 
-    v.processUpdate(u);
+    converter.convert(u, out);
 
-    CHECK( v.getSentences().size() == 1 );
+    CHECK( out.size() == 1 );
 
-    if (v.getSentences().size() > 0) {
-      String s = *(v.getSentences().begin());
-      CHECK( s == "$IIXDR,V,12.42,V,Supply*56\r\n");
+    if (out.size() > 0) {
+      String s = *(out.begin());
+      CHECK( s == "$IIXDR,V,12.42,V,Supply*56");
     }
   }
 
@@ -48,13 +59,13 @@ TEST_CASE("SKNMEAVisitorTest") {
     SKUpdateStatic<1> u;
     u.setEnvironmentOutsidePressure(1.02421);
 
-    v.processUpdate(u);
+    converter.convert(u, out);
 
-    CHECK( v.getSentences().size() == 1 );
+    CHECK( out.size() == 1 );
 
-    if (v.getSentences().size() > 0) {
-      String s = *(v.getSentences().begin());
-      CHECK( s == "$IIXDR,P,1.02421,B,Barometer*23\r\n" );
+    if (out.size() > 0) {
+      String s = *(out.begin());
+      CHECK( s == "$IIXDR,P,1.02421,B,Barometer*23" );
     }
   }
 
@@ -64,13 +75,13 @@ TEST_CASE("SKNMEAVisitorTest") {
           /*pitch*/SKDegToRad(10.1),
           /*yaw*/SKDegToRad(4.2)));
 
-    v.processUpdate(u);
+    converter.convert(u, out);
 
-    CHECK( v.getSentences().size() == 1 );
+    CHECK( out.size() == 1 );
 
-    if (v.getSentences().size() > 0) {
-      String s = *(v.getSentences().begin());
-      CHECK( s == "$IIXDR,A,10.1,D,PTCH,A,29.0,D,ROLL*57\r\n" );
+    if (out.size() > 0) {
+      String s = *(out.begin());
+      CHECK( s == "$IIXDR,A,10.1,D,PTCH,A,29.0,D,ROLL*57" );
     }
   }
 
@@ -78,13 +89,13 @@ TEST_CASE("SKNMEAVisitorTest") {
     SKUpdateStatic<1> u;
     u.setNavigationHeadingMagnetic(SKDegToRad(142));
 
-    v.processUpdate(u);
+    converter.convert(u, out);
 
-    CHECK( v.getSentences().size() == 1 );
+    CHECK( out.size() == 1 );
 
-    if (v.getSentences().size() > 0) {
-      String s = *(v.getSentences().begin());
-      CHECK( s == "$IIHDM,142.0,M*25\r\n" );
+    if (out.size() > 0) {
+      String s = *(out.begin());
+      CHECK( s == "$IIHDM,142.0,M*25" );
     }
   }
 
@@ -95,11 +106,11 @@ TEST_CASE("SKNMEAVisitorTest") {
       u.setEnvironmentWindSpeedTrue(10);
       u.setEnvironmentWindAngleTrueWater(SKDegToRad(142));
 
-      v.processUpdate(u);
-      CHECK( v.getSentences().size() == 1 );
-      if (v.getSentences().size() > 0) {
-        String s = *(v.getSentences().begin());
-        CHECK( s == "$IIMWV,142.0,T,10.00,M,A*3E\r\n" );
+      converter.convert(u, out);
+      CHECK( out.size() == 1 );
+      if (out.size() > 0) {
+        String s = *(out.begin());
+        CHECK( s == "$IIMWV,142.0,T,10.00,M,A*3E" );
       }
     }
 
@@ -107,11 +118,11 @@ TEST_CASE("SKNMEAVisitorTest") {
       u.setEnvironmentWindSpeedApparent(10);
       u.setEnvironmentWindAngleApparent(SKDegToRad(142));
 
-      v.processUpdate(u);
-      CHECK( v.getSentences().size() == 1 );
-      if (v.getSentences().size() > 0) {
-        String s = *(v.getSentences().begin());
-        CHECK( s == "$IIMWV,142.0,R,10.00,M,A*38\r\n" );
+      converter.convert(u, out);
+      CHECK( out.size() == 1 );
+      if (out.size() > 0) {
+        String s = *(out.begin());
+        CHECK( s == "$IIMWV,142.0,R,10.00,M,A*38" );
       }
     }
 
@@ -119,25 +130,25 @@ TEST_CASE("SKNMEAVisitorTest") {
       u.setEnvironmentWindSpeedApparent(10);
       u.setEnvironmentWindAngleApparent(SKDegToRad(-30));
 
-      v.processUpdate(u);
-      CHECK( v.getSentences().size() == 1 );
-      if (v.getSentences().size() > 0) {
-        String s = *(v.getSentences().begin());
-        CHECK( s == "$IIMWV,330.0,R,10.00,M,A*3F\r\n" );
+      converter.convert(u, out);
+      CHECK( out.size() == 1 );
+      if (out.size() > 0) {
+        String s = *(out.begin());
+        CHECK( s == "$IIMWV,330.0,R,10.00,M,A*3F" );
       }
     }
 
     SECTION("Incomplete data") {
       u.setEnvironmentWindSpeedApparent(10);
-      v.processUpdate(u);
-      CHECK( v.getSentences().size() == 0 );
+      converter.convert(u, out);
+      CHECK( out.size() == 0 );
     }
 
     SECTION("Incomplete data") {
       u.setEnvironmentWindSpeedApparent(10);
       u.setEnvironmentWindSpeedTrue(10);
-      v.processUpdate(u);
-      CHECK( v.getSentences().size() == 0 );
+      converter.convert(u, out);
+      CHECK( out.size() == 0 );
     }
   }
 
@@ -146,21 +157,21 @@ TEST_CASE("SKNMEAVisitorTest") {
 
     SECTION("Basic test") {
       u.setSteeringRudderAngle(SKDegToRad(10));
-      v.processUpdate(u);
-      CHECK( v.getSentences().size() == 1 );
-      if (v.getSentences().size() > 0) {
-        String s = *(v.getSentences().begin());
-        CHECK( s == "$IIRSA,10.0,A,,*1E\r\n" );
+      converter.convert(u, out);
+      CHECK( out.size() == 1 );
+      if (out.size() > 0) {
+        String s = *(out.begin());
+        CHECK( s == "$IIRSA,10.0,A,,*1E" );
       }
     }
 
     SECTION("Negative angle") {
       u.setSteeringRudderAngle(SKDegToRad(-10));
-      v.processUpdate(u);
-      CHECK( v.getSentences().size() == 1 );
-      if (v.getSentences().size() > 0) {
-        String s = *(v.getSentences().begin());
-        CHECK( s == "$IIRSA,-10.0,A,,*33\r\n" );
+      converter.convert(u, out);
+      CHECK( out.size() == 1 );
+      if (out.size() > 0) {
+        String s = *(out.begin());
+        CHECK( s == "$IIRSA,-10.0,A,,*33" );
       }
     }
   }

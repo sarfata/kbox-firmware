@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -21,35 +27,14 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
 
-#include "ui/GC.h"
-#include "os/Task.h"
-#include "signalk/KMessage.h"
-#include "signalk/SKNMEAOutput.h"
-#include "signalk/SKHub.h"
-#include "signalk/SKSubscriber.h"
-#include "comms/Kommand.h"
-#include "comms/SlipStream.h"
-#include "comms/KommandHandlerPing.h"
-#include "comms/KommandHandlerWiFiLog.h"
+#include <WString.h>
 
-class WiFiService : public Task, public KReceiver, public SKSubscriber, private SKNMEAOutput {
-  private:
-    SKHub &_hub;
-    SlipStream _slip;
-    KommandHandlerPing _pingHandler;
-    KommandHandlerWiFiLog _wifiLogHandler;
-
+// FIXME: We should have a better representation of a NMEASentence that does
+// not depend on dynamic memory or Arduino strings.
+class SKNMEASentence : public String {
   public:
-    WiFiService(SKHub &skHub, GC &gc);
-
-    void setup();
-    void loop();
-    void processMessage(const KMessage &m) override;
-    void updateReceived(const SKUpdate&) override;
-
-
-    bool write(const SKNMEASentence& s) override;
+    SKNMEASentence(const String &s) : String(s) {};
 };
-

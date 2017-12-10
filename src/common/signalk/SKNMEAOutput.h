@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -21,35 +27,24 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
 
-#include "ui/GC.h"
-#include "os/Task.h"
-#include "signalk/KMessage.h"
-#include "signalk/SKNMEAOutput.h"
-#include "signalk/SKHub.h"
-#include "signalk/SKSubscriber.h"
-#include "comms/Kommand.h"
-#include "comms/SlipStream.h"
-#include "comms/KommandHandlerPing.h"
-#include "comms/KommandHandlerWiFiLog.h"
+#include "SKNMEASentence.h"
 
-class WiFiService : public Task, public KReceiver, public SKSubscriber, private SKNMEAOutput {
-  private:
-    SKHub &_hub;
-    SlipStream _slip;
-    KommandHandlerPing _pingHandler;
-    KommandHandlerWiFiLog _wifiLogHandler;
-
+class SKNMEAOutput {
   public:
-    WiFiService(SKHub &skHub, GC &gc);
+    virtual ~SKNMEAOutput() {};
 
-    void setup();
-    void loop();
-    void processMessage(const KMessage &m) override;
-    void updateReceived(const SKUpdate&) override;
-
-
-    bool write(const SKNMEASentence& s) override;
+    /**
+     * Writes one complete NMEA sentence to the output.
+     *
+     * nmeaSentence must be terminated by "*XX\0" (where XX is the checksum). It
+     * should already include the "\r\n".
+     *
+     * @return true if the sentence was completely written, or false if the
+     * sentence could not be written.
+     */
+    virtual bool write(const SKNMEASentence& nmeaSentence) = 0;
 };
 
