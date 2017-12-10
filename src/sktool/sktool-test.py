@@ -244,7 +244,7 @@ def main():
 
     total = totalFail + totalPass + totalError + totalIgnore
     print("{} PASS out of {} tests. {} tests failed ({} ignored) - {} tests error".format(totalPass, total,
-        totalFail + totalIgnore, totalFail, totalError))
+        totalFail + totalIgnore, totalIgnore, totalError))
 
     if totalFail + totalError > 0:
         sys.exit(-1)
