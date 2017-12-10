@@ -22,6 +22,7 @@
   THE SOFTWARE.
 */
 
+#include "NMEA2000Service.h"
 #include <stdio.h>
 #include <NMEA2000.h>
 #include <N2kMessages.h>
@@ -33,8 +34,6 @@
 #include "common/algo/crc.h"
 #include "common/version/KBoxVersion.h"
 #include "host/util/PersistentStorage.h"
-#include "common/signalk/SKNMEAVisitor.h"
-#include "NMEA2000Service.h"
 
 static NMEA2000Service *handlerContext;
 
@@ -59,7 +58,7 @@ void NMEA2000Service::setup() {
   initializeNMEA2000();
 }
 
-void NMEA2000Service::sendN2kMessage(const tN2kMsg& msg) {
+bool NMEA2000Service::write(const tN2kMsg& msg) {
   bool result = NMEA2000.SendMsg(msg);
   /*
   DEBUG("Sending message on n2k bus - pgn=%i prio=%i src=%i dst=%i len=%i result=%s", msg.PGN, msg.Priority,
@@ -68,9 +67,11 @@ void NMEA2000Service::sendN2kMessage(const tN2kMsg& msg) {
   */
   if (result) {
     KBoxMetrics.event(KBoxEventNMEA2000MessageSent);
+    return true;
   }
   else {
     KBoxMetrics.event(KBoxEventNMEA2000MessageSendError);
+    return false;
   }
 }
 
@@ -89,11 +90,6 @@ void NMEA2000Service::loop() {
   }
 }
 
-// SKNMEA2000ConverterOutput
-void NMEA2000Service::pushMessage(const tN2kMsg& m) {
-  sendN2kMessage(m);
-}
-
 void NMEA2000Service::updateReceived(const SKUpdate& update) {
   if (update.getSource().getInput() != SKSourceInputNMEA2000) {
     SKNMEA2000Converter converter;
@@ -101,9 +97,10 @@ void NMEA2000Service::updateReceived(const SKUpdate& update) {
   }
 }
 
+
+// TODO: Remove visit and processMessage. We should not need them anymore.
 void NMEA2000Service::visit(const NMEA2000Message &m) {
-  // TODO: We should not need this anymore. Remove it!
-  sendN2kMessage(m.getN2kMsg());
+  write(m.getN2kMsg());
 }
 
 void NMEA2000Service::processMessage(const KMessage &m) {

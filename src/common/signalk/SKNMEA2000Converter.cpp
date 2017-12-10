@@ -30,7 +30,7 @@
 #include "SKValue.h"
 #include "SKUnits.h"
 
-void SKNMEA2000Converter::convert(const SKUpdate& update, SKNMEA2000ConverterOutput& out) {
+void SKNMEA2000Converter::convert(const SKUpdate& update, SKNMEA2000Output& out) {
   // Trigger a call of visitSKElectricalBatteriesVoltage for every key with that path
   // (there can be more than one and we do not know how they are called)
   _currentOutput = &out;
@@ -42,14 +42,14 @@ void SKNMEA2000Converter::convert(const SKUpdate& update, SKNMEA2000ConverterOut
     SetN2kOutsideEnvironmentalParameters(msg, 0, N2kDoubleNA, N2kDoubleNA, update.getEnvironmentOutsidePressure());
     // PGN 130314 is more specific to pressure but not supported by Raymarine i70
     //SetN2kPressure(*msg, /* sid */ 0, /* source */ 0, N2kps_Atmospheric, v.getNumberValue());
-    out.pushMessage(msg);
+    out.write(msg);
   }
 
   if (update.hasNavigationAttitude()) {
     tN2kMsg msg;
     SKTypeAttitude attitude = update.getNavigationAttitude();
     SetN2kAttitude(msg, 0, attitude.yaw, attitude.pitch, attitude.roll);
-    out.pushMessage(msg);
+    out.write(msg);
   }
 
   // PGN 129026: Fast COG/SOG
@@ -58,13 +58,13 @@ void SKNMEA2000Converter::convert(const SKUpdate& update, SKNMEA2000ConverterOut
     SetN2kPGN129026(msg, (uint8_t)0, N2khr_true,
         update.getNavigationCourseOverGroundTrue(),
         update.getNavigationSpeedOverGround());
-    out.pushMessage(msg);
+    out.write(msg);
   }
 
   if (update.hasNavigationHeadingMagnetic()) {
     tN2kMsg msg;
     SetN2kMagneticHeading(msg, 0, update.getNavigationHeadingMagnetic());
-    out.pushMessage(msg);
+    out.write(msg);
   }
 
   if (update.hasEnvironmentWindAngleApparent() && update.hasEnvironmentWindSpeedApparent()) {
@@ -101,16 +101,16 @@ void SKNMEA2000Converter::visitSKElectricalBatteriesVoltage(const SKUpdate& u, c
 
   tN2kMsg msg;
   SetN2kDCBatStatus(msg, instance, v.getNumberValue());
-  _currentOutput->pushMessage(msg);
+  _currentOutput->write(msg);
 }
 
-void SKNMEA2000Converter::generateWind(SKNMEA2000ConverterOutput &out, double windAngle, double windSpeed, tN2kWindReference windReference) {
+void SKNMEA2000Converter::generateWind(SKNMEA2000Output &out, double windAngle, double windSpeed, tN2kWindReference windReference) {
   tN2kMsg msg;
 
   // We need to normalize wind to a direction because it is stored as an
   // unsigned double.
   SetN2kWindSpeed(msg, 0, windSpeed, SKNormalizeDirection(windAngle), windReference);
 
-  out.pushMessage(msg);
+  out.write(msg);
 }
 

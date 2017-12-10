@@ -34,7 +34,7 @@
 
 class NMEA2000Service : public Task, public SKSubscriber,
   public KGenerator, public KReceiver, public KVisitor,
-  SKNMEA2000ConverterOutput {
+  SKNMEA2000Output {
   private:
     SKHub &_hub;
     tNMEA2000_teensy NMEA2000;
@@ -65,8 +65,8 @@ class NMEA2000Service : public Task, public SKSubscriber,
     // Helper for the handler who is not a part of this class
     void publishN2kMessage(const tN2kMsg& msg);
 
-    // SKNMEA2000ConverterOutput
-    void pushMessage(const tN2kMsg&);
+    // SKNMEA2000Output
+    bool write(const tN2kMsg&) override;
 
     void processMessage(const KMessage&);
     void visit(const NMEA2000Message&);

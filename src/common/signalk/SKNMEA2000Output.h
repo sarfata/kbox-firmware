@@ -1,4 +1,10 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
   Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
@@ -22,28 +28,17 @@
   THE SOFTWARE.
 */
 
-#pragma once
+class tN2kMsg;
 
-#include <N2kMessages.h>
-#include "SKUpdate.h"
-#include "SKVisitor.generated.h"
-#include "SKNMEA2000Output.h"
-
-/**
- * Converts one or multiple SignalK updates into a series of N2KMessages.
- */
-class SKNMEA2000Converter : private SKVisitor {
-  private:
-    SKNMEA2000Output *_currentOutput = 0;
-
-    void generateWind(SKNMEA2000Output &out, double windAngle, double windSpeed, tN2kWindReference windReference);
-
-  protected:
-    void visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
-
+class SKNMEA2000Output {
   public:
+    virtual ~SKNMEA2000Output() {};
+
     /**
-     * Process a SKUpdate and add messages to the internal queue of messages.
+     * Write a tN2kMsg to the output.
+     *
+     * @return true if the message was sent to the output or false if it could
+     * not be sent.
      */
-    void convert(const SKUpdate& update, SKNMEA2000Output& conversionOutput);
+    virtual bool write(const tN2kMsg& m) = 0;
 };

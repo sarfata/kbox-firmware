@@ -35,13 +35,12 @@
 #define ApproxN2kWindSpeed(x) Approx(x).epsilon(0.01)
 #define ApproxN2kWindAngle(x) Approx(x).epsilon(0.0001)
 
-class N2kQueue : public LinkedList<tN2kMsg>, public SKNMEA2000ConverterOutput {
+class N2kQueue : public LinkedList<tN2kMsg>, public SKNMEA2000Output {
   public:
-    void pushMessage(const tN2kMsg& m) override {
+    bool write(const tN2kMsg& m) override {
       add(m);
+      return true;
     };
-
-    ~N2kQueue() override {};
 };
 
 TEST_CASE("NMEA2000Converter") {
