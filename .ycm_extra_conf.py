@@ -31,19 +31,26 @@ logger = logging.getLogger('ycm-extra-conf')
 ## Platformio automatically copies over the libs you use after your first run.
 ## Be warned that you will not receive autocompletion on libraries until after
 ## your first `platformio run`.
-PlatformioAutogen = ".pioenvs/"
+PlatformioAutogen = ".piolibdeps/"
 
 # Platformio Arduino Std Libs
 ## Arduino Std libs from .platformio packages. Provides stdlib.h and such.
 PlatformioArduinoSTD = '~/.platformio/packages/toolchain-gccarmnoneeabi/arm-none-eabi/include/'
 
+PlatformTeensy = '~/.platformio/packages/framework-arduinoteensy/cores/teensy3/'
+PlatformESP8266 = '~/.platformio/packages/framework-arduinoespressif8266/cores/esp8266/'
+
 # This is the list of all directories to search for header files.
 # Dirs in this list can be paths relative to this file, absolute
 # paths, or paths relative to the user (using ~/path/to/file).
+# There is really no way to know when editing files which framework they will
+# get compiled against so we include both the teensy and the esp8266 framework.
 libDirs = [
            "lib"
            ,PlatformioAutogen
            ,PlatformioArduinoSTD
+           ,PlatformTeensy
+           ,PlatformESP8266
            ]
 
 
@@ -60,7 +67,8 @@ flags = [   '-std=c++11',
             '-D__MK20DX256__',
             '-DARDUINO=10600',
             '-DTEENSYDUINO=124',
-            '-DPLATFORMIO=020401'
+            '-DPLATFORMIO=020401',
+            '-Isrc/'
 ]
 
 # Set this to the absolute path to the folder (NOT the file!) containing the

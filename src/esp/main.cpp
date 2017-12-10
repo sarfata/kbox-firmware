@@ -21,8 +21,10 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
+#include <KBoxLogging.h>
+#include <KBoxLoggerStream.h>
 #include <Adafruit_NeoPixel.h>
-#include "ESPDebug.h"
 #include "NetServer.h"
 
 uint8_t neopixel_pin = 4;
@@ -30,14 +32,31 @@ uint8_t neopixel_pin = 4;
 Adafruit_NeoPixel rgb = Adafruit_NeoPixel(1, neopixel_pin, NEO_GRB + NEO_KHZ800);
 NetServer server(10110);
 
-static const uint32_t connectedColor = rgb.Color(0x00, 0xff, 0x00);
-static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0xff);
+static const uint32_t connectedColor = rgb.Color(0x00, 0x40, 0x00);
+static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0x40);
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#include "comms/SlipStream.h"
+#include "comms/KommandHandler.h"
+#include "comms/KommandHandlerPing.h"
+#include "comms/KommandHandlerNMEA.h"
+#include "comms/KommandHandlerSKData.h"
+#include "stats/KBoxMetrics.h"
+#include "net/KBoxWebServer.h"
+
+#include "ESPDebugLogger.h"
+
+SlipStream slip(Serial, 2048);
+KommandHandlerPing pingHandler;
+KommandHandlerNMEA nmeaHandler(server);
+KBoxWebServer webServer;
+KommandHandlerSKData skDataHandler(webServer);
 
 void setup() {
-  DEBUG_INIT();
+  Serial1.begin(115200);
+  KBoxLogging.setLogger(new ESPDebugLogger(slip));
 
   rgb.begin();
   rgb.setPixelColor(0, 0, 0, 0xff);
@@ -47,14 +66,21 @@ void setup() {
   WiFi.softAP("KBox");
 
   Serial.begin(115200);
-  Serial.setTimeout(0);
-  Serial.setDebugOutput(true);
+  // We do want a timeout to make sure write() does not return
+  // without having written everything.
+  Serial.setTimeout(1000);
+  // Turn on to get ESP debug messages (they will be intermixed with frames to
+  // teensy)
+  Serial.setDebugOutput(false);
+
+  // Configure our webserver
+  webServer.setup();
 
   // This delay is important so that KBox can detect when firmware
   // upload are done and restart normal operation.
   delay(1000);
 
-  DEBUG("Starting KBox WiFi module");
+  INFO("ESP8266 running.");
 }
 
 uint8_t buffer[1024];
@@ -69,17 +95,20 @@ void loop() {
 
   server.loop();
 
-  while (Serial.available()) {
-    buffer[rxIndex++] = Serial.read();
+  while (slip.available()) {
+    uint8_t *frame;
+    size_t len = slip.peekFrame(&frame);
 
-    if (buffer[rxIndex - 1] == '\n') {
-      server.writeAll(buffer, rxIndex);
-      rxIndex = 0;
+    KommandReader kr = KommandReader(frame, len);
+
+    KommandHandler *handlers[] = { &pingHandler, &nmeaHandler, &skDataHandler, 0 };
+    if (KommandHandler::handleKommandWithHandlers(handlers, kr, slip)) {
+      KBoxMetrics.event(KBoxEventESPValidKommand);
     }
-    if (rxIndex == sizeof(buffer)) {
-      DEBUG("Buffer overflow. Clearing buffer.");
-      rxIndex = 0;
+    else {
+      KBoxMetrics.event(KBoxEventESPInvalidKommand);
     }
+    slip.readFrame(0, 0);
   }
 
   if (server.clientsCount() > 0) {

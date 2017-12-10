@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <KBox.h>
+#include <KBoxHardware.h>
 #include <Adafruit_INA219.h>
 #include "MfgTest.h"
 
@@ -32,7 +32,7 @@ class ShuntTest : public MfgTest {
   private:
     Adafruit_INA219 ina219;
   public:
-    ShuntTest(KBox& kbox) : MfgTest(kbox, "ShuntTest", 5000) {};
+    ShuntTest() : MfgTest("ShuntTest", 5000) {};
 
     void setup() {
       ina219.begin(ina219_address);

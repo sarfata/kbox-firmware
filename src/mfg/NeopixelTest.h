@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <KBox.h>
+#include <KBoxHardware.h>
 #include "MfgTest.h"
 
 class NeopixelTest : public MfgTest {
@@ -34,17 +34,17 @@ class NeopixelTest : public MfgTest {
     int pixelId;
 
   public:
-    NeopixelTest(KBox& kbox, int pixelId) : MfgTest(kbox, "Neopixel test", 5000), np(kbox.getNeopixels()), pixelId(pixelId) {};
+    NeopixelTest(int pixelId) : MfgTest("Neopixel test", 5000), np(KBox.getNeopixels()), pixelId(pixelId) {};
 
     void setup() {
       np.setPixelColor(pixelId, 0xff, 0xff, 0xff);
       np.show();
       setInstructions("Press button if neopixel " + String(pixelId) + " is all white.");
-      kbox.getButton().update();
+      KBox.getButton().update();
     };
 
     void loop() {
-      if (kbox.getButton().update()) {
+      if (KBox.getButton().update()) {
         pass();
       }
     };

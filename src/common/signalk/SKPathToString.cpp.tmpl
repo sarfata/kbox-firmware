@@ -1,0 +1,17 @@
+#include "SKPath.h"
+
+String SKPath::toString() const {
+  String path;
+
+  switch (_p) {
+// INSERT GENERATED CODE HERE
+
+    case SKPathInvalidPath:
+    case SKPathEnumIndexedPaths:
+      path = "invalid";
+      break;
+  }
+
+  return path;
+};
+

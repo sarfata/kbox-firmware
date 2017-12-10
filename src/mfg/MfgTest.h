@@ -26,11 +26,8 @@
 
 #include "elapsedMillis.h"
 
-class KBox;
-
 class MfgTest {
   protected:
-    KBox& kbox;
     String _name;
     String _instructions;
     String _reason;
@@ -40,7 +37,7 @@ class MfgTest {
     unsigned int _timeout;
 
   public:
-    MfgTest(KBox &k, const String& name, unsigned int timeout = 0) : kbox(k), _name(name), 
+    MfgTest(const String& name, unsigned int timeout = 0) : _name(name), 
       _finished(false), _success(false), _timeout(timeout) {};
 
 

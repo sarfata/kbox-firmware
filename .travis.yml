@@ -18,29 +18,24 @@ language: python
 python:
     - "2.7"
 
+# Trusty gives us a modern GCC - important for C++ 11 support
+dist: trusty
+
 sudo: false
-cache:
-    directories:
-        - "~/.platformio"
+cache: pip
 
 install:
-    - pip install -U platformio
+    - pip install -U platformio cpp-coveralls
+    - pip install -r src/sktool/requirements.txt
 
 script:
     # This builds all the target
     - platformio run
     # Run the few unit tests (C code running on computer)
     - make test
+    # Run the sktool-test.py script to validate that SignalK output is valid and
+    # matches what we expect.
+    - make validation
 
-# required to get a modern version of g++ with full std-c11 support
-env:
-  CXX=g++-4.9
-addons:
-  apt:
-    sources:
-    # add PPAs with more up-to-date toolchains
-    - ubuntu-toolchain-r-test
-    packages:
-    # install toolchains
-    - gcc-4.9
-    - g++-4.9
+after_success:
+    - coveralls --exclude src/test --exclude /lib --exclude lib --exclude .piolibdeps

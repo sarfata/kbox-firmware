@@ -24,8 +24,10 @@
 
 #pragma once
 
-#include <KBox.h>
+#include <KBoxHardware.h>
 #include <NMEA2000.h>
+#include <NMEA2000_teensy.h>
+#include <N2kMessages.h>
 #include "MfgTest.h"
 
 class N2KTest;
@@ -36,7 +38,7 @@ static void handler(const tN2kMsg &msg);
 
 class N2KTest : public MfgTest {
   public:
-    N2KTest(KBox& kbox) : MfgTest(kbox, "NMEA2000Test", 10000) {};
+    N2KTest() : MfgTest("NMEA2000Test", 10000) {};
     tNMEA2000_teensy NMEA2000;
     int rxMessages = 0;
     elapsedMillis timer;

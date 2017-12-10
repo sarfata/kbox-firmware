@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <KBox.h>
+#include <KBoxHardware.h>
 #include <Adafruit_BMP280.h>
 #include "MfgTest.h"
 
@@ -32,7 +32,7 @@ class BarometerTest : public MfgTest {
   private:
     Adafruit_BMP280 bmp280;
   public:
-    BarometerTest(KBox& kbox) : MfgTest(kbox, "BarometerTest", 3000) {};
+    BarometerTest() : MfgTest("BarometerTest", 3000) {};
 
     void setup() {
       if (!bmp280.begin(bmp280_address)) {

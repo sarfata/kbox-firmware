@@ -2,10 +2,36 @@
 .piolibdeps
 .clang_complete
 .gcc-flags.json
-.DS_Store
 .sconsign.dblite
 *.dSYM
 *.pyc
-*.o
 *.d
 tags
+.gdb_history
+lcov-output
+cov.info
+node_modules
+
+# OSX
+# =========================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Platformio likes to auto-create this
+lib/readme.txt
