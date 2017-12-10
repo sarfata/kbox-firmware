@@ -21,7 +21,8 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include "ESPDebug.h"
+
+#include <KBoxLogging.h>
 #include "NetServer.h"
 
 NetServer::NetServer(int port) : server(port) {
@@ -75,7 +76,7 @@ void NetServer::handleNewClient(AsyncClient *client) {
   client->stop();
 }
 
-void NetServer::writeAll(uint8_t *bytes, int len) {
+void NetServer::writeAll(const uint8_t *bytes, int len) {
   for (int i = 0; i < maxClients; i++) {
     if (clients[i] && clients[i]->connected()) {
       queues[i].add(NetMessage(bytes, len));

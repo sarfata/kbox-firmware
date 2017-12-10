@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <KBox.h>
+#include <KBoxHardware.h>
 
 #include "MfgTest.h"
 
@@ -35,9 +35,9 @@ struct ADCTestCase {
 
 struct ADCTestCase cases[] = {
   { "Supply", supply_analog },
-  { "Bat1", bat1_analog },
-  { "Bat2", bat2_analog },
-  { "Bat3", bat3_analog }
+  { "Bat1", adc1_analog },
+  { "Bat2", adc2_analog },
+  { "Bat3", adc3_analog }
 };
 
 class ADCTest : public MfgTest {
@@ -46,7 +46,7 @@ class ADCTest : public MfgTest {
     int channel;
 
   public:
-    ADCTest(KBox& kbox, int chan) : MfgTest(kbox, "ADCTest(" + cases[chan].channelName + ")", 10000), adc(kbox.getADC()), channel(chan) {};
+    ADCTest(int chan) : MfgTest("ADCTest(" + cases[chan].channelName + ")", 10000), adc(KBox.getADC()), channel(chan) {};
 
     void setup() {
       setInstructions("Apply 12V to " + cases[channel].channelName + " only.");

@@ -23,25 +23,40 @@
 */
 
 #include <Arduino.h>
-#include <KBox.h>
-#include <util/SlipStream.h>
-#include "util/ESPProgrammer.h"
+#include <KBoxHardware.h>
+#include <KBoxLogging.h>
+#include <KBoxLoggerStream.h>
+#include "comms/SlipStream.h"
+#include "../host/esp-programmer/ESPProgrammer.h"
 
-KBox kbox;
-ESPProgrammer programmer(kbox.getNeopixels(), Serial, Serial1);
+class ESPProgrammerDelegateImpl : public ESPProgrammerDelegate {
+  void rebootInFlasher() {
+    KBox.espRebootInFlasher();
+  };
+};
+
+ESPProgrammerDelegateImpl delegate;
+
+ESPProgrammer programmer(KBox.getNeopixels(), Serial, Serial1, delegate);
 
 void setup() {
-  kbox.setup();
+  KBox.setup();
 
-  DEBUG_INIT();
+  // Use Serial3 as the Debug output to avoid trashing the communication
+  // with the programmer program running on host.
+  digitalWrite(nmea2_out_enable, 1);
+  pinMode(nmea2_out_enable, OUTPUT);
+  Serial3.begin(920800);
+  KBoxLogging.setLogger(new KBoxLoggerStream(Serial3));
+
 
   DEBUG("Starting esp program");
-  esp_init();
-  esp_reboot_in_program();
+  KBox.espInit();
+  KBox.espRebootInProgram();
 
-  Serial.setTimeout(0);
-  Serial1.setTimeout(0);
-  Serial3.setTimeout(0);
+  Serial.setTimeout(10000);
+  Serial1.setTimeout(10000);
+  Serial3.setTimeout(10000);
 }
 
 void loop() {

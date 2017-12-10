@@ -1,0 +1,186 @@
+{
+  "vesselKeys": [
+    {
+      "path": "environment.depth.belowKeel",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Depth below keel"
+    },
+    {
+      "path": "environment.depth.belowTransducer",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Depth below Transducer"
+    },
+    {
+      "path": "environment.depth.belowSurface",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Depth below surface"
+    },
+    {
+      "path": "environment.depth.transducerToKeel",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Depth from the transducer to the bottom of the keel"
+    },
+    {
+      "path": "environment.depth.surfaceToTransducer",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Depth transducer is below the surface"
+    },
+    {
+      "path": "environment.water.temperature",
+      "type": "numberValue",
+      "units": "K",
+      "description": "Current water temperature"
+    },
+    {
+      "path": "environment.outside.apparentWindChillTemperature",
+      "type": "numberValue",
+      "unit": "K",
+      "description": "Current outside apparent wind chill temperature"
+    },
+    {
+      "path": "environment.outside.pressure",
+      "type": "numberValue",
+      "unit": "Pa",
+      "description": "Current outside air ambient pressure"
+    },
+    {
+      "path": "environment.wind.angleApparent",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "Apparent wind angle, negative to port"
+    },
+    {
+      "path": "environment.wind.angleTrueGround",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "True wind angle based on speed over ground, negative to port"
+    },
+    {
+      "path": "environment.wind.angleTrueWater",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "True wind angle based on speed through water, negative to port"
+    },
+    {
+      "path": "environment.wind.directionTrue",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "The wind direction relative to true north"
+    },
+    {
+      "path": "environment.wind.directionMagnetic",
+      "type": "numberValue",
+      "unit": "rad",
+      "description": "The wind direction relative to magnetic north"
+    },
+    {
+      "path": "environment.wind.speedTrue",
+      "type": "numberValue",
+      "unit": "m/s",
+      "description": "Wind speed over water (as calculated from speedApparent and vessel's speed through water)"
+    },
+    {
+      "path": "environment.wind.speedOverGround",
+      "type": "numberValue",
+      "unit": "m/s",
+      "description": "Wind speed over ground (as calculated from speedApparent and vessel's speed over ground)"
+    },
+    {
+      "path": "environment.wind.speedApparent",
+      "type": "numberValue",
+      "unit": "m/s",
+      "description": "Apparent wind speed"
+    },
+
+    {
+      "path": "electrical.batteries.%%.voltage",
+      "type": "numberValue",
+      "unit": "V",
+      "description": "Voltage measured at or as close as possible to the device"
+    },
+
+    {
+      "path": "navigation.attitude",
+      "type": "attitudeValue",
+      "description": "Vessel attitude: roll, pitch and yaw"
+    },
+    {
+      "path": "navigation.courseOverGroundTrue",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Course over ground (true)"
+    },
+    {
+      "path": "navigation.headingMagnetic",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Current magnetic heading of the vessel"
+    },
+    {
+      "path": "navigation.headingTrue",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Current True heading of the vessel"
+    },
+    {
+      "path": "navigation.log",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Total distance traveled"
+    },
+    {
+      "path": "navigation.magneticVariation",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "The magnetic variation (declination) at the current position"
+    },
+    {
+      "path": "navigation.position",
+      "type": "positionValue",
+      "description": "The position of the vessel in 2 or 3 dimensions (WGS84 datum)"
+    },
+    {
+      "path": "navigation.speedOverGround",
+      "type": "numberValue",
+      "units": "m/s",
+      "description": "Vessel speed over ground. If converting from AIS \"HIGH\" value, set to 102.2 (Ais max value) and add warning in notifications"
+    },
+    {
+      "path": "navigation.speedThroughWater",
+      "type": "numberValue",
+      "units": "m/s",
+      "description": "Vessel speed through the water"
+    },
+    {
+      "path": "navigation.trip.log",
+      "type": "numberValue",
+      "units": "m",
+      "description": "Total distance traveled on this trip / since trip reset"
+    },
+
+    {
+      "path": "steering.rudderAngle",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Current rudder angle"
+    },
+    {
+      "path": "steering.rudderAngleTarget",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "The angle the rudder should move to"
+    },
+
+    {
+      "path": "performance.leeway",
+      "type": "numberValue",
+      "units": "rad",
+      "description": "Current Leeway"
+    }
+  ]
+}

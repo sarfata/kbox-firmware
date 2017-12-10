@@ -21,103 +21,98 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-#include <SPI.h>
-#include <Encoder.h>
-#include <i2c_t3.h>
-#include <KBox.h>
-#include "util/ESPProgrammer.h"
 
-// Those are included here to force platformio to link to them.
-// See issue github.com/platformio/platformio/issues/432 for a better way to do this.
-#include <Bounce.h>
+#include <KBoxHardware.h>
+#include "common/os/TaskManager.h"
+#include "common/os/Task.h"
+#include "common/signalk/SKHub.h"
+#include "host/drivers/ILI9341GC.h"
+#include "host/pages/BatteryMonitorPage.h"
+#include "host/pages/StatsPage.h"
+#include "host/services/MFD.h"
+#include "host/services/ADCService.h"
+#include "host/services/BarometerService.h"
+#include "host/services/IMUService.h"
+#include "host/services/NMEA2000Service.h"
+#include "host/services/NMEAService.h"
+#include "host/services/RunningLightService.h"
+#include "host/services/SDCardTask.h"
+#include "host/services/USBService.h"
+#include "host/services/WiFiService.h"
 
-#include "ClockPage.h"
+ILI9341GC gc(KBox.getDisplay(), Size(320, 240));
+MFD mfd(gc, KBox.getEncoder(), KBox.getButton());
+TaskManager taskManager;
+SKHub skHub;
 
-KBox kbox;
+USBService usbService(gc);
 
 void setup() {
   // Enable float in printf:
   // https://forum.pjrc.com/threads/27827-Float-in-sscanf-on-Teensy-3-1
   asm(".global _printf_float");
 
-  delay(3000);
+  KBox.setup();
 
-  DEBUG_INIT();
+  // Clears the screen
+  mfd.setup();
+
+  delay(1000);
+
+  Serial.begin(115200);
+  KBoxLogging.setLogger(&usbService);
+
   DEBUG("Starting");
-
 
   digitalWrite(led_pin, 1);
 
-  // Create all the receiver task first
-  WiFiTask *wifi = new WiFiTask();
+  // Instantiate all our services
+  WiFiService *wifi = new WiFiService(skHub, gc);
 
-  // Create all the generating tasks and connect them
-  NMEA2000Task *n2kTask = new NMEA2000Task();
-  n2kTask->connectTo(*wifi);
+  ADCService *adcService = new ADCService(skHub, KBox.getADC());
+  BarometerService *baroService = new BarometerService(skHub);
+  IMUService *imuService = new IMUService(skHub);
 
-  ADCTask *adcTask = new ADCTask(kbox.getADC());
+  NMEA2000Service *n2kService = new NMEA2000Service(skHub);
+  n2kService->connectTo(*wifi);
 
-  // Convert battery measurement into n2k messages before sending them to wifi.
-  VoltageN2kConverter *voltageConverter = new VoltageN2kConverter();
-  adcTask->connectTo(*voltageConverter);
-  voltageConverter->connectTo(*wifi);
-  voltageConverter->connectTo(*n2kTask);
-
-  NMEAReaderTask *reader1 = new NMEAReaderTask(NMEA1_SERIAL);
-  NMEAReaderTask *reader2 = new NMEAReaderTask(NMEA2_SERIAL);
+  NMEAService *reader1 = new NMEAService(skHub, NMEA1_SERIAL);
+  NMEAService *reader2 = new NMEAService(skHub, NMEA2_SERIAL);
   reader1->connectTo(*wifi);
   reader2->connectTo(*wifi);
-
-  IMUTask *imuTask = new IMUTask();
-  imuTask->connectTo(*wifi);
-  imuTask->connectTo(*n2kTask);
-
-  BarometerTask *baroTask = new BarometerTask();
-
-  BarometerN2kConverter *bn2k = new BarometerN2kConverter();
-  bn2k->connectTo(*wifi);
-  bn2k->connectTo(*n2kTask);
-
-  baroTask->connectTo(*bn2k);
 
   SDCardTask *sdcardTask = new SDCardTask();
   reader1->connectTo(*sdcardTask);
   reader2->connectTo(*sdcardTask);
-  adcTask->connectTo(*sdcardTask);
-  n2kTask->connectTo(*sdcardTask);
-  baroTask->connectTo(*sdcardTask);
-  imuTask->connectTo(*sdcardTask);
+  n2kService->connectTo(*sdcardTask);
+
 
   // Add all the tasks
-  kbox.addTask(new IntervalTask(new RunningLightTask(), 250));
-  kbox.addTask(new IntervalTask(adcTask, 1000));
-  kbox.addTask(new IntervalTask(imuTask, 50));
-  kbox.addTask(new IntervalTask(baroTask, 1000));
-  kbox.addTask(n2kTask);
-  kbox.addTask(reader1);
-  kbox.addTask(reader2);
-  kbox.addTask(wifi);
-  kbox.addTask(sdcardTask);
+  taskManager.addTask(&mfd);
+  taskManager.addTask(new IntervalTask(new RunningLightService(), 250));
+  taskManager.addTask(new IntervalTask(adcService, 1000));
+  taskManager.addTask(new IntervalTask(imuService, 50));
+  taskManager.addTask(new IntervalTask(baroService, 1000));
+  taskManager.addTask(n2kService);
+  taskManager.addTask(reader1);
+  taskManager.addTask(reader2);
+  taskManager.addTask(wifi);
+  taskManager.addTask(sdcardTask);
+  taskManager.addTask(&usbService);
 
-  BatteryMonitorPage *batPage = new BatteryMonitorPage();
-  adcTask->connectTo(*batPage);
-  kbox.addPage(batPage);
+  BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
+  mfd.addPage(batPage);
 
   StatsPage *statsPage = new StatsPage();
-  statsPage->setNmea1Task(reader1);
-  statsPage->setNmea2Task(reader2);
-  statsPage->setNMEA2000Task(n2kTask);
-  statsPage->setTaskManager(&(kbox.getTaskManager()));
   statsPage->setSDCardTask(sdcardTask);
 
-  kbox.addPage(statsPage);
+  mfd.addPage(statsPage);
 
-  kbox.setup();
+  taskManager.setup();
 
   // Reinitialize debug here because in some configurations
   // (like logging to nmea2 output), the kbox setup might have messed
   // up the debug configuration.
-  DEBUG_INIT();
   DEBUG("setup done");
 
   Serial.setTimeout(0);
@@ -127,16 +122,5 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.baud() == 230400) {
-    DEBUG("Entering programmer mode");
-    ESPProgrammer programmer(kbox.getNeopixels(), Serial, Serial1);
-    while (programmer.getState() != ESPProgrammer::ProgrammerState::Done) {
-      programmer.loop();
-    }
-    DEBUG("Exiting programmer mode");
-    CPU_RESTART;
-  }
-  else {
-    kbox.loop();
-  }
+  taskManager.loop();
 }

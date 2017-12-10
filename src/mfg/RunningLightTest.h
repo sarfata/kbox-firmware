@@ -24,22 +24,22 @@
 
 #pragma once
 
-#include <KBox.h>
+#include <KBoxHardware.h>
 #include "MfgTest.h"
 
 class RunningLightTest : public MfgTest {
   public:
-    RunningLightTest(KBox& kbox) : MfgTest(kbox, "RunningLightTest", 5000) {};
+    RunningLightTest() : MfgTest("RunningLightTest", 5000) {};
 
     void setup() {
-      kbox.getButton().update();
+      KBox.getButton().update();
       setInstructions("Please confirm the RunningLight led is on");
 
       digitalWrite(led_pin, true);
     };
 
     void loop() {
-      if (kbox.getButton().update()) {
+      if (KBox.getButton().update()) {
         pass();
       }
     };

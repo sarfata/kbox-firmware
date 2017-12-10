@@ -1,0 +1,32 @@
+[
+  {
+    "nmea": "$PCDIN,01F503,000C9F52,23,470000FFFF00FFFF*28",
+    "expectedValues": [
+      { "path": "navigation.speedThroughWater", "value": 0 }
+    ]
+    ,"ignoreFail": true
+  },
+  {
+    "nmea": "$PCDIN,01FD07,000C9F55,23,47C0D370FF7FFFFF*28",
+    "expectedValues": [
+      { "path": "environment.water.temperature", "value": 15.68 }
+    ]
+    ,"ignoreFail": true
+  },
+  {
+    "nmea": "$PCDIN,01F50B,000C9F59,23,45590100009203FF*55",
+    "expectedValues": [
+      { "path": "environment.depth.belowTransducer", "value": 3.45 },
+      { "path": "environment.depth.belowSurface", "value": 4.364 },
+      { "path": "environment.depth.surfaceToTransducer", "value": 0.914 }
+    ]
+  },
+  {
+    "nmea": "$PCDIN,01F513,000C9F5D,23,FFFFFFFFFFFF7F3204007F320400*5C",
+    "expectedValues": [
+      { "path": "navigation.log", "value": 275071 },
+      { "path": "navigation.trip.log", "value": 275071 }
+    ]
+    ,"ignoreFail": true
+  }
+]

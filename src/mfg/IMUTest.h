@@ -22,7 +22,7 @@
   THE SOFTWARE.
 */
 
-#include <KBox.h>
+#include <KBoxHardware.h>
 #include <Adafruit_BNO055.h>
 #include "MfgTest.h"
 
@@ -34,7 +34,7 @@ class IMUTest : public MfgTest {
 
     bool systemOk = false;
   public:
-    IMUTest(KBox& kbox) : MfgTest(kbox, "IMUTest", 180*1000) {};
+    IMUTest() : MfgTest("IMUTest", 180*1000) {};
 
     void setup() {
       if (!bno055.begin()) {

@@ -40,6 +40,9 @@ def nmea_read(input):
             if m:
                 ts = float(m.group(1))
                 sentence = m.group(2)
+            elif "," in line:
+                (ts,sentence) = line.split(',', 1)
+                ts = float(ts) / 1000
 
             yield(ts, sentence)
 
