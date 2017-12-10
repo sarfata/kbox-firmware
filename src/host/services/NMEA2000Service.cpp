@@ -83,29 +83,26 @@ void NMEA2000Service::loop() {
   // call ParseMessages() at least every 10ms.
   NMEA2000.ParseMessages();
 
-  if (_skVisitor.getMessages().size() > 0) {
-    for (LinkedListConstIterator<tN2kMsg*> it = _skVisitor.getMessages().begin();
-        it != _skVisitor.getMessages().end(); it++) {
-      // Outgoing messages are pushed into a circular buffer in the NMEA2000
-      // library. Currently set to 40 messages.
-      sendN2kMessage(**it);
-    }
-    _skVisitor.flushMessages();
-  }
-
   if (timeSinceLastParametersSave > 1000) {
     saveNMEA2000Parameters();
     timeSinceLastParametersSave = 0;
   }
 }
 
+// SKNMEA2000ConverterOutput
+void NMEA2000Service::pushMessage(const tN2kMsg& m) {
+  sendN2kMessage(m);
+}
+
 void NMEA2000Service::updateReceived(const SKUpdate& update) {
   if (update.getSource().getInput() != SKSourceInputNMEA2000) {
-    _skVisitor.processUpdate(update);
+    SKNMEA2000Converter converter;
+    converter.convert(update, *this);
   }
 }
 
 void NMEA2000Service::visit(const NMEA2000Message &m) {
+  // TODO: We should not need this anymore. Remove it!
   sendN2kMessage(m.getN2kMsg());
 }
 

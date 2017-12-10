@@ -39,8 +39,9 @@
  * This makes visiting a SKUpdate message much nicer.
  */
 class SKVisitor {
-  protected:
-    void visit(const SKUpdate& u);
+  public:
+    void visit(const SKUpdate& u, const SKPath& p, const SKValue &v);
 
+  protected:
 // INSERT GENERATED CODE HERE
 };

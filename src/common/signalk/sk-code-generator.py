@@ -206,7 +206,7 @@ class SKVisitorHeaderGenerator(TemplateGenerator):
 
 class SKVisitorImplGenerator(TemplateGenerator):
     def generateForKey(self, k):
-        self.indentLevel = 4;
+        self.indentLevel = 2;
         self.p("if (p.getStaticPath() == {}) {{".format(k.enumKey()))
         self.p("  {}(u, p, v);".format(k.visitorName()));
         self.p("}");

@@ -54,7 +54,7 @@ class SKNMEAVisitor : SKVisitor {
      * Process a SKUpdate and add messages to the internal queue of messages.
      */
     void processUpdate(const SKUpdate& update) {
-      visit(update);
+      update.accept(*this);
     };
 
     /**

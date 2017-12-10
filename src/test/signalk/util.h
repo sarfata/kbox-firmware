@@ -29,4 +29,4 @@
 
 class tN2kMsg;
 
-const tN2kMsg *findMessage(const LinkedList<tN2kMsg*> messages, uint32_t pgn, int index);
+const tN2kMsg* findMessage(const LinkedList<tN2kMsg>& messages, uint32_t pgn, int index);

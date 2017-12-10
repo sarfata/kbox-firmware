@@ -30,15 +30,15 @@
 #include "common/signalk/KMessage.h"
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKSubscriber.h"
-#include "common/signalk/SKNMEA2000Visitor.h"
+#include "common/signalk/SKNMEA2000Converter.h"
 
 class NMEA2000Service : public Task, public SKSubscriber,
-  public KGenerator, public KReceiver, public KVisitor {
+  public KGenerator, public KReceiver, public KVisitor,
+  SKNMEA2000ConverterOutput {
   private:
     SKHub &_hub;
     tNMEA2000_teensy NMEA2000;
     unsigned int _imuSequence;
-    SKNMEA2000Visitor _skVisitor;
 
 
     void sendN2kMessage(const tN2kMsg& msg);
@@ -64,6 +64,9 @@ class NMEA2000Service : public Task, public SKSubscriber,
 
     // Helper for the handler who is not a part of this class
     void publishN2kMessage(const tN2kMsg& msg);
+
+    // SKNMEA2000ConverterOutput
+    void pushMessage(const tN2kMsg&);
 
     void processMessage(const KMessage&);
     void visit(const NMEA2000Message&);
