@@ -21,7 +21,7 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-
+#pragma once
 #include <Adafruit_BNO055.h>
 #include "common/os/Task.h"
 #include "common/signalk/SKHub.h"
@@ -30,11 +30,18 @@ class IMUService : public Task {
   private:
     SKHub &_skHub;
     Adafruit_BNO055 bno055;
-    uint8_t sysCalib, gyroCalib, accelCalib, magCalib;
+    uint8_t _sysCalib, _gyroCalib, _accelCalib, _magCalib;
+    double _roll, _pitch, _heading;
     imu::Vector<3> eulerAngles;
 
   public:
     IMUService(SKHub& skHub) : Task("IMU"), _skHub(skHub) {};
     void setup();
     void loop();
+
+    void getLastValues(int &accelCalibration, double &pitch, double &heel, int &magCalibration, double &heading);
+    void saveAccelCalibration();
+    void resetAccelCalibration();
+    void saveMagCalibration();
+    void resetMagCalibration();
 };
