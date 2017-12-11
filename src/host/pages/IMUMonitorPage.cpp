@@ -36,7 +36,7 @@
 #include "signalk/SKUnits.h"
 
 
-IMUMonitorPage::IMUMonitorPage(SKHub& hub, IMUService &imuService) {
+IMUMonitorPage::IMUMonitorPage(SKHub& hub, IMUService &imuService) : _imuService(imuService) {
   static const int col1 = 5;
   static const int col2 = 200;
   static const int row1 = 26;
@@ -45,66 +45,64 @@ IMUMonitorPage::IMUMonitorPage(SKHub& hub, IMUService &imuService) {
   static const int row4 = 182;
 
   addLayer(new TextLayer(Point(col1, row1), Size(20, 20), "HDG ° Mag", ColorWhite, ColorBlack, FontDefault));
-  addLayer(new TextLayer(Point(col2, row1), Size(20, 20), "Calibration", ColorWhite, ColorBlack, FontDefault));
+  addLayer(new TextLayer(Point(col2, row1), Size(20, 20), "Cal: Mag/Acc", ColorWhite, ColorBlack, FontDefault));
   addLayer(new TextLayer(Point(col1, row3), Size(20, 20), "Heel °", ColorWhite, ColorBlack, FontDefault));
   addLayer(new TextLayer(Point(col2, row3), Size(20, 20), "Pitch °", ColorWhite, ColorBlack, FontDefault));
 
   _hdgTL = new TextLayer(Point(col1, row2), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
   _calTL = new TextLayer(Point(col2, row2), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
-  _heelTL  = new TextLayer(Point(col1, row4), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
+  _rollTL  = new TextLayer(Point(col1, row4), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
   _pitchTL = new TextLayer(Point(col2, row4), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
 
   addLayer(_hdgTL);
   addLayer(_calTL);
-  addLayer(_heelTL);
+  addLayer(_rollTL);
   addLayer(_pitchTL);
 
   hub.subscribe(this);
 
-  imuService.getLastValues(_accelCalibration, _pitch, _heel, _magCalibration, _heading);
-  DEBUG("AccelCalibration: %i | MagCalibration: %i", _accelCalibration, _magCalibration);
 }
 
+bool IMUMonitorPage::processEvent(const ButtonEvent &be){
 
-void IMUMonitorPage::updateReceived(const SKUpdate& up) {
-
-
-
-  // No Updates coming when Calib below cfIMU_MIN_CAL
-  // Aproach was for trusted values only
-  // Disadvantage is, that the display is stuck to the last value!
-
-  if ( up.hasNavigationHeadingMagnetic() ) {
-    const SKValue& vm = up.getNavigationHeadingMagnetic();
-    // DEBUG( "Heading Magnetic %f", SKRadToDeg( vm.getNumberValue() ) );
-    _hdgTL->setText(String( SKRadToDeg( vm.getNumberValue() ), 1) + "°        ");
+  // DEBUG("EventTypeButton: %i", be.clickType);
+  if (be.clickType == ButtonEventTypeClick) {
+    DEBUG("Button ButtonEventTypeClick !!!");
+    // Change page on single click.
+    return false;
   }
+  if (be.clickType == ButtonEventTypeLongClick) {
+    DEBUG("Button ButtonEventTypeLongClick !!!");
+    // TODO: here will start the offset to zero calibration of heel & pitch
+  }
+  return true;
+}
 
+bool IMUMonitorPage::processEvent(const TickEvent &te){
+
+  _imuService.getLastValues(_accelCalibration, _pitch, _roll, _magCalibration, _heading);
+  //DEBUG("AccelCalibration: %i | MagCalibration: %i", _accelCalibration, _magCalibration);
+
+  // TODO: Some damping for the display
+
+  _hdgTL->setText(String( _heading, 1) + "°        ");
+  _calTL->setText(String( _magCalibration) + "/" + String( _accelCalibration) + "   ");
+
+  _pitchTL->setText(String( _pitch, 1) + "°     ");
+  _rollTL->setText(String( _roll, 1) + "°     ");
 
   // Always show Hdg from IMU-sensor, but if the value is not trusted change color to Red
-  // TODO: Some damping for the display
-	/*
-  _hdgTL->setText(String( IMUService::IMU_HdgFiltered, 1) + "°        ");
-  _calTL->setText(String( IMUService::magCAL) + "   ");
-
-	if ( IMUService::magCAL < cfHdgMinCal ) {
+	if ((_magCalibration <= cfHdgMinCal)||(_accelCalibration <= cfHeelPitchMinCal)) {
     _hdgTL->setColor(ColorRed);
     _calTL->setColor(ColorRed);
   } else {
     _hdgTL->setColor(ColorWhite);
     _calTL->setColor(ColorWhite);
   };
-	 */
 
-  // GyroCalib is more likely better than magCalib, so we hope there is an update
-  // from IMUService
-  // TODO: An own Visitor for Display Values (damped values with lower frequency)
-  if ( up.hasNavigationAttitude() ) {
-    const SKValue& vm = up.getNavigationAttitude();
-    //DEBUG("MagCAL from IMUService: %i ", IMUService::magCAL );
-    _pitchTL->setText(String( SKRadToDeg( vm.getAttitudeValue().pitch ), 1) + "°     ");
-    _heelTL->setText(String( SKRadToDeg( vm.getAttitudeValue().roll ), 1) + "°     ");
-  } else {
-    //DEBUG("up.hasNavigationAttitude() == FALSE");
-  }
+  return true;
+}
+
+void IMUMonitorPage::updateReceived(const SKUpdate& up) {
+  // may be needed for something....
 }
