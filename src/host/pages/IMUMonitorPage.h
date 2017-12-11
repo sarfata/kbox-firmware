@@ -34,14 +34,18 @@
 #include "common/ui/TextLayer.h"
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKSubscriber.h"
+#include "services/IMUService.h"
 
-class IMUMonitorPage : public Page, public SKSubscriber {
+class IMUMonitorPage: public Page, public SKSubscriber {
   private:
     TextLayer *_hdgTL, *_heelTL, *_pitchTL, *_calTL;
-		int _magCal;
+		int _magCalibration, _accelCalibration;
+    double _pitch;
+    double _heel;
+    double _heading;
 
   public:
-    IMUMonitorPage(SKHub& hub);
-    
+    IMUMonitorPage(SKHub& hub, IMUService &imuService);
+    //IMUService imuService;
     virtual void updateReceived(const SKUpdate& up);
 };
