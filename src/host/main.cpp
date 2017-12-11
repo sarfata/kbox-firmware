@@ -23,18 +23,18 @@
 */
 
 #include <KBoxHardware.h>
-#include <KBoxConfig.h>
+#include "common/config/KBoxConfig.h"
 #include "common/os/TaskManager.h"
 #include "common/os/Task.h"
 #include "common/signalk/SKHub.h"
 #include "host/drivers/ILI9341GC.h"
 #include "host/pages/BatteryMonitorPage.h"
-#include "host/pages/IMUMonitorPage.h"
 #include "host/pages/StatsPage.h"
 #include "host/services/MFD.h"
 #include "host/services/ADCService.h"
 #include "host/services/BarometerService.h"
 #include "host/services/IMUService.h"
+#include "host/pages/IMUMonitorPage.h"
 #include "host/services/NMEA2000Service.h"
 #include "host/services/NMEAService.h"
 #include "host/services/RunningLightService.h"
@@ -72,9 +72,6 @@ void setup() {
   WiFiService *wifi = new WiFiService(skHub, gc);
 
   ADCService *adcService = new ADCService(skHub, KBox.getADC());
-  BarometerService *baroService = new BarometerService(skHub);
-  IMUService *imuService = new IMUService(skHub);
-
   NMEA2000Service *n2kService = new NMEA2000Service(skHub);
   n2kService->connectTo(*wifi);
 
@@ -93,8 +90,6 @@ void setup() {
   taskManager.addTask(&mfd);
   taskManager.addTask(new IntervalTask(new RunningLightService(), 250));
   taskManager.addTask(new IntervalTask(adcService, cfAdcServiceInterval));
-  taskManager.addTask(new IntervalTask(imuService, cfIMUServiceInterval));
-  taskManager.addTask(new IntervalTask(baroService, cfBaroServiceInterval));
   taskManager.addTask(n2kService);
   taskManager.addTask(reader1);
   taskManager.addTask(reader2);
@@ -102,13 +97,22 @@ void setup() {
   taskManager.addTask(sdcardTask);
   taskManager.addTask(&usbService);
 
+  #ifdef SERVICE_BARO
+    BarometerService *baroService = new BarometerService(skHub);
+    taskManager.addTask(new IntervalTask(baroService, cfBaroServiceInterval));
+  #endif
+
+  #ifdef SERVICE_IMU
+    IMUService *imuService = new IMUService(skHub);
+    taskManager.addTask(new IntervalTask(imuService, cfIMUServiceInterval));
+    #ifdef PAGE_IMU
+      IMUMonitorPage *imuPage = new IMUMonitorPage(skHub, *imuService);
+      mfd.addPage(imuPage);
+    #endif
+  #endif
+
   BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
   mfd.addPage(batPage);
-	
-	#ifdef IMU_MONITOR_PAGE
-    IMUMonitorPage *imuPage = new IMUMonitorPage(skHub);
-    mfd.addPage(imuPage);
-  #endif
 
   StatsPage *statsPage = new StatsPage();
   statsPage->setSDCardTask(sdcardTask);
