@@ -33,9 +33,7 @@ in mind and will be compatible with it.
  - An SDCard to record data.
 
 [KBox is an open-source hardware project](https://github.com/sarfata/kbox-hardware). You can review the
-schematics and build it yourself. We also intend to get a few batches
-manufactured by a professional board assembly house. If you are interested, put
-your name in our form!
+schematics and build it yourself. [You can also order a fully assembled and tested KBox from tindie.](https://www.tindie.com/products/sarfata/kbox-open-source-boat-gateway/) Every KBox sold via tindie helps support the project. Thank you!
 
 [Find more news about KBox on
 hackaday.io](https://hackaday.io/project/11055-kbox).
@@ -70,35 +68,43 @@ Because KBox is open-source, you can do a lot more things with it:
 
 ### Current software status
 
-As of April 2016, the KBox firmware supports:
+As of December 2017, the KBox firmware:
 
- - General functionnality
-   - Creating a new WiFi network (KBox) or joining an existing network (via simple
+ - General functionality
+   - Creates a new WiFi network (KBox) or can join an existing network (via simple
      code modification and recompiling)
-   - Support up to 8 simultaneous TCP clients connected on port 4242
-   - Very basic clock on the screen
- - NMEA0183 reception and forwarding
-   - Receiving NMEA0183 sentence from an external source and forwarding them to
-     WiFi clients via a TCP socket
- - NMEA2000:
-   - Receiving NMEA2000 packets and translating them to `$PCDIN` nmea sentences to
-     all WiFi clients. iNavX will decode this just fine as well as a few other
-     programs.
+   - Supports up to 8 simultaneous TCP clients connected on port 10110
+   - Integrated web server
+ - NMEA0183
+   - Forwards all NMEA0183 sentences to WiFi clients via TCP
+   - Converts RMC (GPS speed and coordinates) and MWV (Wind) to SignalK
+ - NMEA2000
+   - Forwards all NMEA2000 messages to WiFi (even the ones not understood by
+     KBox) in Seasmart format (they look like NMEA sentences and start with
+     `$PCDIN`)
+   - Converts PGN 127245 (Rudder), 127250 (heading), 128259 (boat speed), 128267
+     (depth), 129025 (position rapid lat/lon), 129026 (sog/cog rapid) and 130306
+     (wind speed and angle/direction) to SignalK
+   - Generates PGN 127508 (battery), 130310 (baro pressure), 130306 (wind),
+     127257 (attitude), 127250 (magnetic heading), 129026 (sog/cog rapid) from
+     SignalK
  - Sensors
-   - Sending nmea2000 bus voltage as well as all three battery banks voltage to
-     WiFi clients via $PCDIN nmea 2000 messages, and to the NMEA2000 network.
-   - Sending current pressure via nmea 2000 $PCDIN messages to wifi clients and
-     to the NMEA2000 network.
+   - Measure nmea2000 bus voltage as well as all three battery banks voltage.
+   - Measure barometric pressure
+   - Measure roll, pitch and magnetic heading
+   - Sensor data is available in SignalK and is automatically converted to the
+     relevant NMEA and NMEA2000 messages
+ - SignalK:
+   - All updates generated from NMEA, NMEA2000 and internal sensors are
+     available over websocket
+ - Data logging
+   - All NMEA and NMEA2000 messages are logged to the SDCard
+ - Display
+   - Battery monitor page: shows voltages of all battery
+   - Stats page: shows number of received and transmitted messages on all interfaces
 
-Current focus is on improving the translation of key sentences from one network
-to the other:
-
- - Translate NMEA0183 GPS and AIS messages to NMEA2000 messages
- - Translate NMEA0183 messages received via WiFi to NMEA2000 messages (so that
-   you can set a waypoint on the iPad and get bearing, distance, time to reach
-   information on a NMEA2000 display)
- - Logging everything to SDCard so we can enjoy sailing, collect a lot of data,
-   go home and continue working on new conversions from the dry comfort of home.
+For more information on current work and future updates, please refer to our
+[issue tracker](https://github.com/sarfata/kbox-firmware/issues).
 
 ## KBox firmware overview
 
@@ -115,7 +121,12 @@ running on the WiFi module.
 Read the [Developer setup](https://github.com/sarfata/kbox-firmware/wiki/Developer-Setup)
 page of the Wiki to learn how to install and run the tools required to program KBox.
 
-## Reporting problems and Sharing suggestions
+## Mailing list
+
+Please join the [KBox-Discussion](https://groups.google.com/forum/#!topic/kbox-discussion)
+mailing list! This is the best place to ask questions and discuss KBox.
+
+## Reporting problems and Contacting the author
 
 If you run into problems or would like to suggest new features for this project,
 please use the [GitHub issue tracker](https://github.com/sarfata/kbox-firmware).
@@ -133,7 +144,10 @@ your library.
 
 List of contributors:
 
- - Thomas Sarlandie
+ - [Thomas Sarlandie](https://github.com/sarfata/)
+ - [Neftaly Hernandez](https://github.com/neftaly)
+ - [Heiko Behrens](https://github.com/HBehrens)
+ - [Ronnie Zeiller](https://github.com/ronzeiller)
 
 ## License
 
@@ -173,3 +187,9 @@ To work on KBox and program the WiFi module, you will also use
 **[Fair winds and following seas](https://en.wikipedia.org/wiki/Following_sea)
 to the authors of these libraries! Without them, this project would not have
 been possible!**
+
+## Changelog
+
+ * 2017 12 07
+   * Merge develop branch into master - Start the changelog
+   * The old master branch is not in `kbox-v0`

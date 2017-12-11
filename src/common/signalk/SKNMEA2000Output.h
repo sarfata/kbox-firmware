@@ -28,20 +28,17 @@
   THE SOFTWARE.
 */
 
-#pragma once
+class tN2kMsg;
 
-#include "SKUpdate.h"
-
-/**
- * This class will automatically visit all known properties of a
- * SKUpdate and call protected methods to deal with each of them.
- *
- * This makes visiting a SKUpdate message much nicer.
- */
-class SKVisitor {
+class SKNMEA2000Output {
   public:
-    void visit(const SKUpdate& u, const SKPath& p, const SKValue &v);
+    virtual ~SKNMEA2000Output() {};
 
-  protected:
-// INSERT GENERATED CODE HERE
+    /**
+     * Write a tN2kMsg to the output.
+     *
+     * @return true if the message was sent to the output or false if it could
+     * not be sent.
+     */
+    virtual bool write(const tN2kMsg& m) = 0;
 };

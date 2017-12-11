@@ -61,8 +61,8 @@ void NMEASentenceBuilder::setField(int fieldId, float v, int precision) {
   setField(fieldId, String(v, precision));
 }
 
-String NMEASentenceBuilder::toNMEA() {
-  String nmea = "$" + talkerId + sentenceId;
+SKNMEASentence NMEASentenceBuilder::toNMEA() {
+  SKNMEASentence nmea = SKNMEASentence("$" + talkerId + sentenceId);
 
   for (int i = 0; i < numFields; i++) {
     nmea += "," + fields[i];

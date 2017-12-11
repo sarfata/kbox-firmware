@@ -27,31 +27,36 @@
 #include <N2kMsg.h>
 #include <N2kMessages.h>
 #include "../KBoxTest.h"
+#include "common/signalk/SKNMEA2000Converter.h"
 #include "common/signalk/SKUpdateStatic.h"
-#include "common/signalk/SKNMEA2000Visitor.h"
 #include "common/signalk/SKUnits.h"
 #include "util.h"
 
 #define ApproxN2kWindSpeed(x) Approx(x).epsilon(0.01)
 #define ApproxN2kWindAngle(x) Approx(x).epsilon(0.0001)
 
-TEST_CASE("NMEA2000Visitor") {
-  SKNMEA2000Visitor visitor;
+class N2kQueue : public LinkedList<tN2kMsg>, public SKNMEA2000Output {
+  public:
+    bool write(const tN2kMsg& m) override {
+      add(m);
+      return true;
+    };
+};
 
-  SECTION("Basic checks") {
-    CHECK( visitor.getMessages().size() == 0 );
-  }
+TEST_CASE("NMEA2000Converter") {
+  SKNMEA2000Converter converter;
+  N2kQueue messages;
 
   SECTION("SOG/COG") {
     SKUpdateStatic<2> rmcUpdate;
     rmcUpdate.setValue(SKPathNavigationSpeedOverGround, 3);
     rmcUpdate.setValue(SKPathNavigationCourseOverGroundTrue, 1);
 
-    visitor.processUpdate(rmcUpdate);
+    converter.convert(rmcUpdate, messages);
 
-    CHECK( visitor.getMessages().size() == 1 );
+    CHECK( messages.size() == 1 );
 
-    const tN2kMsg *m129026 = findMessage(visitor.getMessages(), 129026, 0);
+    const tN2kMsg *m129026 = findMessage(messages, 129026, 0);
     CHECK( m129026 != 0 );
     if (m129026) {
       unsigned char sid;
@@ -72,13 +77,13 @@ TEST_CASE("NMEA2000Visitor") {
     electricalUpdate.setElectricalBatteriesVoltage("engine", 13.0);
     electricalUpdate.setElectricalBatteriesVoltage("house", 12.0);
 
-    visitor.processUpdate(electricalUpdate);
+    converter.convert(electricalUpdate, messages);
 
-    CHECK( visitor.getMessages().size() == 2 );
+    CHECK( messages.size() == 2 );
 
-    if (visitor.getMessages().size() > 2) {
-      const tN2kMsg *m1 = findMessage(visitor.getMessages(), 127508, 0);
-      const tN2kMsg *m2 = findMessage(visitor.getMessages(), 127508, 1);
+    if (messages.size() > 2) {
+      const tN2kMsg *m1 = findMessage(messages, 127508, 0);
+      const tN2kMsg *m2 = findMessage(messages, 127508, 1);
 
       unsigned char instance;
       double voltage;
@@ -105,12 +110,12 @@ TEST_CASE("NMEA2000Visitor") {
     SKUpdateStatic<1> pressureUpdate;
     pressureUpdate.setEnvironmentOutsidePressure(1.013);
 
-    visitor.processUpdate(pressureUpdate);
+    converter.convert(pressureUpdate, messages);
 
-    CHECK( visitor.getMessages().size() == 1 );
+    CHECK( messages.size() == 1 );
 
-    if (visitor.getMessages().size() > 1) {
-      const tN2kMsg *m = findMessage(visitor.getMessages(), 130314, 0);
+    if (messages.size() > 1) {
+      const tN2kMsg *m = findMessage(messages, 130314, 0);
 
       unsigned char sid;
       unsigned char instance;
@@ -128,11 +133,11 @@ TEST_CASE("NMEA2000Visitor") {
     imuUpdate.setNavigationHeadingMagnetic(1.5708);
     imuUpdate.setNavigationAttitude(SKTypeAttitude(3, 1, 0));
 
-    visitor.processUpdate(imuUpdate);
+    converter.convert(imuUpdate, messages);
 
-    CHECK( visitor.getMessages().size() == 2 );
-    const tN2kMsg *mAttitude = findMessage(visitor.getMessages(), 127257, 0);
-    const tN2kMsg *mHeading = findMessage(visitor.getMessages(), 127250, 0);
+    CHECK( messages.size() == 2 );
+    const tN2kMsg *mAttitude = findMessage(messages, 127257, 0);
+    const tN2kMsg *mHeading = findMessage(messages, 127250, 0);
 
     CHECK( mAttitude );
     if (mAttitude) {
@@ -170,11 +175,11 @@ TEST_CASE("NMEA2000Visitor") {
       windUpdate.setEnvironmentWindAngleApparent(SKDegToRad(-30));
       windUpdate.setEnvironmentWindSpeedApparent(SKKnotToMs(4.5));
 
-      visitor.processUpdate(windUpdate);
+      converter.convert(windUpdate, messages);
 
-      CHECK( visitor.getMessages().size() == 1 );
+      CHECK( messages.size() == 1 );
 
-      const tN2kMsg *mWind = findMessage(visitor.getMessages(), 130306, 0);
+      const tN2kMsg *mWind = findMessage(messages, 130306, 0);
 
       CHECK( mWind );
       if (mWind) {
@@ -196,11 +201,11 @@ TEST_CASE("NMEA2000Visitor") {
       windUpdate.setEnvironmentWindAngleTrueWater(SKDegToRad(-30));
       windUpdate.setEnvironmentWindSpeedTrue(SKKnotToMs(4.5));
 
-      visitor.processUpdate(windUpdate);
+      converter.convert(windUpdate, messages);
 
-      CHECK( visitor.getMessages().size() == 1 );
+      CHECK( messages.size() == 1 );
 
-      const tN2kMsg *mWind = findMessage(visitor.getMessages(), 130306, 0);
+      const tN2kMsg *mWind = findMessage(messages, 130306, 0);
 
       CHECK( mWind );
       if (mWind) {
@@ -221,11 +226,11 @@ TEST_CASE("NMEA2000Visitor") {
       windUpdate.setEnvironmentWindAngleTrueGround(SKDegToRad(-30));
       windUpdate.setEnvironmentWindSpeedOverGround(SKKnotToMs(4.5));
 
-      visitor.processUpdate(windUpdate);
+      converter.convert(windUpdate, messages);
 
-      CHECK( visitor.getMessages().size() == 1 );
+      CHECK( messages.size() == 1 );
 
-      const tN2kMsg *mWind = findMessage(visitor.getMessages(), 130306, 0);
+      const tN2kMsg *mWind = findMessage(messages, 130306, 0);
 
       CHECK( mWind );
       if (mWind) {
@@ -246,11 +251,11 @@ TEST_CASE("NMEA2000Visitor") {
       windUpdate.setEnvironmentWindDirectionMagnetic(SKDegToRad(270));
       windUpdate.setEnvironmentWindSpeedOverGround(SKKnotToMs(4.5));
 
-      visitor.processUpdate(windUpdate);
+      converter.convert(windUpdate, messages);
 
-      CHECK( visitor.getMessages().size() == 1 );
+      CHECK( messages.size() == 1 );
 
-      const tN2kMsg *mWind = findMessage(visitor.getMessages(), 130306, 0);
+      const tN2kMsg *mWind = findMessage(messages, 130306, 0);
 
       CHECK( mWind );
       if (mWind) {
@@ -271,11 +276,11 @@ TEST_CASE("NMEA2000Visitor") {
       windUpdate.setEnvironmentWindDirectionTrue(SKDegToRad(270));
       windUpdate.setEnvironmentWindSpeedOverGround(SKKnotToMs(4.5));
 
-      visitor.processUpdate(windUpdate);
+      converter.convert(windUpdate, messages);
 
-      CHECK( visitor.getMessages().size() == 1 );
+      CHECK( messages.size() == 1 );
 
-      const tN2kMsg *mWind = findMessage(visitor.getMessages(), 130306, 0);
+      const tN2kMsg *mWind = findMessage(messages, 130306, 0);
 
       CHECK( mWind );
       if (mWind) {

@@ -31,43 +31,19 @@
 #pragma once
 
 #include <WString.h>
-#include "common/algo/List.h"
-#include "common/signalk/SKVisitor.generated.h"
+#include "SKVisitor.generated.h"
+#include "SKNMEAOutput.h"
 
-class SKNMEAVisitor : SKVisitor {
+class SKNMEAConverter : SKVisitor {
   private:
-    LinkedList<String> _sentences;
-
-
+    SKNMEAOutput *_currentOutput;
     void visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
-    void visitSKEnvironmentOutsidePressure(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
-    void visitSKEnvironmentWindAngleApparent(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
-    void visitSKEnvironmentWindAngleTrueWater(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
-    void visitSKNavigationAttitude(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
-    void visitSKNavigationHeadingMagnetic(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
-    void visitSKSteeringRudderAngle(const SKUpdate &u, const SKPath &p, const SKValue &v) override;
 
-    void generateMWV(double windAngle, double windSpeed, bool apparent);
+    void generateMWV(SKNMEAOutput& out, double windAngle, double windSpeed, bool apparent);
 
   public:
     /**
-     * Process a SKUpdate and add messages to the internal queue of messages.
+     * Process a SKUpdate and sends messages to the output.
      */
-    void processUpdate(const SKUpdate& update) {
-      visit(update);
-    };
-
-    /**
-     * Retrieve the current list of sentences.
-     */
-    const LinkedList<String>& getSentences() const {
-      return _sentences;
-    };
-
-    /**
-     * Flush the list of sentences.
-     */
-    void flushSentences() {
-      _sentences.clear();
-    };
+    void convert(const SKUpdate& update, SKNMEAOutput& output);
 };

@@ -30,18 +30,21 @@
 
 #pragma once
 
-#include "SKUpdate.h"
+#include "SKNMEASentence.h"
 
-/**
- * This class will automatically visit all known properties of a
- * SKUpdate and call protected methods to deal with each of them.
- *
- * This makes visiting a SKUpdate message much nicer.
- */
-class SKVisitor {
+class SKNMEAOutput {
   public:
-    void visit(const SKUpdate& u, const SKPath& p, const SKValue &v);
+    virtual ~SKNMEAOutput() {};
 
-  protected:
-// INSERT GENERATED CODE HERE
+    /**
+     * Writes one complete NMEA sentence to the output.
+     *
+     * nmeaSentence must be terminated by "*XX\0" (where XX is the checksum). It
+     * should already include the "\r\n".
+     *
+     * @return true if the sentence was completely written, or false if the
+     * sentence could not be written.
+     */
+    virtual bool write(const SKNMEASentence& nmeaSentence) = 0;
 };
+

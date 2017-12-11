@@ -8,8 +8,7 @@ PORT=/dev/tty.usbmodem1411
 endif
 
 
-all:
-	platformio -f -c vim run --target upload
+all: host esp mfg test sktool validation
 
 clean:
 	platformio -f -c vim run --target clean

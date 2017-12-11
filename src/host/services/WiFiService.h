@@ -26,14 +26,15 @@
 #include "ui/GC.h"
 #include "os/Task.h"
 #include "signalk/KMessage.h"
+#include "signalk/SKNMEAOutput.h"
+#include "signalk/SKHub.h"
+#include "signalk/SKSubscriber.h"
 #include "comms/Kommand.h"
 #include "comms/SlipStream.h"
 #include "comms/KommandHandlerPing.h"
 #include "comms/KommandHandlerWiFiLog.h"
-#include "common/signalk/SKHub.h"
-#include "common/signalk/SKSubscriber.h"
 
-class WiFiService : public Task, public KReceiver, public SKSubscriber {
+class WiFiService : public Task, public KReceiver, public SKSubscriber, private SKNMEAOutput {
   private:
     SKHub &_hub;
     SlipStream _slip;
@@ -47,5 +48,8 @@ class WiFiService : public Task, public KReceiver, public SKSubscriber {
     void loop();
     void processMessage(const KMessage &m) override;
     void updateReceived(const SKUpdate&) override;
+
+
+    bool write(const SKNMEASentence& s) override;
 };
 
