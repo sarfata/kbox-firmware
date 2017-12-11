@@ -29,6 +29,8 @@
 #include "Event.h"
 #include "Layer.h"
 
+#include <KBoxLogging.h>
+
 /* A page is one simple app available on the MFD.
  *
  * - Only one page can be active at a time.
@@ -44,7 +46,9 @@ class BasePage {
 
     virtual bool processEvent(const ButtonEvent &e) {
       // By default button down will force switching to the next page.
-      return !(e.clickType == ButtonEventTypePressed);
+      DEBUG("EventTypeButton: %i", e.clickType);
+      // false -> next page
+      return !(e.clickType == ButtonEventTypeClick);
     }
     virtual bool processEvent(const EncoderEvent &e) {
       // By default this will be ignored.
@@ -59,7 +63,7 @@ class BasePage {
     virtual ~BasePage() {};
 };
 
-/* BasePage offers a very generic paint implementation. 
+/* BasePage offers a very generic paint implementation.
  * Page assumes the use of Layers.
  *
  * Adding a layer via addLayer() will transfer ownership to the Page who will
@@ -76,4 +80,3 @@ class Page : public BasePage {
     void addLayer(Layer *l);
     void paint(GC &context);
 };
-
