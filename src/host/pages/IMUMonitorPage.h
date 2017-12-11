@@ -28,24 +28,26 @@
   THE SOFTWARE.
 */
 
-#pragma once
-
 #include "common/ui/Page.h"
 #include "common/ui/TextLayer.h"
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKSubscriber.h"
 #include "services/IMUService.h"
 
-class IMUMonitorPage: public Page, public SKSubscriber {
-  private:
-    TextLayer *_hdgTL, *_heelTL, *_pitchTL, *_calTL;
-		int _magCalibration, _accelCalibration;
-    double _pitch;
-    double _heel;
-    double _heading;
+class IMUMonitorPage : public Page, public SKSubscriber {
+	private:
+		TextLayer *_hdgTL, *_rollTL, *_pitchTL, *_calTL;
+		IMUService &_imuService;
 
-  public:
-    IMUMonitorPage(SKHub& hub, IMUService &imuService);
-    //IMUService imuService;
-    virtual void updateReceived(const SKUpdate& up);
+		int _magCalibration, _accelCalibration;
+		double _pitch;
+		double _roll;
+		double _heading;
+
+	public:
+		IMUMonitorPage(SKHub& hub, IMUService &imuService);
+		virtual void updateReceived(const SKUpdate& up);
+
+		bool processEvent(const TickEvent &te);
+		bool processEvent(const ButtonEvent &be);
 };
