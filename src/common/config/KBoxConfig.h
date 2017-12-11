@@ -35,7 +35,10 @@
 // Define different tasks and pages
 // if you don't like a task or page just comment it out
 // ---------------------------------------------------------------------------
-#define IMU_MONITOR_PAGE
+#define SERVICE_BARO
+#define SERVICE_IMU
+
+#define PAGE_IMU
 
 // ---------------------------------------------------------------------------
 //           Use of internal Sensors
