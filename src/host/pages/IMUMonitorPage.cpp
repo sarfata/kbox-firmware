@@ -72,8 +72,7 @@ bool IMUMonitorPage::processEvent(const ButtonEvent &be){
     return false;
   }
   if (be.clickType == ButtonEventTypeLongClick) {
-    DEBUG("Button ButtonEventTypeLongClick !!!");
-    // TODO: here will start the offset to zero calibration of heel & pitch
+    _imuService.setOffset();
   }
   return true;
 }
