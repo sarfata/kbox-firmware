@@ -31,12 +31,12 @@
 #include <stdio.h>
 #include "common/signalk/SKUpdate.h"
 #include "IMUMonitorPage.h"
-#include "KBoxConfig.h"
+#include "common/config/KBoxConfig.h"
 #include <KBoxLogging.h>
 #include "signalk/SKUnits.h"
-#include "services/IMUService.h"
 
-IMUMonitorPage::IMUMonitorPage(SKHub& hub) {
+
+IMUMonitorPage::IMUMonitorPage(SKHub& hub, IMUService &imuService) {
   static const int col1 = 5;
   static const int col2 = 200;
   static const int row1 = 26;
@@ -60,10 +60,15 @@ IMUMonitorPage::IMUMonitorPage(SKHub& hub) {
   addLayer(_pitchTL);
 
   hub.subscribe(this);
+
+  imuService.getLastValues(_accelCalibration, _pitch, _heel, _magCalibration, _heading);
+  DEBUG("AccelCalibration: %i | MagCalibration: %i", _accelCalibration, _magCalibration);
 }
 
 
 void IMUMonitorPage::updateReceived(const SKUpdate& up) {
+
+
 
   // No Updates coming when Calib below cfIMU_MIN_CAL
   // Aproach was for trusted values only
@@ -81,7 +86,7 @@ void IMUMonitorPage::updateReceived(const SKUpdate& up) {
 	/*
   _hdgTL->setText(String( IMUService::IMU_HdgFiltered, 1) + "°        ");
   _calTL->setText(String( IMUService::magCAL) + "   ");
-  
+
 	if ( IMUService::magCAL < cfHdgMinCal ) {
     _hdgTL->setColor(ColorRed);
     _calTL->setColor(ColorRed);
@@ -103,4 +108,3 @@ void IMUMonitorPage::updateReceived(const SKUpdate& up) {
     //DEBUG("up.hasNavigationAttitude() == FALSE");
   }
 }
-
