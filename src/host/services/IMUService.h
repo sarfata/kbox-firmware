@@ -25,6 +25,7 @@
 #include <Adafruit_BNO055.h>
 #include "common/os/Task.h"
 #include "common/signalk/SKHub.h"
+#include <EEPROM.h>
 
 class IMUService : public Task {
   private:
@@ -32,6 +33,7 @@ class IMUService : public Task {
     Adafruit_BNO055 bno055;
     uint8_t _sysCalib, _gyroCalib, _accelCalib, _magCalib;
     double _roll, _pitch, _heading;
+    double _offsetRoll, _offsetPitch;
     imu::Vector<3> eulerAngles;
 
   public:
@@ -39,9 +41,9 @@ class IMUService : public Task {
     void setup();
     void loop();
 
-    void getLastValues(int &accelCalibration, double &pitch, double &heel, int &magCalibration, double &heading);
-    void saveAccelCalibration();
-    void resetAccelCalibration();
-    void saveMagCalibration();
-    void resetMagCalibration();
+    void getLastValues(int &accelCalibration, double &pitch, double &roll, int &magCalibration, double &heading);
+    void resetIMU();
+    bool recallCalibration();
+    bool saveCalibration();
+    void setOffset();
 };
