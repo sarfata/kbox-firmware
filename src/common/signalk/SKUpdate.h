@@ -31,6 +31,8 @@
 #include "SKValue.h"
 #include "SKTime.h"
 
+class SKVisitor;
+
 /**
  * Represents a SignalK update message.
  *
@@ -98,9 +100,23 @@ class SKUpdate {
      */
     virtual bool setValue(const SKPath path, const SKValue v) = 0;
 
+    /**
+     * Visit this SKValue calling appropriate callback on the visitor for each
+     * path/value encountered.
+     */
+    virtual void accept(SKVisitor &visitor) const = 0;
+
+    /**
+     * Visit this SKValue calling appropriate callback on the visitor for each
+     * path/value encountered that matches the path provided.
+     *
+     * This is useful if you want to visit all the ElectricalBatteriesVoltage
+     * values for example.
+     */
+    virtual void accept(SKVisitor &visitor, SKPathEnum staticPath) const = 0;
+
     // Syntactic sugar to make working with SKUpdates easier to read and less
     // prone to type errors.
-    // Automatically generated.
 #include "SKUpdateSyntacticSugar.generated.h"
 
 };

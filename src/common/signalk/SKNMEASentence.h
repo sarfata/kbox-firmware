@@ -30,18 +30,11 @@
 
 #pragma once
 
-#include "SKUpdate.h"
+#include <WString.h>
 
-/**
- * This class will automatically visit all known properties of a
- * SKUpdate and call protected methods to deal with each of them.
- *
- * This makes visiting a SKUpdate message much nicer.
- */
-class SKVisitor {
+// FIXME: We should have a better representation of a NMEASentence that does
+// not depend on dynamic memory or Arduino strings.
+class SKNMEASentence : public String {
   public:
-    void visit(const SKUpdate& u, const SKPath& p, const SKValue &v);
-
-  protected:
-// INSERT GENERATED CODE HERE
+    SKNMEASentence(const String &s) : String(s) {};
 };

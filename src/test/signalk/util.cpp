@@ -25,11 +25,11 @@
 #include "util.h"
 #include <N2kMsg.h>
 
-const tN2kMsg *findMessage(const LinkedList<tN2kMsg*> messages, uint32_t pgn, int index) {
-  for (LinkedListConstIterator<tN2kMsg*> it = messages.begin(); it != messages.end(); it++) {
-    if ((*it)->PGN == pgn) {
+const tN2kMsg* findMessage(const LinkedList<tN2kMsg>& messages, uint32_t pgn, int index) {
+  for (LinkedListConstIterator<tN2kMsg> it = messages.begin(); it != messages.end(); it++) {
+    if ((*it).PGN == pgn) {
       if (index-- == 0) {
-        return (*it);
+        return &(*it);
       }
     }
   }

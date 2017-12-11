@@ -31,12 +31,7 @@
 #include "SKVisitor.generated.h"
 
 
-void SKVisitor::visit(const SKUpdate& u) {
-  for (int i = 0; i < u.getSize(); i++) {
-    const SKPath &p = u.getPath(i);
-    const SKValue &v = u.getValue(i);
-
+void SKVisitor::visit(const SKUpdate& u, const SKPath &p, const SKValue &v) {
 // INSERT GENERATED CODE HERE
-  }
 }
 

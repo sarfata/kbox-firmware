@@ -26,6 +26,7 @@
 
 #include "SKUpdate.h"
 #include "SKPath.h"
+#include "SKVisitor.generated.h"
 
 /**
  * Implements a statically allocated SKUpdate. The capacity of the update is
@@ -142,4 +143,19 @@ template <uint16_t capacity> class SKUpdateStatic : public SKUpdate {
         return SKValueNone;
       }
     };
+
+    virtual void accept(SKVisitor& visitor) const override {
+      for (int i = 0; i < getSize(); i++) {
+        visitor.visit(*this, getPath(i), getValue(i));
+      }
+    }
+
+    virtual void accept(SKVisitor& visitor, SKPathEnum staticPath) const override {
+      for (int i = 0; i < getSize(); i++) {
+        if (getPath(i).getStaticPath() == staticPath) {
+          visitor.visit(*this, getPath(i), getValue(i));
+        }
+      }
+    }
+
 };

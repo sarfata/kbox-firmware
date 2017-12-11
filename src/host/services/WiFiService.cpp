@@ -24,7 +24,7 @@
 
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
-#include "common/signalk/SKNMEAVisitor.h"
+#include "common/signalk/SKNMEAConverter.h"
 #include "common/signalk/KMessageNMEAVisitor.h"
 #include "common/signalk/SKJSONVisitor.h"
 #include "stats/KBoxMetrics.h"
@@ -85,15 +85,9 @@ void WiFiService::updateReceived(const SKUpdate& u) {
    * to messages that will be sent to WiFi clients.
    */
 
-  // Convert to NMEA format first
-  SKNMEAVisitor nmeaVisitor;
-  nmeaVisitor.processUpdate(u);
-  for (LinkedList<String>::constIterator it = nmeaVisitor.getSentences().begin(); it != nmeaVisitor.getSentences().end(); it++) {
-    // NMEA Sentences should always be 82 bytes or less
-    FixedSizeKommand<100> k(KommandNMEASentence);
-    k.appendNullTerminatedString((*it).c_str());
-    _slip.writeFrame(k.getBytes(), k.getSize());
-  }
+  SKNMEAConverter nmeaConverter;
+  // The converter will call this->write(NMEASentence) for every generated sentence
+  nmeaConverter.convert(u, *this);
 
   // Now send in JSON format
   StaticJsonBuffer<1024> jsonBuffer;
@@ -103,4 +97,13 @@ void WiFiService::updateReceived(const SKUpdate& u) {
   jsonData.printTo(k);
   k.write(0);
   _slip.writeFrame(k.getBytes(), k.getSize());
+}
+
+bool WiFiService::write(const SKNMEASentence& sentence) {
+  // NMEA Sentences should always be 82 bytes or less
+  FixedSizeKommand<100> k(KommandNMEASentence);
+  String s = sentence + "\r\n";
+  k.appendNullTerminatedString(s.c_str());
+  _slip.writeFrame(k.getBytes(), k.getSize());
+  return true;
 }

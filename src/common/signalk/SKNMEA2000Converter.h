@@ -1,10 +1,4 @@
 /*
-     __  __     ______     ______     __  __
-    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
-    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
-     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
-       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
-
   The MIT License
 
   Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
@@ -30,18 +24,26 @@
 
 #pragma once
 
+#include <N2kMessages.h>
 #include "SKUpdate.h"
+#include "SKVisitor.generated.h"
+#include "SKNMEA2000Output.h"
 
 /**
- * This class will automatically visit all known properties of a
- * SKUpdate and call protected methods to deal with each of them.
- *
- * This makes visiting a SKUpdate message much nicer.
+ * Converts one or multiple SignalK updates into a series of N2KMessages.
  */
-class SKVisitor {
-  public:
-    void visit(const SKUpdate& u, const SKPath& p, const SKValue &v);
+class SKNMEA2000Converter : private SKVisitor {
+  private:
+    SKNMEA2000Output *_currentOutput = 0;
+
+    void generateWind(SKNMEA2000Output &out, double windAngle, double windSpeed, tN2kWindReference windReference);
 
   protected:
-// INSERT GENERATED CODE HERE
+    void visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
+
+  public:
+    /**
+     * Process a SKUpdate and add messages to the internal queue of messages.
+     */
+    void convert(const SKUpdate& update, SKNMEA2000Output& conversionOutput);
 };
