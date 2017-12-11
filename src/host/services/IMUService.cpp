@@ -72,8 +72,7 @@ void IMUService::loop() {
   _roll = eulerAngles.z() + _offsetRoll;
   _pitch = eulerAngles.y() + _offsetPitch;
   _heading = fmod(eulerAngles.x() + 270, 360);
-
-  DEBUG("Attitude heel: %.3f pitch: %.3f  Mag heading: %.3f", _roll, _pitch, _heading);
+  //DEBUG("Attitude heel: %.3f pitch: %.3f  Mag heading: %.3f", _roll, _pitch, _heading);
 
   if (_magCalib >= cfHdgMinCal) {
     update.setNavigationHeadingMagnetic(SKDegToRad(_heading));
