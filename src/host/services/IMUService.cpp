@@ -22,8 +22,8 @@
   THE SOFTWARE.
 */
 
-#include <KBoxConfig.h>
 #include <KBoxLogging.h>
+#include "common/config/KBoxConfig.h"
 #include "common/signalk/SKUpdateStatic.h"
 #include "common/signalk/SKUnits.h"
 #include "IMUService.h"
@@ -39,30 +39,37 @@ void IMUService::setup() {
 }
 
 void IMUService::loop() {
-  bno055.getCalibration(&sysCalib, &gyroCalib, &accelCalib, &magCalib);
+  bno055.getCalibration(&_sysCalib, &_gyroCalib, &_accelCalib, &_magCalib);
 
   eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
 
-  //DEBUG("Calib Sys: %i Accel: %i Gyro: %i Mag: %i", sysCalib, accelCalib, gyroCalib, magCalib);
-  //DEBUG("Attitude roll: %f pitch: %f  Mag heading: %f", eulerAngles.z(), eulerAngles.y(), eulerAngles.x());
+  DEBUG("Calib Sys: %i Accel: %i Gyro: %i Mag: %i", _sysCalib, _accelCalib, _gyroCalib, _magCalib);
+  DEBUG("Attitude roll: %f pitch: %f  Mag heading: %f", eulerAngles.z(), eulerAngles.y(), eulerAngles.x());
 
   SKUpdateStatic<2> update;
   // Note: We could calculate yaw as the difference between the Magnetic
   // Heading and the Course Over Ground Magnetic.
 
   /* if orientation == MOUNTED_ON_PORT_HULL */
-  double roll, pitch, heading;
-  roll = eulerAngles.z();
-  pitch = eulerAngles.y();
-  heading = fmod(eulerAngles.x() + 270, 360);
+  _roll = eulerAngles.z();
+  _pitch = eulerAngles.y();
+  _heading = fmod(eulerAngles.x() + 270, 360);
 
-  if (magCalib >= cfHdgMinCal) {
-    update.setNavigationHeadingMagnetic(SKDegToRad(heading));
+  if (_magCalib >= cfHdgMinCal) {
+    update.setNavigationHeadingMagnetic(SKDegToRad(_heading));
     _skHub.publish(update);
   }
-	
-	if (accelCalib >= cfHeelPitchMinCal && gyroCalib >= cfHeelPitchMinCal) {
-    update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(roll), /* pitch */ SKDegToRad(pitch), /* yaw */ 0));
+
+	if (_accelCalib >= cfHeelPitchMinCal && _gyroCalib >= cfHeelPitchMinCal) {
+    update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(_roll), /* pitch */ SKDegToRad(_pitch), /* yaw */ 0));
     _skHub.publish(update);
   }
+}
+
+void IMUService::getLastValues(int &accelCalibration, double &pitch, double &heel, int &magCalibration, double &heading){
+  accelCalibration = _accelCalib;
+  pitch = _pitch;
+  heel = _roll;
+  magCalibration = _magCalib;
+  heading = _heading;
 }
