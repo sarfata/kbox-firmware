@@ -50,48 +50,51 @@ void IMUService::setup() {
 
 void IMUService::loop() {
   bno055.getCalibration(&_sysCalib, &_gyroCalib, &_accelCalib, &_magCalib);
+  //DEBUG("Calib Sys: %i Accel: %i Gyro: %i Mag: %i", _sysCalib, _accelCalib, _gyroCalib, _magCalib);
 
   eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
-
-  //DEBUG("Calib Sys: %i Accel: %i Gyro: %i Mag: %i", _sysCalib, _accelCalib, _gyroCalib, _magCalib);
-  //DEBUG("Attitude roll: %.3f pitch: %.3f  Mag heading: %.3f", eulerAngles.z(), eulerAngles.y(), eulerAngles.x());
+  //DEBUG("Sensor Raw-datas: eulerAngles.z=%.3f eulerAngles.y=%.3f  eulerAngles.x=%.3f", eulerAngles.z(), eulerAngles.y(), eulerAngles.x());
 
   SKUpdateStatic<2> update;
   // Note: We could calculate yaw as the difference between the Magnetic
   // Heading and the Course Over Ground Magnetic.
 
+  // TODO: different calcs according to mounting position
   /* if orientation == MOUNTED_ON_STARBOARD_HULL */
-  _roll = SKDegToRad(eulerAngles.z() + _offsetRoll);
-  _pitch = SKDegToRad(eulerAngles.y() + _offsetPitch);
+  _roll = SKDegToRad(eulerAngles.z());
+  _pitch = SKDegToRad(eulerAngles.y());
   _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
-  //DEBUG("Attitude heel: %.3f pitch: %.3f  Mag heading: %.3f", SKRadToDeg(_roll), SKRadToDeg(_pitch), SKRadToDeg(_heading));
 
+  // update NavigationHeadingMagnetic if quality (= calibration value) is ok
   if (_magCalib >= _cfHdgMinCal) {
     update.setNavigationHeadingMagnetic(_heading);
     _skHub.publish(update);
   }
-
+  // update NavigationAttitude if quality (= calibration value) is ok
 	if (_accelCalib >= _cfHeelPitchMinCal && _gyroCalib >= _cfHeelPitchMinCal) {
-    update.setNavigationAttitude(SKTypeAttitude(/* roll */ _roll, /* pitch */ _pitch, /* yaw */ 0));
+    update.setNavigationAttitude(SKTypeAttitude(/* roll */ _roll + _offsetRoll, /* pitch */ _pitch + _offsetPitch, /* yaw */ 0));
+    //DEBUG("Heel = %.3f | Pitch = %.3f | Heading = %.3f", SKRadToDeg( _roll + _offsetRoll), SKRadToDeg( _pitch + _offsetPitch), SKRadToDeg(_heading));
     _skHub.publish(update);
   }
 }
 
+// get the actual values of calibration, heel & pitch (including offset) and heading for display
+// all angles in radians
 void IMUService::getLastValues(int &accelCalibration, double &pitch, double &roll, int &magCalibration, double &heading){
   accelCalibration = _accelCalib;
-  pitch = _pitch;
-  roll = _roll;
+  pitch = _pitch + _offsetPitch;
+  roll = _roll + _offsetRoll;
   magCalibration = _magCalib;
   heading = _heading;
 }
 
-//  Offset for Heel=0 and Pitch=0 with long button press in IMUMonitorPage
+//  Calc offset for making Heel=0 and Pitch=0 (e.g. called with long button press in IMUMonitorPage)
 void IMUService::setOffset() {
-  // FIXIT: Why it is called at startup of KBox? event longClick coming?
+  // FIXIT: Why is it called at startup of KBox? event longClick coming?
   if ( millis() > 10000 ) {
     _offsetRoll = _roll * (-1);
     _offsetPitch = _pitch * (-1);
-    DEBUG("Offset changed: Heel -> %.3f | Pitch -> %.3f", SKRadToDeg(_offsetRoll), SKRadToDeg(_offsetPitch));
+    INFO("Offset changed: Heel -> %.3f | Pitch -> %.3f", SKRadToDeg(_offsetRoll), SKRadToDeg(_offsetPitch));
     // TODO: angle of heel and pitch must be smaller than 90°, check overflow!
   }
 }
