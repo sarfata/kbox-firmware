@@ -23,7 +23,6 @@
 */
 
 #include <KBoxLogging.h>
-#include "common/config/KBoxConfig.h"
 #include "common/signalk/SKUpdateStatic.h"
 #include "common/signalk/SKUnits.h"
 #include "IMUService.h"
@@ -31,6 +30,8 @@
 void IMUService::setup() {
   _offsetRoll  = 0.0;
   _offsetPitch = 0.0;
+  _cfHdgMinCal = 2;
+  _cfHeelPitchMinCal = 2;
 
   // until config is made, declare default mounting position KBox here
   uint8_t axisConfig = 0b00001001;
@@ -64,12 +65,12 @@ void IMUService::loop() {
   _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
   //DEBUG("Attitude heel: %.3f pitch: %.3f  Mag heading: %.3f", SKRadToDeg(_roll), SKRadToDeg(_pitch), SKRadToDeg(_heading));
 
-  if (_magCalib >= cfHdgMinCal) {
+  if (_magCalib >= _cfHdgMinCal) {
     update.setNavigationHeadingMagnetic(_heading);
     _skHub.publish(update);
   }
 
-	if (_accelCalib >= cfHeelPitchMinCal && _gyroCalib >= cfHeelPitchMinCal) {
+	if (_accelCalib >= _cfHeelPitchMinCal && _gyroCalib >= _cfHeelPitchMinCal) {
     update.setNavigationAttitude(SKTypeAttitude(/* roll */ _roll, /* pitch */ _pitch, /* yaw */ 0));
     _skHub.publish(update);
   }
