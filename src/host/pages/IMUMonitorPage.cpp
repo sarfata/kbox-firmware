@@ -67,7 +67,6 @@ IMUMonitorPage::IMUMonitorPage(SKHub& hub, IMUService &imuService) : _imuService
 }
 
 bool IMUMonitorPage::processEvent(const ButtonEvent &be){
-
   // DEBUG("EventTypeButton: %i", be.clickType);
   if (be.clickType == ButtonEventTypeClick) {
     DEBUG("Button ButtonEventTypeClick !!!");
@@ -81,15 +80,12 @@ bool IMUMonitorPage::processEvent(const ButtonEvent &be){
 }
 
 bool IMUMonitorPage::processEvent(const TickEvent &te){
-
   _imuService.getLastValues(_accelCalibration, _pitch, _roll, _magCalibration, _heading);
   //DEBUG("AccelCalibration: %i | MagCalibration: %i", _accelCalibration, _magCalibration);
 
   // TODO: Some damping for the display
-
   _hdgTL->setText(String( SKRadToDeg(_heading), 1) + "°        ");
   _calTL->setText(String( _magCalibration) + "/" + String( _accelCalibration) + "   ");
-
   _pitchTL->setText(String( SKRadToDeg(_pitch), 1) + "°     ");
   _rollTL->setText(String( SKRadToDeg(_roll), 1) + "°     ");
 
