@@ -23,7 +23,6 @@
 */
 
 #include <KBoxHardware.h>
-#include "common/config/KBoxConfig.h"
 #include "common/os/TaskManager.h"
 #include "common/os/Task.h"
 #include "common/signalk/SKHub.h"
@@ -72,6 +71,9 @@ void setup() {
   WiFiService *wifi = new WiFiService(skHub, gc);
 
   ADCService *adcService = new ADCService(skHub, KBox.getADC());
+  BarometerService *baroService = new BarometerService(skHub);
+  IMUService *imuService = new IMUService(skHub);
+
   NMEA2000Service *n2kService = new NMEA2000Service(skHub);
   n2kService->connectTo(*wifi);
 
@@ -89,7 +91,9 @@ void setup() {
   // Add all the tasks
   taskManager.addTask(&mfd);
   taskManager.addTask(new IntervalTask(new RunningLightService(), 250));
-  taskManager.addTask(new IntervalTask(adcService, cfAdcServiceInterval));
+  taskManager.addTask(new IntervalTask(adcService, 1000));
+  taskManager.addTask(new IntervalTask(imuService, 50));
+  taskManager.addTask(new IntervalTask(baroService, 1000));
   taskManager.addTask(n2kService);
   taskManager.addTask(reader1);
   taskManager.addTask(reader2);
@@ -97,19 +101,11 @@ void setup() {
   taskManager.addTask(sdcardTask);
   taskManager.addTask(&usbService);
 
-  #ifdef SERVICE_BARO
-    BarometerService *baroService = new BarometerService(skHub);
-    taskManager.addTask(new IntervalTask(baroService, cfBaroServiceInterval));
-  #endif
+  BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
+  mfd.addPage(batPage);
 
-  #ifdef SERVICE_IMU
-    IMUService *imuService = new IMUService(skHub);
-    taskManager.addTask(new IntervalTask(imuService, cfIMUServiceInterval));
-    #ifdef PAGE_IMU
-      IMUMonitorPage *imuPage = new IMUMonitorPage(skHub, *imuService);
-      mfd.addPage(imuPage);
-    #endif
-  #endif
+  IMUMonitorPage *imuPage = new IMUMonitorPage(skHub, *imuService);
+  mfd.addPage(imuPage);
 
   BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
   mfd.addPage(batPage);
