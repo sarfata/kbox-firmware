@@ -26,6 +26,7 @@
 #include "common/signalk/SKUpdateStatic.h"
 #include "common/signalk/SKUnits.h"
 #include "IMUService.h"
+#include <EEPROM.h>
 
 void IMUService::setup() {
   _offsetRoll  = 0.0;
