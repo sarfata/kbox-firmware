@@ -36,6 +36,9 @@ class IMUService : public Task {
     double _offsetRoll, _offsetPitch;
     imu::Vector<3> eulerAngles;
 
+    // TODO: change to config setting
+    uint8_t _cfHdgMinCal, _cfHeelPitchMinCal;
+
   public:
     IMUService(SKHub& skHub) : Task("IMU"), _skHub(skHub) {};
     void setup();
