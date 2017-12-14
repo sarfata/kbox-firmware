@@ -107,9 +107,6 @@ void setup() {
   IMUMonitorPage *imuPage = new IMUMonitorPage(skHub, *imuService);
   mfd.addPage(imuPage);
 
-  BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
-  mfd.addPage(batPage);
-
   StatsPage *statsPage = new StatsPage();
   statsPage->setSDCardTask(sdcardTask);
 
