@@ -40,9 +40,8 @@ class IMUMonitorPage : public Page, public SKSubscriber {
 		IMUService &_imuService;
 
 		int _magCalibration, _accelCalibration;
-		double _pitch;
-		double _roll;
-		double _heading;
+		double _pitch, _roll, _heading;
+		uint8_t _cfHdgMinCal, _cfHeelPitchMinCal;
 
 	public:
 		IMUMonitorPage(SKHub& hub, IMUService &imuService);
