@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,14 +28,31 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include <errno.h>
+#include <stdio.h>
+#include "KBoxTestLogger.h"
 
-#include <WString.h>
-#include <string>
-#include <ostream>
+static int strrpos(const char *string, char c) {
+  int index = -1;
+  int i = 0;
+  for (i = 0; string[i] != 0; i++) {
+    if (string[i] == c) {
+      index = i;
+    }
+  }
+  return index;
+}
 
-// This is required so that Catch.hpp can print Teensy Strings
-std::ostream& operator << ( std::ostream& os, ::String const& value );
+void KBoxTestLogger::log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs) {
+  static const char *logLevelPrefixes[] = { "D", "I", "E", "WD", "WI", "WE" };
 
-#include "catch.hpp"
+  int lastSlash = strrpos(fname, '/');
+  if (lastSlash > 0) {
+    fname = fname + lastSlash + 1;
+  }
 
+  fprintf(stdout, "%s %s: %i ", logLevelPrefixes[level], fname, lineno);
+
+  vfprintf(stdout, fmt, fmtargs);
+  fprintf(stdout, "\n");
+}
