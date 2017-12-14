@@ -1,17 +1,19 @@
 /***************************************************************************
-
-Edited Library for KBox use!
-
-
   This is a library for the BNO055 orientation sensor
+
   Designed specifically to work with the Adafruit BNO055 Breakout.
+
   Pick one up today in the adafruit shop!
   ------> http://www.adafruit.com/products
+
   These sensors use I2C to communicate, 2 pins are required to interface.
+
   Adafruit invests time and resources providing this open source code,
   please support Adafruit andopen-source hardware by purchasing products
   from Adafruit!
+
   Written by KTOWN for Adafruit Industries.
+
   MIT license, all text above must be included in any redistribution
  ***************************************************************************/
 
@@ -24,14 +26,12 @@ Edited Library for KBox use!
  #include "WProgram.h"
 #endif
 
-/*  Disabled, not needed for KBox
-#ifdef __AVR_ATtiny85__
- #include <TinyWireM.h>
- #define Wire TinyWireM
-#else
- #include <Wire.h>
-#endif
-*/
+//#ifdef __AVR_ATtiny85__
+ //#include <TinyWireM.h>
+ //#define Wire TinyWireM
+//#else
+ //#include <Wire.h>
+//#endif
 
 #include <Adafruit_Sensor.h>
 #include <utility/imumaths.h>
@@ -279,13 +279,7 @@ class Adafruit_BNO055 : public Adafruit_Sensor
       VECTOR_GRAVITY       = BNO055_GRAVITY_DATA_X_LSB_ADDR
     } adafruit_vector_type_t;
 
-#if defined (ARDUINO_SAMD_ZERO) && ! (ARDUINO_SAMD_FEATHER_M0)
-#error "On an arduino Zero, BNO055's ADR pin must be high. Fix that, then delete this line."
-    Adafruit_BNO055 ( int32_t sensorID = -1, uint8_t address = BNO055_ADDRESS_B );
-#else
     Adafruit_BNO055 ( int32_t sensorID = -1, uint8_t address = BNO055_ADDRESS_A );
-#endif
-    bool  begin               ( adafruit_bno055_opmode_t mode = OPERATION_MODE_NDOF );
     // MOD for KBox to set axis and sign
     bool  begin               ( adafruit_bno055_opmode_t mode = OPERATION_MODE_NDOF,
                                   uint8_t axis_remap_orientation = REMAP_CONFIG_P1,
