@@ -25,7 +25,6 @@
 #include <Adafruit_BNO055.h>
 #include "common/os/Task.h"
 #include "common/signalk/SKHub.h"
-#include <EEPROM.h>
 
 class IMUService : public Task {
   private:
