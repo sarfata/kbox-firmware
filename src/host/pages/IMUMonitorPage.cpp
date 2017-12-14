@@ -31,12 +31,15 @@
 #include <stdio.h>
 #include "common/signalk/SKUpdate.h"
 #include "IMUMonitorPage.h"
-#include "common/config/KBoxConfig.h"
 #include <KBoxLogging.h>
 #include "signalk/SKUnits.h"
 
 
 IMUMonitorPage::IMUMonitorPage(SKHub& hub, IMUService &imuService) : _imuService(imuService) {
+
+  _cfHdgMinCal = 2;
+  _cfHeelPitchMinCal = 2;
+
   static const int col1 = 5;
   static const int col2 = 200;
   static const int row1 = 26;
@@ -84,14 +87,14 @@ bool IMUMonitorPage::processEvent(const TickEvent &te){
 
   // TODO: Some damping for the display
 
-  _hdgTL->setText(String( _heading, 1) + "°        ");
+  _hdgTL->setText(String( SKRadToDeg(_heading), 1) + "°        ");
   _calTL->setText(String( _magCalibration) + "/" + String( _accelCalibration) + "   ");
 
-  _pitchTL->setText(String( _pitch, 1) + "°     ");
-  _rollTL->setText(String( _roll, 1) + "°     ");
+  _pitchTL->setText(String( SKRadToDeg(_pitch), 1) + "°     ");
+  _rollTL->setText(String( SKRadToDeg(_roll), 1) + "°     ");
 
   // Always show Hdg from IMU-sensor, but if the value is not trusted change color to Red
-	if ((_magCalibration <= cfHdgMinCal)||(_accelCalibration <= cfHeelPitchMinCal)) {
+	if ((_magCalibration <= _cfHdgMinCal)||(_accelCalibration <= _cfHeelPitchMinCal)) {
     _hdgTL->setColor(ColorRed);
     _calTL->setColor(ColorRed);
   } else {
