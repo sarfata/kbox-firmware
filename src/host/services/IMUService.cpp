@@ -32,25 +32,15 @@ void IMUService::setup() {
   _offsetRoll  = 0.0;
   _offsetPitch = 0.0;
 
+  // until config is made, declare default mounting position KBox here
+  uint8_t axisConfig = 0b00001001;
+  uint8_t signConfig = 0b00000000;
+
   DEBUG("Initing BNO055");
-  if (!bno055.begin()) {
+  if (!bno055.begin(bno055.OPERATION_MODE_NDOF, axisConfig, signConfig)) {
     DEBUG("Error initializing BNO055");
   }
   else {
-    // put BNO055 into config mode
-    bno055.setMode(bno055.OPERATION_MODE_CONFIG);
-    delay(50);
-    // Configure axis mapping (see Bosch manual section 3.4)
-    //bno055.write8(BNO055_AXIS_MAP_CONFIG_ADDR, REMAP_CONFIG_P2); // P0-P7, Default is P1
-    // set axis remap to default KBox mounting starboard hull
-    bno055.write8(bno055.BNO055_AXIS_MAP_CONFIG_ADDR, 0b00001001 );
-    delay(50);
-    //bno055.write8(BNO055_AXIS_MAP_SIGN_ADDR, REMAP_SIGN_P2); // P0-P7, Default is P1
-    // set sign remap to default KBox mounting on starboard hull
-    bno055.write8(bno055.BNO055_AXIS_MAP_SIGN_ADDR, 0b00000000 );
-    delay(50);
-    bno055.setMode( bno055.OPERATION_MODE_NDOF ); // OPERATION_MODE_NDOF_FMC_OFF
-    delay(1000);
     if (recallCalibration())
       DEBUG("Success!");
   }
@@ -62,25 +52,25 @@ void IMUService::loop() {
   eulerAngles = bno055.getVector(Adafruit_BNO055::VECTOR_EULER);
 
   //DEBUG("Calib Sys: %i Accel: %i Gyro: %i Mag: %i", _sysCalib, _accelCalib, _gyroCalib, _magCalib);
-  //DEBUG("Attitude roll: %f pitch: %f  Mag heading: %f", eulerAngles.z(), eulerAngles.y(), eulerAngles.x());
+  //DEBUG("Attitude roll: %.3f pitch: %.3f  Mag heading: %.3f", eulerAngles.z(), eulerAngles.y(), eulerAngles.x());
 
   SKUpdateStatic<2> update;
   // Note: We could calculate yaw as the difference between the Magnetic
   // Heading and the Course Over Ground Magnetic.
 
   /* if orientation == MOUNTED_ON_STARBOARD_HULL */
-  _roll = eulerAngles.z() + _offsetRoll;
-  _pitch = eulerAngles.y() + _offsetPitch;
-  _heading = fmod(eulerAngles.x() + 270, 360);
-  //DEBUG("Attitude heel: %.3f pitch: %.3f  Mag heading: %.3f", _roll, _pitch, _heading);
+  _roll = SKDegToRad(eulerAngles.z() + _offsetRoll);
+  _pitch = SKDegToRad(eulerAngles.y() + _offsetPitch);
+  _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
+  //DEBUG("Attitude heel: %.3f pitch: %.3f  Mag heading: %.3f", SKRadToDeg(_roll), SKRadToDeg(_pitch), SKRadToDeg(_heading));
 
   if (_magCalib >= cfHdgMinCal) {
-    update.setNavigationHeadingMagnetic(SKDegToRad(_heading));
+    update.setNavigationHeadingMagnetic(_heading);
     _skHub.publish(update);
   }
 
 	if (_accelCalib >= cfHeelPitchMinCal && _gyroCalib >= cfHeelPitchMinCal) {
-    update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(_roll), /* pitch */ SKDegToRad(_pitch), /* yaw */ 0));
+    update.setNavigationAttitude(SKTypeAttitude(/* roll */ _roll, /* pitch */ _pitch, /* yaw */ 0));
     _skHub.publish(update);
   }
 }
@@ -99,31 +89,28 @@ void IMUService::setOffset() {
   if ( millis() > 10000 ) {
     _offsetRoll = _roll * (-1);
     _offsetPitch = _pitch * (-1);
-    DEBUG("Offset changed: Heel -> %.3f | Pitch -> %.3f", _offsetRoll, _offsetPitch);
+    DEBUG("Offset changed: Heel -> %.3f | Pitch -> %.3f", SKRadToDeg(_offsetRoll), SKRadToDeg(_offsetPitch));
     // TODO: angle of heel and pitch must be smaller than 90°, check overflow!
   }
 }
 
 bool IMUService::saveCalibration() {
+  int _eeAddress = 0;
+  long bnoID;
+  sensor_t sensor;
+  adafruit_bno055_offsets_t newCalib;
+  bno055.getSensorOffsets(newCalib);
 
-   int _eeAddress = 0;
-   long bnoID;
-   sensor_t sensor;
-   adafruit_bno055_offsets_t newCalib;
-   bno055.getSensorOffsets(newCalib);
+  DEBUG("\n\nStoring calibration data to EEPROM...");
+  bno055.getSensor(&sensor);
+  bnoID = sensor.sensor_id;
 
-   DEBUG("\n\nStoring calibration data to EEPROM...");
+  EEPROM.put(_eeAddress, bnoID);
 
-   bno055.getSensor(&sensor);
-   bnoID = sensor.sensor_id;
-
-   EEPROM.put(_eeAddress, bnoID);
-
-   _eeAddress += sizeof(long);
-   EEPROM.put(_eeAddress, newCalib);
-   DEBUG("Data stored to EEPROM.");
-   delay(500);
-
+  _eeAddress += sizeof(long);
+  EEPROM.put(_eeAddress, newCalib);
+  DEBUG("Data stored to EEPROM.");
+  delay(500);
   return true;
 }
 
