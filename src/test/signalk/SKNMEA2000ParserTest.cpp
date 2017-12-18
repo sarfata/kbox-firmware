@@ -111,6 +111,16 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
     CHECK( update.getSteeringRudderAngle() == Approx(SKDegToRad(-3.6)).epsilon(0.0001) );
   }
 
+  SECTION("127275: NavigationAttitude Heel, Pitch, Yaw") {
+    // SID, yaw, pitch, roll in radians
+    SetN2kAttitude(msg, 0, SKDegToRad(352), SKDegToRad(-2.3), SKDegToRad(3.2));
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    CHECK( update.getSize() == 1);
+    CHECK( update.getNavigationAttitude().yaw   == Approx(SKDegToRad(352)).epsilon(0.0001) );
+    CHECK( update.getNavigationAttitude().pitch == Approx(SKDegToRad(-2.3)).epsilon(0.0001) );
+    CHECK( update.getNavigationAttitude().roll  == Approx(SKDegToRad(3.2)).epsilon(0.0001) );
+  }
+
   SECTION("130306: Ground Wind Test TWS, TWD TrueNorth referenced") {
     SetN2kWindSpeed(msg, 0, 16, SKDegToRad(45), N2kWind_True_North);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));

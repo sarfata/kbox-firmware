@@ -55,9 +55,9 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
         return parse127250(input, msg, timestamp);
       break;
     //case 127251L: // Rate of Turn
-    //case 127257L: // Attitude Yaw, Pitch, Roll
-    //    return parse127257(input, msg, timestamp);
-    //  break;
+    case 127257L: // Attitude Yaw, Pitch, Roll
+        return parse127257(input, msg, timestamp);
+      break;
     //case 127258L:  // Magnetic Variation
     //    return parse127258(input, msg, timestamp);
     //  break;
@@ -205,6 +205,38 @@ const SKUpdate& SKNMEA2000Parser::parse127250(const SKSourceInput& input, const 
   }
 
   DEBUG("Unable to parse NMEA2000 with PGN %i", msg.PGN);
+  return _invalidSku;
+}
+
+// *****************************************************************************
+// PGN 127257 Attitude Yaw, Pitch, Roll
+//  - Yaw                   Heading in radians.
+//  - Pitch                 Pitch in radians. Positive, when your bow rises.
+//  - Roll                  Roll in radians. Positive, when tilted right.
+// *****************************************************************************
+const SKUpdate& SKNMEA2000Parser::parse127257(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
+  unsigned char sid;
+  double yaw   = N2kDoubleNA;
+  double pitch = N2kDoubleNA;
+  double roll  = N2kDoubleNA;
+
+  if (ParseN2kPGN127257(msg, sid, yaw, pitch, roll)) {
+    SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
+    update->setTimestamp(timestamp);
+
+    SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
+    update->setSource(source);
+    // TODO: check if it is possible to set NAN as value to SKUpdate
+    // because set to zero is no good solution
+    if (!(N2kIsNA(roll) && N2kIsNA(pitch) && N2kIsNA(yaw) ) ) {
+      update->setNavigationAttitude(SKTypeAttitude(roll, pitch, yaw));
+    }
+
+    _sku = update;
+    return *_sku;
+  }
+
+  DEBUG("Unable to parse N2kMsg with PGN %i", msg.PGN);
   return _invalidSku;
 }
 
