@@ -31,6 +31,7 @@
 #pragma once
 
 #include <ArduinoJson.h>
+#include <WString.h>
 #include "KBoxConfig.h"
 
 /**
@@ -40,7 +41,9 @@
 class KBoxConfigParser {
   private:
     void parseIMUConfig(const JsonObject &object, IMUConfig &imuConfig);
-    void parseNMEAConfig(const JsonObject &object, NMEAConfig &nmeaConfig, int nmeaIndex);
+    void parseNMEAConfig(const JsonObject &object, SerialConfig &nmeaConfig);
+
+    SerialMode convertSerialMode(const String &s);
 
   public:
     /**

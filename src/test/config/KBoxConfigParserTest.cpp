@@ -41,10 +41,10 @@ TEST_CASE("KBoxConfigParser") {
     kboxConfigParser.defaultConfig(config);
 
     // check some default values
-    CHECK( config.nmea1Config.baudRate == 38400 );
-    CHECK( config.nmea1Config.inputEnabled == true );
-    CHECK( config.nmea1Config.outputEnabled == false );
-    CHECK( config.nmea2Config.baudRate == 4800 );
+    CHECK( config.serial1Config.baudRate == 38400 );
+    CHECK( config.serial1Config.inputMode == SerialModeNMEA );
+    CHECK( config.serial1Config.outputMode == SerialModeDisabled );
+    CHECK( config.serial2Config.baudRate == 4800 );
   }
 
   SECTION("No input") {
@@ -53,17 +53,17 @@ TEST_CASE("KBoxConfigParser") {
     kboxConfigParser.parseKBoxConfig(root, config);
 
     // check some default values
-    CHECK( config.nmea1Config.baudRate == 38400 );
-    CHECK( config.nmea1Config.inputEnabled == true );
-    CHECK( config.nmea1Config.outputEnabled == false );
-    CHECK( config.nmea2Config.baudRate == 4800 );
+    CHECK( config.serial1Config.baudRate == 38400 );
+    CHECK( config.serial1Config.inputMode == SerialModeNMEA );
+    CHECK( config.serial1Config.outputMode == SerialModeDisabled );
+    CHECK( config.serial2Config.baudRate == 4800 );
   }
 
   SECTION("basic config") {
-    const char* jsonConfig = "{ 'nmea1': { 'inputEnabled': false, 'outputEnabled': true, 'baudRate': 4800 }, \
-                           'nmea2': { 'baudRate': 38400 }, \
-                           'imu': { 'enabled': false, frequency: 5 }\
-                         }";
+    const char* jsonConfig = "{ 'serial1': { 'inputMode': 'disabled', 'outputMode': 'nmea', 'baudRate': 4800 }, \
+                                'serial2': { 'baudRate': 38400 }, \
+                                'imu': { 'enabled': false, frequency: 5 }\
+                              }";
 
     JsonObject& root = jsonBuffer.parseObject(jsonConfig);
 
@@ -71,12 +71,12 @@ TEST_CASE("KBoxConfigParser") {
 
     kboxConfigParser.parseKBoxConfig(root, config);
 
-    CHECK( config.nmea1Config.baudRate == 4800 );
-    CHECK( config.nmea1Config.inputEnabled == false );
-    CHECK( config.nmea1Config.outputEnabled == true );
+    CHECK( config.serial1Config.baudRate == 4800 );
+    CHECK( config.serial1Config.inputMode == SerialModeDisabled );
+    CHECK( config.serial1Config.outputMode == SerialModeNMEA );
 
-    CHECK( config.nmea2Config.baudRate == 38400 );
+    CHECK( config.serial2Config.baudRate == 38400 );
 
-    CHECK( config.imuConfig.enabled == false );
+    CHECK( ! config.imuConfig.enabled );
   }
 }

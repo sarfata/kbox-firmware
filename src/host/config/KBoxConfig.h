@@ -30,14 +30,14 @@
 
 #pragma once
 
-#include "NMEAConfig.h"
+#include "SerialConfig.h"
 #include "IMUConfig.h"
 
 /**
  * A KBox configuration in memory
  */
 struct KBoxConfig {
-  NMEAConfig nmea1Config;
-  NMEAConfig nmea2Config;
+  SerialConfig serial1Config;
+  SerialConfig serial2Config;
   IMUConfig imuConfig;
 };

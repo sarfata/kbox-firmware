@@ -30,8 +30,13 @@
 
 #pragma once
 
-struct  NMEAConfig {
+enum SerialMode {
+  SerialModeDisabled,
+  SerialModeNMEA
+};
+
+struct  SerialConfig {
   int baudRate = 0;
-  bool inputEnabled = true;
-  bool outputEnabled = false;
+  enum SerialMode inputMode = SerialModeDisabled;
+  enum SerialMode outputMode = SerialModeDisabled;
 };

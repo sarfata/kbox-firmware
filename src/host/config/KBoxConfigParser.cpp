@@ -29,18 +29,15 @@
 */
 
 #include "KBoxConfigParser.h"
-#include <KBoxLogging.h>
-
-#include <WString.h>
 
 void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
-  config.nmea1Config.baudRate = 38400;
-  config.nmea1Config.inputEnabled = true;
-  config.nmea1Config.outputEnabled = false;
+  config.serial1Config.baudRate = 38400;
+  config.serial1Config.inputMode = SerialModeNMEA;
+  config.serial1Config.outputMode = SerialModeDisabled;
 
-  config.nmea2Config.baudRate = 4800;
-  config.nmea2Config.inputEnabled = true;
-  config.nmea2Config.outputEnabled = false;
+  config.serial2Config.baudRate = 4800;
+  config.serial2Config.inputMode = SerialModeNMEA;
+  config.serial2Config.outputMode = SerialModeDisabled;
 
   config.imuConfig.enabled = true;
 }
@@ -48,8 +45,8 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
   defaultConfig(config);
 
-  parseNMEAConfig(json["nmea1"], config.nmea1Config, 1);
-  parseNMEAConfig(json["nmea2"], config.nmea2Config, 2);
+  parseNMEAConfig(json["serial1"], config.serial1Config);
+  parseNMEAConfig(json["serial2"], config.serial2Config);
   parseIMUConfig(json["imu"], config.imuConfig);
 }
 
@@ -59,7 +56,17 @@ void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &imuConf
   }
 }
 
-void KBoxConfigParser::parseNMEAConfig(const JsonObject &json, NMEAConfig &nmeaConfig, int nmeaIndex) {
+enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {
+  if (s == "disabled") {
+    return SerialModeDisabled;
+  }
+  if (s == "nmea") {
+    return SerialModeNMEA;
+  }
+  return SerialModeDisabled;
+}
+
+void KBoxConfigParser::parseNMEAConfig(const JsonObject &json, SerialConfig &nmeaConfig) {
   if (json == JsonObject::invalid()) {
     return;
   }
@@ -67,10 +74,10 @@ void KBoxConfigParser::parseNMEAConfig(const JsonObject &json, NMEAConfig &nmeaC
   if (json["baudRate"].is<int>()) {
     nmeaConfig.baudRate = json["baudRate"].as<int>();
   }
-  if (json["inputEnabled"].is<bool>()) {
-    nmeaConfig.inputEnabled = json["inputEnabled"].as<bool>();
+  if (json["inputMode"].is<const char*>()) {
+    nmeaConfig.inputMode = convertSerialMode(json.get<const char*>("inputMode"));
   }
-  if (json["outputEnabled"].is<bool>()) {
-    nmeaConfig.outputEnabled = json["outputEnabled"].as<bool>();
+  if (json["outputMode"].is<const char*>()) {
+    nmeaConfig.outputMode = convertSerialMode(json.get<const char*>("outputMode"));
   }
 }
