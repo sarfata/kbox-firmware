@@ -24,8 +24,9 @@
 
 #include <KBoxHardware.h>
 #include "common/os/TaskManager.h"
-#include "common/os/Task.h"
 #include "common/signalk/SKHub.h"
+#include "host/config/KBoxConfig.h"
+#include "host/config/KBoxConfigParser.h"
 #include "host/drivers/ILI9341GC.h"
 #include "host/pages/BatteryMonitorPage.h"
 #include "host/pages/StatsPage.h"
@@ -40,10 +41,13 @@
 #include "host/services/USBService.h"
 #include "host/services/WiFiService.h"
 
+static const char *configFilename = "kbox-config.json";
+
 ILI9341GC gc(KBox.getDisplay(), Size(320, 240));
 MFD mfd(gc, KBox.getEncoder(), KBox.getButton());
 TaskManager taskManager;
 SKHub skHub;
+KBoxConfig config;
 
 USBService usbService(gc);
 
@@ -65,6 +69,26 @@ void setup() {
   DEBUG("Starting");
 
   digitalWrite(led_pin, 1);
+
+  // Load configuration if available
+  KBoxConfigParser configParser;
+  if (KBox.getSdFat().exists(configFilename)) {
+    File configFile = KBox.getSdFat().open(configFilename);
+    // We can afford to allocate a lot of memory on the stack for this because we have not started doing
+    // anything real yet.
+    StaticJsonBuffer<4096> jsonBuffer;
+    JsonObject &root =jsonBuffer.parseObject(configFile);
+
+    if (root.success()) {
+      configParser.parseKBoxConfig(root, config);
+    }
+    else {
+      ERROR("Failed to parse configuration file");
+    }
+  }
+  else {
+    configParser.defaultConfig(config);
+  }
 
   // Instantiate all our services
   WiFiService *wifi = new WiFiService(skHub, gc);

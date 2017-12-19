@@ -30,7 +30,7 @@
 #include <Bounce.h>
 #include <Encoder.h>
 #include <ILI9341_t3.h>
-
+#include <SdFat.h>
 #include "board.h"
 
 
@@ -49,6 +49,10 @@ class KBoxHardware {
     Bounce button = Bounce(encoder_button, 10 /* ms */);
     ILI9341_t3 display = ILI9341_t3(display_cs, display_dc, 255 /* rst unused */, display_mosi, display_sck, display_miso);
     ADC adc;
+    SdFat _sd;
+    bool _sdCardSuccess = false;
+
+    bool sdCardInit();
 
   public:
     void setup();
@@ -71,6 +75,14 @@ class KBoxHardware {
 
     ADC& getADC() {
       return adc;
+    };
+
+    SdFat& getSdFat() {
+      return _sd;
+    };
+
+    bool isSdCardUsable() const {
+      return _sdCardSuccess;
     };
 
     void setBacklight(BacklightIntensity intensity);
