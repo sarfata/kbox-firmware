@@ -126,7 +126,7 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
     CHECK( update.getEnvironmentDepthBelowTransducer() == 42 );
     CHECK( update.getEnvironmentDepthBelowSurface() == N2kDoubleNA );
     CHECK( update.getEnvironmentDepthTransducerToKeel() ==  2.25 );
-    CHECK( update.getEnvironmentDepthBelowKeel() == 44.25 );
+    CHECK( update.getEnvironmentDepthBelowKeel() == 39.75 );
   }
 
   SECTION("128267: Depth with offset not set") {
