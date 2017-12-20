@@ -110,21 +110,17 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
   SECTION("128267: Depth below waterline") {
     SetN2kWaterDepth(msg, 0, 42.0, 1.95);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
-    CHECK( update.getSize() == 5);
+    CHECK( update.getSize() == 3);
     CHECK( update.getEnvironmentDepthSurfaceToTransducer() == 1.95 );
     CHECK( update.getEnvironmentDepthBelowTransducer() == 42 );
     CHECK( update.getEnvironmentDepthBelowSurface() == 43.95 );
-    CHECK( update.getEnvironmentDepthTransducerToKeel() == N2kDoubleNA );
-    CHECK( update.getEnvironmentDepthBelowKeel() == N2kDoubleNA );
   }
 
   SECTION("128267: Depth below lowest point of vessel") {
     SetN2kWaterDepth(msg, 0, 42.0, -2.25);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
-    CHECK( update.getSize() == 5);
-    CHECK( update.getEnvironmentDepthSurfaceToTransducer() ==  N2kDoubleNA );
+    CHECK( update.getSize() == 3);
     CHECK( update.getEnvironmentDepthBelowTransducer() == 42 );
-    CHECK( update.getEnvironmentDepthBelowSurface() == N2kDoubleNA );
     CHECK( update.getEnvironmentDepthTransducerToKeel() ==  2.25 );
     CHECK( update.getEnvironmentDepthBelowKeel() == 39.75 );
   }
@@ -132,23 +128,15 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
   SECTION("128267: Depth with offset not set") {
     SetN2kWaterDepth(msg, 0, 1.90, N2kDoubleNA);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
-    CHECK( update.getSize() == 5);
+    CHECK( update.getSize() == 1);
     CHECK( update.getEnvironmentDepthBelowTransducer() == Approx(1.9).epsilon(0.0001) );
-    CHECK( update.getEnvironmentDepthSurfaceToTransducer() ==  N2kDoubleNA );
-    CHECK( update.getEnvironmentDepthBelowSurface() == N2kDoubleNA );
-    CHECK( update.getEnvironmentDepthTransducerToKeel() ==  N2kDoubleNA );
-    CHECK( update.getEnvironmentDepthBelowKeel() == N2kDoubleNA );
   }
 
   SECTION("128267: Depth with zero offset") {
     SetN2kWaterDepth(msg, 0, 5.99, 0);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
-    CHECK( update.getSize() == 5);
+    CHECK( update.getSize() == 1);
     CHECK( update.getEnvironmentDepthBelowTransducer() == 5.99 );
-    CHECK( update.getEnvironmentDepthSurfaceToTransducer() ==  N2kDoubleNA );
-    CHECK( update.getEnvironmentDepthBelowSurface() == N2kDoubleNA );
-    CHECK( update.getEnvironmentDepthTransducerToKeel() ==  0 );
-    CHECK( update.getEnvironmentDepthBelowKeel() == 5.99 );
   }
 
   SECTION("130306: Ground Wind Test TWS, TWD TrueNorth referenced") {
