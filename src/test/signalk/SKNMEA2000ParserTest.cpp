@@ -59,29 +59,14 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
     CHECK( update.getNavigationSpeedOverGround() == 3.4 );
   }
   */
-  SECTION("128267: Simple depth below transducer") {
-    SetN2kWaterDepth(msg, 0, 42, N2kDoubleNA);
+
+  SECTION("127245: Rudder Angle") {
+    // rudderPosition,instance,rudderDirectionOrder,angleOrder
+    SetN2kRudder(msg, SKDegToRad(-3.6), 0, N2kRDO_NoDirectionOrder, N2kDoubleNA);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 1);
-    CHECK( update.getEnvironmentDepthBelowTransducer() == 42 );
-  }
-
-  SECTION("128267: Depth below surface") {
-    SetN2kWaterDepth(msg, 0, 42, 1.3);
-    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
-    CHECK( update.getSize() == 3);
-    CHECK( update.getEnvironmentDepthBelowTransducer() == 42 );
-    CHECK( update.getEnvironmentDepthBelowSurface() == 43.3 );
-    CHECK( update.getEnvironmentDepthSurfaceToTransducer() == 1.3 );
-  }
-
-  SECTION("128267: Depth below keel") {
-    SetN2kWaterDepth(msg, 0, 42, -1.2);
-    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
-    CHECK( update.getSize() == 3);
-    CHECK( update.getEnvironmentDepthBelowTransducer() == 42 );
-    CHECK( update.getEnvironmentDepthBelowKeel() == 40.8 );
-    CHECK( update.getEnvironmentDepthTransducerToKeel() == 1.2 );
+    // Some precision is lost because NMEA2000 rounds this value to 0.0001 precision
+    CHECK( update.getSteeringRudderAngle() == Approx(SKDegToRad(-3.6)).epsilon(0.0001) );
   }
 
   SECTION("127250: VESSEL True HEADING RAPID") {
@@ -102,15 +87,6 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
     CHECK( update.getNavigationMagneticVariation() == Approx(SKDegToRad(3.2)).epsilon(0.0001) );
   }
 
-  SECTION("127245: Rudder Angle") {
-    // rudderPosition,instance,rudderDirectionOrder,angleOrder
-    SetN2kRudder(msg, SKDegToRad(-3.6), 0, N2kRDO_NoDirectionOrder, N2kDoubleNA);
-    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
-    CHECK( update.getSize() == 1);
-    // Some precision is lost because NMEA2000 rounds this value to 0.0001 precision
-    CHECK( update.getSteeringRudderAngle() == Approx(SKDegToRad(-3.6)).epsilon(0.0001) );
-  }
-
   SECTION("127275: NavigationAttitude Heel, Pitch, Yaw") {
     // SID, yaw, pitch, roll in radians
     SetN2kAttitude(msg, 0, SKDegToRad(179.9), SKDegToRad(-2.3), SKDegToRad(3.2));
@@ -119,6 +95,60 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
     CHECK( update.getNavigationAttitude().yaw   == Approx(SKDegToRad(179.9)).epsilon(0.0001) );
     CHECK( update.getNavigationAttitude().pitch == Approx(SKDegToRad(-2.3)).epsilon(0.0001) );
     CHECK( update.getNavigationAttitude().roll  == Approx(SKDegToRad(3.2)).epsilon(0.0001) );
+  }
+
+  SECTION("127275: NavigationAttitude Heel, Pitch, Yaw = NaN = N2kDoubleNA = -1e9") {
+    // SID, yaw, pitch, roll in radians
+    SetN2kAttitude(msg, 0, N2kDoubleNA, SKDegToRad(-2.3), SKDegToRad(3.2));
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    CHECK( update.getSize() == 1);
+    CHECK( update.getNavigationAttitude().yaw   == -1e9 );
+    CHECK( update.getNavigationAttitude().pitch == Approx(SKDegToRad(-2.3)).epsilon(0.0001) );
+    CHECK( update.getNavigationAttitude().roll  == Approx(SKDegToRad(3.2)).epsilon(0.0001) );
+  }
+
+  SECTION("128267: Depth below waterline") {
+    SetN2kWaterDepth(msg, 0, 42, 1.95);
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    CHECK( update.getSize() == 5);
+    CHECK( update.getEnvironmentDepthSurfaceToTransducer() == 1.95 );
+    CHECK( update.getEnvironmentDepthBelowTransducer() == 42 );
+    CHECK( update.getEnvironmentDepthBelowSurface() == 43.95 );
+    CHECK( update.getEnvironmentDepthTransducerToKeel() == N2kDoubleNA );
+    CHECK( update.getEnvironmentDepthBelowKeel() == N2kDoubleNA );
+  }
+
+  SECTION("128267: Depth below lowest point of vessel") {
+    SetN2kWaterDepth(msg, 0, 42, -2.25);
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    CHECK( update.getSize() == 5);
+    CHECK( update.getEnvironmentDepthSurfaceToTransducer() ==  N2kDoubleNA );
+    CHECK( update.getEnvironmentDepthBelowTransducer() == 42 );
+    CHECK( update.getEnvironmentDepthBelowSurface() == N2kDoubleNA );
+    CHECK( update.getEnvironmentDepthTransducerToKeel() ==  2.25 );
+    CHECK( update.getEnvironmentDepthBelowKeel() == 44.25 );
+  }
+
+  SECTION("128267: Depth with offset not set") {
+    SetN2kWaterDepth(msg, 0, 1.9, N2kDoubleNA);
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    CHECK( update.getSize() == 5);
+    CHECK( update.getEnvironmentDepthBelowTransducer() == 1.9 );
+    CHECK( update.getEnvironmentDepthSurfaceToTransducer() ==  N2kDoubleNA );
+    CHECK( update.getEnvironmentDepthBelowSurface() == N2kDoubleNA );
+    CHECK( update.getEnvironmentDepthTransducerToKeel() ==  N2kDoubleNA );
+    CHECK( update.getEnvironmentDepthBelowKeel() == N2kDoubleNA );
+  }
+
+  SECTION("128267: Depth with zero offset") {
+    SetN2kWaterDepth(msg, 0, 5.99, 0);
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    CHECK( update.getSize() == 5);
+    CHECK( update.getEnvironmentDepthBelowTransducer() == 5.99 );
+    CHECK( update.getEnvironmentDepthSurfaceToTransducer() ==  N2kDoubleNA );
+    CHECK( update.getEnvironmentDepthBelowSurface() == N2kDoubleNA );
+    CHECK( update.getEnvironmentDepthTransducerToKeel() ==  0 );
+    CHECK( update.getEnvironmentDepthBelowKeel() == 5.99 );
   }
 
   SECTION("130306: Ground Wind Test TWS, TWD TrueNorth referenced") {
@@ -138,8 +168,7 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
   }
 
   SECTION("130306: Apparent Wind AWS, AWA Test starboard") {
-    //TODO: watch if Timo will correct Typo
-    SetN2kWindSpeed(msg, 0, 12.4, SKDegToRad(29.8), N2kWind_Apprent);
+    SetN2kWindSpeed(msg, 0, 12.4, SKDegToRad(29.8), N2kWind_Apparent);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 2);
     CHECK( update.getEnvironmentWindSpeedApparent() == 12.4 );
@@ -147,8 +176,7 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
   }
 
   SECTION("130306: Apparent Wind AWS, AWA Test port") {
-    //TODO: watch if Timo will correct Typo
-    SetN2kWindSpeed(msg, 0, 12.4, SKDegToRad(330), N2kWind_Apprent);
+    SetN2kWindSpeed(msg, 0, 12.4, SKDegToRad(330), N2kWind_Apparent);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 2);
     CHECK( update.getEnvironmentWindSpeedApparent() == 12.4 );
