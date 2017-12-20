@@ -108,7 +108,7 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
   }
 
   SECTION("128267: Depth below waterline") {
-    SetN2kWaterDepth(msg, 0, 42, 1.95);
+    SetN2kWaterDepth(msg, 0, 42.0, 1.95);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 5);
     CHECK( update.getEnvironmentDepthSurfaceToTransducer() == 1.95 );
@@ -119,7 +119,7 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
   }
 
   SECTION("128267: Depth below lowest point of vessel") {
-    SetN2kWaterDepth(msg, 0, 42, -2.25);
+    SetN2kWaterDepth(msg, 0, 42.0, -2.25);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 5);
     CHECK( update.getEnvironmentDepthSurfaceToTransducer() ==  N2kDoubleNA );
@@ -130,10 +130,10 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
   }
 
   SECTION("128267: Depth with offset not set") {
-    SetN2kWaterDepth(msg, 0, 1.9, N2kDoubleNA);
+    SetN2kWaterDepth(msg, 0, 1.90, N2kDoubleNA);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 5);
-    CHECK( update.getEnvironmentDepthBelowTransducer() == 1.9 );
+    CHECK( update.getEnvironmentDepthBelowTransducer() == Approx(1.9).epsilon(0.0001) );
     CHECK( update.getEnvironmentDepthSurfaceToTransducer() ==  N2kDoubleNA );
     CHECK( update.getEnvironmentDepthBelowSurface() == N2kDoubleNA );
     CHECK( update.getEnvironmentDepthTransducerToKeel() ==  N2kDoubleNA );
