@@ -19,6 +19,8 @@
       { "path": "environment.depth.belowTransducer", "value": 3.45 },
       { "path": "environment.depth.belowSurface", "value": 4.364 },
       { "path": "environment.depth.surfaceToTransducer", "value": 0.914 }
+      { "path": "environment.depth.transducerToKeel", "value": -1000000000.0 }
+      { "path": "environment.depth.belowKeel", "value": -1000000000.0 }
     ]
   },
   {
