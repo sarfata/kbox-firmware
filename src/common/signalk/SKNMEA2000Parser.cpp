@@ -226,11 +226,7 @@ const SKUpdate& SKNMEA2000Parser::parse127257(const SKSourceInput& input, const 
 
     SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
     update->setSource(source);
-    // TODO: check if it is possible to set NAN as value to SKUpdate
-    // because set to zero is no good solution
-    if (!(N2kIsNA(roll) && N2kIsNA(pitch) && N2kIsNA(yaw) ) ) {
-      update->setNavigationAttitude(SKTypeAttitude(roll, pitch, yaw));
-    }
+    update->setNavigationAttitude(SKTypeAttitude(roll, pitch, yaw));
 
     _sku = update;
     return *_sku;
@@ -276,32 +272,56 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
 
 // ****************************************************************************
 //  PGN 128267  Water depth
+//  Water depth relative to the transducer and offset of the measuring transducer.
+//  Water depth is either below water surface or below lowest point of vessel.
+//  Offset – If the value of this field is positive, it represents the
+//  difference in depth between the transducer and the waterline of the vessel.
+//  If the value of this field is negative, it represents the difference in
+//  depth between the transducer and the keel of the vessel.
 // ****************************************************************************
 const SKUpdate& SKNMEA2000Parser::parse128267(const SKSourceInput& input, const tN2kMsg& msg, const SKTime& timestamp) {
   unsigned char sid;
-  double depthBelowTransducer = N2kDoubleNA;
+  double depth = N2kDoubleNA;
   double offset = N2kDoubleNA;
 
-  if (ParseN2kWaterDepth(msg, sid, depthBelowTransducer, offset)) {
-    if (!N2kIsNA(depthBelowTransducer)) {
-      SKUpdateStatic<3> *update = new SKUpdateStatic<3>();
+  if (ParseN2kWaterDepth(msg, sid, depth, offset)) {
+    if (!N2kIsNA(depth)) {
+      SKUpdateStatic<5> *update = new SKUpdateStatic<5>();
       update->setTimestamp(timestamp);
 
       SKSource source = SKSource::sourceForNMEA2000(input, msg.PGN, msg.Priority, msg.Source);
       update->setSource(source);
+      update->setEnvironmentDepthBelowTransducer(depth);
 
-      update->setEnvironmentDepthBelowTransducer(depthBelowTransducer);
-
-      // When offset is negative, it's the distance between transducer and keel
       if (!N2kIsNA(offset)) {
-        if (offset < 0) {
+        if (offset == 0) {
+          // When you have zero offset than the transducer is mounted on the
+          // lowest point of the boat, e.g. motor boat w/o keel, sailing boat keel
+          update->setEnvironmentDepthSurfaceToTransducer(N2kDoubleNA);
+          update->setEnvironmentDepthBelowSurface(N2kDoubleNA);
+          update->setEnvironmentDepthBelowKeel(depth);
+          update->setEnvironmentDepthTransducerToKeel(0);
+        }
+        else if (offset < 0) {
+          // When offset is negative, it's the distance between transducer and keel
+          update->setEnvironmentDepthSurfaceToTransducer(N2kDoubleNA);
+          update->setEnvironmentDepthBelowSurface(N2kDoubleNA);
+          update->setEnvironmentDepthBelowKeel(depth + offset);
           update->setEnvironmentDepthTransducerToKeel(offset * -1);
-          update->setEnvironmentDepthBelowKeel(depthBelowTransducer + offset);
         }
         else if (offset > 0) {
+          //  Positive offset numbers provide the distance from the transducer to the waterline.
           update->setEnvironmentDepthSurfaceToTransducer(offset);
-          update->setEnvironmentDepthBelowSurface(depthBelowTransducer + offset);
+          update->setEnvironmentDepthBelowSurface(depth + offset);
+          update->setEnvironmentDepthBelowKeel(N2kDoubleNA);
+          update->setEnvironmentDepthTransducerToKeel(N2kDoubleNA);
         }
+      } else {
+        // No offset available, then depth = Depth Below Transducer
+        update->setEnvironmentDepthSurfaceToTransducer(N2kDoubleNA);
+        update->setEnvironmentDepthBelowSurface(N2kDoubleNA);
+        update->setEnvironmentDepthBelowKeel(N2kDoubleNA);
+        update->setEnvironmentDepthTransducerToKeel(N2kDoubleNA);
       }
 
       _sku = update;
