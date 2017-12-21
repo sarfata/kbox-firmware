@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -21,32 +27,17 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
 
-#include "common/os/Task.h"
-#include "common/algo/List.h"
-#include "common/signalk/KMessage.h"
-#include "common/stats/KBoxMetrics.h"
-#include "common/signalk/SKSource.h"
-#include "common/signalk/SKHub.h"
-
-// Defined by the NMEA Standard
-#define MAX_NMEA_SENTENCE_LENGTH 83
-
-class HardwareSerial;
-
-class NMEAService : public Task, public KGenerator {
-  private:
-    SKHub &_hub;
-    HardwareSerial& stream;
-    LinkedList<NMEASentence> receiveQueue;
-    enum KBoxEvent rxValidEvent, rxErrorEvent;
-    SKSourceInput _skSourceInput;
-
-  public:
-    NMEAService(SKHub &hub, HardwareSerial&s);
-
-    void setup();
-    void loop();
+/**
+ * Configuration for an instance of SKNMEAConverter.
+ */
+struct SKNMEAConverterConfig {
+  bool xdrPressure = true;
+  bool xdrAttitude = true;
+  bool xdrBatteries = true;
+  bool hdm = true;
+  bool rsa = true;
+  bool mwv = true;
 };
-

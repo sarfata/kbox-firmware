@@ -30,6 +30,13 @@
 
 #include "KBoxConfigParser.h"
 
+#define READ_VALUE_WITH_TYPE(name, type) if (json[#name].is<type>()) { config.name = json[#name].as<type>(); }
+#define READ_BOOL_VALUE(name) READ_VALUE_WITH_TYPE(name, bool)
+#define READ_INT_VALUE(name) READ_VALUE_WITH_TYPE(name, int)
+#define READ_INT_VALUE_WRANGE(name, min, max) if (json[#name].is<int>() && json[#name] > min && json[#name] < max) { config.name = json[#name].as<int>(); }
+
+#define READ_ENUM_VALUE(name, converter) if (json[#name].is<const char *>()) { config.name = converter(json[#name].as<const char*>()); }
+
 void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.serial1Config.baudRate = 38400;
   config.serial1Config.inputMode = SerialModeNMEA;
@@ -45,16 +52,56 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
   defaultConfig(config);
 
-  parseNMEAConfig(json["serial1"], config.serial1Config);
-  parseNMEAConfig(json["serial2"], config.serial2Config);
+  parseSerialConfig(json["serial1"], config.serial1Config);
+  parseSerialConfig(json["serial2"], config.serial2Config);
   parseIMUConfig(json["imu"], config.imuConfig);
+  parseBarometerConfig(json["barometer"], config.barometerConfig);
+  parseWiFiConfig(json["wifi"], config.wifiConfig);
 }
 
-void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &imuConfig) {
-  if (json["enabled"].is<bool>()) {
-    imuConfig.enabled = json["enabled"].as<bool>();
-  }
+void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &config) {
+  READ_BOOL_VALUE(enabled);
+  READ_INT_VALUE_WRANGE(frequency, 1, 100);
 }
+
+void KBoxConfigParser::parseBarometerConfig(const JsonObject &json, BarometerConfig &config){
+  READ_BOOL_VALUE(enabled);
+  READ_INT_VALUE_WRANGE(frequency, 1, 10);
+}
+
+void KBoxConfigParser::parseSerialConfig(const JsonObject &json, SerialConfig &config) {
+  if (json == JsonObject::invalid()) {
+    return;
+  }
+
+  READ_INT_VALUE(baudRate);
+  READ_ENUM_VALUE(inputMode, convertSerialMode);
+  READ_ENUM_VALUE(outputMode, convertSerialMode);
+
+  parseNMEAConverterConfig(json["nmeaConverter"], config.nmeaConverter);
+}
+
+void KBoxConfigParser::parseWiFiConfig(const JsonObject &json, WiFiConfig &config) {
+  if (json == JsonObject::invalid()) {
+    return;
+  }
+
+  READ_BOOL_VALUE(enabled);
+  parseNMEAConverterConfig(json["nmeaConverter"], config.nmeaConverter);
+}
+
+void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEAConverterConfig &config) {
+  if (json == JsonObject::invalid()) {
+    return;
+  }
+
+  READ_BOOL_VALUE(xdrPressure);
+  READ_BOOL_VALUE(xdrAttitude);
+  READ_BOOL_VALUE(hdm);
+  READ_BOOL_VALUE(rsa);
+  READ_BOOL_VALUE(mwv);
+}
+
 
 enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {
   if (s == "disabled") {
@@ -64,20 +111,4 @@ enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {
     return SerialModeNMEA;
   }
   return SerialModeDisabled;
-}
-
-void KBoxConfigParser::parseNMEAConfig(const JsonObject &json, SerialConfig &nmeaConfig) {
-  if (json == JsonObject::invalid()) {
-    return;
-  }
-
-  if (json["baudRate"].is<int>()) {
-    nmeaConfig.baudRate = json["baudRate"].as<int>();
-  }
-  if (json["inputMode"].is<const char*>()) {
-    nmeaConfig.inputMode = convertSerialMode(json.get<const char*>("inputMode"));
-  }
-  if (json["outputMode"].is<const char*>()) {
-    nmeaConfig.outputMode = convertSerialMode(json.get<const char*>("outputMode"));
-  }
 }

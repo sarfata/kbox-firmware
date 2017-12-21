@@ -40,9 +40,6 @@
  */
 class KBoxConfigParser {
   private:
-    void parseIMUConfig(const JsonObject &object, IMUConfig &imuConfig);
-    void parseNMEAConfig(const JsonObject &object, SerialConfig &nmeaConfig);
-
     SerialMode convertSerialMode(const String &s);
 
   public:
@@ -59,4 +56,10 @@ class KBoxConfigParser {
      * the one provided by defaultConfig().
      */
     void parseKBoxConfig(const JsonObject &object, KBoxConfig &config);
+
+    void parseIMUConfig(const JsonObject &object, IMUConfig &config);
+    void parseBarometerConfig(const JsonObject &json, BarometerConfig &config);
+    void parseSerialConfig(const JsonObject &object, SerialConfig &config);
+    void parseWiFiConfig(const JsonObject &json, WiFiConfig &config);
+    void parseNMEAConverterConfig(const JsonObject &json, SKNMEAConverterConfig &config);
 };

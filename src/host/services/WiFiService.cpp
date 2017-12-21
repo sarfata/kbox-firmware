@@ -31,7 +31,8 @@
 
 #include "WiFiService.h"
 
-WiFiService::WiFiService(SKHub &skHub, GC &gc) : Task("WiFi"), _hub(skHub), _slip(WiFiSerial, 2048) {
+WiFiService::WiFiService(const WiFiConfig &config, SKHub &skHub, GC &gc) :
+  Task("WiFi"), _config(config), _hub(skHub), _slip(WiFiSerial, 2048) {
   // We will need gc at some point to be able to take screenshot
 }
 
@@ -85,7 +86,7 @@ void WiFiService::updateReceived(const SKUpdate& u) {
    * to messages that will be sent to WiFi clients.
    */
 
-  SKNMEAConverter nmeaConverter;
+  SKNMEAConverter nmeaConverter(_config.nmeaConverter);
   // The converter will call this->write(NMEASentence) for every generated sentence
   nmeaConverter.convert(u, *this);
 

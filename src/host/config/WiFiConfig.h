@@ -30,8 +30,7 @@
 
 #pragma once
 
-struct IMUConfig {
+struct WiFiConfig {
   bool enabled;
-  int frequency;
+  SKNMEAConverterConfig nmeaConverter;
 };
-

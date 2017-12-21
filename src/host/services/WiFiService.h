@@ -33,22 +33,23 @@
 #include "comms/SlipStream.h"
 #include "comms/KommandHandlerPing.h"
 #include "comms/KommandHandlerWiFiLog.h"
+#include "config/WiFiConfig.h"
 
 class WiFiService : public Task, public KReceiver, public SKSubscriber, private SKNMEAOutput {
   private:
+    const WiFiConfig &_config;
     SKHub &_hub;
     SlipStream _slip;
     KommandHandlerPing _pingHandler;
     KommandHandlerWiFiLog _wifiLogHandler;
 
   public:
-    WiFiService(SKHub &skHub, GC &gc);
+    WiFiService(const WiFiConfig &config, SKHub &skHub, GC &gc);
 
     void setup();
     void loop();
     void processMessage(const KMessage &m) override;
     void updateReceived(const SKUpdate&) override;
-
 
     bool write(const SKNMEASentence& s) override;
 };

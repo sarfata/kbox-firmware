@@ -35,7 +35,7 @@
 #include "host/services/BarometerService.h"
 #include "host/services/IMUService.h"
 #include "host/services/NMEA2000Service.h"
-#include "host/services/NMEAService.h"
+#include "host/services/SerialService.h"
 #include "host/services/RunningLightService.h"
 #include "host/services/SDCardTask.h"
 #include "host/services/USBService.h"
@@ -91,7 +91,7 @@ void setup() {
   }
 
   // Instantiate all our services
-  WiFiService *wifi = new WiFiService(skHub, gc);
+  WiFiService *wifi = new WiFiService(config.wifiConfig, skHub, gc);
 
   ADCService *adcService = new ADCService(skHub, KBox.getADC());
   BarometerService *baroService = new BarometerService(skHub);
@@ -100,8 +100,8 @@ void setup() {
   NMEA2000Service *n2kService = new NMEA2000Service(skHub);
   n2kService->connectTo(*wifi);
 
-  NMEAService *reader1 = new NMEAService(skHub, NMEA1_SERIAL);
-  NMEAService *reader2 = new NMEAService(skHub, NMEA2_SERIAL);
+  SerialService *reader1 = new SerialService(config.serial1Config, skHub, NMEA1_SERIAL);
+  SerialService *reader2 = new SerialService(config.serial2Config, skHub, NMEA2_SERIAL);
   reader1->connectTo(*wifi);
   reader2->connectTo(*wifi);
 
@@ -115,8 +115,12 @@ void setup() {
   taskManager.addTask(&mfd);
   taskManager.addTask(new IntervalTask(new RunningLightService(), 250));
   taskManager.addTask(new IntervalTask(adcService, 1000));
-  taskManager.addTask(new IntervalTask(imuService, 50));
-  taskManager.addTask(new IntervalTask(baroService, 1000));
+  if (config.imuConfig.enabled) {
+    taskManager.addTask(new IntervalTask(imuService, 1000 / config.imuConfig.frequency));
+  }
+  if (config.barometerConfig.enabled) {
+    taskManager.addTask(new IntervalTask(baroService, 1000 / config.barometerConfig.frequency));
+  }
   taskManager.addTask(n2kService);
   taskManager.addTask(reader1);
   taskManager.addTask(reader2);

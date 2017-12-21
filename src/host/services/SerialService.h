@@ -1,13 +1,7 @@
 /*
-     __  __     ______     ______     __  __
-    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
-    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
-     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
-       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
-
   The MIT License
 
-  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +21,38 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-
 #pragma once
 
-struct IMUConfig {
-  bool enabled;
-  int frequency;
+#include "common/os/Task.h"
+#include "common/algo/List.h"
+#include "common/signalk/KMessage.h"
+#include "common/signalk/SKSubscriber.h"
+#include "common/signalk/SKNMEAOutput.h"
+#include "common/stats/KBoxMetrics.h"
+#include "common/signalk/SKSource.h"
+#include "common/signalk/SKHub.h"
+#include "host/config/SerialConfig.h"
+
+// Defined by the NMEA Standard
+#define MAX_NMEA_SENTENCE_LENGTH 83
+
+class HardwareSerial;
+
+class SerialService : public Task, public KGenerator, public SKSubscriber, private SKNMEAOutput {
+  private:
+    SerialConfig &_config;
+    SKHub &_hub;
+    HardwareSerial& stream;
+    LinkedList<NMEASentence> receiveQueue;
+    enum KBoxEvent _rxValidEvent, _rxErrorEvent, _txValidEvent, _txOverflowEvent;
+    SKSourceInput _skSourceInput;
+
+  public:
+    SerialService(SerialConfig &_config, SKHub &hub, HardwareSerial&s);
+
+    void setup();
+    void loop();
+    void updateReceived(const SKUpdate&) override;
+    bool write(const SKNMEASentence& nmeaSentence) override;
 };
 

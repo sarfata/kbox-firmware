@@ -79,4 +79,18 @@ TEST_CASE("KBoxConfigParser") {
 
     CHECK( ! config.imuConfig.enabled );
   }
+
+  SECTION("NMEA Converter Config") {
+    const char *jsonConfig = "{ 'xdr': true, 'mwv': false }";
+
+    JsonObject &root = jsonBuffer.parseObject(jsonConfig);
+
+    CHECK( root.success() );
+
+    SKNMEAConverterConfig nmeaConfig;
+    kboxConfigParser.parseNMEAConverterConfig(root, nmeaConfig);
+
+    CHECK( nmeaConfig.xdrPressure == true );
+    CHECK( nmeaConfig.mwv == false );
+  }
 }

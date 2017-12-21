@@ -30,6 +30,8 @@
 
 #pragma once
 
+#include <signalk/SKNMEAConverterConfig.h>
+
 enum SerialMode {
   SerialModeDisabled,
   SerialModeNMEA
@@ -39,4 +41,5 @@ struct  SerialConfig {
   int baudRate = 0;
   enum SerialMode inputMode = SerialModeDisabled;
   enum SerialMode outputMode = SerialModeDisabled;
+  SKNMEAConverterConfig nmeaConverter;
 };

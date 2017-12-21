@@ -30,8 +30,7 @@
 
 #pragma once
 
-struct IMUConfig {
+struct BarometerConfig {
   bool enabled;
   int frequency;
 };
-

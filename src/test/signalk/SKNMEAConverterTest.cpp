@@ -38,7 +38,8 @@ class NMEAOut : public LinkedList<SKNMEASentence>, public SKNMEAOutput {
 };
 
 TEST_CASE("SKNMEAConverterTest") {
-  SKNMEAConverter converter;
+  SKNMEAConverterConfig config;
+  SKNMEAConverter converter(config);
   NMEAOut out;
 
   SECTION("ElectricalBatteriesVoltage") {
@@ -89,13 +90,21 @@ TEST_CASE("SKNMEAConverterTest") {
     SKUpdateStatic<1> u;
     u.setNavigationHeadingMagnetic(SKDegToRad(142));
 
-    converter.convert(u, out);
+    SECTION("Basic conversion") {
+      converter.convert(u, out);
 
-    CHECK( out.size() == 1 );
+      CHECK( out.size() == 1 );
 
-    if (out.size() > 0) {
-      String s = *(out.begin());
-      CHECK( s == "$IIHDM,142.0,M*25" );
+      if (out.size() > 0) {
+        String s = *(out.begin());
+        CHECK( s == "$IIHDM,142.0,M*25" );
+      }
+    }
+    SECTION("Disable HDM") {
+      config.hdm = false;
+
+      converter.convert(u, out);
+      CHECK( out.size() == 0 );
     }
   }
 

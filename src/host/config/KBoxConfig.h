@@ -32,6 +32,8 @@
 
 #include "SerialConfig.h"
 #include "IMUConfig.h"
+#include "BarometerConfig.h"
+#include "WiFiConfig.h"
 
 /**
  * A KBox configuration in memory
@@ -40,4 +42,6 @@ struct KBoxConfig {
   SerialConfig serial1Config;
   SerialConfig serial2Config;
   IMUConfig imuConfig;
+  BarometerConfig barometerConfig;
+  WiFiConfig wifiConfig;
 };

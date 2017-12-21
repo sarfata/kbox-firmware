@@ -33,15 +33,19 @@
 #include <WString.h>
 #include "SKVisitor.generated.h"
 #include "SKNMEAOutput.h"
+#include "SKNMEAConverterConfig.h"
 
 class SKNMEAConverter : SKVisitor {
   private:
+    const SKNMEAConverterConfig &_config;
     SKNMEAOutput *_currentOutput;
     void visitSKElectricalBatteriesVoltage(const SKUpdate& u, const SKPath &p, const SKValue &v) override;
 
     void generateMWV(SKNMEAOutput& out, double windAngle, double windSpeed, bool apparent);
 
   public:
+    SKNMEAConverter(const SKNMEAConverterConfig &config) : _config(config), _currentOutput(nullptr) {};
+
     /**
      * Process a SKUpdate and sends messages to the output.
      */
