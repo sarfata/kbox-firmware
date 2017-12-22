@@ -142,9 +142,15 @@ void KBoxHardware::espRebootInProgram() {
   digitalWrite(wifi_rst, 1);
 }
 
-
 bool KBoxHardware::sdCardInit() {
-  if (!_sd.begin(sdcard_cs)) {
+  //TODO: check if sdcard_cs is working with SdFatSdio
+  #if defined(__MK66FX1M0__)
+    // SDIO support for Builtin SD-Card in Teensy 3.6
+    if (!_sd.begin()){
+  #else
+    // KBox, Teensy 3.2
+    if (!_sd.begin(sdcard_cs)){
+  #endif
     if (_sd.card()->errorCode()) {
       DEBUG("Something went wrong ... SD card errorCode: %i errorData: %i", _sd.card()->errorCode(),
             _sd.card()->errorData());
