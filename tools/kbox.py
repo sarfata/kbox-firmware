@@ -7,7 +7,7 @@ import argparse
 import struct
 import time
 import png
-import timeit
+import random
 
 """ Courtesy of esptool.py - GPL """
 def slip_reader(port):
@@ -75,6 +75,9 @@ class KBox(object):
     KommandPong = 0x01
     KommandErr = 0x0F
     KommandLog = 0x10
+    KommandFileRead = 0x20
+    KommandFileReadReply = 0x21
+    KommandFileError = 0x2F
     KommandScreenshot = 0x30
     KommandScreenshotData = 0x31
 
@@ -120,6 +123,15 @@ class KBox(object):
                 return frame[2:]
             elif cmd == KBox.KommandErr:
                 raise FatalError("KBox responded with an error")
+            elif cmd == KBox.KommandFileError:
+                data = frame[2:]
+                if len(data) != 8:
+                    raise FatalError("Invalid KommandFileError size {"
+                                     "}".format(len(data)))
+
+                (fileid, errno) = struct.unpack('<LL', data)
+                raise FatalError("KBox responded with a file error {} for "
+                                 "file {}".format(errno, fileid))
             elif cmd == KBox.KommandLog:
                 # Keep printing log messages while waiting
                 self.printLog(frame[2:])
@@ -193,6 +205,38 @@ class KBox(object):
         print "Captured screenshot with {} lines in {:.0f} ms".format(len(pixels), (time.time() - t0)*1000)
         png.from_array(pixels, 'RGB').save('screenshot.png')
 
+    def read_file(self, filename, start_position = 0, size = 32 * 1024 * 1024):
+        read_id = int(random.random() * 2**32)
+
+        request = struct.pack('<LLL', read_id, start_position, size)
+        request = request + filename + '\0'
+
+        self.command(KBox.KommandFileRead, request)
+
+        done = False
+        file_data = []
+        while not done:
+            data = self.readCommand(KBox.KommandFileReadReply)
+
+            (replyReadId, replyStartPos, replySize) = struct.unpack('<LLL',
+                                                                    data[0:12])
+
+            if replyReadId != read_id:
+                print("Got a read reply for another read ({})".format(
+                    replyReadId))
+                continue
+
+            if len(data) != replySize + 12:
+                print("Invalid reply length - Got {} bytes. Should be {}+12={"
+                      "}".format(len(data), replySize, replySize+12))
+            else:
+                print("Read {} bytes from pos {}".format(replySize, replyStartPos))
+                file_data[start_position:start_position + replySize] = data[12:12+replySize]
+
+            done = True
+
+        return file_data
+
     @staticmethod
     def convertToRgb(pixel):
         r = (pixel>>8)&0x00F8
@@ -210,6 +254,8 @@ def main():
     subparsers.add_parser("ping")
     subparsers.add_parser("logs")
     subparsers.add_parser("screenshot")
+    fileread_parser = subparsers.add_parser("fileread")
+    fileread_parser.add_argument("filename")
 
     args = parser.parse_args()
 
@@ -237,7 +283,10 @@ def main():
             log = kbox.readCommand(KBox.KommandLog)
             kbox.printLog(log)
     elif args.command == "screenshot":
-        capture = kbox.takeScreenshot()
+        kbox.takeScreenshot()
+    elif args.command == "fileread":
+        data = kbox.read_file(args.filename)
+        print(data)
 
 if __name__ == '__main__':
     main()

@@ -34,10 +34,17 @@ enum KommandIdentifier {
   KommandPong = 0x01,
   KommandErr = 0x0F,
   KommandLog = 0x10,
+  KommandFileRead = 0x20,
+  KommandFileReadReply = 0x21,
+  KommandFileError = 0x2F,
   KommandScreenshot = 0x30,
   KommandScreenshotData = 0x31,
   KommandNMEASentence = 0x40,
   KommandSKData = 0x42
+};
+
+enum class KommandFileErrors {
+    NoSuchFile
 };
 
 class Kommand {

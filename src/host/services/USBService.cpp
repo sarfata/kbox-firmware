@@ -105,7 +105,8 @@ void USBService::loopConnectedFrame() {
 
     KommandReader kr = KommandReader(frame, len);
 
-    KommandHandler *handlers[] = { &_pingHandler, &_screenshotHandler, 0 };
+    KommandHandler *handlers[] = { &_pingHandler, &_screenshotHandler,
+                                   &_fileReadHandler, nullptr };
     if (KommandHandler::handleKommandWithHandlers(handlers, kr, _slip)) {
       KBoxMetrics.event(KBoxEventUSBValidKommand);
     }

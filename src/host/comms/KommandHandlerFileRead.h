@@ -1,4 +1,10 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
   Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
@@ -24,42 +30,12 @@
 
 #pragma once
 
-#include <KBoxLogging.h>
-#include <KBoxLoggerStream.h>
-#include <comms/KommandHandlerFileRead.h>
-#include "comms/SlipStream.h"
-#include "os/Task.h"
-#include "ui/GC.h"
-#include "comms/KommandHandlerPing.h"
-#include "comms/KommandHandlerScreenshot.h"
+#include "comms/KommandHandler.h"
 
-class USBService : public Task, public KBoxLogger {
+class KommandHandlerFileRead : public KommandHandler {
   private:
-    static const size_t MaxLogFrameSize = 256;
-
-    SlipStream _slip;
-    KBoxLoggerStream _streamLogger;
-    KommandHandlerPing _pingHandler;
-    KommandHandlerScreenshot _screenshotHandler;
-    KommandHandlerFileRead _fileReadHandler;
-
-    enum USBConnectionState{
-      ConnectedDebug,
-      ConnectedFrame,
-      ConnectedESPProgramming
-    };
-    USBConnectionState _state;
-
-    void loopConnectedFrame();
-    void loopConnectedESPProgramming();
-
-    void sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs);
+    static const int MaxReadSize = 2048;
 
   public:
-    USBService(GC &gc);
-    ~USBService() {};
-
-    void setup();
-    void loop();
-    virtual void log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list args);
+    bool handleKommand(KommandReader &kreader, SlipStream &replyStream) override;
 };
