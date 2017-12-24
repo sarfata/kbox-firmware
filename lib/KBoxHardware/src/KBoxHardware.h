@@ -49,7 +49,14 @@ class KBoxHardware {
     Bounce button = Bounce(encoder_button, 10 /* ms */);
     ILI9341_t3 display = ILI9341_t3(display_cs, display_dc, 255 /* rst unused */, display_mosi, display_sck, display_miso);
     ADC adc;
-    SdFat _sd;
+    #if defined(__MK66FX1M0__)
+      // SDIO support for Builtin SD-Card in Teensy 3.6
+      SdFatSdio _sd;
+    #else
+      // KBox, Teensy 3.2
+      SdFat _sd;
+    #endif
+
     bool _sdCardSuccess = false;
 
     bool sdCardInit();
@@ -77,9 +84,17 @@ class KBoxHardware {
       return adc;
     };
 
-    SdFat& getSdFat() {
-      return _sd;
-    };
+    #if defined(__MK66FX1M0__)
+      // SDIO support for Builtin SD-Card in Teensy 3.6
+      SdFatSdio& getSdFat() {
+        return _sd;
+      };
+    #else
+      // KBox, Teensy 3.2
+      SdFat& getSdFat() {
+        return _sd;
+      };
+    #endif
 
     bool isSdCardUsable() const {
       return _sdCardSuccess;
