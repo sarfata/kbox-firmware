@@ -29,6 +29,7 @@
 */
 
 #include "SKJSONVisitor.h"
+#include "SKUnits.h"
 
 void SKJSONVisitor::processSource(const SKSource &source, JsonObject &sourceObject) {
   sourceObject["label"] = _jsonBuffer.strdup(source.getLabel().c_str());
@@ -84,18 +85,20 @@ JsonObject& SKJSONVisitor::processUpdate(const SKUpdate& update) {
       case SKValue::SKValueTypeAttitude:
         {
           JsonObject &attitude = obj.createNestedObject("value");
-          attitude["pitch"] = v.getAttitudeValue().pitch;
-          attitude["roll"] = v.getAttitudeValue().roll;
-          if ( v.getAttitudeValue().yaw != SKDoubleNAN) {
+          if ( v.getAttitudeValue().yaw != SKDoubleNAN)
+            attitude["pitch"] = v.getAttitudeValue().yaw;
+          if ( v.getAttitudeValue().roll != SKDoubleNAN)
+            attitude["roll"] = v.getAttitudeValue().roll;
+          if ( v.getAttitudeValue().yaw != SKDoubleNAN)
             attitude["yaw"] = v.getAttitudeValue().yaw;
-          }
         }
         break;
       case SKValue::SKValueTypePosition:
         JsonObject &position = obj.createNestedObject("value");
         position["latitude"] = v.getPositionValue().latitude;
         position["longitude"] = v.getPositionValue().longitude;
-        position["altitude"] = v.getPositionValue().altitude;
+        if ( v.getPositionValue().altitude != SKDoubleNAN)
+          position["altitude"] = v.getPositionValue().altitude;
         break;
     }
   }

@@ -53,7 +53,7 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
     NMEASentenceBuilder sb( "II", "XDR", 8);
     sb.setField(1, "A");
     if (update.getNavigationAttitude().pitch == SKDoubleNAN) {
-      sb.setField(2, '');
+      sb.setField(2, "");
     } else {
       sb.setField(2, SKRadToDeg(update.getNavigationAttitude().pitch), 1);
     }
@@ -61,7 +61,7 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
     sb.setField(4, "PTCH");
     sb.setField(5, "A");
     if (update.getNavigationAttitude().roll == SKDoubleNAN) {
-      sb.setField(2, '');
+      sb.setField(2, "");
     } else {
       sb.setField(2, SKRadToDeg(update.getNavigationAttitude().roll), 1);
     }
@@ -101,7 +101,6 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
     sb.setField(4, "");
     output.write(sb.toNMEA());
   }
-
 
   if (update.hasEnvironmentWindAngleApparent() &&
       update.hasEnvironmentWindSpeedApparent() &&
