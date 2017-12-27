@@ -61,9 +61,9 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
     sb.setField(4, "PTCH");
     sb.setField(5, "A");
     if (update.getNavigationAttitude().roll == SKDoubleNAN) {
-      sb.setField(2, "");
+      sb.setField(6, "");
     } else {
-      sb.setField(2, SKRadToDeg(update.getNavigationAttitude().roll), 1);
+      sb.setField(6, SKRadToDeg(update.getNavigationAttitude().roll), 1);
     }
     sb.setField(7, "D");
     sb.setField(8, "ROLL");
