@@ -26,11 +26,14 @@
 
 #include <KBoxLogging.h>
 #include <KBoxLoggerStream.h>
+#include <comms/KommandHandlerFileRead.h>
 #include "comms/SlipStream.h"
 #include "os/Task.h"
 #include "ui/GC.h"
 #include "comms/KommandHandlerPing.h"
 #include "comms/KommandHandlerScreenshot.h"
+#include "comms/KommandHandlerFileRead.h"
+#include "comms/KommandHandlerFileWrite.h"
 
 class USBService : public Task, public KBoxLogger {
   private:
@@ -40,6 +43,8 @@ class USBService : public Task, public KBoxLogger {
     KBoxLoggerStream _streamLogger;
     KommandHandlerPing _pingHandler;
     KommandHandlerScreenshot _screenshotHandler;
+    KommandHandlerFileRead _fileReadHandler;
+    KommandHandlerFileWrite _fileWriteHandler;
 
     enum USBConnectionState{
       ConnectedDebug,
@@ -51,7 +56,8 @@ class USBService : public Task, public KBoxLogger {
     void loopConnectedFrame();
     void loopConnectedESPProgramming();
 
-    void sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs);
+    void sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno,
+                      const char *fmt, va_list fmtargs);
 
   public:
     USBService(GC &gc);
@@ -59,5 +65,6 @@ class USBService : public Task, public KBoxLogger {
 
     void setup();
     void loop();
-    virtual void log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list args);
+    void log(enum KBoxLoggingLevel level, const char *fname, int lineno,
+             const char *fmt, va_list args) override;
 };

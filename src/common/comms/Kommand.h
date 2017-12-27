@@ -34,10 +34,61 @@ enum KommandIdentifier {
   KommandPong = 0x01,
   KommandErr = 0x0F,
   KommandLog = 0x10,
+
+  /**
+   * Kommand to read a file from the SDCard.
+   *
+   * Data:
+   *  - uint32_t: fileOpId - a identifier used in errors or replies
+   *  - uint32_t: startPosition - where to start reading from in file
+   *  - uint32_t: size - amount of bytes to read
+   *  - char[]: zero-terminated filename
+   *
+   * Replies with KommandFileReadReply or KommandFileError
+   */
+  KommandFileRead = 0x20,
+
+  /**
+   * Kommand to write to a file on the SDCard.
+   *
+   * Data:
+   *  - uint32_t: fileOpId - a identifier used in errors or replies
+   *  - uint32_t: startPosition
+   *  - uint32_t: size
+   *  - char[]: zero-terminated filename
+   *  - uint8_t[]: data
+   */
+   KommandFileWrite = 0x21,
+
+  /**
+   * Response to a KommandFileRead
+   *
+   * Data:
+   *  - uint32_t: fileOpId - a identifier used in errors or replies
+   *  - uint32_t: size
+   *  - uint8_t[]: data
+   */
+  KommandFileReadReply = 0x22,
+
+  /**
+   * Data:
+   *  - uint32_t: fileOpId - a identifier used in errors or replies
+   *  - uint32_t: error code (KommandFileErrors)
+   */
+  KommandFileError = 0x2F,
+
   KommandScreenshot = 0x30,
   KommandScreenshotData = 0x31,
+
   KommandNMEASentence = 0x40,
   KommandSKData = 0x42
+};
+
+enum class KommandFileErrors {
+    AOK,
+    NoSuchFile,
+    InvalidWriteError,
+    WriteError
 };
 
 class Kommand {

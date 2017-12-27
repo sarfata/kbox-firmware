@@ -7,9 +7,17 @@ import argparse
 import struct
 import time
 import png
-import timeit
+import random
+import logging
+import sys
 
-""" Courtesy of esptool.py - GPL """
+""" Courtesy of esptool.py - GPL 
+
+Modified to return a tuple (packer, Exception). Caller is responsible to decide
+what to do with the Exception if it exits.
+Kudos: https://stackoverflow.com/questions/11366892/handle-generator-exceptions-in-its-consumer
+
+"""
 def slip_reader(port):
     """Generator to read SLIP packets from a serial port.
     Yields one full SLIP packet at a time, raises exception on timeout or invalid data.
@@ -24,7 +32,12 @@ def slip_reader(port):
         waiting = port.inWaiting()
         read_bytes = port.read(1 if waiting == 0 else waiting)
         if read_bytes == '':
-            raise FatalError("Timed out waiting for packet %s" % ("header" if partial_packet is None else "content"))
+            if partial_packet is None:
+                logging.info("Timed out waiting for packet header")
+                yield None
+            else:
+                logging.info("Timed out waiting for packet content")
+                yield None
 
         for b in read_bytes:
             if partial_packet is None:  # waiting for packet header
@@ -33,7 +46,7 @@ def slip_reader(port):
                     connected = True
                 else:
                     if connected:
-                        raise FatalError('Invalid head of packet (%r)' % b)
+                        raise KBoxError('Invalid head of packet (%r)' % b)
                     else:
                         # Ignore errors until we are connected (aka seen one valid packet)
                         pass
@@ -45,7 +58,7 @@ def slip_reader(port):
                 elif b == '\xdd':
                     partial_packet += '\xdb'
                 else:
-                    raise FatalError('Invalid SLIP escape (%r%r)' % ('\xdb', b))
+                    raise KBoxError('Invalid SLIP escape (%r%r)' % ('\xdb', b))
             elif b == '\xdb':  # start of escape sequence
                 in_escape = True
             elif b == '\xc0':  # end of packet
@@ -54,7 +67,7 @@ def slip_reader(port):
             else:  # normal byte in packet
                 partial_packet += b
 
-class FatalError(RuntimeError):
+class KBoxError(RuntimeError):
     """
     Wrapper class for runtime errors that aren't caused by internal bugs, but by
     invalid KBox responses or input content.
@@ -68,13 +81,18 @@ class FatalError(RuntimeError):
         Return a fatal error object that includes the hex values of
         'result' as a string formatted argument.
         """
-        return FatalError(message % ", ".join(hex(ord(x)) for x in result))
+        return KBoxError(message + " [" +  ", ".join(hex(ord(x)) for x in
+                                                    result) + "]")
 
 class KBox(object):
     KommandPing = 0x00
     KommandPong = 0x01
     KommandErr = 0x0F
     KommandLog = 0x10
+    KommandFileRead = 0x20
+    KommandFileWrite = 0x21
+    KommandFileReadReply = 0x22
+    KommandFileError = 0x2F
     KommandScreenshot = 0x30
     KommandScreenshotData = 0x31
 
@@ -88,7 +106,12 @@ class KBox(object):
         self._debug = debug
 
     def read(self):
-        return self._slip_reader.next()
+        try:
+            return self._slip_reader.next()
+        except KBoxError as e:
+            # reset reader on errors
+            self._slip_reader = slip_reader(self._port)
+            raise e
 
     def write(self, packet):
         """
@@ -100,31 +123,53 @@ class KBox(object):
               + '\xc0'
         self._port.write(buf)
 
-    def readCommand(self, command):
+    def readCommand(self, command, timeout = 1):
         """
         Reads incoming frame until a frame with specified command is received.
         """
 
+        timer = time.time()
+
         while True:
-            frame = self.read()
+            if time.time() > timer + timeout:
+                raise KBoxError("timed out")
+
+            try:
+                frame = self.read()
+            except KBoxError as e:
+                logging.warn(e.message)
+                continue
+
+            if frame is None:
+                continue
 
             if self._debug:
                 print "> ({}) {}".format(len(frame), " ".join("{:02x}".format(ord(c)) for c in frame))
 
-            if len(frame) < 2:
-                raise FatalError.WithFrame("Frame is too short to be valid (%s)", frame)
+            if not frame or len(frame) < 2:
+                raise KBoxError.WithFrame("Frame is too short to be valid", frame)
 
             (cmd,) = struct.unpack('<H', frame[0:2])
 
             if cmd == command:
                 return frame[2:]
             elif cmd == KBox.KommandErr:
-                raise FatalError("KBox responded with an error")
+                raise KBoxError.WithFrame("KBox responded with an error", frame)
+            elif cmd == KBox.KommandFileError:
+                data = frame[2:]
+                if len(data) != 8:
+                    raise KBoxError.WithFrame("Invalid KommandFileError size {}"
+                                              .format(len(data), frame))
+
+                (fileid, errno) = struct.unpack('<LL', data)
+                raise KBoxError.WithFrame("KBox responded with a file error {} "
+                                           "for file {}".format(errno, fileid),
+                                          frame)
             elif cmd == KBox.KommandLog:
                 # Keep printing log messages while waiting
                 self.printLog(frame[2:])
             else:
-                print("Got unexpected command with id {}".format(cmd))
+                print("Got unexpected frame with id {}".format(cmd))
 
     def parseLogCommand(self, data):
         logLevels = { 0: "hD", 1: "hI", 2: "hE", 3: "wD", 4: "wI", 5: "wE" }
@@ -153,14 +198,14 @@ class KBox(object):
         while not ponged:
             resp = self.readCommand(KBox.KommandPong)
             if len(resp) != 4:
-                raise FatalError("KBox ponged with wrong size frame ({} instead of 4)".format(len(resp)))
+                raise KBoxError("KBox ponged with wrong size frame ({} instead of 4)".format(len(resp)))
             else:
                 (data,) = struct.unpack('<I', resp)
                 print("PONG[{}] in {} ms".format(data, (time.time() - t0) * 1000))
                 ponged = True
 
     def command(self, command, data = ""):
-        print("Sending cmd {} len {}".format(command, len(data)))
+        logging.debug("Sending cmd {} len {}".format(command, len(data)))
         t0 = time.time()
         pkt = struct.pack('<H', command) + data
         self.write(pkt)
@@ -176,7 +221,8 @@ class KBox(object):
         data = self.readCommand(KBox.KommandScreenshotData)
         (y,) = struct.unpack('<H', data[0:2])
         pixelData = data[2:]
-        pixels = [ KBox.convertToRgb(struct.unpack('<H', pixelData[i:i+2])[0]) for i in range(0, len(pixelData), 2) ]
+        pixels = [ KBox.convertToRgb(struct.unpack('<H', pixelData[i:i+2])[0])
+                   for i in range(0, len(pixelData), 2) ]
         pixelsByLine = [ pixels[i:i+320] for i in range(0, len(pixels), 320) ]
 
         return (y, pixelsByLine)
@@ -190,8 +236,108 @@ class KBox(object):
             capturedLines = capturedLines + len(rect)
             pixels.extend(rect)
 
-        print "Captured screenshot with {} lines in {:.0f} ms".format(len(pixels), (time.time() - t0)*1000)
-        png.from_array(pixels, 'RGB').save('screenshot.png')
+        print "Captured screenshot with {} lines in {:.0f} ms"\
+                .format(len(pixels), (time.time() - t0)*1000)
+        return png.from_array(pixels, 'RGB')
+
+    def read_file(self, filename):
+        t0 = time.time()
+
+        data = ""
+        block_count = 0
+        while True:
+            block = self.read_file_block(filename, len(data))
+            block_count = block_count + 1
+            data = data + block
+            if len(block) == 0:
+                break
+
+        duration = time.time() - t0
+        speed = len(data) / duration
+        logging.info("Read file {} ({} bytes) in {}ms. {} kB/s. ({} blocks)"
+                     .format(filename, len(data), duration * 1000, speed/1024,
+                             block_count))
+        return data
+
+    def read_file_block(self, filename, start_position = 0, size = 32 * 1024 *
+                                                               1024):
+        read_id = int(random.random() * 2**32)
+
+        request = struct.pack('<LLL', read_id, start_position, size)
+        request = request + filename + '\0'
+
+        self.command(KBox.KommandFileRead, request)
+
+        data = self.readCommand(KBox.KommandFileReadReply)
+
+        (reply_read_id, reply_size) = struct.unpack('<LL', data[0:8])
+
+        if reply_read_id != read_id:
+            raise KBoxError.WithFrame("Got a read reply for another read ({"
+                                       "} <> {})".format(hex(reply_read_id),
+                                                         hex(read_id)),
+                                      data)
+
+        if len(data) != reply_size + 8:
+            raise KBoxError.WithFrame("Invalid reply length - Got {} bytes. "
+                                        "Should be {}+8={}"
+                                      .format(len(data), reply_size,
+                                                reply_size+8),
+                                      data)
+
+        logging.debug("Read {} bytes from pos {}".format(reply_size,
+                                                     start_position))
+        return data[8:8+reply_size]
+
+    def write_file(self, filename, data, block_size = 2000):
+        t0 = time.time()
+        bytes_sent = 0
+        block_count = 0
+        while bytes_sent < len(data):
+            remaining_bytes = len(data) - bytes_sent
+            if remaining_bytes > block_size:
+                remaining_bytes = block_size
+
+            block = data[bytes_sent:bytes_sent + remaining_bytes]
+            self.write_file_block(filename, block, bytes_sent)
+            bytes_sent = bytes_sent + remaining_bytes
+            block_count = block_count + 1
+
+        duration = time.time() - t0
+        speed = len(data) / duration
+
+        logging.info("Wrote file {} ({} bytes) in {}ms. {} kB/s. ({} blocks)"
+                     .format(filename, len(data), duration * 1000, speed / 1024,
+                             block_count))
+
+    def write_file_block(self, filename, data, start_position = 0, retries = 3):
+        write_id = int(random.random() * 2**32)
+
+        request = struct.pack('<LLL', write_id, start_position, len(data))
+        request = request + filename + '\0'
+        request = request + data
+
+        while retries > 0:
+            self.command(KBox.KommandFileWrite, request)
+
+            try:
+                data = self.readCommand(KBox.KommandFileError, timeout = 0.1)
+            except KBoxError as e:
+                logging.warn(e.message)
+                retries = retries - 1
+                continue
+
+            (reply_write_id, reply_error) = struct.unpack('<LL', data[0:8])
+            if reply_write_id != write_id:
+                raise KBoxError.WithFrame("Got a file error for another operation"
+                                          "({})".format(reply_read_id), data)
+            if reply_error != 0:
+                raise KBoxError.WithFrame("Write Error ({})".format(reply_error),
+                                          data)
+            # success!
+            return
+
+        raise KBoxError("Failed to write block - retries exceeded")
 
     @staticmethod
     def convertToRgb(pixel):
@@ -209,9 +355,24 @@ def main():
     subparsers = parser.add_subparsers(dest = "command")
     subparsers.add_parser("ping")
     subparsers.add_parser("logs")
-    subparsers.add_parser("screenshot")
+
+    screenshot_parser = subparsers.add_parser("screenshot")
+    screenshot_parser.add_argument("filename", default = 'screenshot.png')
+
+    file_read_parser = subparsers.add_parser("fread")
+    file_read_parser.add_argument("filename")
+    file_read_parser.add_argument("destination", type = argparse.FileType('w'),
+                                  default = sys.stdout)
+
+    file_write_parser = subparsers.add_parser("fwrite")
+    file_write_parser.add_argument("filename")
 
     args = parser.parse_args()
+
+    if args.debug:
+        logging.basicConfig(level = logging.DEBUG)
+    else:
+        logging.basicConfig(level = logging.INFO)
 
     kbox = KBox(args.port, args.debug)
 
@@ -221,7 +382,7 @@ def main():
         try:
             p = kbox.read()
             ready = True
-        except FatalError as e:
+        except KBoxError as e:
             print e
 
     if args.command == "ping":
@@ -237,7 +398,17 @@ def main():
             log = kbox.readCommand(KBox.KommandLog)
             kbox.printLog(log)
     elif args.command == "screenshot":
-        capture = kbox.takeScreenshot()
+        png = kbox.takeScreenshot()
+        png.from_array(pixels, 'RGB').save(args.filename)
+
+    elif args.command == "fread":
+        data = kbox.read_file(args.filename)
+        args.destination.write(data)
+
+    elif args.command == "fwrite":
+        with open(args.filename, 'r') as f:
+            data = f.read()
+            kbox.write_file(args.filename, data)
 
 if __name__ == '__main__':
     main()

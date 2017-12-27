@@ -4,7 +4,7 @@ import time
 import re
 import serial
 from termcolor import colored
-from kbox import KBox,FatalError
+from kbox import KBox,KBoxError
 
 """
 Helper methods to interact with KBox.
@@ -103,7 +103,7 @@ def main():
             p = kbox.ping(42)
             ready = True
             print "Connected!"
-        except FatalError as e:
+        except KBoxError as e:
             print e
 
     tests = []

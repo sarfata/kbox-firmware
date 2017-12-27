@@ -80,6 +80,7 @@ void setup() {
     JsonObject &root =jsonBuffer.parseObject(configFile);
 
     if (root.success()) {
+      DEBUG("Loading configuration from SDCard");
       configParser.parseKBoxConfig(root, config);
     }
     else {
@@ -87,8 +88,10 @@ void setup() {
     }
   }
   else {
+    DEBUG("No configuration file found. Using defaults.");
     configParser.defaultConfig(config);
   }
+
 
   // Instantiate all our services
   WiFiService *wifi = new WiFiService(config.wifiConfig, skHub, gc);
