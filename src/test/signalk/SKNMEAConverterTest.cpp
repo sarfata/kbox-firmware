@@ -85,6 +85,22 @@ TEST_CASE("SKNMEAConverterTest") {
     }
   }
 
+  SECTION("NavigationAttitude with NAN for pitch") {
+    SKUpdateStatic<1> u;
+    u.setNavigationAttitude(SKTypeAttitude(/*roll*/SKDegToRad(29),
+          /*pitch*/SKDoubleNAN,
+          /*yaw*/SKDoubleNAN));
+
+    converter.convert(u, out);
+
+    CHECK( out.size() == 1 );
+
+    if (out.size() > 0) {
+      String s = *(out.begin());
+      CHECK( s == "$IIXDR,A,,D,PTCH,A,29.0,D,ROLL*49" );
+    }
+  }
+
   SECTION("NavigationHeadingMagnetic") {
     SKUpdateStatic<1> u;
     u.setNavigationHeadingMagnetic(SKDegToRad(142));
