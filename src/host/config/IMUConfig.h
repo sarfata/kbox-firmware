@@ -32,6 +32,13 @@
 
 struct IMUConfig {
   bool enabled;
-  int frequency;
+  int  frequency;
+  bool enabledHdg;
+  bool enabledHeelPitch;
+  int  calHdg;
+  int  calHeelPitch;
+  bool writeN2kHdg;
+  bool writeN2kHeelPitch;
+  bool writeNMEAHdg;
+  bool writeNMEAHeelPitch;
 };
-

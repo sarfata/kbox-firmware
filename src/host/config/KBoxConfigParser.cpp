@@ -46,7 +46,15 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.serial2Config.inputMode = SerialModeNMEA;
   config.serial2Config.outputMode = SerialModeDisabled;
 
-  config.imuConfig.enabled = true;
+  config.imuConfig.enabled = true;            // enable internal IMU sensor
+  config.imuConfig.enabledHdg = true;         // true if values taken from internal sensor
+  config.imuConfig.enabledHeelPitch = true;   // true if values taken from internal sensor
+  config.imuConfig.calHdg = 2;                // hdg valid, if calibration value greater equal
+  config.imuConfig.calHeelPitch = 2;          // heel (roll) & pitch valid, if calibration value greater equal
+  config.imuConfig.writeN2kHdg = false;       // write heading to N2k bus
+  config.imuConfig.writeN2kHeelPitch = false; // write heel & pitch values to N2k bus
+  config.imuConfig.writeNMEAHdg = true;       // if NMEA hdm enabled write value from unternal sensor
+  config.imuConfig.writeNMEAHeelPitch = true; // if NMEA xdrAttitude enabled, write value from internal sensor
 }
 
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
@@ -62,6 +70,14 @@ void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &confi
 void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &config) {
   READ_BOOL_VALUE(enabled);
   READ_INT_VALUE_WRANGE(frequency, 1, 100);
+  READ_BOOL_VALUE(enabledHdg);
+  READ_BOOL_VALUE(enabledHeelPitch);
+  READ_INT_VALUE_WRANGE(calHdg, 0, 3);
+  READ_INT_VALUE_WRANGE(calHeelPitch, 0, 3);
+  READ_BOOL_VALUE(writeN2kHdg);
+  READ_BOOL_VALUE(writeN2kHeelPitch);
+  READ_BOOL_VALUE(writeNMEAHdg);
+  READ_BOOL_VALUE(writeNMEAHeelPitch);
 }
 
 void KBoxConfigParser::parseBarometerConfig(const JsonObject &json, BarometerConfig &config){
