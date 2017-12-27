@@ -39,7 +39,8 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
   _currentOutput = &output;
   update.accept(*this, SKPathElectricalBatteriesVoltage);
 
-  if (update.hasEnvironmentOutsidePressure()) {
+  if (update.hasEnvironmentOutsidePressure() &&
+      update.getEnvironmentOutsidePressure() != SKDoubleNAN) {
     NMEASentenceBuilder sb("II", "XDR", 4);
     sb.setField(1, "P");
     sb.setField(2, update.getEnvironmentOutsidePressure(), 5);
@@ -51,17 +52,26 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
   if (update.hasNavigationAttitude()) {
     NMEASentenceBuilder sb( "II", "XDR", 8);
     sb.setField(1, "A");
-    sb.setField(2, SKRadToDeg(update.getNavigationAttitude().pitch), 1);
+    if (update.getNavigationAttitude().pitch == SKDoubleNAN) {
+      sb.setField(2, '');
+    } else {
+      sb.setField(2, SKRadToDeg(update.getNavigationAttitude().pitch), 1);
+    }
     sb.setField(3, "D");
     sb.setField(4, "PTCH");
     sb.setField(5, "A");
-    sb.setField(6, SKRadToDeg(update.getNavigationAttitude().roll), 1);
+    if (update.getNavigationAttitude().roll == SKDoubleNAN) {
+      sb.setField(2, '');
+    } else {
+      sb.setField(2, SKRadToDeg(update.getNavigationAttitude().roll), 1);
+    }
     sb.setField(7, "D");
     sb.setField(8, "ROLL");
     output.write(sb.toNMEA());
   }
 
-  if (update.hasNavigationHeadingMagnetic()) {
+  if (update.hasNavigationHeadingMagnetic() &&
+      update.getNavigationHeadingMagnetic() != SKDoubleNAN) {
     NMEASentenceBuilder sb("II", "HDM", 2);
     sb.setField(1, SKRadToDeg(update.getNavigationHeadingMagnetic()), 1);
     sb.setField(2, "M");
@@ -82,7 +92,8 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
   //      3) Port rudder sensor
   //      4) Status, A means data is valid
   // *********************************************** */
-  if (update.hasSteeringRudderAngle()) {
+  if (update.hasSteeringRudderAngle() &&
+      update.getSteeringRudderAngle() != SKDoubleNAN) {
     NMEASentenceBuilder sb("II", "RSA", 4);
     sb.setField(1, SKRadToDeg(SKNormalizeAngle(update.getSteeringRudderAngle())),1 );
     sb.setField(2, "A");
@@ -92,11 +103,17 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
   }
 
 
-  if (update.hasEnvironmentWindAngleApparent() && update.hasEnvironmentWindSpeedApparent()) {
+  if (update.hasEnvironmentWindAngleApparent() &&
+      update.hasEnvironmentWindSpeedApparent() &&
+      update.getEnvironmentWindAngleApparent() != SKDoubleNAN &&
+      update.getEnvironmentWindSpeedApparent() != SKDoubleNAN) {
     generateMWV(output, update.getEnvironmentWindAngleApparent(), update.getEnvironmentWindSpeedApparent(), true);
   }
 
-  if (update.hasEnvironmentWindAngleTrueWater() && update.hasEnvironmentWindSpeedTrue()) {
+  if (update.hasEnvironmentWindAngleTrueWater() &&
+      update.hasEnvironmentWindSpeedTrue() &&
+      update.getEnvironmentWindAngleTrueWater() != SKDoubleNAN &&
+      update.getEnvironmentWindSpeedTrue() != SKDoubleNAN) {
     generateMWV(output, update.getEnvironmentWindAngleTrueWater(), update.getEnvironmentWindSpeedTrue(), false);
   }
 
@@ -147,6 +164,3 @@ void SKNMEAConverter::generateMWV(SKNMEAOutput &output, double windAngle, double
   sb.setField(5, "A");
   output.write(sb.toNMEA());
 }
-
-
-
