@@ -30,15 +30,10 @@
 
 #pragma once
 
-#include "comms/KommandHandlerFile.h"
+#include <common/comms/KommandHandler.h>
 
-/**
- * Handle KommandFileRead operations.
- */
-class KommandHandlerFileRead : public KommandHandlerFile {
-  private:
-    static const int MaxReadSize = 2048;
-
-  public:
-    bool handleKommand(KommandReader &kreader, SlipStream &replyStream) override;
+class KommandHandlerFile : public KommandHandler {
+  protected:
+    void sendFileError(SlipStream &replyStream,
+                       uint32_t fileOpId, const KommandFileErrors &error);
 };

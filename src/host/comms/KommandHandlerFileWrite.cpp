@@ -30,56 +30,43 @@
 
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
-#include "KommandHandlerFileRead.h"
+#include "KommandHandlerFileWrite.h"
 
-bool KommandHandlerFileRead::handleKommand(KommandReader &kreader, SlipStream &replyStream) {
-  if (kreader.getKommandIdentifier() != KommandFileRead) {
+bool KommandHandlerFileWrite::handleKommand(KommandReader &kreader,
+                                            SlipStream &replyStream) {
+  if (kreader.getKommandIdentifier() != KommandFileWrite) {
     return false;
   }
 
-  uint32_t readId = kreader.read32();
+  uint32_t writeId = kreader.read32();
   uint32_t startPosition = kreader.read32();
   uint32_t size = kreader.read32();
   const char *filename = kreader.readNullTerminatedString();
 
-  if (KBox.getSdFat().exists(filename)) {
-    File f = KBox.getSdFat().open(filename, O_READ);
+  File f = KBox.getSdFat().open(filename, O_CREAT|O_WRITE);
 
-    if (size > f.fileSize()) {
-      size = f.fileSize();
-    }
-    if (size > MaxReadSize) {
-      size = MaxReadSize;
-    }
-
-    f.seekSet(startPosition);
-
-    FixedSizeKommand<MaxReadSize + 2*4> replyFrame(KommandFileReadReply);
-    replyFrame.append32(readId);
-
-    uint8_t *bytes;
-    size_t *index;
-    replyFrame.captureBuffer(&bytes, &index);
-
-    // We need to set the size *after* we read the data
-    size_t indexBeforeAddingSize = *index;
-
-    // fake add size
-    replyFrame.append32(0);
-
-    int readCount = f.read(bytes + *index, size);
-    size_t frame_size = *index + readCount;
-
-    // Update the 'size' field with how many bytes were actually read
-    *index = indexBeforeAddingSize;
-    replyFrame.append32(readCount);
-
-    *index = frame_size;
-
-    replyStream.writeFrame(replyFrame.getBytes(), replyFrame.getSize());
+  if (!f.isOpen()) {
+    sendFileError(replyStream, writeId, KommandFileErrors::NoSuchFile);
+    return true;
   }
-  else {
-    sendFileError(replyStream, readId, KommandFileErrors::NoSuchFile);
+
+  if (kreader.dataSize() - kreader.dataIndex() != size) {
+    DEBUG("Invalid write size: %i-%i != %i", kreader.dataSize(),
+          kreader.dataIndex(), size);
+    sendFileError(replyStream, writeId, KommandFileErrors::InvalidWriteError);
+    return true;
   }
+
+  const uint8_t* writeData = kreader.dataBuffer() + kreader.dataIndex();
+  f.seek(startPosition);
+
+  // Documentation says this will return size or -1. Never anything else.
+  if (f.write(writeData, size) != size) {
+    sendFileError(replyStream, writeId, KommandFileErrors::WriteError);
+    return true;
+  }
+  f.close();
+
+  sendFileError(replyStream, writeId, KommandFileErrors::AOK);
   return true;
 }

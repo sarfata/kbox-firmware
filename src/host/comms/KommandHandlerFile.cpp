@@ -28,17 +28,14 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "KommandHandlerFile.h"
 
-#include "comms/KommandHandlerFile.h"
+void KommandHandlerFile::sendFileError(SlipStream &replyStream,
+                                       uint32_t fileOpId,
+                                       const KommandFileErrors &error) {
+  FixedSizeKommand<8> errorFrame(KommandFileError);
+  errorFrame.append32(fileOpId);
+  errorFrame.append32(static_cast<uint32_t>(error));
 
-/**
- * Handle KommandFileRead operations.
- */
-class KommandHandlerFileRead : public KommandHandlerFile {
-  private:
-    static const int MaxReadSize = 2048;
-
-  public:
-    bool handleKommand(KommandReader &kreader, SlipStream &replyStream) override;
-};
+  replyStream.writeFrame(errorFrame.getBytes(), errorFrame.getSize());
+}

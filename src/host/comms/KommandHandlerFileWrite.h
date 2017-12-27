@@ -32,12 +32,9 @@
 
 #include "comms/KommandHandlerFile.h"
 
-/**
- * Handle KommandFileRead operations.
- */
-class KommandHandlerFileRead : public KommandHandlerFile {
+class KommandHandlerFileWrite : public KommandHandlerFile {
   private:
-    static const int MaxReadSize = 2048;
+    static const int MaxWriteSize = 2048;
 
   public:
     bool handleKommand(KommandReader &kreader, SlipStream &replyStream) override;
