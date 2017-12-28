@@ -105,6 +105,11 @@ class KBoxHardware {
     void espInit();
     void espRebootInFlasher();
     void espRebootInProgram();
+
+    /**
+     * Immediately reboots KBox.
+     */
+    void rebootKBox();
 };
 
 extern KBoxHardware KBox;

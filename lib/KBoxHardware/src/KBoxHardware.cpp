@@ -191,3 +191,12 @@ bool KBoxHardware::sdCardInit() {
 
   return true;
 }
+
+void KBoxHardware::rebootKBox() {
+  // https://forum.pjrc.com/threads/24304-_reboot_Teensyduino()
+  // -vs-_restart_Teensyduino()
+  uint32_t* const cpuRestartAddress = (uint32_t*)0xE000ED0C;
+  static const uint32_t cpuRestartValue = 0x5FA0004;
+
+  *cpuRestartAddress = cpuRestartValue;
+}

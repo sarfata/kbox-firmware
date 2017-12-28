@@ -107,6 +107,7 @@ void USBService::loopConnectedFrame() {
 
     KommandHandler *handlers[] = { &_pingHandler, &_screenshotHandler,
                                    &_fileReadHandler, &_fileWriteHandler,
+                                   &_rebootHandler,
                                    nullptr };
     if (KommandHandler::handleKommandWithHandlers(handlers, kr, _slip)) {
       KBoxMetrics.event(KBoxEventUSBValidKommand);
@@ -142,7 +143,7 @@ void USBService::loopConnectedESPProgramming() {
     programmer.loop();
   }
   DEBUG("Exiting programmer mode");
-  CPU_RESTART;
+  KBox.rebootKBox();
 }
 
 /**

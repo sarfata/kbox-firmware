@@ -80,6 +80,13 @@ enum KommandIdentifier {
   KommandScreenshot = 0x30,
   KommandScreenshotData = 0x31,
 
+  /**
+   * Force a reboot of KBOX.
+   *
+   * The kommand must have "H0LDFA57\0" as payload otherwise it will be ignored.
+   */
+  KommandReboot = 0x33,
+
   KommandNMEASentence = 0x40,
   KommandSKData = 0x42
 };

@@ -26,7 +26,6 @@
 
 #include <KBoxLogging.h>
 #include <KBoxLoggerStream.h>
-#include <comms/KommandHandlerFileRead.h>
 #include "comms/SlipStream.h"
 #include "os/Task.h"
 #include "ui/GC.h"
@@ -34,6 +33,7 @@
 #include "comms/KommandHandlerScreenshot.h"
 #include "comms/KommandHandlerFileRead.h"
 #include "comms/KommandHandlerFileWrite.h"
+#include "comms/KommandHandlerReboot.h"
 
 class USBService : public Task, public KBoxLogger {
   private:
@@ -45,6 +45,7 @@ class USBService : public Task, public KBoxLogger {
     KommandHandlerScreenshot _screenshotHandler;
     KommandHandlerFileRead _fileReadHandler;
     KommandHandlerFileWrite _fileWriteHandler;
+    KommandHandlerReboot _rebootHandler;
 
     enum USBConnectionState{
       ConnectedDebug,

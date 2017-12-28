@@ -95,6 +95,7 @@ class KBox(object):
     KommandFileError = 0x2F
     KommandScreenshot = 0x30
     KommandScreenshotData = 0x31
+    KommandReboot = 0x33
 
     def __init__(self, port, debug = False):
         self._port = serial.Serial(port)
@@ -209,6 +210,10 @@ class KBox(object):
         t0 = time.time()
         pkt = struct.pack('<H', command) + data
         self.write(pkt)
+
+    def reboot(self):
+        payload = "H0LDFA57" + '\0'
+        self.command(KBox.KommandReboot, payload)
 
     def captureScreen(self, startY = 0):
         """
@@ -355,6 +360,7 @@ def main():
     subparsers = parser.add_subparsers(dest = "command")
     subparsers.add_parser("ping")
     subparsers.add_parser("logs")
+    subparsers.add_parser("reboot")
 
     screenshot_parser = subparsers.add_parser("screenshot")
     screenshot_parser.add_argument("filename", default = 'screenshot.png')
@@ -362,10 +368,11 @@ def main():
     file_read_parser = subparsers.add_parser("fread")
     file_read_parser.add_argument("filename")
     file_read_parser.add_argument("destination", type = argparse.FileType('w'),
-                                  default = sys.stdout)
+                                  default = sys.stdout, nargs = '?')
 
     file_write_parser = subparsers.add_parser("fwrite")
     file_write_parser.add_argument("filename")
+    file_write_parser.add_argument("destination", nargs = '?')
 
     args = parser.parse_args()
 
@@ -397,6 +404,8 @@ def main():
             # log messages will be printed automatically
             log = kbox.readCommand(KBox.KommandLog)
             kbox.printLog(log)
+    elif args.command == "reboot":
+        kbox.reboot()
     elif args.command == "screenshot":
         png = kbox.takeScreenshot()
         png.from_array(pixels, 'RGB').save(args.filename)
@@ -408,7 +417,10 @@ def main():
     elif args.command == "fwrite":
         with open(args.filename, 'r') as f:
             data = f.read()
-            kbox.write_file(args.filename, data)
+            destination = args.filename
+            if args.destination:
+                destination = args.destination
+            kbox.write_file(destination, data)
 
 if __name__ == '__main__':
     main()
