@@ -24,6 +24,7 @@
 
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
+#include <config/WiFiConfig.h>
 #include "common/signalk/SKNMEAConverter.h"
 #include "common/signalk/KMessageNMEAVisitor.h"
 #include "common/signalk/SKJSONVisitor.h"
@@ -38,8 +39,10 @@ WiFiService::WiFiService(const WiFiConfig &config, SKHub &skHub, GC &gc) :
 
 void WiFiService::setup() {
   KBox.espInit();
-  DEBUG("booting ESP!");
-  KBox.espRebootInProgram();
+  if (_config.enabled) {
+    DEBUG("booting ESP!");
+    KBox.espRebootInProgram();
+  }
 
   _hub.subscribe(this);
 }
@@ -67,6 +70,10 @@ void WiFiService::loop() {
 }
 
 void WiFiService::processMessage(const KMessage &m) {
+  if (!_config.enabled) {
+    return;
+  }
+
   KMessageNMEAVisitor v;
   m.accept(v);
 
@@ -85,6 +92,10 @@ void WiFiService::updateReceived(const SKUpdate& u) {
   /* This is where we convert the data in SignalK format that floats inside KBox
    * to messages that will be sent to WiFi clients.
    */
+
+  if (!_config.enabled) {
+    return;
+  }
 
   SKNMEAConverter nmeaConverter(_config.nmeaConverter);
   // The converter will call this->write(NMEASentence) for every generated sentence
