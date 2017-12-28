@@ -34,10 +34,14 @@ enum KBoxEvent {
   // FIXME: Not implemented yet.
   KBoxEventNMEA1RXOverflow,
   KBoxEventNMEA1RXError,
+  KBoxEventNMEA1TX,
+  KBoxEventNMEA1TXOverflow,
 
   KBoxEventNMEA2RX,
   KBoxEventNMEA2RXBufferOverflow,
   KBoxEventNMEA2RXError,
+  KBoxEventNMEA2TX,
+  KBoxEventNMEA2TXOverflow,
 
   KBoxEventNMEA2000MessageReceived,
   KBoxEventNMEA2000MessageSent,

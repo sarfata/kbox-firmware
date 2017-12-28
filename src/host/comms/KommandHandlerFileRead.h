@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +30,15 @@
 
 #pragma once
 
-#include <WString.h>
-#include <string>
-#include <ostream>
+#include "comms/KommandHandlerFile.h"
 
-// This is required so that Catch.hpp can print Teensy Strings
-std::ostream& operator << ( std::ostream& os, ::String const& value );
+/**
+ * Handle KommandFileRead operations.
+ */
+class KommandHandlerFileRead : public KommandHandlerFile {
+  private:
+    static const int MaxReadSize = 2048;
 
-#include "catch.hpp"
-
+  public:
+    bool handleKommand(KommandReader &kreader, SlipStream &replyStream) override;
+};

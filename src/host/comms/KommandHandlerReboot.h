@@ -1,7 +1,7 @@
 /*
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,9 @@
 
 #pragma once
 
-#include <WString.h>
-#include <string>
-#include <ostream>
+#include "comms/KommandHandler.h"
 
-// This is required so that Catch.hpp can print Teensy Strings
-std::ostream& operator << ( std::ostream& os, ::String const& value );
-
-#include "catch.hpp"
-
+class KommandHandlerReboot : public KommandHandler {
+  public:
+    bool handleKommand(KommandReader &kreader, SlipStream &replyStream) override;
+};

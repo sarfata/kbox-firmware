@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,14 +28,14 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "KommandHandlerFile.h"
 
-#include <WString.h>
-#include <string>
-#include <ostream>
+void KommandHandlerFile::sendFileError(SlipStream &replyStream,
+                                       uint32_t fileOpId,
+                                       const KommandFileErrors &error) {
+  FixedSizeKommand<8> errorFrame(KommandFileError);
+  errorFrame.append32(fileOpId);
+  errorFrame.append32(static_cast<uint32_t>(error));
 
-// This is required so that Catch.hpp can print Teensy Strings
-std::ostream& operator << ( std::ostream& os, ::String const& value );
-
-#include "catch.hpp"
-
+  replyStream.writeFrame(errorFrame.getBytes(), errorFrame.getSize());
+}

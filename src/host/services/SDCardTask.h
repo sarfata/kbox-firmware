@@ -38,11 +38,9 @@ class Loggable {
 
 class SDCardTask : public Task, public KReceiver {
   private:
-    SdFat *sd = 0;
-    SdFile *logFile = 0;
+    SdFile *logFile = nullptr;
     bool cardReady = false;
 
-    bool cardInit();
     String generateNewFileName(const String& baseName);
     SdFile* createLogFile(const String& baseName);
 
@@ -50,11 +48,11 @@ class SDCardTask : public Task, public KReceiver {
 
   public:
     SDCardTask();
-    virtual ~SDCardTask();
+    virtual ~SDCardTask() = default;
 
-    void setup();
-    void loop();
-    void processMessage(const KMessage&);
+    void setup() override;
+    void loop() override;
+    void processMessage(const KMessage&) override;
 
     // Those two functions returns value in bytes.
     uint64_t getFreeSpace() const;

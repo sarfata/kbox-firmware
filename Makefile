@@ -1,10 +1,10 @@
 UNAME := $(shell uname)
 
 ifeq ($(UNAME), Linux)
-PORT=/dev/ttyACM0
+    PORT := /dev/ttyACM0
 endif
 ifeq ($(UNAME), Darwin)
-PORT=/dev/tty.usbmodem1411
+    PORT := $(shell ls /dev/tty.usbmodem14* )
 endif
 
 

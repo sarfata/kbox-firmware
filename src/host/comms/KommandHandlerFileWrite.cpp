@@ -28,20 +28,45 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include <KBoxLogging.h>
+#include <KBoxHardware.h>
+#include "KommandHandlerFileWrite.h"
 
-#include "SKUpdate.h"
+bool KommandHandlerFileWrite::handleKommand(KommandReader &kreader,
+                                            SlipStream &replyStream) {
+  if (kreader.getKommandIdentifier() != KommandFileWrite) {
+    return false;
+  }
 
-/**
- * This class will automatically visit all known properties of a
- * SKUpdate and call protected methods to deal with each of them.
- *
- * This makes visiting a SKUpdate message much nicer.
- */
-class SKVisitor {
-  public:
-    virtual void visit(const SKUpdate& u, const SKPath& p, const SKValue &v);
+  uint32_t writeId = kreader.read32();
+  uint32_t startPosition = kreader.read32();
+  uint32_t size = kreader.read32();
+  const char *filename = kreader.readNullTerminatedString();
 
-  protected:
-// INSERT GENERATED CODE HERE
-};
+  File f = KBox.getSdFat().open(filename, O_CREAT|O_WRITE);
+
+  if (!f.isOpen()) {
+    sendFileError(replyStream, writeId, KommandFileErrors::NoSuchFile);
+    return true;
+  }
+
+  if (kreader.dataSize() - kreader.dataIndex() != size) {
+    DEBUG("Invalid write size: %i-%i != %i", kreader.dataSize(),
+          kreader.dataIndex(), size);
+    sendFileError(replyStream, writeId, KommandFileErrors::InvalidWriteError);
+    return true;
+  }
+
+  const uint8_t* writeData = kreader.dataBuffer() + kreader.dataIndex();
+  f.seek(startPosition);
+
+  // Documentation says this will return size or -1. Never anything else.
+  if (f.write(writeData, size) != size) {
+    sendFileError(replyStream, writeId, KommandFileErrors::WriteError);
+    return true;
+  }
+  f.close();
+
+  sendFileError(replyStream, writeId, KommandFileErrors::AOK);
+  return true;
+}

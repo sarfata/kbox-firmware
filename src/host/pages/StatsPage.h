@@ -32,6 +32,7 @@
 class StatsPage : public Page {
   private:
     TextLayer *nmea1Rx, *nmea1Errors, *nmea2Rx, *nmea2Errors;
+    TextLayer *nmea1Tx, *nmea1TxErrors, *nmea2Tx, *nmea2TxErrors;
     TextLayer *canRx, *canTx, *canTxErrors;
     TextLayer *usedRam, *freeRam, *avgLoopTime;
     TextLayer *logName, *logSize, *freeSpace;

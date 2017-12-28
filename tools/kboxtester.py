@@ -3,8 +3,9 @@ import argparse
 import time
 import re
 import serial
+import random
 from termcolor import colored
-from kbox import KBox,FatalError
+from kbox import KBox,KBoxError
 
 """
 Helper methods to interact with KBox.
@@ -60,6 +61,14 @@ class KBoxTest(object):
         return None
 
     """
+    Confirm KBox is still alive!
+    """
+    def alive(self):
+        id = random.random() * 2**16
+        self.kbox.ping(id)
+        return True
+
+    """
     Run the test. Return true if the test is successful or false otherwise.
     """
     def run(self):
@@ -67,22 +76,15 @@ class KBoxTest(object):
 
 class BasicRMCTest(KBoxTest):
     def run(self):
-        # Look for a TaskManager message to make sure we have started
-        if not self.searchLog(".*", fnamepattern = "TaskManager.cpp", timeout = 10):
-            return False
+        self.alive()
 
         self.kboxjig.sendNMEA1Sentence("$GPRMC,004119.000,A,3751.3385,N,12227.4913,W,5.02,235.24,141116,,,D*75")
 
-        if not self.searchLog("Found .* sentences waiting", fnamepattern = "NMEAService"):
-            return False
-        if not self.searchLog("Sending message on n2k bus - pgn=129026", fnamepattern = "NMEA2000Service.cpp"):
-            return False
-        if not self.searchLog("TX: \\$PCDIN,01F802", fnamepattern = "NMEA2000Service.cpp"):
+        if not self.searchLog("Found .* sentences waiting", fnamepattern =
+        "SerialService"):
             return False
 
-        # Look for a TaskManager message to make sure we have not crashed.
-        if not self.searchLog(".*", fnamepattern = "TaskManager.cpp", timeout = 10):
-            return False
+        self.alive()
 
         return True
 
@@ -103,7 +105,7 @@ def main():
             p = kbox.ping(42)
             ready = True
             print "Connected!"
-        except FatalError as e:
+        except KBoxError as e:
             print e
 
     tests = []

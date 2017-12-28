@@ -21,15 +21,38 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-
 #pragma once
 
-#include <WString.h>
-#include <string>
-#include <ostream>
+#include "common/os/Task.h"
+#include "common/algo/List.h"
+#include "common/signalk/KMessage.h"
+#include "common/signalk/SKSubscriber.h"
+#include "common/signalk/SKNMEAOutput.h"
+#include "common/stats/KBoxMetrics.h"
+#include "common/signalk/SKSource.h"
+#include "common/signalk/SKHub.h"
+#include "host/config/SerialConfig.h"
 
-// This is required so that Catch.hpp can print Teensy Strings
-std::ostream& operator << ( std::ostream& os, ::String const& value );
+// Defined by the NMEA Standard
+#define MAX_NMEA_SENTENCE_LENGTH 83
 
-#include "catch.hpp"
+class HardwareSerial;
+
+class SerialService : public Task, public KGenerator, public SKSubscriber, private SKNMEAOutput {
+  private:
+    SerialConfig &_config;
+    SKHub &_hub;
+    HardwareSerial& stream;
+    LinkedList<NMEASentence> receiveQueue;
+    enum KBoxEvent _rxValidEvent, _rxErrorEvent, _txValidEvent, _txOverflowEvent;
+    SKSourceInput _skSourceInput;
+
+  public:
+    SerialService(SerialConfig &_config, SKHub &hub, HardwareSerial&s);
+
+    void setup();
+    void loop();
+    void updateReceived(const SKUpdate&) override;
+    bool write(const SKNMEASentence& nmeaSentence) override;
+};
 

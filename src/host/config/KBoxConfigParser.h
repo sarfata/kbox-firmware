@@ -30,18 +30,37 @@
 
 #pragma once
 
-#include "SKUpdate.h"
+#include <ArduinoJson.h>
+#include <WString.h>
+#include "KBoxConfig.h"
 
 /**
- * This class will automatically visit all known properties of a
- * SKUpdate and call protected methods to deal with each of them.
+ * Load a JSON file into a KBoxConfig object.
  *
- * This makes visiting a SKUpdate message much nicer.
  */
-class SKVisitor {
-  public:
-    virtual void visit(const SKUpdate& u, const SKPath& p, const SKValue &v);
+class KBoxConfigParser {
+  private:
+    SerialMode convertSerialMode(const String &s);
 
-  protected:
-// INSERT GENERATED CODE HERE
+  public:
+    /**
+     * Configures default values in given KBoxConfig object.
+     */
+    void defaultConfig(KBoxConfig &config);
+
+    /**
+     * Parse given JsonObject and transfers the new values found to the config
+     * object.
+     *
+     * Values not specific in the JSON will have the default values (same as
+     * the one provided by defaultConfig().
+     */
+    void parseKBoxConfig(const JsonObject &object, KBoxConfig &config);
+
+    void parseIMUConfig(const JsonObject &object, IMUConfig &config);
+    void parseBarometerConfig(const JsonObject &json, BarometerConfig &config);
+    void parseSerialConfig(const JsonObject &object, SerialConfig &config);
+    void parseNMEA2000Config(const JsonObject &object, NMEA2000Config &config);
+    void parseWiFiConfig(const JsonObject &json, WiFiConfig &config);
+    void parseNMEAConverterConfig(const JsonObject &json, SKNMEAConverterConfig &config);
 };

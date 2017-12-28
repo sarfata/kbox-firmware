@@ -24,6 +24,7 @@
 
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
+#include <config/WiFiConfig.h>
 #include "common/signalk/SKNMEAConverter.h"
 #include "common/signalk/KMessageNMEAVisitor.h"
 #include "common/signalk/SKJSONVisitor.h"
@@ -31,14 +32,17 @@
 
 #include "WiFiService.h"
 
-WiFiService::WiFiService(SKHub &skHub, GC &gc) : Task("WiFi"), _hub(skHub), _slip(WiFiSerial, 2048) {
+WiFiService::WiFiService(const WiFiConfig &config, SKHub &skHub, GC &gc) :
+  Task("WiFi"), _config(config), _hub(skHub), _slip(WiFiSerial, 2048) {
   // We will need gc at some point to be able to take screenshot
 }
 
 void WiFiService::setup() {
   KBox.espInit();
-  DEBUG("booting ESP!");
-  KBox.espRebootInProgram();
+  if (_config.enabled) {
+    DEBUG("booting ESP!");
+    KBox.espRebootInProgram();
+  }
 
   _hub.subscribe(this);
 }
@@ -66,6 +70,10 @@ void WiFiService::loop() {
 }
 
 void WiFiService::processMessage(const KMessage &m) {
+  if (!_config.enabled) {
+    return;
+  }
+
   KMessageNMEAVisitor v;
   m.accept(v);
 
@@ -85,7 +93,11 @@ void WiFiService::updateReceived(const SKUpdate& u) {
    * to messages that will be sent to WiFi clients.
    */
 
-  SKNMEAConverter nmeaConverter;
+  if (!_config.enabled) {
+    return;
+  }
+
+  SKNMEAConverter nmeaConverter(_config.nmeaConverter);
   // The converter will call this->write(NMEASentence) for every generated sentence
   nmeaConverter.convert(u, *this);
 

@@ -1,0 +1,52 @@
+{
+  "imu": {
+    "enabled": true,
+    "frequency": 20
+  },
+  "barometer": {
+    "enabled": true,
+    "frequency": 1
+  },
+  "wifi": {
+    "enabled": true,
+    "nmeaConverter": {
+      "xdrPressure": true,
+      "xdrAttitude": true,
+      "xdrBattery": true,
+      "hdm": true,
+      "mwv": true,
+      "rsa": true
+    }
+  },
+  "serial1": {
+    "inputMode": "nmea",
+    "outputMode": "nmea",
+    "baudRate": 38400,
+    "nmeaConverter": {
+      "xdrPressure": true,
+      "xdrAttitude": true,
+      "xdrBattery": true,
+      "hdm": true,
+      "mwv": true,
+      "rsa": true
+    }
+  },
+  "serial2": {
+    "inputMode": "nmea",
+    "outputMode": "nmea",
+    "baudRate": 4800,
+    "nmeaConverter": {
+      "xdrPressure": false,
+      "xdrAttitude": false,
+      "xdrBattery": false,
+      "hdm": true,
+      "mwv": true,
+      "rsa": true
+    }
+  },
+  "nmea2000": {
+    "txEnabled": true,
+    "rxEnabled": true
+  }
+}
+
