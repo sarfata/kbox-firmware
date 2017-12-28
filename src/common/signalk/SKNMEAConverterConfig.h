@@ -36,7 +36,7 @@
 struct SKNMEAConverterConfig {
   bool xdrPressure = true;
   bool xdrAttitude = true;
-  bool xdrBatteries = true;
+  bool xdrBattery = true;
   bool hdm = true;
   bool rsa = true;
   bool mwv = true;

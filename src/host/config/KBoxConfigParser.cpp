@@ -40,13 +40,25 @@
 void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.serial1Config.baudRate = 38400;
   config.serial1Config.inputMode = SerialModeNMEA;
-  config.serial1Config.outputMode = SerialModeDisabled;
+  config.serial1Config.outputMode = SerialModeNMEA;
 
   config.serial2Config.baudRate = 4800;
   config.serial2Config.inputMode = SerialModeNMEA;
-  config.serial2Config.outputMode = SerialModeDisabled;
+  config.serial2Config.outputMode = SerialModeNMEA;
+  config.serial2Config.nmeaConverter.xdrAttitude = false;
+  config.serial2Config.nmeaConverter.xdrBattery = false;
+  config.serial2Config.nmeaConverter.xdrPressure = false;
+
+  config.nmea2000Config.txEnabled = true;
+  config.nmea2000Config.rxEnabled = true;
 
   config.imuConfig.enabled = true;
+  config.imuConfig.frequency = 20;
+
+  config.barometerConfig.enabled = true;
+  config.barometerConfig.frequency = 1;
+
+  config.wifiConfig.enabled = true;
 }
 
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
@@ -57,6 +69,7 @@ void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &confi
   parseIMUConfig(json["imu"], config.imuConfig);
   parseBarometerConfig(json["barometer"], config.barometerConfig);
   parseWiFiConfig(json["wifi"], config.wifiConfig);
+  parseNMEA2000Config(json["nmea2000"], config.nmea2000Config);
 }
 
 void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &config) {
@@ -81,6 +94,12 @@ void KBoxConfigParser::parseSerialConfig(const JsonObject &json, SerialConfig &c
   parseNMEAConverterConfig(json["nmeaConverter"], config.nmeaConverter);
 }
 
+void KBoxConfigParser::parseNMEA2000Config(const JsonObject &json,
+                                           NMEA2000Config &config) {
+  READ_BOOL_VALUE(rxEnabled);
+  READ_BOOL_VALUE(txEnabled);
+}
+
 void KBoxConfigParser::parseWiFiConfig(const JsonObject &json, WiFiConfig &config) {
   if (json == JsonObject::invalid()) {
     return;
@@ -97,6 +116,7 @@ void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEACo
 
   READ_BOOL_VALUE(xdrPressure);
   READ_BOOL_VALUE(xdrAttitude);
+  READ_BOOL_VALUE(xdrBattery);
   READ_BOOL_VALUE(hdm);
   READ_BOOL_VALUE(rsa);
   READ_BOOL_VALUE(mwv);

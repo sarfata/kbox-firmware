@@ -72,6 +72,7 @@ void setup() {
 
   // Load configuration if available
   KBoxConfigParser configParser;
+  configParser.defaultConfig(config);
   if (KBox.getSdFat().exists(configFilename)) {
     File configFile = KBox.getSdFat().open(configFilename);
     // We can afford to allocate a lot of memory on the stack for this because we have not started doing
@@ -89,7 +90,6 @@ void setup() {
   }
   else {
     DEBUG("No configuration file found. Using defaults.");
-    configParser.defaultConfig(config);
   }
 
 
@@ -100,7 +100,8 @@ void setup() {
   BarometerService *baroService = new BarometerService(skHub);
   IMUService *imuService = new IMUService(skHub);
 
-  NMEA2000Service *n2kService = new NMEA2000Service(skHub);
+  NMEA2000Service *n2kService = new NMEA2000Service(config.nmea2000Config,
+                                                    skHub);
   n2kService->connectTo(*wifi);
 
   SerialService *reader1 = new SerialService(config.serial1Config, skHub, NMEA1_SERIAL);
@@ -112,7 +113,6 @@ void setup() {
   reader1->connectTo(*sdcardTask);
   reader2->connectTo(*sdcardTask);
   n2kService->connectTo(*sdcardTask);
-
 
   // Add all the tasks
   taskManager.addTask(&mfd);

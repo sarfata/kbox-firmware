@@ -56,6 +56,10 @@ void KBoxHardware::setup() {
   NMEA1_SERIAL.begin(38400);
   NMEA2_SERIAL.begin(4800);
 
+  // Initialize can transceiver pins
+  digitalWrite(can_standby, 1);
+  pinMode(can_standby, OUTPUT);
+
   // Initialize ADC
   adc.setAveraging(1);
   adc.setResolution(12);

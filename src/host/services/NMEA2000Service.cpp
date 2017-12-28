@@ -23,14 +23,10 @@
 */
 
 #include "NMEA2000Service.h"
-#include <stdio.h>
-#include <NMEA2000.h>
-#include <N2kMessages.h>
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
 #include <TimeLib.h>
 #include "common/stats/KBoxMetrics.h"
-#include "common/signalk/SKUpdate.h"
 #include "common/algo/crc.h"
 #include "common/version/KBoxVersion.h"
 #include "host/util/PersistentStorage.h"
@@ -43,19 +39,27 @@ static void handler(const tN2kMsg &msg) {
 }
 
 void NMEA2000Service::publishN2kMessage(const tN2kMsg& msg) {
-  KBoxMetrics.event(KBoxEventNMEA2000MessageReceived);
-  NMEA2000Message m(msg, now());
-  sendMessage(m);
+  if (_config.rxEnabled) {
+    KBoxMetrics.event(KBoxEventNMEA2000MessageReceived);
+    NMEA2000Message m(msg, now());
+    sendMessage(m);
+  }
 }
 
 void NMEA2000Service::setup() {
-  // Make sure the CAN transceiver is enabled.
-  pinMode(can_standby, OUTPUT);
-  digitalWrite(can_standby, 0);
+  if (_config.rxEnabled || _config.txEnabled) {
+    // Make sure the CAN transceiver is enabled.
+    digitalWrite(can_standby, 0);
 
+
+    if (_config.txEnabled) {
+      initializeNMEA2000forReceiveAndTransmit();
+    }
+    else {
+      initializeNMEA2000forReceiveOnly();
+    }
+  }
   _hub.subscribe(this);
-
-  initializeNMEA2000();
 }
 
 bool NMEA2000Service::write(const tN2kMsg& msg) {
@@ -91,23 +95,30 @@ void NMEA2000Service::loop() {
 }
 
 void NMEA2000Service::updateReceived(const SKUpdate& update) {
-  if (update.getSource().getInput() != SKSourceInputNMEA2000) {
-    SKNMEA2000Converter converter;
-    converter.convert(update, *this);
+  if (_config.txEnabled) {
+    if (update.getSource().getInput() != SKSourceInputNMEA2000) {
+      SKNMEA2000Converter converter;
+      converter.convert(update, *this);
+    }
   }
 }
 
+void NMEA2000Service::initializeNMEA2000forReceiveOnly() {
+  NMEA2000.SetMode(tNMEA2000::N2km_ListenOnly);
 
-// TODO: Remove visit and processMessage. We should not need them anymore.
-void NMEA2000Service::visit(const NMEA2000Message &m) {
-  write(m.getN2kMsg());
+  handlerContext = this;
+  NMEA2000.SetMsgHandler(handler);
+  NMEA2000.EnableForward(false);
+
+  if (NMEA2000.Open()) {
+    INFO("Initialized NMEA2000 (receive only)");
+  }
+  else {
+    ERROR("Something went wrong initializing NMEA2000 ... ");
+  }
 }
 
-void NMEA2000Service::processMessage(const KMessage &m) {
-  m.accept(*this);
-}
-
-void NMEA2000Service::initializeNMEA2000() {
+void NMEA2000Service::initializeNMEA2000forReceiveAndTransmit() {
   uint32_t serialNumber[4] = { SIM_UIDH, SIM_UIDMH, SIM_UIDML, SIM_UIDL };
 
   char serialNumberString[33];

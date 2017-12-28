@@ -37,7 +37,7 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
   // Trigger a call of visitSKElectricalBatteriesVoltage for every key with that path
   // (there can be more than one and we do not know how they are called)
   _currentOutput = &output;
-  if (_config.xdrBatteries) {
+  if (_config.xdrBattery) {
     update.accept(*this, SKPathElectricalBatteriesVoltage);
   }
 

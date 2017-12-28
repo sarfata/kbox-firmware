@@ -43,8 +43,12 @@ TEST_CASE("KBoxConfigParser") {
     // check some default values
     CHECK( config.serial1Config.baudRate == 38400 );
     CHECK( config.serial1Config.inputMode == SerialModeNMEA );
-    CHECK( config.serial1Config.outputMode == SerialModeDisabled );
+    CHECK( config.serial1Config.outputMode == SerialModeNMEA );
     CHECK( config.serial2Config.baudRate == 4800 );
+    CHECK( config.serial2Config.outputMode == SerialModeNMEA );
+    CHECK( config.nmea2000Config.txEnabled == true );
+    CHECK( config.nmea2000Config.rxEnabled == true );
+    CHECK( config.wifiConfig.enabled == true );
   }
 
   SECTION("No input") {
@@ -55,7 +59,7 @@ TEST_CASE("KBoxConfigParser") {
     // check some default values
     CHECK( config.serial1Config.baudRate == 38400 );
     CHECK( config.serial1Config.inputMode == SerialModeNMEA );
-    CHECK( config.serial1Config.outputMode == SerialModeDisabled );
+    CHECK( config.serial1Config.outputMode == SerialModeNMEA );
     CHECK( config.serial2Config.baudRate == 4800 );
   }
 
