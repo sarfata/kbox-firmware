@@ -193,14 +193,14 @@ been possible!**
 ## Changelog
 
  * 2017 12 28
-  * KBox now supports a configuration file (`kbox-config.json`) on the sdcard.
-  * KBox supports sending data to NMEA outputs
-  * Generated NMEA sentences can be configured independently for each output
-  (nmea1/nmea2/wifi)
-  * Frequency of IMU and Barometer updates can be configured
-  * KBox can be configured to only listen on NMEA2000 bus and not send anything
-  * WiFi module can be completely disabled (will save power)
-  * `tools/kbox.py` can be used to read/write files to the SDCard over USB
+   * KBox now supports a configuration file (`kbox-config.json`) on the sdcard.
+   * KBox supports sending data to NMEA outputs
+   * Generated NMEA sentences can be configured independently for each output
+     (nmea1/nmea2/wifi)
+   * Frequency of IMU and Barometer updates can be configured
+   * KBox can be configured to only listen on NMEA2000 bus and not send anything
+   * WiFi module can be completely disabled (will save power)
+   * `tools/kbox.py` can be used to read/write files to the SDCard over USB
  * 2017 12 07
    * Merge develop branch into master - Start the changelog
    * The old master branch is not in `kbox-v0`
