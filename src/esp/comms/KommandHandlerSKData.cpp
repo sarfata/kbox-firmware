@@ -32,6 +32,10 @@
 #include "KommandHandlerSKData.h"
 
 bool KommandHandlerSKData::handleKommand(KommandReader &kreader, SlipStream &replyStream) {
+  if (kreader.getKommandIdentifier() != KommandSKData) {
+    return false;
+  }
+
   const char *jsonData = kreader.readNullTerminatedString();
 
   if (jsonData) {
