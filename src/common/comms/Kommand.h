@@ -88,7 +88,34 @@ enum KommandIdentifier {
   KommandReboot = 0x33,
 
   KommandNMEASentence = 0x40,
-  KommandSKData = 0x42
+  KommandSKData = 0x42,
+
+  /**
+   * Sends information about WiFi module status.
+   *
+   * Data:
+   *  - uint16_t: status (KBoxESPState)
+   *  - uint16_t: dhcpClients
+   *  - uint16_t: tcpClients
+   *  - uint16_t: signalkClients
+   *  - uint32_t: ipAddress of KBox
+   */
+  KommandWiFiStatus = 0x50,
+
+  /**
+   * Send configuration information to the wifi module.
+   *
+   * Data:
+   *  - bool (uint8_t): accessPointEnabled
+   *  - char[]: apSsid
+   *  - char[]: apPassword
+   *  - bool (uint8_t): clientEnabled
+   *  - char[]: clientSsid
+   *  - char[]: clientPassword
+   *  - char[]: mmsi
+   *
+   */
+  KommandWiFiConfiguration = 0x51,
 };
 
 enum class KommandFileErrors {
@@ -143,6 +170,10 @@ template <uint16_t maxDataSize> class FixedSizeKommand : public Kommand, public 
       }
       _bytes[_index++] = b;
     };
+
+    void appendNullTerminatedString(const String& s) {
+      appendNullTerminatedString(s.c_str());
+    }
 
     void appendNullTerminatedString(const char *s) {
       int len = strlen(s);

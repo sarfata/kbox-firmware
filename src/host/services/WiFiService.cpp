@@ -33,7 +33,9 @@
 #include "WiFiService.h"
 
 WiFiService::WiFiService(const WiFiConfig &config, SKHub &skHub, GC &gc) :
-  Task("WiFi"), _config(config), _hub(skHub), _slip(WiFiSerial, 2048) {
+  Task("WiFi"), _config(config), _hub(skHub), _slip(WiFiSerial, 2048),
+  _wifiStatusHandler(*this), _espState(ESPState::ESPStarting)
+{
   // We will need gc at some point to be able to take screenshot
 }
 
@@ -54,7 +56,8 @@ void WiFiService::loop() {
 
     KommandReader kr = KommandReader(frame, len);
 
-    KommandHandler *handlers[] = { &_pingHandler, &_wifiLogHandler, 0 };
+    KommandHandler *handlers[] = { &_pingHandler, &_wifiLogHandler,
+                                   &_wifiStatusHandler, 0 };
     if (KommandHandler::handleKommandWithHandlers(handlers, kr, _slip)) {
       KBoxMetrics.event(KBoxEventWiFiValidKommand);
     }
@@ -118,4 +121,69 @@ bool WiFiService::write(const SKNMEASentence& sentence) {
   k.appendNullTerminatedString(s.c_str());
   _slip.writeFrame(k.getBytes(), k.getSize());
   return true;
+}
+
+void
+WiFiService::wiFiStatusUpdated(const ESPState &state, uint16_t dhcpClients,
+                               uint16_t tcpClients, uint16_t signalkClients,
+                               const IPAddress &ipAddress) {
+  _espState = state;
+  _clientAddress = ipAddress;
+  _dhcpClients = dhcpClients;
+
+  switch (state) {
+    case ESPState::ESPStarting:
+    case ESPState::ESPReady:
+      sendConfiguration();
+      break;
+
+    case ESPState::ESPConfigured:
+      _espState = state;
+      break;
+  }
+}
+
+const String WiFiService::wiFiStatus() const {
+  if (_config.client.enabled) {
+    IPAddress ip = _clientAddress;
+    if (static_cast<uint32_t >(ip) != 0) {
+      return "connected";
+    }
+    else {
+      return "connecting";
+    }
+  }
+  if (_config.accessPoint.enabled) {
+    return String(_config.accessPoint.ssid) + "(" + _dhcpClients + ")";
+  }
+  return "(disabled)";
+}
+
+const IPAddress WiFiService::ipAddress() const {
+  if (_config.client.enabled) {
+    return _clientAddress;
+  }
+  else if (_config.accessPoint.enabled) {
+    return IPAddress(192, 168, 4, 1);
+  }
+  else {
+    return IPAddress((uint32_t)0);
+  }
+}
+
+void WiFiService::sendConfiguration() {
+  DEBUG("sending wifi config");
+  FixedSizeKommand<1024> configFrame(KommandWiFiConfiguration);
+
+  configFrame.append8(_config.accessPoint.enabled);
+  configFrame.appendNullTerminatedString(_config.accessPoint.ssid);
+  configFrame.appendNullTerminatedString(_config.accessPoint.password);
+
+  configFrame.append8(_config.client.enabled);
+  configFrame.appendNullTerminatedString(_config.client.ssid);
+  configFrame.appendNullTerminatedString(_config.client.password);
+
+  configFrame.appendNullTerminatedString(_config.mmsi);
+
+  _slip.writeFrame(configFrame.getBytes(), configFrame.getSize());
 }
