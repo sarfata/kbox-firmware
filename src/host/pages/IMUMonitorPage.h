@@ -33,18 +33,19 @@
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKSubscriber.h"
 #include "services/IMUService.h"
+#include "host/config/IMUConfig.h"
 
 class IMUMonitorPage : public Page, public SKSubscriber {
 	private:
 		TextLayer *_hdgTL, *_rollTL, *_pitchTL, *_calTL;
+		IMUConfig &_config;
 		IMUService &_imuService;
 
 		int _magCalibration, _accelCalibration;
 		double _pitch, _roll, _heading;
-		uint8_t _cfHdgMinCal, _cfHeelPitchMinCal;
 
 	public:
-		IMUMonitorPage(SKHub& hub, IMUService &imuService);
+		IMUMonitorPage(IMUConfig &config, SKHub& hub, IMUService &imuService);
 		virtual void updateReceived(const SKUpdate& up);
 
 		bool processEvent(const TickEvent &te);
