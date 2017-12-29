@@ -34,11 +34,7 @@
 #include <KBoxLogging.h>
 #include "signalk/SKUnits.h"
 
-
-IMUMonitorPage::IMUMonitorPage(SKHub& hub, IMUService &imuService) : _imuService(imuService) {
-
-  _cfHdgMinCal = 2;
-  _cfHeelPitchMinCal = 2;
+IMUMonitorPage::IMUMonitorPage(IMUConfig &config, SKHub& hub, IMUService &imuService) : _config(config), _imuService(imuService) {
 
   static const int col1 = 5;
   static const int col2 = 200;
@@ -63,7 +59,6 @@ IMUMonitorPage::IMUMonitorPage(SKHub& hub, IMUService &imuService) : _imuService
   addLayer(_pitchTL);
 
   hub.subscribe(this);
-
 }
 
 bool IMUMonitorPage::processEvent(const ButtonEvent &be){
@@ -89,8 +84,9 @@ bool IMUMonitorPage::processEvent(const TickEvent &te){
   _pitchTL->setText(String( SKRadToDeg(_pitch), 1) + "°     ");
   _rollTL->setText(String( SKRadToDeg(_roll), 1) + "°     ");
 
-  // Always show Hdg from IMU-sensor, but if the value is not trusted change color to Red
-	if ((_magCalibration <= _cfHdgMinCal)||(_accelCalibration <= _cfHeelPitchMinCal)) {
+  // Always show Hdg from IMU-sensor, but if the value is not trusted (which means
+  // calibration below config setting, change color to red
+	if ((_magCalibration <= _config.calHdg)||(_accelCalibration <= _config.calHeelPitch)) {
     _hdgTL->setColor(ColorRed);
     _calTL->setColor(ColorRed);
   } else {
