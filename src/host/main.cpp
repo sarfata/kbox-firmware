@@ -99,7 +99,7 @@ void setup() {
 
   ADCService *adcService = new ADCService(skHub, KBox.getADC());
   BarometerService *baroService = new BarometerService(skHub);
-  IMUService *imuService = new IMUService(skHub);
+  IMUService *imuService = new IMUService(config.imuConfig, skHub);
 
   NMEA2000Service *n2kService = new NMEA2000Service(config.nmea2000Config,
                                                     skHub);
@@ -135,8 +135,11 @@ void setup() {
   BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
   mfd.addPage(batPage);
 
-  IMUMonitorPage *imuPage = new IMUMonitorPage(skHub, *imuService);
-  mfd.addPage(imuPage);
+  if (config.imuConfig.enabled) {
+    // At the moment the IMUMonitorPage is working with built-in sensor only
+    IMUMonitorPage *imuPage = new IMUMonitorPage(config.imuConfig, skHub, *imuService);
+    mfd.addPage(imuPage);
+  }
 
   StatsPage *statsPage = new StatsPage();
   statsPage->setSDCardTask(sdcardTask);
