@@ -79,6 +79,16 @@ class KommandReader {
     const char *readNullTerminatedString();
 
     /**
+     * Gets a pointer to the data.
+     */
+    const uint8_t* dataBuffer() const;
+
+    /**
+     * Get the current value of the reading index.
+     */
+    size_t dataIndex() const;
+
+    /**
      * Start reading from the beginning of the packet again.
      * (The first byte after the KommandIdentifier header.
      */

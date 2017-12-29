@@ -33,8 +33,3 @@ std::ostream& operator << ( std::ostream& os, ::String const& value );
 
 #include "catch.hpp"
 
-#include <stdarg.h>
-#define DEBUG(...) debug(__FILE__, __LINE__, __VA_ARGS__)
-
-#include <WString.h>
-

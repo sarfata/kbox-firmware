@@ -23,6 +23,7 @@
 */
 
 #include <i2c_t3.h>
+#include <KBoxLogging.h>
 #include "KBoxHardware.h"
 
 KBoxHardware KBox;
@@ -55,6 +56,10 @@ void KBoxHardware::setup() {
   NMEA1_SERIAL.begin(38400);
   NMEA2_SERIAL.begin(4800);
 
+  // Initialize can transceiver pins
+  digitalWrite(can_standby, 1);
+  pinMode(can_standby, OUTPUT);
+
   // Initialize ADC
   adc.setAveraging(1);
   adc.setResolution(12);
@@ -79,6 +84,8 @@ void KBoxHardware::setup() {
   display.setRotation(display_rotation);
 
   setBacklight(BacklightIntensityMax);
+
+  _sdCardSuccess = sdCardInit();
 }
 
 void KBoxHardware::setBacklight(BacklightIntensity intensity) {
@@ -137,4 +144,63 @@ void KBoxHardware::espRebootInProgram() {
   // Boot the ESP module
   digitalWrite(wifi_enable, 1);
   digitalWrite(wifi_rst, 1);
+}
+
+bool KBoxHardware::sdCardInit() {
+  //TODO: check if sdcard_cs is working with SdFatSdio
+  #if defined(__MK66FX1M0__)
+    // SDIO support for Builtin SD-Card in Teensy 3.6
+    if (!_sd.begin()){
+  #else
+    // KBox, Teensy 3.2
+    if (!_sd.begin(sdcard_cs)){
+  #endif
+    if (_sd.card()->errorCode()) {
+      DEBUG("Something went wrong ... SD card errorCode: %i errorData: %i", _sd.card()->errorCode(),
+            _sd.card()->errorData());
+      return false;
+    }
+
+    if (_sd.vol()->fatType() == 0) {
+      DEBUG("Can't find a valid FAT16/FAT32 partition. Try reformatting the card.");
+      return false;
+    }
+
+    if (!_sd.vwd()->isOpen()) {
+      DEBUG("Can't open root directory. Try reformatting the card.");
+      return false;
+    }
+
+    DEBUG("Unknown error while initializing card.");
+    return false;
+  }
+  else {
+    DEBUG("SdCard successfully initialized.");
+  }
+
+  uint32_t size = _sd.card()->cardSize();
+  if (size == 0) {
+    DEBUG("Can't figure out card size :(");
+    return false;
+  }
+  uint32_t sizeMB = 0.000512 * size + 0.5;
+  DEBUG("Card size: %luMB. Volume is FAT%i Cluster size: %i bytes", sizeMB, _sd.vol()->fatType(), 512 * _sd.vol()->blocksPerCluster());
+
+  if ((sizeMB > 1100 && _sd.vol()->blocksPerCluster() < 64)
+      || (sizeMB < 2200 && _sd.vol()->fatType() == 32)) {
+    DEBUG("This card should be reformatted for best performance.");
+    DEBUG("Use a cluster size of 32 KB for cards larger than 1 GB.");
+    DEBUG("Only cards larger than 2 GB should be formatted FAT32.");
+  }
+
+  return true;
+}
+
+void KBoxHardware::rebootKBox() {
+  // https://forum.pjrc.com/threads/24304-_reboot_Teensyduino()
+  // -vs-_restart_Teensyduino()
+  uint32_t* const cpuRestartAddress = (uint32_t*)0xE000ED0C;
+  static const uint32_t cpuRestartValue = 0x5FA0004;
+
+  *cpuRestartAddress = cpuRestartValue;
 }

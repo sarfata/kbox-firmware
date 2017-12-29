@@ -29,7 +29,12 @@ KommandReader::KommandReader(const uint8_t *buffer, size_t size) : buffer(buffer
 }
 
 uint16_t KommandReader::getKommandIdentifier() const {
-  return buffer[0] + (buffer[1] << 8);
+  if (size >= 2) {
+    return buffer[0] + (buffer[1] << 8);
+  }
+  else {
+    return 0;
+  }
 }
 
 uint8_t KommandReader::read8() {
@@ -44,7 +49,7 @@ uint16_t KommandReader::read16() {
     return 0;
   }
   uint16_t w = buffer[index] + (buffer[index + 1] << 8);
-  buffer += 2;
+  index += 2;
   return w;
 }
 
@@ -60,6 +65,10 @@ uint32_t KommandReader::read32() {
 const char *KommandReader::readNullTerminatedString() {
   char *s = (char*)buffer + index;
 
+  if (index >= size) {
+    return 0;
+  }
+
   // Make sure there is a 0 termination before end of buffer
   // At the same time, advance index to next element in buffer.
   while (index < size && buffer[index] != 0) {
@@ -67,7 +76,7 @@ const char *KommandReader::readNullTerminatedString() {
   }
 
   // Check that the string is properly null-terminated
-  if (buffer[index] != 0) {
+  if (index == size || buffer[index] != 0) {
     return 0;
   }
 
@@ -88,4 +97,12 @@ size_t KommandReader::dataSize() const {
   else {
     return 0;
   }
+}
+
+const uint8_t* KommandReader::dataBuffer() const {
+  return buffer + 2;
+}
+
+size_t KommandReader::dataIndex() const {
+  return index - 2;
 }

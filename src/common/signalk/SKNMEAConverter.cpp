@@ -37,9 +37,11 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
   // Trigger a call of visitSKElectricalBatteriesVoltage for every key with that path
   // (there can be more than one and we do not know how they are called)
   _currentOutput = &output;
-  update.accept(*this, SKPathElectricalBatteriesVoltage);
+  if (_config.xdrBattery) {
+    update.accept(*this, SKPathElectricalBatteriesVoltage);
+  }
 
-  if (update.hasEnvironmentOutsidePressure()) {
+  if (_config.xdrPressure && update.hasEnvironmentOutsidePressure()) {
     NMEASentenceBuilder sb("II", "XDR", 4);
     sb.setField(1, "P");
     sb.setField(2, update.getEnvironmentOutsidePressure(), 5);
@@ -48,7 +50,7 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
     output.write(sb.toNMEA());
   }
 
-  if (update.hasNavigationAttitude()) {
+  if (_config.xdrAttitude && update.hasNavigationAttitude()) {
     NMEASentenceBuilder sb( "II", "XDR", 8);
     sb.setField(1, "A");
     sb.setField(2, SKRadToDeg(update.getNavigationAttitude().pitch), 1);
@@ -61,7 +63,7 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
     output.write(sb.toNMEA());
   }
 
-  if (update.hasNavigationHeadingMagnetic()) {
+  if (_config.hdm && update.hasNavigationHeadingMagnetic()) {
     NMEASentenceBuilder sb("II", "HDM", 2);
     sb.setField(1, SKRadToDeg(update.getNavigationHeadingMagnetic()), 1);
     sb.setField(2, "M");
@@ -82,7 +84,7 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
   //      3) Port rudder sensor
   //      4) Status, A means data is valid
   // *********************************************** */
-  if (update.hasSteeringRudderAngle()) {
+  if (_config.rsa && update.hasSteeringRudderAngle()) {
     NMEASentenceBuilder sb("II", "RSA", 4);
     sb.setField(1, SKRadToDeg(SKNormalizeAngle(update.getSteeringRudderAngle())),1 );
     sb.setField(2, "A");
@@ -91,12 +93,11 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
     output.write(sb.toNMEA());
   }
 
-
-  if (update.hasEnvironmentWindAngleApparent() && update.hasEnvironmentWindSpeedApparent()) {
+  if (_config.mwv && (update.hasEnvironmentWindAngleApparent() && update.hasEnvironmentWindSpeedApparent())) {
     generateMWV(output, update.getEnvironmentWindAngleApparent(), update.getEnvironmentWindSpeedApparent(), true);
   }
 
-  if (update.hasEnvironmentWindAngleTrueWater() && update.hasEnvironmentWindSpeedTrue()) {
+  if (_config.mwv && (update.hasEnvironmentWindAngleTrueWater() && update.hasEnvironmentWindSpeedTrue())) {
     generateMWV(output, update.getEnvironmentWindAngleTrueWater(), update.getEnvironmentWindSpeedTrue(), false);
   }
 
