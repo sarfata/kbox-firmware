@@ -32,17 +32,20 @@ uint8_t neopixel_pin = 4;
 Adafruit_NeoPixel rgb = Adafruit_NeoPixel(1, neopixel_pin, NEO_GRB + NEO_KHZ800);
 NetServer server(10110);
 
-static const uint32_t connectedColor = rgb.Color(0x00, 0x40, 0x00);
-static const uint32_t readyColor = rgb.Color(0x00, 0x00, 0x40);
+static const uint32_t startingColor = rgb.Color(0x30, 0x10, 0x00);
+static const uint32_t readyColor = rgb.Color(0x20, 0x20, 0x00);
+static const uint32_t connectedColor = rgb.Color(0x00, 0x00, 0x40);
+static const uint32_t clientsConnectedColor = rgb.Color(0x00, 0x40, 0x00);
 
-#include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <ESPAsyncTCP.h>
+#include <elapsedMillis.h>
 #include "comms/SlipStream.h"
 #include "comms/KommandHandler.h"
 #include "comms/KommandHandlerPing.h"
 #include "comms/KommandHandlerNMEA.h"
 #include "comms/KommandHandlerSKData.h"
+#include "comms/KommandHandlerWiFiConfiguration.h"
+#include "common/comms/ESPState.h"
 #include "stats/KBoxMetrics.h"
 #include "net/KBoxWebServer.h"
 
@@ -53,28 +56,46 @@ KommandHandlerPing pingHandler;
 KommandHandlerNMEA nmeaHandler(server);
 KBoxWebServer webServer;
 KommandHandlerSKData skDataHandler(webServer);
+KommandHandlerWiFiConfiguration wiFiConfigurationHandler;
+ESPState espState;
+WiFiEventHandler gotIPHandler;
+WiFiEventHandler dhcpTimeoutHandler;
+
+static void processSlipMessages();
+static void reportStatus(ESPState state, uint16_t dhcpClients = 0,
+                         uint16_t tcpClients = 0, uint16_t signalkClients = 0,
+                         uint32_t ipAddress = 0);
+static void configurationCallback(const WiFiConfiguration&);
+
+static void gotIPCallback(const WiFiEventStationModeGotIP&);
+static void dhcpTimeoutCallback(void);
 
 void setup() {
   Serial1.begin(115200);
   KBoxLogging.setLogger(new ESPDebugLogger(slip));
 
   rgb.begin();
-  rgb.setPixelColor(0, 0, 0, 0xff);
+  rgb.setPixelColor(0, startingColor);
   rgb.show();
-
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP("KBox");
 
   Serial.begin(115200);
   // We do want a timeout to make sure write() does not return
   // without having written everything.
+  // FIXME: We should not use this!
   Serial.setTimeout(1000);
+
   // Turn on to get ESP debug messages (they will be intermixed with frames to
   // teensy)
   Serial.setDebugOutput(false);
 
+  wiFiConfigurationHandler.setCallback(configurationCallback);
+  gotIPHandler = WiFi.onStationModeGotIP(gotIPCallback);
+  dhcpTimeoutHandler = WiFi.onStationModeDHCPTimeout(dhcpTimeoutCallback);
+
   // Configure our webserver
   webServer.setup();
+
+  espState = ESPState::ESPStarting;
 
   // This delay is important so that KBox can detect when firmware
   // upload are done and restart normal operation.
@@ -83,25 +104,66 @@ void setup() {
   INFO("ESP8266 running.");
 }
 
-uint8_t buffer[1024];
-size_t rxIndex = 0;
-
 void loop() {
-  static unsigned long int nextPrint = 0;
-  if (millis() > nextPrint) {
-    DEBUG("Still running ... %i connected clients - %i heap - IP: %s", server.clientsCount(), ESP.getFreeHeap(), WiFi.localIP().toString().c_str());
-    nextPrint = millis() + 500;
-  }
+  static elapsedMillis lastMessageTimer = 0;
 
+  processSlipMessages();
   server.loop();
 
+  switch (espState) {
+    case ESPState::ESPStarting:
+      espState = ESPState::ESPReady;
+      reportStatus(espState);
+      lastMessageTimer = 0;
+      rgb.setPixelColor(0, startingColor);
+      rgb.show();
+
+      break;
+
+    case ESPState::ESPReady:
+      // We should receive our configuration. If we don't let's re-send the
+      // ready message.
+      if (lastMessageTimer > 500) {
+        reportStatus(espState);
+        lastMessageTimer = 0;
+      }
+      rgb.setPixelColor(0, readyColor);
+      break;
+
+    case ESPState::ESPConfigured:
+      // We are connected. Report status every 500ms.
+      if (lastMessageTimer > 500) {
+        DEBUG("Still running ... %i connected clients - %i heap", server.clientsCount(), ESP.getFreeHeap());
+        reportStatus(espState,
+                     WiFi.softAPgetStationNum(),
+                     server.clientsCount(),
+                     0, // FIXME: Signalk Clients
+                     static_cast<uint32_t>(WiFi.localIP()) );
+        // TODO: Report other counters + and IP Address
+        lastMessageTimer = 0;
+      }
+
+      if (server.clientsCount() > 0) {
+        rgb.setPixelColor(0, clientsConnectedColor);
+      }
+      else {
+        rgb.setPixelColor(0, connectedColor);
+      }
+      rgb.show();
+      break;
+  }
+}
+
+static void processSlipMessages() {
   while (slip.available()) {
     uint8_t *frame;
     size_t len = slip.peekFrame(&frame);
 
     KommandReader kr = KommandReader(frame, len);
 
-    KommandHandler *handlers[] = { &pingHandler, &nmeaHandler, &skDataHandler, 0 };
+    KommandHandler *handlers[] = { &pingHandler, &nmeaHandler,
+                                   &skDataHandler, &wiFiConfigurationHandler,
+                                   nullptr };
     if (KommandHandler::handleKommandWithHandlers(handlers, kr, slip)) {
       KBoxMetrics.event(KBoxEventESPValidKommand);
     }
@@ -110,13 +172,53 @@ void loop() {
     }
     slip.readFrame(0, 0);
   }
-
-  if (server.clientsCount() > 0) {
-    rgb.setPixelColor(0, connectedColor);
-  }
-  else {
-    rgb.setPixelColor(0, readyColor);
-  }
-  rgb.show();
 }
 
+static void configurationCallback(const WiFiConfiguration& config) {
+  if (config.clientEnabled) {
+    if (config.clientPassword.length() == 0) {
+      WiFi.begin(config.clientSSID.c_str());
+    }
+    else {
+      WiFi.begin(config.clientSSID.c_str(), config.clientPassword.c_str());
+    }
+  }
+  else {
+    WiFi.enableSTA(false);
+  }
+
+  if (config.accessPointEnabled) {
+    if (config.accessPointPassword.length() == 0) {
+      WiFi.softAP(config.accessPointSSID.c_str());
+    }
+    else {
+      WiFi.softAP(config.accessPointSSID.c_str(),
+                  config.accessPointPassword.c_str());
+    }
+  }
+  else {
+    WiFi.enableAP(false);
+  }
+  espState = ESPState::ESPConfigured;
+}
+
+static void gotIPCallback(const WiFiEventStationModeGotIP&) {
+  DEBUG("DHCP Got IP Address!");
+}
+
+static void dhcpTimeoutCallback(void) {
+  DEBUG("DHCP Timeout");
+}
+
+static void reportStatus(ESPState state, uint16_t dhcpClients,
+                         uint16_t tcpClients, uint16_t signalkClients,
+                         uint32_t ipAddress) {
+  FixedSizeKommand<12> kommand(KommandWiFiStatus);
+
+  kommand.append16(static_cast<uint16_t>(state));
+  kommand.append16(dhcpClients);
+  kommand.append16(tcpClients);
+  kommand.append16(signalkClients);
+  kommand.append32(ipAddress);
+  slip.writeFrame(kommand.getBytes(), kommand.getSize());
+}
