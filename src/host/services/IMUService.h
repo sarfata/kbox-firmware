@@ -25,20 +25,20 @@
 #include <Adafruit_BNO055.h>
 #include "common/os/Task.h"
 #include "common/signalk/SKHub.h"
-#include "host/config/SerialConfig.h"
+#include "host/config/IMUConfig.h"
 
 class IMUService : public Task {
   private:
+    IMUConfig &_config;
     SKHub &_skHub;
     Adafruit_BNO055 bno055;
     uint8_t _sysCalib, _gyroCalib, _accelCalib, _magCalib;
     double _roll, _pitch, _heading;
     double _offsetRoll, _offsetPitch;
     imu::Vector<3> eulerAngles;
-    SerialConfig &_config;
 
   public:
-    IMUService(SKHub& skHub) : Task("IMU"), _skHub(skHub) {};
+    IMUService(IMUConfig &config, SKHub& skHub) : Task("IMU"),  _config(config), _skHub(skHub) {};
     void setup();
     void loop();
 
