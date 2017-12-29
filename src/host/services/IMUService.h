@@ -25,6 +25,7 @@
 #include <Adafruit_BNO055.h>
 #include "common/os/Task.h"
 #include "common/signalk/SKHub.h"
+#include "host/config/SerialConfig.h"
 
 class IMUService : public Task {
   private:
@@ -34,9 +35,7 @@ class IMUService : public Task {
     double _roll, _pitch, _heading;
     double _offsetRoll, _offsetPitch;
     imu::Vector<3> eulerAngles;
-
-    // TODO: change to config setting
-    uint8_t _cfHdgMinCal, _cfHeelPitchMinCal;
+    SerialConfig &_config;
 
   public:
     IMUService(SKHub& skHub) : Task("IMU"), _skHub(skHub) {};
