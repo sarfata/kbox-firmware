@@ -32,7 +32,17 @@
 
 #include "common/signalk/SKNMEAConverterConfig.h"
 
+struct WiFiNetworkConfig {
+  bool enabled;
+  String ssid;
+  String password;
+};
+
 struct WiFiConfig {
   bool enabled;
   SKNMEAConverterConfig nmeaConverter;
+
+  String mmsi;
+  WiFiNetworkConfig client;
+  WiFiNetworkConfig accessPoint;
 };

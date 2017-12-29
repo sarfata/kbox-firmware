@@ -19,6 +19,15 @@
       "hdm": true,
       "mwv": true,
       "rsa": true
+    },
+    "accessPoint": {
+      "enabled": true,
+      "ssid": "KBox"
+    },
+    "client": {
+      "enabled": false,
+      "ssid": "your-boat-network",
+      "password": "super-secret"
     }
   },
   "serial1": {

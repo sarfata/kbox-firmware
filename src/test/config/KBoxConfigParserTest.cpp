@@ -64,6 +64,12 @@ TEST_CASE("KBoxConfigParser") {
 
     CHECK( config.imuConfig.enableHdg );
     CHECK( config.imuConfig.enableHeelPitch );
+
+    CHECK( config.wifiConfig.accessPoint.enabled == true );
+    CHECK( config.wifiConfig.accessPoint.ssid == "KBox" );
+    CHECK( config.wifiConfig.accessPoint.password == "" );
+
+    CHECK( config.wifiConfig.client.enabled == false );
   }
 
   SECTION("basic config") {
@@ -101,5 +107,21 @@ TEST_CASE("KBoxConfigParser") {
 
     CHECK( nmeaConfig.xdrPressure == true );
     CHECK( nmeaConfig.mwv == false );
+  }
+
+  SECTION("WiFi config") {
+    const char *jsonConfig = "{ 'client': "
+      "   { 'enabled': true, ssid: 'network', 'password': 'secret' }"
+      "}";
+    JsonObject &root = jsonBuffer.parseObject(jsonConfig);
+
+    CHECK( root.success() );
+
+    WiFiConfig wiFiConfig;
+    kboxConfigParser.parseWiFiConfig(root, wiFiConfig);
+
+    CHECK( wiFiConfig.client.enabled == true );
+    CHECK( wiFiConfig.client.ssid == "network" );
+    CHECK( wiFiConfig.client.password == "secret" );
   }
 }
