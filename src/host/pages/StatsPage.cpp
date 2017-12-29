@@ -25,6 +25,8 @@
 #include <malloc.h>
 #include "StatsPage.h"
 #include "stats/KBoxMetrics.h"
+#include "host/services/SDCardTask.h"
+#include "host/services/WiFiService.h"
 
 StatsPage::StatsPage() {
   loadView();
@@ -94,6 +96,16 @@ void StatsPage::loadView() {
   canTxErrors = new TextLayer(Point(col4, row3), Size(colWidth, rowHeight), "0");
   addLayer(canRx); addLayer(canTx); addLayer(canTxErrors);
 
+  addLayer(new TextLayer(Point(col3, row5), Size(colWidth, rowHeight),
+                         "WiFi:"));
+  addLayer(new TextLayer(Point(col3, row6), Size(colWidth, rowHeight), "IP:"));
+  wifiStatus = new TextLayer(Point(col4 - 40, row5), Size(colWidth, rowHeight),
+                             "xxx");
+  wifiIP = new TextLayer(Point(col4 - 40, row6), Size(colWidth, rowHeight), "x"
+    ".x.x"
+    ".x");
+  addLayer(wifiStatus); addLayer(wifiIP);
+
   addLayer(new TextLayer(Point(col1, row9), Size(colWidth, rowHeight), "Avg Loop:"));
   addLayer(new TextLayer(Point(col1, row10), Size(colWidth, rowHeight), "Used RAM:"));
   addLayer(new TextLayer(Point(col1, row11), Size(colWidth, rowHeight), "Free RAM:"));
@@ -107,8 +119,8 @@ void StatsPage::loadView() {
   freeRam = new TextLayer(Point(col2, row11), Size(colWidth, rowHeight), "0");
   addLayer(usedRam); addLayer(freeRam); addLayer(avgLoopTime);
 
-  // FIXME: dirty hack below
-  logName = new TextLayer(Point(col4 - 10, row9), Size(colWidth, rowHeight), "");
+  logName = new TextLayer(Point(col4 - 40, row9), Size(colWidth, rowHeight),
+                          "");
   logSize = new TextLayer(Point(col4, row10), Size(colWidth, rowHeight), "");
   freeSpace = new TextLayer(Point(col4, row11), Size(colWidth, rowHeight), "");
   addLayer(logName); addLayer(logSize); addLayer(freeSpace);
@@ -148,6 +160,15 @@ bool StatsPage::processEvent(const TickEvent &e) {
   canRx->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA2000MessageReceived)));
   canTx->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA2000MessageSent)));
   canTxErrors->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA2000MessageSendError)));
+
+  if (wifiService) {
+    wifiStatus->setText(wifiService->wiFiStatus());
+
+    const IPAddress& ip = wifiService->ipAddress();
+    char str[20];
+    snprintf(str, sizeof(str), "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+    wifiIP->setText(String(str));
+  }
 
   freeRam->setText(String(getFreeRam()));
   usedRam->setText(String(getUsedRam()));

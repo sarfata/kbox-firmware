@@ -111,6 +111,7 @@ void setup() {
   reader2->connectTo(*wifi);
 
   SDCardTask *sdcardTask = new SDCardTask();
+
   reader1->connectTo(*sdcardTask);
   reader2->connectTo(*sdcardTask);
   n2kService->connectTo(*sdcardTask);
@@ -143,6 +144,7 @@ void setup() {
 
   StatsPage *statsPage = new StatsPage();
   statsPage->setSDCardTask(sdcardTask);
+  statsPage->setWiFiService(wifi);
 
   mfd.addPage(statsPage);
 

@@ -27,17 +27,20 @@
 #include "ui/Page.h"
 #include "ui/TextLayer.h"
 
-#include "../services/SDCardTask.h"
+class SDCardTask;
+class WiFiService;
 
 class StatsPage : public Page {
   private:
     TextLayer *nmea1Rx, *nmea1Errors, *nmea2Rx, *nmea2Errors;
     TextLayer *nmea1Tx, *nmea1TxErrors, *nmea2Tx, *nmea2TxErrors;
     TextLayer *canRx, *canTx, *canTxErrors;
+    TextLayer *wifiStatus, *wifiIP;
     TextLayer *usedRam, *freeRam, *avgLoopTime;
     TextLayer *logName, *logSize, *freeSpace;
 
     const SDCardTask *sdcardTask = 0;
+    const WiFiService *wifiService = 0;
 
     void loadView();
     String formatDiskSize(uint64_t intSize);
@@ -49,4 +52,8 @@ class StatsPage : public Page {
     void setSDCardTask(const SDCardTask *t) {
       sdcardTask = t;
     };
+
+    void setWiFiService(const WiFiService *s) {
+      wifiService = s;
+    }
 };
