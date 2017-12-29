@@ -31,10 +31,8 @@
 void IMUService::setup() {
   _offsetRoll  = 0.0;
   _offsetPitch = 0.0;
-  _cfHdgMinCal = 2;
-  _cfHeelPitchMinCal = 2;
 
-  // until config is made, declare default mounting position KBox here
+  // until config for positioning is made, declare default mounting position KBox here
   uint8_t axisConfig = 0b00001001;
   uint8_t signConfig = 0b00000000;
 
@@ -66,7 +64,7 @@ void IMUService::loop() {
   _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
 
   // update NavigationHeadingMagnetic if quality (= calibration value) is ok
-  if (_magCalib >= _cfHdgMinCal) {
+  if (_magCalib >= _config.imu) {
     update.setNavigationHeadingMagnetic(_heading);
     _skHub.publish(update);
   }
