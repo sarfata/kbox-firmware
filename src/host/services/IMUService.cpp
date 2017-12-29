@@ -64,12 +64,12 @@ void IMUService::loop() {
   _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
 
   // update NavigationHeadingMagnetic if quality (= calibration value) is ok
-  if (_magCalib >= _config.imu) {
+  if (_magCalib >= _config.calHdg) {
     update.setNavigationHeadingMagnetic(_heading);
     _skHub.publish(update);
   }
   // update NavigationAttitude if quality (= calibration value) is ok
-	if (_accelCalib >= _cfHeelPitchMinCal && _gyroCalib >= _cfHeelPitchMinCal) {
+	if (_accelCalib >= _config.calHeelPitch && _gyroCalib >= _config.calHeelPitch) {
     update.setNavigationAttitude(SKTypeAttitude(/* roll */ _roll + _offsetRoll, /* pitch */ _pitch + _offsetPitch, /* yaw */ 0));
     //DEBUG("Heel = %.3f | Pitch = %.3f | Heading = %.3f", SKRadToDeg( _roll + _offsetRoll), SKRadToDeg( _pitch + _offsetPitch), SKRadToDeg(_heading));
     _skHub.publish(update);
