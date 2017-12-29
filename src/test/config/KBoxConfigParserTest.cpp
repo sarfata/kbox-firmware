@@ -61,6 +61,11 @@ TEST_CASE("KBoxConfigParser") {
     CHECK( config.serial1Config.inputMode == SerialModeNMEA );
     CHECK( config.serial1Config.outputMode == SerialModeNMEA );
     CHECK( config.serial2Config.baudRate == 4800 );
+
+    CHECK( config.imuConfig.enableHdg );
+    CHECK( config.imuConfig.enableHeelPitch );
+    CHECK( config.imuConfig.calHdg == 3 );
+    CHECK( config.imuConfig.calHeelPitch == 2 );
   }
 
   SECTION("basic config") {

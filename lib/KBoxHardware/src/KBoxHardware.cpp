@@ -147,7 +147,6 @@ void KBoxHardware::espRebootInProgram() {
 }
 
 bool KBoxHardware::sdCardInit() {
-  //TODO: check if sdcard_cs is working with SdFatSdio
   #if defined(__MK66FX1M0__)
     // SDIO support for Builtin SD-Card in Teensy 3.6
     if (!_sd.begin()){

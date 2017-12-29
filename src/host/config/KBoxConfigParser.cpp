@@ -54,6 +54,11 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
 
   config.imuConfig.enabled = true;
   config.imuConfig.frequency = 20;
+  config.imuConfig.enabled = true;           // enable internal IMU sensor
+  config.imuConfig.enableHdg = true;         // true if values taken from internal sensor
+  config.imuConfig.enableHeelPitch = true;   // true if values taken from internal sensor
+  config.imuConfig.calHdg = 3;               // hdg valid, if calibration value greater equal
+  config.imuConfig.calHeelPitch = 2;         // heel (roll) & pitch valid, if calibration value greater equal
 
   config.barometerConfig.enabled = true;
   config.barometerConfig.frequency = 1;
@@ -75,6 +80,10 @@ void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &confi
 void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &config) {
   READ_BOOL_VALUE(enabled);
   READ_INT_VALUE_WRANGE(frequency, 1, 100);
+  READ_BOOL_VALUE(enableHdg);
+  READ_BOOL_VALUE(enableHeelPitch);
+  READ_INT_VALUE_WRANGE(calHdg, 0, 3);
+  READ_INT_VALUE_WRANGE(calHeelPitch, 0, 3);
 }
 
 void KBoxConfigParser::parseBarometerConfig(const JsonObject &json, BarometerConfig &config){
