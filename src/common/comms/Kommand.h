@@ -98,7 +98,7 @@ enum KommandIdentifier {
    *  - uint16_t: dhcpClients
    *  - uint16_t: tcpClients
    *  - uint16_t: signalkClients
-   *  - uint32_t: ipAddress of KBox
+   *  - uint32_t: ipAddress on clientNetwork
    */
   KommandWiFiStatus = 0x50,
 
@@ -176,19 +176,21 @@ template <uint16_t maxDataSize> class FixedSizeKommand : public Kommand, public 
     }
 
     void appendNullTerminatedString(const char *s) {
-      int len = strlen(s);
+      if (s != nullptr) {
+        int len = strlen(s);
 
-      // We want to have space for the string content + the terminating \0
-      if (len > (int)(bufferSize - _index - 1)) {
-        len = bufferSize - _index - 1;
+        // We want to have space for the string content + the terminating \0
+        if (len > (int)(bufferSize - _index - 1)) {
+          len = bufferSize - _index - 1;
+        }
+        if (len <= 0) {
+          return;
+        }
+
+        strncpy((char*)_bytes + _index, s, len);
+        _index += len;
+
       }
-      if (len <= 0) {
-        return;
-      }
-
-      strncpy((char*)_bytes + _index, s, len);
-      _index += len;
-
       // Always add 0 because strncpy(a,b, strlen(s)) will not!
       append8((uint8_t) 0);
     };

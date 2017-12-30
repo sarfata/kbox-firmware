@@ -143,7 +143,7 @@ WiFiService::wiFiStatusUpdated(const ESPState &state, uint16_t dhcpClients,
   }
 }
 
-const String WiFiService::wiFiStatus() const {
+const String WiFiService::clientInterfaceStatus() const {
   if (_config.client.enabled) {
     IPAddress ip = _clientAddress;
     if (static_cast<uint32_t >(ip) != 0) {
@@ -153,17 +153,27 @@ const String WiFiService::wiFiStatus() const {
       return "connecting";
     }
   }
+  return "(disabled)";
+}
+
+const IPAddress WiFiService::clientInterfaceIP() const {
+  if (_config.client.enabled) {
+    return _clientAddress;
+  }
+  else {
+    return IPAddress((uint32_t)0);
+  }
+}
+
+const String WiFiService::accessPointInterfaceStatus() const {
   if (_config.accessPoint.enabled) {
     return String(_config.accessPoint.ssid) + "(" + _dhcpClients + ")";
   }
   return "(disabled)";
 }
 
-const IPAddress WiFiService::ipAddress() const {
-  if (_config.client.enabled) {
-    return _clientAddress;
-  }
-  else if (_config.accessPoint.enabled) {
+const IPAddress WiFiService::accessPointInterfaceIP() const {
+  if (_config.accessPoint.enabled) {
     return IPAddress(192, 168, 4, 1);
   }
   else {
@@ -172,7 +182,6 @@ const IPAddress WiFiService::ipAddress() const {
 }
 
 void WiFiService::sendConfiguration() {
-  DEBUG("sending wifi config");
   FixedSizeKommand<1024> configFrame(KommandWiFiConfiguration);
 
   configFrame.append8(_config.accessPoint.enabled);
@@ -183,7 +192,7 @@ void WiFiService::sendConfiguration() {
   configFrame.appendNullTerminatedString(_config.client.ssid);
   configFrame.appendNullTerminatedString(_config.client.password);
 
-  configFrame.appendNullTerminatedString(_config.mmsi);
+  configFrame.appendNullTerminatedString(_config.vesselMRN);
 
   _slip.writeFrame(configFrame.getBytes(), configFrame.getSize());
 }

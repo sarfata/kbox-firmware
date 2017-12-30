@@ -23,6 +23,7 @@
 */
 
 #include <malloc.h>
+#include <util/PrintableIPAddress.h>
 #include "StatsPage.h"
 #include "stats/KBoxMetrics.h"
 #include "host/services/SDCardTask.h"
@@ -96,15 +97,24 @@ void StatsPage::loadView() {
   canTxErrors = new TextLayer(Point(col4, row3), Size(colWidth, rowHeight), "0");
   addLayer(canRx); addLayer(canTx); addLayer(canTxErrors);
 
+  // WiFi AP
   addLayer(new TextLayer(Point(col3, row5), Size(colWidth, rowHeight),
-                         "WiFi:"));
+                         "WiFi-AP:"));
   addLayer(new TextLayer(Point(col3, row6), Size(colWidth, rowHeight), "IP:"));
-  wifiStatus = new TextLayer(Point(col4 - 40, row5), Size(colWidth, rowHeight),
-                             "xxx");
-  wifiIP = new TextLayer(Point(col4 - 40, row6), Size(colWidth, rowHeight), "x"
-    ".x.x"
-    ".x");
-  addLayer(wifiStatus); addLayer(wifiIP);
+  wifiAPStatus = new TextLayer(Point(col4 - 20, row5), Size(colWidth,
+                                                            rowHeight), "");
+  wifiAPIP = new TextLayer(Point(col4 - 40, row6), Size(colWidth, rowHeight), "");
+  addLayer(wifiAPStatus); addLayer(wifiAPIP);
+
+  // WiFi Client
+  addLayer(new TextLayer(Point(col3, row7), Size(colWidth, rowHeight),
+                         "WiFi-C:"));
+  addLayer(new TextLayer(Point(col3, row8), Size(colWidth, rowHeight), "IP:"));
+  wifiClientStatus = new TextLayer(Point(col4 - 20, row7), Size(colWidth,
+                                                            rowHeight), "");
+  wifiClientIP = new TextLayer(Point(col4 - 40, row8), Size(colWidth,
+                                                           rowHeight), "");
+  addLayer(wifiClientStatus); addLayer(wifiClientIP);
 
   addLayer(new TextLayer(Point(col1, row9), Size(colWidth, rowHeight), "Avg Loop:"));
   addLayer(new TextLayer(Point(col1, row10), Size(colWidth, rowHeight), "Used RAM:"));
@@ -162,12 +172,14 @@ bool StatsPage::processEvent(const TickEvent &e) {
   canTxErrors->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA2000MessageSendError)));
 
   if (wifiService) {
-    wifiStatus->setText(wifiService->wiFiStatus());
+    wifiAPStatus->setText(wifiService->accessPointInterfaceStatus());
+    wifiClientStatus->setText(wifiService->clientInterfaceStatus());
 
-    const IPAddress& ip = wifiService->ipAddress();
-    char str[20];
-    snprintf(str, sizeof(str), "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-    wifiIP->setText(String(str));
+    auto clientIP = PrintableIPAddress(wifiService->clientInterfaceIP());
+    wifiClientIP->setText(clientIP.toString());
+
+    auto apIP = PrintableIPAddress(wifiService->accessPointInterfaceIP());
+    wifiAPIP->setText(apIP.toString());
   }
 
   freeRam->setText(String(getFreeRam()));

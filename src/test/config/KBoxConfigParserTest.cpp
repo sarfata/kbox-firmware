@@ -49,6 +49,10 @@ TEST_CASE("KBoxConfigParser") {
     CHECK( config.nmea2000Config.txEnabled == true );
     CHECK( config.nmea2000Config.rxEnabled == true );
     CHECK( config.wifiConfig.enabled == true );
+    // urn:mrn:signalk:uuid:c0d79334-4e25-4245-8892-54e8ccc8021d
+    // urn:mrn:imo:vesselMRN:230099999
+    CHECK( config.wifiConfig.vesselMRN != "" );
+    CHECK( config.wifiConfig.vesselMRN.startsWith("urn:mrn:signalk:uuid:") );
   }
 
   SECTION("No input") {
@@ -123,5 +127,24 @@ TEST_CASE("KBoxConfigParser") {
     CHECK( wiFiConfig.client.enabled == true );
     CHECK( wiFiConfig.client.ssid == "network" );
     CHECK( wiFiConfig.client.password == "secret" );
+  }
+
+  SECTION("WiFi config - with no data") {
+    const char *jsonConfig = "{ 'client': "
+      "   { 'enabled': false }"
+      "}";
+    JsonObject &root = jsonBuffer.parseObject(jsonConfig);
+
+    CHECK( root.success() );
+
+    WiFiConfig wiFiConfig;
+    wiFiConfig.client.ssid = "Default-SSID";
+    wiFiConfig.client.password = "Default-password";
+
+    kboxConfigParser.parseWiFiConfig(root, wiFiConfig);
+
+    CHECK( wiFiConfig.client.enabled == false );
+    CHECK( wiFiConfig.client.ssid == "Default-SSID" );
+    CHECK( wiFiConfig.client.password == "Default-password" );
   }
 }

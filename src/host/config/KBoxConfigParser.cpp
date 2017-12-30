@@ -81,7 +81,9 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.barometerConfig.frequency = 1;
 
   config.wifiConfig.enabled = true;
-  config.wifiConfig.mmsi = "default-mmsi";
+  // TODO: Make this depend on KBox hardware so two KBox do not have the same.
+  config.wifiConfig.vesselMRN =
+    "urn:mrn:signalk:uuid:31807318-2C00-4A44-890A-7FDB3D53B760";
   config.wifiConfig.accessPoint.enabled = true;
   config.wifiConfig.accessPoint.ssid = "KBox";
   config.wifiConfig.accessPoint.password = "";

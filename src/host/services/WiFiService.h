@@ -63,8 +63,10 @@ class WiFiService : public Task, public KReceiver, public SKSubscriber,
 
     bool write(const SKNMEASentence& s) override;
 
-    const String wiFiStatus() const;
-    const IPAddress ipAddress() const;
+    const String clientInterfaceStatus() const;
+    const IPAddress clientInterfaceIP() const;
+    const String accessPointInterfaceStatus() const;
+    const IPAddress accessPointInterfaceIP() const;
 
   private:
     // WiFiStatusObserver

@@ -42,7 +42,7 @@ struct WiFiConfig {
   bool enabled;
   SKNMEAConverterConfig nmeaConverter;
 
-  String mmsi;
+  String vesselMRN;
   WiFiNetworkConfig client;
   WiFiNetworkConfig accessPoint;
 };

@@ -47,7 +47,7 @@ bool KommandHandlerWiFiConfiguration::handleKommand(KommandReader &kreader,
   config.clientSSID = kreader.readNullTerminatedString();
   config.clientPassword = kreader.readNullTerminatedString();
 
-  config.mmsi = kreader.readNullTerminatedString();
+  config.vesselMRN = kreader.readNullTerminatedString();
 
   _callback(config);
 
