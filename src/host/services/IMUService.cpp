@@ -31,10 +31,18 @@
 void IMUService::setup() {
   _offsetRoll  = 0.0;
   _offsetPitch = 0.0;
-
-  // until config for positioning is made, declare default mounting position KBox here
+  // Default mounting position: VerticalStbHull
   uint8_t axisConfig = 0b00001001;
   uint8_t signConfig = 0b00000000;
+
+  if (_config.mounting == VerticalTopToBow) {
+    axisConfig = 0b00001001;
+    signConfig = 0b00000000;
+  }
+  if (_config.mounting == HorizontalLeftSideToBow) {
+    axisConfig = 0b00100100;
+    signConfig = 0b00000000;
+  }
 
   DEBUG("Initing BNO055");
   if (!bno055.begin(bno055.OPERATION_MODE_NDOF, axisConfig, signConfig)) {
@@ -57,11 +65,22 @@ void IMUService::loop() {
   // Note: We could calculate yaw as the difference between the Magnetic
   // Heading and the Course Over Ground Magnetic.
 
-  // TODO: different calcs according to mounting position
-  /* if orientation == MOUNTED_ON_STARBOARD_HULL */
-  _roll = SKDegToRad(eulerAngles.z());
-  _pitch = SKDegToRad(eulerAngles.y());
-  _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
+  if (_config.mounting == VerticalStbHull) {
+    _roll = SKDegToRad(eulerAngles.z());
+    _pitch = SKDegToRad(eulerAngles.y());
+    _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
+  }
+  if (_config.mounting == VerticalTopToBow) {
+    //TODO: check position for CaptainRon47
+    _roll = SKDegToRad(eulerAngles.y());
+    _pitch = SKDegToRad(eulerAngles.z());
+    _heading = SKDegToRad(fmod(eulerAngles.x() + 180, 360));
+  }
+  if (_config.mounting == HorizontalLeftSideToBow) {
+    _roll = SKDegToRad(eulerAngles.y());
+    _pitch = SKDegToRad(eulerAngles.z()) * (-1);
+    _heading = SKDegToRad(eulerAngles.x());
+  }
 
   // update NavigationHeadingMagnetic if quality (= calibration value) is ok
   if (_magCalib >= _config.calHdg) {
@@ -70,7 +89,7 @@ void IMUService::loop() {
   }
   // update NavigationAttitude if quality (= calibration value) is ok
 	if (_accelCalib >= _config.calHeelPitch && _gyroCalib >= _config.calHeelPitch) {
-    update.setNavigationAttitude(SKTypeAttitude(/* roll */ _roll + _offsetRoll, /* pitch */ _pitch + _offsetPitch, /* yaw */ 0));
+    update.setNavigationAttitude(SKTypeAttitude(/* roll */ _roll + _offsetRoll, /* pitch */ _pitch + _offsetPitch, /* yaw */ SKDoubleNAN));
     //DEBUG("Heel = %.3f | Pitch = %.3f | Heading = %.3f", SKRadToDeg( _roll + _offsetRoll), SKRadToDeg( _pitch + _offsetPitch), SKRadToDeg(_heading));
     _skHub.publish(update);
   }
@@ -104,7 +123,7 @@ bool IMUService::saveCalibration() {
   adafruit_bno055_offsets_t newCalib;
   bno055.getSensorOffsets(newCalib);
 
-  DEBUG("\n\nStoring calibration data to EEPROM...");
+  DEBUG("Storing calibration data to EEPROM...");
   bno055.getSensor(&sensor);
   bnoID = sensor.sensor_id;
 

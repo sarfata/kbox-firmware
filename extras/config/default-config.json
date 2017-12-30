@@ -5,7 +5,8 @@
     "enableHdg": true,
     "enableHeelPitch": true,
     "calHdg": 3,
-    "calHeelPitch": 2
+    "calHeelPitch": 2,
+    "mounting": "verticalStarboardHull"
   },
   "barometer": {
     "enabled": true,

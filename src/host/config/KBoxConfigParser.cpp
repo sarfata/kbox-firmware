@@ -59,6 +59,7 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.imuConfig.enableHeelPitch = true;   // true if values taken from internal sensor
   config.imuConfig.calHdg = 3;               // hdg valid, if calibration value greater equal
   config.imuConfig.calHeelPitch = 2;         // heel (roll) & pitch valid, if calibration value greater equal
+  config.imuConfig.mounting = VerticalStbHull;
 
   config.barometerConfig.enabled = true;
   config.barometerConfig.frequency = 1;
@@ -84,6 +85,7 @@ void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &config)
   READ_BOOL_VALUE(enableHeelPitch);
   READ_INT_VALUE_WRANGE(calHdg, 0, 3);
   READ_INT_VALUE_WRANGE(calHeelPitch, 0, 3);
+  READ_ENUM_VALUE(mounting, convertIMUMounting);
 }
 
 void KBoxConfigParser::parseBarometerConfig(const JsonObject &json, BarometerConfig &config){
@@ -140,4 +142,17 @@ enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {
     return SerialModeNMEA;
   }
   return SerialModeDisabled;
+}
+
+enum IMUMounting KBoxConfigParser::convertIMUMounting(const String &s) {
+  if (s == "verticalStarboardHull") {
+      return VerticalStbHull;
+  }
+  if (s == "verticalTopToBow") {
+      return VerticalTopToBow;
+  }
+  if (s == "horizontalLeftSideToBow") {
+      return HorizontalLeftSideToBow;
+  }
+  return VerticalStbHull;
 }
