@@ -58,8 +58,10 @@ KBoxWebServer webServer;
 KommandHandlerSKData skDataHandler(webServer);
 KommandHandlerWiFiConfiguration wiFiConfigurationHandler;
 ESPState espState;
-WiFiEventHandler gotIPHandler;
-WiFiEventHandler dhcpTimeoutHandler;
+WiFiEventHandler onGotIPHandler;
+WiFiEventHandler onDhcpTimeoutHandler;
+WiFiEventHandler onStationModeConnectedHandler;
+WiFiEventHandler onStationModeDisconnectedHandler;
 
 static void processSlipMessages();
 static void reportStatus(ESPState state, uint16_t dhcpClients = 0,
@@ -67,8 +69,10 @@ static void reportStatus(ESPState state, uint16_t dhcpClients = 0,
                          uint32_t ipAddress = 0);
 static void configurationCallback(const WiFiConfiguration&);
 
-static void gotIPCallback(const WiFiEventStationModeGotIP&);
-static void dhcpTimeoutCallback(void);
+static void onGotIP(const WiFiEventStationModeGotIP&);
+static void onDHCPTimeout(void);
+static void onStationModeConnected(const WiFiEventStationModeConnected&);
+static void onStationModeDisconnected(const WiFiEventStationModeDisconnected&);
 
 void setup() {
   Serial1.begin(115200);
@@ -89,8 +93,16 @@ void setup() {
   Serial.setDebugOutput(false);
 
   wiFiConfigurationHandler.setCallback(configurationCallback);
-  gotIPHandler = WiFi.onStationModeGotIP(gotIPCallback);
-  dhcpTimeoutHandler = WiFi.onStationModeDHCPTimeout(dhcpTimeoutCallback);
+
+  onGotIPHandler = WiFi.onStationModeGotIP(onGotIP);
+  onDhcpTimeoutHandler = WiFi.onStationModeDHCPTimeout(onDHCPTimeout);
+  onStationModeConnectedHandler =
+    WiFi.onStationModeConnected(onStationModeConnected);
+  onStationModeDisconnectedHandler =
+    WiFi.onStationModeDisconnected(onStationModeDisconnected);
+
+  // Do not remember config automatically
+  WiFi.persistent(false);
 
   // Configure our webserver
   webServer.setup();
@@ -101,7 +113,8 @@ void setup() {
   // upload are done and restart normal operation.
   delay(1000);
 
-  INFO("ESP8266 running.");
+  String resetInfo = ESP.getResetInfo();
+  INFO("ESP8266 reboot reason: %s", resetInfo.c_str());
 }
 
 void loop() {
@@ -177,11 +190,18 @@ static void processSlipMessages() {
 static void configurationCallback(const WiFiConfiguration& config) {
   if (config.clientEnabled) {
     if (config.clientPassword.length() == 0) {
-      WiFi.begin(config.clientSSID.c_str());
+      if (!WiFi.begin(config.clientSSID.c_str())) {
+        ERROR("Error connecting to %s", config.clientSSID.c_str());
+      }
     }
     else {
-      WiFi.begin(config.clientSSID.c_str(), config.clientPassword.c_str());
+      if (!WiFi.begin(config.clientSSID.c_str(),
+                      config.clientPassword.c_str())) {
+        ERROR("Error connecting to %s (with pass %s)",
+              config.clientSSID.c_str(), config.clientPassword.c_str());
+      }
     }
+    WiFi.enableSTA(true);
   }
   else {
     WiFi.enableSTA(false);
@@ -195,6 +215,7 @@ static void configurationCallback(const WiFiConfiguration& config) {
       WiFi.softAP(config.accessPointSSID.c_str(),
                   config.accessPointPassword.c_str());
     }
+    WiFi.enableAP(true);
   }
   else {
     WiFi.enableAP(false);
@@ -202,13 +223,22 @@ static void configurationCallback(const WiFiConfiguration& config) {
   espState = ESPState::ESPConfigured;
 }
 
-static void gotIPCallback(const WiFiEventStationModeGotIP&) {
+static void onGotIP(const WiFiEventStationModeGotIP& e) {
   DEBUG("DHCP Got IP Address!");
 }
 
-static void dhcpTimeoutCallback(void) {
+static void onDHCPTimeout(void) {
   DEBUG("DHCP Timeout");
 }
+
+static void onStationModeConnected(const WiFiEventStationModeConnected& e) {
+  DEBUG("StationModeConnected");
+}
+static void onStationModeDisconnected(const WiFiEventStationModeDisconnected&
+e) {
+  DEBUG("StationModeDisconnected - reason=%i", e.reason);
+}
+
 
 static void reportStatus(ESPState state, uint16_t dhcpClients,
                          uint16_t tcpClients, uint16_t signalkClients,
