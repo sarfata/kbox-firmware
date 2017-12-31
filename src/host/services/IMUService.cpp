@@ -83,16 +83,15 @@ void IMUService::loop() {
   }
 
   // update NavigationHeadingMagnetic if quality (= calibration value) is ok
-  if (_magCalib >= _config.calHdg) {
+  if (isMagCalibrated()) {
     update.setNavigationHeadingMagnetic(_heading);
-    _skHub.publish(update);
   }
   // update NavigationAttitude if quality (= calibration value) is ok
-	if (_accelCalib >= _config.calHeelPitch && _gyroCalib >= _config.calHeelPitch) {
+	if (isHeelAndPitchCalibrated()) {
     update.setNavigationAttitude(SKTypeAttitude(/* roll */ _roll + _offsetRoll, /* pitch */ _pitch + _offsetPitch, /* yaw */ SKDoubleNAN));
     //DEBUG("Heel = %.3f | Pitch = %.3f | Heading = %.3f", SKRadToDeg( _roll + _offsetRoll), SKRadToDeg( _pitch + _offsetPitch), SKRadToDeg(_heading));
-    _skHub.publish(update);
   }
+  _skHub.publish(update);
 }
 
 // get the actual values of calibration, heel & pitch (including offset) and heading for display

@@ -76,7 +76,6 @@ bool IMUMonitorPage::processEvent(const ButtonEvent &be){
 
 bool IMUMonitorPage::processEvent(const TickEvent &te){
   _imuService.getLastValues(_accelCalibration, _pitch, _roll, _magCalibration, _heading);
-  //DEBUG("AccelCalibration: %i | MagCalibration: %i", _accelCalibration, _magCalibration);
 
   // TODO: Some damping for the display
   _hdgTL->setText(String( SKRadToDeg(_heading), 1) + "°        ");
@@ -86,7 +85,7 @@ bool IMUMonitorPage::processEvent(const TickEvent &te){
 
   // Always show Hdg from IMU-sensor, but if the value is not trusted (which means
   // calibration below config setting, change color to red
-	if ((_magCalibration <= _config.calHdg)||(_accelCalibration <= _config.calHeelPitch)) {
+  if ( ! _imuService.isMagCalibrated() || ! _imuService.isHeelAndPitchCalibrated()) {
     _hdgTL->setColor(ColorRed);
     _calTL->setColor(ColorRed);
   } else {

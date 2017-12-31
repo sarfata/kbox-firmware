@@ -42,9 +42,19 @@ class IMUService : public Task {
     void setup();
     void loop();
 
-    void getLastValues(int &accelCalibration, double &pitch, double &roll, int &magCalibration, double &heading);
     void resetIMU();
     bool recallCalibration();
     bool saveCalibration();
     void setOffset();
+
+    bool isMagCalibrated() {
+			return _magCalib == 3;
+		}
+
+		bool isHeelAndPitchCalibrated() {
+			return _accelCalib >= 2 && _gyroCalib >= 2;
+		}
+
+    void getLastValues(int &accelCalibration, double &pitch, double &roll, int &magCalibration, double &heading);
+
 };

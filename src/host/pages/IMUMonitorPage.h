@@ -40,7 +40,6 @@ class IMUMonitorPage : public Page, public SKSubscriber {
 		TextLayer *_hdgTL, *_rollTL, *_pitchTL, *_calTL;
 		IMUConfig &_config;
 		IMUService &_imuService;
-
 		int _magCalibration, _accelCalibration;
 		double _pitch, _roll, _heading;
 
@@ -50,4 +49,5 @@ class IMUMonitorPage : public Page, public SKSubscriber {
 
 		bool processEvent(const TickEvent &te);
 		bool processEvent(const ButtonEvent &be);
+
 };
