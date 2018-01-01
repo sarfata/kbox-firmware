@@ -95,3 +95,7 @@ bool IMUMonitorPage::processEvent(const TickEvent &te){
 
   return true;
 }
+
+void IMUMonitorPage::updateReceived(const SKUpdate& up) {
+  // may be needed for something....
+}
