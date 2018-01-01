@@ -36,18 +36,18 @@
 #include "host/config/IMUConfig.h"
 
 class IMUMonitorPage : public Page, public SKSubscriber {
-	private:
-		TextLayer *_hdgTL, *_rollTL, *_pitchTL, *_calTL;
-		IMUConfig &_config;
-		IMUService &_imuService;
-		int _magCalibration, _accelCalibration;
-		double _pitch, _roll, _heading;
+  private:
+    TextLayer *_hdgTL, *_rollTL, *_pitchTL, *_calTL;
+    IMUConfig &_config;
+    IMUService &_imuService;
 
-	public:
-		IMUMonitorPage(IMUConfig &config, SKHub& hub, IMUService &imuService);
-		virtual void updateReceived(const SKUpdate& up);
+    int _magCalibration, _accelCalibration;
+    double _pitch, _roll, _heading;
 
-		bool processEvent(const TickEvent &te);
-		bool processEvent(const ButtonEvent &be);
+  public:
+    IMUMonitorPage(IMUConfig &config, SKHub& hub, IMUService &imuService);
+    virtual void updateReceived(const SKUpdate& up);
 
+    bool processEvent(const TickEvent &te);
+    bool processEvent(const ButtonEvent &be);
 };
