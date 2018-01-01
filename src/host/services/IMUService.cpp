@@ -104,14 +104,25 @@ void IMUService::getLastValues(int &accelCalibration, double &pitch, double &rol
   heading = _heading;
 }
 
-//  Calc offset for making Heel=0 and Pitch=0 (e.g. called with long button press in IMUMonitorPage)
+//  Calc offset for making Heel=0 and Pitch=0
+//  (e.g. called with long button press in IMUMonitorPage)
+//  TODO: If an setOffset will be done a second time within 5 Seconds,
+//  the values will be stored into EEPROM and loaded at start of KBox
 void IMUService::setOffset() {
+  bool changed = false;
   // FIXIT: Why is it called at startup of KBox? event longClick coming?
   if ( millis() > 10000 ) {
-    _offsetRoll = _roll * (-1);
-    _offsetPitch = _pitch * (-1);
-    INFO("Offset changed: Heel -> %.3f | Pitch -> %.3f", SKRadToDeg(_offsetRoll), SKRadToDeg(_offsetPitch));
-    // TODO: angle of heel and pitch must be smaller than 90°, check overflow!
+    if (abs(_roll) < M_PI / 2 ) {
+      _offsetRoll = _roll * (-1);
+      changed = true;
+    }
+    if (abs(_pitch) < M_PI / 2 ) {
+      _offsetPitch = _pitch * (-1);
+      changed = true;
+    }
+    if ( changed ) {
+      INFO("Offset changed: Heel -> %.3f | Pitch -> %.3f", SKRadToDeg(_offsetRoll), SKRadToDeg(_offsetPitch));
+    }
   }
 }
 
