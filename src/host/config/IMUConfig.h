@@ -44,7 +44,5 @@ struct IMUConfig {
   int frequency;
   bool enableHdg;
   bool enableHeelPitch;
-  int  calHdg;
-  int  calHeelPitch;
   enum IMUMounting mounting = VerticalStbHull;
 };
