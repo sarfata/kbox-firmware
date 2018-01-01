@@ -64,8 +64,6 @@ TEST_CASE("KBoxConfigParser") {
 
     CHECK( config.imuConfig.enableHdg );
     CHECK( config.imuConfig.enableHeelPitch );
-    CHECK( config.imuConfig.calHdg == 3 );
-    CHECK( config.imuConfig.calHeelPitch == 2 );
   }
 
   SECTION("basic config") {
