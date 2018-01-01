@@ -47,6 +47,8 @@ class IMUMonitorPage : public Page, public SKSubscriber {
 	public:
 		IMUMonitorPage(IMUConfig &config, SKHub& hub, IMUService &imuService);
 
+    virtual void updateReceived(const SKUpdate& up);
+
 		bool processEvent(const TickEvent &te);
 		bool processEvent(const ButtonEvent &be);
 };
