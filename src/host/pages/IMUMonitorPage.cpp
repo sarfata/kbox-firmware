@@ -84,7 +84,7 @@ bool IMUMonitorPage::processEvent(const TickEvent &te){
   _rollTL->setText(String( SKRadToDeg(_roll), 1) + "°     ");
 
   // Always show Hdg from IMU-sensor, but if the value is not trusted (which means
-  // calibration below config setting, change color to red
+  // calibration below default setting, change color to red
   if ( ! _imuService.isMagCalibrated() || ! _imuService.isHeelAndPitchCalibrated()) {
     _hdgTL->setColor(ColorRed);
     _calTL->setColor(ColorRed);
@@ -94,8 +94,4 @@ bool IMUMonitorPage::processEvent(const TickEvent &te){
   };
 
   return true;
-}
-
-void IMUMonitorPage::updateReceived(const SKUpdate& up) {
-  // may be needed for something....
 }
