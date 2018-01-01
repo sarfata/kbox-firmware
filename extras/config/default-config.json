@@ -4,8 +4,6 @@
     "frequency": 20,
     "enableHdg": true,
     "enableHeelPitch": true,
-    "calHdg": 3,
-    "calHeelPitch": 2,
     "mounting": "verticalStarboardHull"
   },
   "barometer": {
