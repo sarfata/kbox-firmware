@@ -62,9 +62,7 @@ IMUMonitorPage::IMUMonitorPage(IMUConfig &config, SKHub& hub, IMUService &imuSer
 }
 
 bool IMUMonitorPage::processEvent(const ButtonEvent &be){
-  // DEBUG("EventTypeButton: %i", be.clickType);
   if (be.clickType == ButtonEventTypeClick) {
-    DEBUG("Button ButtonEventTypeClick !!!");
     // Change page on single click.
     return false;
   }
