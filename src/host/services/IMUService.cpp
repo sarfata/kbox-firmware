@@ -157,8 +157,8 @@ bool IMUService::readHeelPitchOffset() {
 
   if (PersistentStorage::writeImuHeelPitchOffsets(o)) {
     DEBUG("Recalling offset data from EEPROM...");
-    _offsetRoll = o.offsetHeel / 100.0;
-    _offsetPitch = o.offsetPitch / 100.0;
+    _offsetRoll = o.offsetHeel / 1000.0;
+    _offsetPitch = o.offsetPitch / 1000.0;
     return true;
   }
   ERROR("Error reading IMU Offsets for heel and pitch from flash.");
