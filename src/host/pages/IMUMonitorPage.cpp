@@ -44,7 +44,7 @@ IMUMonitorPage::IMUMonitorPage(IMUConfig &config, SKHub& hub, IMUService &imuSer
   static const int row4 = 182;
 
   addLayer(new TextLayer(Point(col1, row1), Size(20, 20), "HDG ° Mag", ColorWhite, ColorBlack, FontDefault));
-  addLayer(new TextLayer(Point(col2, row1), Size(20, 20), "Cal: Mag/Acc", ColorWhite, ColorBlack, FontDefault));
+  addLayer(new TextLayer(Point(col2, row1), Size(20, 20), "Sys/Mag/Acc", ColorWhite, ColorBlack, FontDefault));
   addLayer(new TextLayer(Point(col1, row3), Size(20, 20), "Heel °", ColorWhite, ColorBlack, FontDefault));
   addLayer(new TextLayer(Point(col2, row3), Size(20, 20), "Pitch °", ColorWhite, ColorBlack, FontDefault));
 
@@ -67,17 +67,17 @@ bool IMUMonitorPage::processEvent(const ButtonEvent &be){
     return false;
   }
   if (be.clickType == ButtonEventTypeLongClick) {
-    _imuService.setOffset();
+    _imuService.setHeelPitchOffset();
   }
   return true;
 }
 
 bool IMUMonitorPage::processEvent(const TickEvent &te){
-  _imuService.getLastValues(_accelCalibration, _pitch, _roll, _magCalibration, _heading);
+  _imuService.getLastValues(_sysCalibration, _accelCalibration, _pitch, _roll, _magCalibration, _heading);
 
   // TODO: Some damping for the display
   _hdgTL->setText(String( SKRadToDeg(_heading), 1) + "°        ");
-  _calTL->setText(String( _magCalibration) + "/" + String( _accelCalibration) + "   ");
+  _calTL->setText(String( _sysCalibration) + "/" + String( _magCalibration) + "/" + String( _accelCalibration) + "   ");
   _pitchTL->setText(String( SKRadToDeg(_pitch), 1) + "°     ");
   _rollTL->setText(String( SKRadToDeg(_roll), 1) + "°     ");
 

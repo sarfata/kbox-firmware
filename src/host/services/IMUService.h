@@ -35,6 +35,9 @@ class IMUService : public Task {
     uint8_t _sysCalib, _gyroCalib, _accelCalib, _magCalib;
     double _roll, _pitch, _heading;
     double _offsetRoll, _offsetPitch;
+    elapsedMillis _timeSinceLastCalSave;
+    elapsedMillis _timeSinceLastSetOffset;
+
     imu::Vector<3> eulerAngles;
 
   public:
@@ -43,18 +46,23 @@ class IMUService : public Task {
     void loop();
 
     void resetIMU();
-    bool recallCalibration();
-    bool saveCalibration();
-    void setOffset();
+    bool readCalibrationOffsets();
+    bool saveCalibrationOffsets();
+    void setHeelPitchOffset();
+    bool saveHeelPitchOffset();
+    bool readHeelPitchOffset();
 
+    // sysCal '0' in NDOF mode means that the device has not yet found the 'north pole',
+    // and orientation values will be off  The heading will jump to an absolute value
+    // once the BNO finds magnetic north (the system calibration status jumps to 1 or higher).
     bool isMagCalibrated() {
-			return _magCalib == 3;
+			return _magCalib == 3 && _sysCalib > 0;
 		}
 
 		bool isHeelAndPitchCalibrated() {
-			return _accelCalib >= 2 && _gyroCalib >= 2;
+			return _accelCalib >= 2 && _gyroCalib >= 2 && _sysCalib > 0;
 		}
 
-    void getLastValues(int &accelCalibration, double &pitch, double &roll, int &magCalibration, double &heading);
+    void getLastValues(int &_sysCalibration, int &accelCalibration, double &pitch, double &roll, int &magCalibration, double &heading);
 
 };

@@ -33,6 +33,7 @@
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKSubscriber.h"
 #include "services/IMUService.h"
+//TODO: damping and automatic damping according to service frequency
 #include "host/config/IMUConfig.h"
 
 class IMUMonitorPage : public Page, public SKSubscriber {
@@ -41,7 +42,7 @@ class IMUMonitorPage : public Page, public SKSubscriber {
 		IMUConfig &_config;
 		IMUService &_imuService;
 
-		int _magCalibration, _accelCalibration;
+		int _magCalibration, _accelCalibration, _sysCalibration;
 		double _pitch, _roll, _heading;
 
 	public:

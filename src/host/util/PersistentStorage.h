@@ -65,15 +65,37 @@ class PersistentStorage {
       };
     };
 
+    struct BNO055CalOffsets {
+      uint16_t accel_offset_x;
+      uint16_t accel_offset_y;
+      uint16_t accel_offset_z;
+      uint16_t gyro_offset_x;
+      uint16_t gyro_offset_y;
+      uint16_t gyro_offset_z;
+      uint16_t mag_offset_x;
+      uint16_t mag_offset_y;
+      uint16_t mag_offset_z;
+      uint16_t accel_radius;
+      uint16_t mag_radius;
+    };
+
+    struct IMUHeelPitchOffsets {
+      int offsetHeel;
+      int offsetPitch;
+    };
+
   private:
     // Addresses of elements in flash storage
     static const uint16_t magicAddress = 0;
     static const uint16_t versionAddress = 4;
     static const uint16_t nmea2000ParamsAddress = 8;
+    static const uint16_t bno055CalOffsetsAddress = 20;     // 11 x 2 Byte
+    static const uint16_t imuHeelPitchOffsetsAddress = 42;  //  2 x 2 Byte
 
     // Size of flash
-    static const uint16_t storageUsed = 8 + sizeof(struct NMEA2000Parameters);
-    static const uint16_t storageSize = 2048;
+    static const uint16_t storageUsed = 46;
+    static const uint16_t storageSize = 2048; // Teensy 3.2
+    //static const uint16_t storageSize = 4096; // Teensy 3.6
 
     static bool read(uint16_t address, void *dest, uint16_t size);
     static bool write(uint16_t address, const void *src, uint16_t size);
@@ -86,5 +108,10 @@ class PersistentStorage {
   public:
     static bool readNMEA2000Parameters(struct NMEA2000Parameters &p);
     static bool writeNMEA2000Parameters(struct NMEA2000Parameters &p);
-};
 
+    static bool readBNO055CalOffsets(struct BNO055CalOffsets &o);
+    static bool writeBNO055CalOffsets(struct BNO055CalOffsets &o);
+
+    static bool readImuHeelPitchOffsets(IMUHeelPitchOffsets &o);
+    static bool writeImuHeelPitchOffsets(IMUHeelPitchOffsets &o);
+};
