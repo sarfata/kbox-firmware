@@ -148,21 +148,25 @@ bool IMUService::saveHeelPitchOffset() {
     DEBUG("Storing offset data to EEPROM...");
     return true;
   }
-  ERROR("Error saving IMU Offsets for heel and pitch to flash.");
-  return false;
+  else {
+    ERROR("Error saving IMU Offsets for heel and pitch to flash.");
+    return false;
+  }
 }
 
 bool IMUService::readHeelPitchOffset() {
   struct PersistentStorage::IMUHeelPitchOffsets o;
 
-  if (PersistentStorage::writeImuHeelPitchOffsets(o)) {
+  if (PersistentStorage::readImuHeelPitchOffsets(o)) {
     DEBUG("Recalling offset data from EEPROM...");
     _offsetRoll = o.offsetHeel / 1000.0;
     _offsetPitch = o.offsetPitch / 1000.0;
     return true;
   }
-  ERROR("Error reading IMU Offsets for heel and pitch from flash.");
-  return false;
+  else {
+    ERROR("Error reading IMU Offsets for heel and pitch from flash.");
+    return false;
+  }
 }
 
 bool IMUService::saveCalibrationOffsets() {
@@ -186,8 +190,10 @@ bool IMUService::saveCalibrationOffsets() {
     DEBUG("BNO055 Calibration Offsets written to flash.");
     return true;
   }
-  ERROR("Error saving BNO055 Calibration Offsets to flash.");
-  return false;
+  else {
+    ERROR("Error saving BNO055 Calibration Offsets to flash.");
+    return false;
+  }
 }
 
 bool IMUService::readCalibrationOffsets() {
@@ -211,6 +217,8 @@ bool IMUService::readCalibrationOffsets() {
     DEBUG("BNO055 Calibration Offsets recalled from flash.");
     return true;
   }
-  ERROR("Error recalling BNO055 Calibration Offsets from EEPROM");
-  return false;
+  else {
+    ERROR("Error recalling BNO055 Calibration Offsets from EEPROM");
+    return false;
+  }
 }
