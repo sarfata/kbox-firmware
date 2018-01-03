@@ -141,14 +141,18 @@ enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {
 }
 
 enum IMUMounting KBoxConfigParser::convertIMUMounting(const String &s) {
+  if (s == "verticalPortHull") {
+    return VerticalPortHull;
+  }
   if (s == "verticalStarboardHull") {
-      return VerticalStbHull;
+    return VerticalStbHull;
   }
   if (s == "verticalTopToBow") {
-      return VerticalTopToBow;
+    return VerticalTopToBow;
   }
   if (s == "horizontalLeftSideToBow") {
-      return HorizontalLeftSideToBow;
+    return HorizontalLeftSideToBow;
   }
-  return VerticalStbHull;
+  // default
+  return VerticalPortHull;
 }

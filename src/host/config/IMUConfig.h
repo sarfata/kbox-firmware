@@ -34,9 +34,9 @@ enum IMUMounting {
   VerticalStbHull,
   VerticalPortHull,
   VerticalTopToBow,
-  VerticalTopToAft,
+  //VerticalTopToStern,
   HorizontalLeftSideToBow,
-  HorizontalRightSideToBow
+  //HorizontalRightSideToBow
 };
 
 struct IMUConfig {
@@ -44,5 +44,5 @@ struct IMUConfig {
   int frequency;
   bool enableHdg;
   bool enableHeelPitch;
-  enum IMUMounting mounting = VerticalStbHull;
+  enum IMUMounting mounting = VerticalPortHull;
 };

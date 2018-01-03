@@ -33,6 +33,7 @@ class IMUService : public Task {
     SKHub &_skHub;
     Adafruit_BNO055 bno055;
     uint8_t _sysCalib, _gyroCalib, _accelCalib, _magCalib;
+    uint8_t _axisConfig, _signConfig;
     double _roll, _pitch, _heading;
     double _offsetRoll, _offsetPitch;
     elapsedMillis _timeSinceLastCalSave;

@@ -32,21 +32,22 @@ void IMUService::setup() {
   _timeSinceLastSetOffset = 0;
   _offsetRoll  = 0.0;
   _offsetPitch = 0.0;
-  // Default mounting position: VerticalStbHull
-  uint8_t axisConfig = 0b00001001;
-  uint8_t signConfig = 0b00000000;
 
-  if (_config.mounting == VerticalTopToBow) {
-    axisConfig = 0b00001001;
-    signConfig = 0b00000000;
-  }
-  if (_config.mounting == HorizontalLeftSideToBow) {
-    axisConfig = 0b00100100;
-    signConfig = 0b00000000;
+  switch (_config.mounting) {
+    case HorizontalLeftSideToBow:
+      _axisConfig = 0b00100100;
+      _signConfig = 0b00000000;
+    break;
+    case VerticalTopToBow:
+    case VerticalStbHull:
+    case VerticalPortHull:
+    default:
+      _axisConfig = 0b00001001;
+      _signConfig = 0b00000000;
   }
 
   DEBUG("Initing BNO055");
-  if (!bno055.begin(bno055.OPERATION_MODE_NDOF, axisConfig, signConfig)) {
+  if (!bno055.begin(bno055.OPERATION_MODE_NDOF, _axisConfig, _signConfig)) {
     DEBUG("Error initializing BNO055");
   }
   else {
@@ -67,21 +68,27 @@ void IMUService::loop() {
   // Note: We could calculate yaw as the difference between the Magnetic
   // Heading and the Course Over Ground Magnetic.
 
-  if (_config.mounting == VerticalStbHull) {
-    _roll = SKDegToRad(eulerAngles.z());
-    _pitch = SKDegToRad(eulerAngles.y());
-    _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
-  }
-  if (_config.mounting == VerticalTopToBow) {
-    //TODO: check position for CaptainRon47
-    _roll = SKDegToRad(eulerAngles.y());
-    _pitch = SKDegToRad(eulerAngles.z());
-    _heading = SKDegToRad(fmod(eulerAngles.x() + 180, 360));
-  }
-  if (_config.mounting == HorizontalLeftSideToBow) {
-    _roll = SKDegToRad(eulerAngles.y());
-    _pitch = SKDegToRad(eulerAngles.z()) * (-1);
-    _heading = SKDegToRad(eulerAngles.x());
+  switch (_config.mounting) {
+    case VerticalPortHull:
+      _roll = SKDegToRad(eulerAngles.z());
+      _pitch = SKDegToRad(eulerAngles.y());
+      _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
+    break;
+    case VerticalStbHull:
+      _roll = SKDegToRad(eulerAngles.z())*(-1);
+      _pitch = SKDegToRad(eulerAngles.y())*(-1);
+      _heading = SKDegToRad(eulerAngles.x());
+    break;
+    case VerticalTopToBow:
+      _roll = SKDegToRad(eulerAngles.y());
+      _pitch = SKDegToRad(eulerAngles.z());
+      _heading = SKDegToRad(fmod(eulerAngles.x() + 180, 360));
+    break;
+    case HorizontalLeftSideToBow:
+      _roll = SKDegToRad(eulerAngles.y());
+      _pitch = SKDegToRad(eulerAngles.z()) * (-1);
+      _heading = SKDegToRad(eulerAngles.x());
+    break;
   }
 
   // update NavigationHeadingMagnetic if quality (= calibration value) is ok
@@ -119,24 +126,22 @@ void IMUService::getLastValues(int &sysCalibration, int &accelCalibration, doubl
 //  the values will be stored into EEPROM and loaded at start of KBox
 void IMUService::setHeelPitchOffset() {
   bool changed = false;
-  // FIXIT: Why is it called at startup of KBox? event longClick coming?
-  if ( millis() > 10000 ) {
-    if (abs(_roll) < M_PI / 2 ) {
-      _offsetRoll = _roll * (-1);
-      changed = true;
-    }
-    if (abs(_pitch) < M_PI / 2 ) {
-      _offsetPitch = _pitch * (-1);
-      changed = true;
-    }
-    if ( changed ) {
-      INFO("Offset changed: Heel -> %.3f | Pitch -> %.3f", SKRadToDeg(_offsetRoll), SKRadToDeg(_offsetPitch));
-      if (_timeSinceLastSetOffset < 5000) {
-        saveHeelPitchOffset();
-      }
-    }
-    _timeSinceLastSetOffset = 0;
+  if (abs(_roll) < M_PI / 2 ) {
+    _offsetRoll = _roll * (-1);
+    changed = true;
   }
+  if (abs(_pitch) < M_PI / 2 ) {
+    _offsetPitch = _pitch * (-1);
+    changed = true;
+  }
+
+  if ( changed ) {
+    INFO("Offset changed: Heel -> %.3f | Pitch -> %.3f", SKRadToDeg(_offsetRoll), SKRadToDeg(_offsetPitch));
+    if (_timeSinceLastSetOffset < 5000) {
+      saveHeelPitchOffset();
+    }
+  }
+  _timeSinceLastSetOffset = 0;
 }
 
 bool IMUService::saveHeelPitchOffset() {
