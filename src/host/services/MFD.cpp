@@ -33,6 +33,7 @@ MFD::MFD(GC &gc, Encoder &e, Bounce &b) : Task("MFD"), gc(gc), encoder(e), butto
 void MFD::setup() {
   gc.fillRectangle(Origin, gc.getSize(), ColorBlack);
   lastTick = 0;
+  button.update();
 }
 
 void MFD::processInputs() {
