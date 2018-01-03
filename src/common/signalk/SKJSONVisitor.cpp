@@ -85,8 +85,8 @@ JsonObject& SKJSONVisitor::processUpdate(const SKUpdate& update) {
       case SKValue::SKValueTypeAttitude:
         {
           JsonObject &attitude = obj.createNestedObject("value");
-          if ( v.getAttitudeValue().yaw != SKDoubleNAN)
-            attitude["pitch"] = v.getAttitudeValue().yaw;
+          if ( v.getAttitudeValue().pitch != SKDoubleNAN)
+            attitude["pitch"] = v.getAttitudeValue().pitch;
           if ( v.getAttitudeValue().roll != SKDoubleNAN)
             attitude["roll"] = v.getAttitudeValue().roll;
           if ( v.getAttitudeValue().yaw != SKDoubleNAN)
