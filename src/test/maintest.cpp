@@ -22,25 +22,24 @@
   THE SOFTWARE.
 */
 
-#define CATCH_CONFIG_MAIN
+#include "KBoxTestLogger.h"
+
+#define CATCH_CONFIG_RUNNER
 #include "catch.hpp"
 
 #include <WString.h>
-
 #include <stdarg.h>
-#define DEBUG(...) debug(__FILE__, __LINE__, __VA_ARGS__)
+
 
 std::ostream& operator << ( std::ostream& os, String const& value ) {
     os << value.c_str();
     return os;
 }
 
-void debug(const char *fname, int lineno, const char *fmt, ... ) {
-  printf("%s: %i ", fname, lineno);
-  char tmp[128]; // resulting string limited to 128 chars
-  va_list args;
-  va_start (args, fmt );
-  vsnprintf(tmp, 128, fmt, args);
-  va_end (args);
-  printf("%s\n", tmp);
+int main( int argc, char* argv[] ) {
+  KBoxLogging.setLogger(new KBoxTestLogger());
+
+  int result = Catch::Session().run( argc, argv );
+
+  return result;
 }

@@ -29,20 +29,10 @@
 #include "SDCardTask.h"
 
 SDCardTask::SDCardTask() : Task("SDCard") {
-  DEBUG("init sdcard ...");
-  sd = new SdFat();
-}
-
-SDCardTask::~SDCardTask() {
-  // FIXME: Update SDFat library to more recent version that fixes this or get
-  // rid of it.
-  // Do not delete SD because the constructor is non-virtual which causes a
-  // Warning.
-  //delete(sd);
 }
 
 void SDCardTask::setup() {
-  if (cardInit()) {
+  if (KBox.isSdCardUsable()) {
     cardReady = true;
     logFile = createLogFile("kbox-");
     DEBUG("SDCard logging to: %s", getLogFileName().c_str());
@@ -78,47 +68,6 @@ void SDCardTask::loop() {
   receivedMessages.clear();
 }
 
-bool SDCardTask::cardInit() {
-  if (!sd->begin(sdcard_cs)) {
-    if (sd->card()->errorCode()) {
-      DEBUG("Something went wrong ... SD card errorCode: %i errorData: %i", sd->card()->errorCode(), sd->card()->errorData());
-      return false;
-    }
-    else {
-      DEBUG("SdCard successfully initialized.");
-    }
-
-    if (sd->vol()->fatType() == 0) {
-      DEBUG("Can't find a valid FAT16/FAT32 partition. Try reformatting the card.");
-      return false;
-    }
-
-    if (!sd->vwd()->isOpen()) {
-      DEBUG("Can't open root directory. Try reformatting the card.");
-      return false;
-    }
-
-    DEBUG("Unknown error while initializing card.");
-    return false;
-  }
-
-  uint32_t size = sd->card()->cardSize();
-  if (size == 0) {
-    DEBUG("Can't figure out card size :(");
-    return false;
-  }
-  uint32_t sizeMB = 0.000512 * size + 0.5;
-  DEBUG("Card size: %luMB. Volume is FAT%i Cluster size: %i bytes", sizeMB, sd->vol()->fatType(), 512 * sd->vol()->blocksPerCluster());
-
- if ((sizeMB > 1100 && sd->vol()->blocksPerCluster() < 64)
-      || (sizeMB < 2200 && sd->vol()->fatType() == 32)) {
-    DEBUG("This card should be reformatted for best performance.");
-    DEBUG("Use a cluster size of 32 KB for cards larger than 1 GB.");
-    DEBUG("Only cards larger than 2 GB should be formatted FAT32.");
-  }
-
- return true;
-}
 
 String SDCardTask::generateNewFileName(const String& baseName) {
   if (baseName.length() > 6) {
@@ -129,7 +78,7 @@ String SDCardTask::generateNewFileName(const String& baseName) {
   char fileName[20];
   for (int i = 0; i < 99999; i++) {
     snprintf(fileName, sizeof(fileName), "%s%i.log", baseName.c_str(), i);
-    if (!sd->exists(fileName)) {
+    if (!KBox.getSdFat().exists(fileName)) {
       return String(fileName);
     }
   }
@@ -139,14 +88,14 @@ String SDCardTask::generateNewFileName(const String& baseName) {
 
 SdFile* SDCardTask::createLogFile(const String& baseName) {
   if (!cardReady) {
-    return 0;
+    return nullptr;
   }
   String fileName = generateNewFileName(baseName);
 
   SdFile *file = new SdFile();
   if (fileName == "" || !file->open(fileName.c_str(), O_CREAT | O_WRITE | O_EXCL)) {
     DEBUG("Error while opening file '%s'", fileName.c_str());
-    return NULL;
+    return nullptr;
   }
   return file;
 }

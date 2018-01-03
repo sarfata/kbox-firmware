@@ -24,8 +24,9 @@
 
 #include <KBoxHardware.h>
 #include "common/os/TaskManager.h"
-#include "common/os/Task.h"
 #include "common/signalk/SKHub.h"
+#include "host/config/KBoxConfig.h"
+#include "host/config/KBoxConfigParser.h"
 #include "host/drivers/ILI9341GC.h"
 #include "host/pages/BatteryMonitorPage.h"
 #include "host/pages/StatsPage.h"
@@ -34,16 +35,19 @@
 #include "host/services/BarometerService.h"
 #include "host/services/IMUService.h"
 #include "host/services/NMEA2000Service.h"
-#include "host/services/NMEAService.h"
+#include "host/services/SerialService.h"
 #include "host/services/RunningLightService.h"
 #include "host/services/SDCardTask.h"
 #include "host/services/USBService.h"
 #include "host/services/WiFiService.h"
 
+static const char *configFilename = "kbox-config.json";
+
 ILI9341GC gc(KBox.getDisplay(), Size(320, 240));
 MFD mfd(gc, KBox.getEncoder(), KBox.getButton());
 TaskManager taskManager;
 SKHub skHub;
+KBoxConfig config;
 
 USBService usbService(gc);
 
@@ -66,18 +70,42 @@ void setup() {
 
   digitalWrite(led_pin, 1);
 
+  // Load configuration if available
+  KBoxConfigParser configParser;
+  configParser.defaultConfig(config);
+  if (KBox.getSdFat().exists(configFilename)) {
+    File configFile = KBox.getSdFat().open(configFilename);
+    // We can afford to allocate a lot of memory on the stack for this because we have not started doing
+    // anything real yet.
+    StaticJsonBuffer<4096> jsonBuffer;
+    JsonObject &root =jsonBuffer.parseObject(configFile);
+
+    if (root.success()) {
+      DEBUG("Loading configuration from SDCard");
+      configParser.parseKBoxConfig(root, config);
+    }
+    else {
+      ERROR("Failed to parse configuration file");
+    }
+  }
+  else {
+    DEBUG("No configuration file found. Using defaults.");
+  }
+
+
   // Instantiate all our services
-  WiFiService *wifi = new WiFiService(skHub, gc);
+  WiFiService *wifi = new WiFiService(config.wifiConfig, skHub, gc);
 
   ADCService *adcService = new ADCService(skHub, KBox.getADC());
   BarometerService *baroService = new BarometerService(skHub);
   IMUService *imuService = new IMUService(skHub);
 
-  NMEA2000Service *n2kService = new NMEA2000Service(skHub);
+  NMEA2000Service *n2kService = new NMEA2000Service(config.nmea2000Config,
+                                                    skHub);
   n2kService->connectTo(*wifi);
 
-  NMEAService *reader1 = new NMEAService(skHub, NMEA1_SERIAL);
-  NMEAService *reader2 = new NMEAService(skHub, NMEA2_SERIAL);
+  SerialService *reader1 = new SerialService(config.serial1Config, skHub, NMEA1_SERIAL);
+  SerialService *reader2 = new SerialService(config.serial2Config, skHub, NMEA2_SERIAL);
   reader1->connectTo(*wifi);
   reader2->connectTo(*wifi);
 
@@ -86,13 +114,16 @@ void setup() {
   reader2->connectTo(*sdcardTask);
   n2kService->connectTo(*sdcardTask);
 
-
   // Add all the tasks
   taskManager.addTask(&mfd);
   taskManager.addTask(new IntervalTask(new RunningLightService(), 250));
   taskManager.addTask(new IntervalTask(adcService, 1000));
-  taskManager.addTask(new IntervalTask(imuService, 50));
-  taskManager.addTask(new IntervalTask(baroService, 1000));
+  if (config.imuConfig.enabled) {
+    taskManager.addTask(new IntervalTask(imuService, 1000 / config.imuConfig.frequency));
+  }
+  if (config.barometerConfig.enabled) {
+    taskManager.addTask(new IntervalTask(baroService, 1000 / config.barometerConfig.frequency));
+  }
   taskManager.addTask(n2kService);
   taskManager.addTask(reader1);
   taskManager.addTask(reader2);

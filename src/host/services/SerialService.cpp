@@ -22,12 +22,17 @@
   THE SOFTWARE.
 */
 
+#include "SerialService.h"
+
 #include <KBoxLogging.h>
 #include <Arduino.h>
+#include <KBoxHardware.h>
+#include <signalk/SKNMEAConverter.h>
 #include "common/algo/List.h"
 #include "common/stats/KBoxMetrics.h"
 #include "common/signalk/SKNMEAParser.h"
-#include "NMEAService.h"
+#include "common/signalk/SKSource.h"
+#include "host/config/SerialConfig.h"
 
 
 // Linked list used to buffer messages
@@ -122,36 +127,63 @@ void serialEvent3() {
   }
 }
 
-NMEAService::NMEAService(SKHub &hub, HardwareSerial &s) : Task("NMEA Service"), _hub(hub), stream(s) {
+SerialService::SerialService(SerialConfig &config, SKHub &hub, HardwareSerial &s) : Task("NMEA Service"), _config(config), _hub(hub), stream(s) {
   if (&s == &Serial2) {
-    received2 = &receiveQueue;
-    _taskName = "NMEA Reader1";
-    rxValidEvent = KBoxEventNMEA1RX;
-    rxErrorEvent = KBoxEventNMEA1RXError;
+    if (_config.inputMode == SerialModeNMEA) {
+      received2 = &receiveQueue;
+    }
+    _taskName = "Serial Service 1";
+    _rxValidEvent = KBoxEventNMEA1RX;
+    _rxErrorEvent = KBoxEventNMEA1RXError;
+    _txValidEvent = KBoxEventNMEA1TX;
+    _txOverflowEvent = KBoxEventNMEA1TXOverflow;
     _skSourceInput = SKSourceInputNMEA0183_1;
   }
   if (&s == &Serial3) {
-    received3 = &receiveQueue;
-    _taskName = "NMEA Reader2";
-    rxValidEvent = KBoxEventNMEA2RX;
-    rxErrorEvent = KBoxEventNMEA2RXError;
+    if (_config.inputMode == SerialModeNMEA) {
+      received3 = &receiveQueue;
+    }
+    _taskName = "Serial Service 2";
+    _rxValidEvent = KBoxEventNMEA2RX;
+    _rxErrorEvent = KBoxEventNMEA2RXError;
+    _txValidEvent = KBoxEventNMEA2TX;
+    _txOverflowEvent = KBoxEventNMEA2TXOverflow;
     _skSourceInput = SKSourceInputNMEA0183_2;
   }
 }
 
-void NMEAService::setup() {
+void SerialService::setup() {
+  if (_skSourceInput == SKSourceInputNMEA0183_1) {
+    NMEA1_SERIAL.begin(_config.baudRate);
+    digitalWrite(nmea1_out_enable, _config.outputMode != SerialModeDisabled);
+    DEBUG("SerialService[1] Baudrate: %i Input: %s Output: %s",
+          _config.baudRate,
+          _config.inputMode == SerialModeNMEA ? "true" : "false",
+          _config.outputMode == SerialModeNMEA ? "true" : "false");
+  }
+  if (_skSourceInput == SKSourceInputNMEA0183_2) {
+    NMEA2_SERIAL.begin(_config.baudRate);
+    digitalWrite(nmea2_out_enable, _config.outputMode != SerialModeDisabled);
+    INFO("SerialService[2] Baudrate: %i Input: %s Output: %s",
+          _config.baudRate,
+          _config.inputMode == SerialModeNMEA ? "true" : "false",
+          _config.outputMode == SerialModeNMEA ? "true" : "false");
+  }
+
+  _hub.subscribe(this);
 }
 
-
-void NMEAService::loop() {
+void SerialService::loop() {
   if (receiveQueue.size() == 0) {
     return;
   }
   // Send all queue sentences
-  DEBUG("Found %i sentences waiting", receiveQueue.size());
+  DEBUG("Serial[%i]: Found %i sentences waiting",
+        _skSourceInput == SKSourceInputNMEA0183_1 ? 1 : 2,
+        receiveQueue.size());
   for (LinkedList<NMEASentence>::iterator it = receiveQueue.begin(); it != receiveQueue.end(); it++) {
     if (it->isValid()) {
-      KBoxMetrics.event(rxValidEvent);
+      KBoxMetrics.event(_rxValidEvent);
       this->sendMessage(*it);
 
       SKNMEAParser p;
@@ -162,7 +194,7 @@ void NMEAService::loop() {
       }
     }
     else {
-      KBoxMetrics.event(rxErrorEvent);
+      KBoxMetrics.event(_rxErrorEvent);
     }
   }
   // FIXME: the current linked list implementation would probably continue to
@@ -170,3 +202,27 @@ void NMEAService::loop() {
   // best if we had a clearer contract or a better way to manage this.
   receiveQueue.clear();
 }
+
+void SerialService::updateReceived(const SKUpdate &update) {
+  if (_config.outputMode == SerialModeNMEA) {
+    SKNMEAConverter nmeaConverter(_config.nmeaConverter);
+    nmeaConverter.convert(update, *this);
+  }
+}
+
+bool SerialService::write(const SKNMEASentence &nmeaSentence) {
+  DEBUG("Writing NMEA to Serial[%i] output: %s",
+        _skSourceInput == SKSourceInputNMEA0183_1 ? 1 : 2,
+        nmeaSentence.c_str());
+  if ((size_t)stream.availableForWrite() >= nmeaSentence.length() + 2) {
+    stream.write(nmeaSentence.c_str());
+    stream.write("\r\n");
+    KBoxMetrics.event(_txValidEvent);
+    return true;
+  }
+  else {
+    KBoxMetrics.event(_txOverflowEvent);
+    return false;
+  }
+}
+

@@ -1,0 +1,24 @@
+{
+  "imu": {
+    "enabled": false
+  },
+  "barometer": {
+    "enabled": false
+  },
+  "wifi": {
+    "enabled": false
+  },
+  "serial1": {
+    "inputMode": "disabled",
+    "outputMode": "disabled"
+  },
+  "serial2": {
+    "inputMode": "disabled",
+    "outputMode": "disabled"
+  },
+  "nmea2000": {
+    "txEnabled": false,
+    "rxEnabled": false
+  }
+}
+

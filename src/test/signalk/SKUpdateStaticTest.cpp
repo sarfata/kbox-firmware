@@ -89,15 +89,30 @@ TEST_CASE("SKUpdateStatic") {
     SKUpdateStatic<3> u;
 
     CHECK( u.hasElectricalBatteriesVoltage("engine") == false );
+
     CHECK( u.setElectricalBatteriesVoltage("engine", 12.1) == true );
     CHECK( u.setElectricalBatteriesVoltage("house", 12.2) == true );
     CHECK( u.setElectricalBatteriesVoltage("house2", 12.3) == true );
-
     CHECK( u.setElectricalBatteriesVoltage("house3", 12.4) == false );
 
     CHECK( u.getElectricalBatteriesVoltage("engine") == 12.1 );
     CHECK( u.getElectricalBatteriesVoltage("house") == 12.2 );
     CHECK( u.getElectricalBatteriesVoltage("house2") == 12.3 );
+
+    class CountingVisitor : public SKVisitor {
+      public:
+        int counter = 0;
+
+        virtual void visit(const SKUpdate& u, const SKPath& p, const SKValue &v)
+        override {
+          counter++;
+        }
+
+    };
+    CountingVisitor countingVisitor;
+    u.accept(countingVisitor, SKPathElectricalBatteriesVoltage);
+
+    CHECK( countingVisitor.counter == 3 );
   }
 };
 

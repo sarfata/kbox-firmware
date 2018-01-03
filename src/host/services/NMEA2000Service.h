@@ -31,11 +31,12 @@
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKSubscriber.h"
 #include "common/signalk/SKNMEA2000Converter.h"
+#include "host/config/NMEA2000Config.h"
 
-class NMEA2000Service : public Task, public SKSubscriber,
-  public KGenerator, public KReceiver, public KVisitor,
+class NMEA2000Service : public Task, public SKSubscriber, public KGenerator,
   SKNMEA2000Output {
   private:
+    const NMEA2000Config &_config;
     SKHub &_hub;
     tNMEA2000_teensy NMEA2000;
     unsigned int _imuSequence;
@@ -47,7 +48,13 @@ class NMEA2000Service : public Task, public SKSubscriber,
      * Will initialize NMEA2000 and restore NMEA2000 parameters from persistent
      * storage if available.
      */
-    void initializeNMEA2000();
+    void initializeNMEA2000forReceiveAndTransmit();
+
+    /**
+     * Initialize NMEA2000 for receiving messages only. No transmission
+     * on bus will be possible.
+     */
+    void initializeNMEA2000forReceiveOnly();
 
     /**
      * Saves NMEA2000 parameters to persistent storage so they can be restored
@@ -58,7 +65,9 @@ class NMEA2000Service : public Task, public SKSubscriber,
     elapsedMillis timeSinceLastParametersSave;
 
   public:
-    NMEA2000Service(SKHub &hub) : Task("NMEA2000"), _hub(hub), _imuSequence(0) {};
+    NMEA2000Service(NMEA2000Config &config, SKHub &hub) :
+      Task("NMEA2000"), _config(config), _hub(hub), _imuSequence(0) {};
+
     void setup();
     void loop();
 
@@ -67,9 +76,6 @@ class NMEA2000Service : public Task, public SKSubscriber,
 
     // SKNMEA2000Output
     bool write(const tN2kMsg&) override;
-
-    void processMessage(const KMessage&);
-    void visit(const NMEA2000Message&);
 
     void updateReceived(const SKUpdate& update);
 };
