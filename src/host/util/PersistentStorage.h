@@ -112,6 +112,6 @@ class PersistentStorage {
     static bool readBNO055CalOffsets(struct BNO055CalOffsets &o);
     static bool writeBNO055CalOffsets(struct BNO055CalOffsets &o);
 
-    static bool readImuHeelPitchOffsets(IMUHeelPitchOffsets &o);
-    static bool writeImuHeelPitchOffsets(IMUHeelPitchOffsets &o);
+    static bool readImuHeelPitchOffsets(struct IMUHeelPitchOffsets &o);
+    static bool writeImuHeelPitchOffsets(struct IMUHeelPitchOffsets &o);
 };
