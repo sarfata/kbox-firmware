@@ -89,7 +89,7 @@ void IMUService::loop() {
     update.setNavigationHeadingMagnetic(_heading);
   }
   // update NavigationAttitude if quality (= calibration value) is ok
-	if (isHeelAndPitchCalibrated()) {
+  if (isHeelAndPitchCalibrated()) {
     update.setNavigationAttitude(SKTypeAttitude(/* roll */ _roll + _offsetRoll, /* pitch */ _pitch + _offsetPitch, /* yaw */ SKDoubleNAN));
     //DEBUG("Heel = %.3f | Pitch = %.3f | Heading = %.3f", SKRadToDeg( _roll + _offsetRoll), SKRadToDeg( _pitch + _offsetPitch), SKRadToDeg(_heading));
   }
