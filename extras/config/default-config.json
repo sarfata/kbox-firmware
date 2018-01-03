@@ -4,7 +4,7 @@
     "frequency": 20,
     "enableHdg": true,
     "enableHeelPitch": true,
-    "mounting": "verticalStarboardHull"
+    "mounting": "verticalPortHull"
   },
   "barometer": {
     "enabled": true,
