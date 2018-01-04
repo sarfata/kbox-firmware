@@ -53,11 +53,19 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
   if (_config.xdrAttitude && update.hasNavigationAttitude()) {
     NMEASentenceBuilder sb( "II", "XDR", 8);
     sb.setField(1, "A");
-    sb.setField(2, SKRadToDeg(update.getNavigationAttitude().pitch), 1);
+    if (update.getNavigationAttitude().pitch == SKDoubleNAN) {
+      sb.setField(2, "");
+    } else {
+      sb.setField(2, SKRadToDeg(update.getNavigationAttitude().pitch), 1);
+    }
     sb.setField(3, "D");
     sb.setField(4, "PTCH");
     sb.setField(5, "A");
-    sb.setField(6, SKRadToDeg(update.getNavigationAttitude().roll), 1);
+    if (update.getNavigationAttitude().roll == SKDoubleNAN) {
+      sb.setField(6, "");
+    } else {
+      sb.setField(6, SKRadToDeg(update.getNavigationAttitude().roll), 1);
+    }
     sb.setField(7, "D");
     sb.setField(8, "ROLL");
     output.write(sb.toNMEA());
@@ -93,11 +101,13 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
     output.write(sb.toNMEA());
   }
 
-  if (_config.mwv && (update.hasEnvironmentWindAngleApparent() && update.hasEnvironmentWindSpeedApparent())) {
+  if (_config.mwv && update.hasEnvironmentWindAngleApparent()
+      && update.hasEnvironmentWindSpeedApparent()) {
     generateMWV(output, update.getEnvironmentWindAngleApparent(), update.getEnvironmentWindSpeedApparent(), true);
   }
 
-  if (_config.mwv && (update.hasEnvironmentWindAngleTrueWater() && update.hasEnvironmentWindSpeedTrue())) {
+  if (_config.mwv && update.hasEnvironmentWindAngleTrueWater()
+      && update.hasEnvironmentWindSpeedTrue()) {
     generateMWV(output, update.getEnvironmentWindAngleTrueWater(), update.getEnvironmentWindSpeedTrue(), false);
   }
 
@@ -148,6 +158,3 @@ void SKNMEAConverter::generateMWV(SKNMEAOutput &output, double windAngle, double
   sb.setField(5, "A");
   output.write(sb.toNMEA());
 }
-
-
-

@@ -57,4 +57,4 @@ inline double SKNormalizeAngle(double x) {
   return x - M_PI;
 }
 
-
+const double SKDoubleNAN = -1e9;

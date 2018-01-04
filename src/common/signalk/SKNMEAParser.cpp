@@ -76,7 +76,9 @@ const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceR
   double cog = SKDegToRad(reader.getFieldAsDouble(8));
 
   if (!isnan(latitude) && !isnan(longitude)) {
-    rmc->setValue(SKPathNavigationPosition, SKTypePosition(latitude, longitude, 0));
+    rmc->setValue(SKPathNavigationPosition, SKTypePosition(latitude,
+                                                           longitude,
+                                                           SKDoubleNAN));
   }
   if (!isnan(sog)) {
     rmc->setValue(SKPathNavigationSpeedOverGround, sog);

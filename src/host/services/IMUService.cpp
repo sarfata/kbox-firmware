@@ -56,7 +56,7 @@ void IMUService::loop() {
   heading = fmod(eulerAngles.x() + 270, 360);
 
   if (sysCalib == 3) {
-    update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(roll), /* pitch */ SKDegToRad(pitch), /* yaw */ 0));
+    update.setNavigationAttitude(SKTypeAttitude(/* roll */ SKDegToRad(roll), /* pitch */ SKDegToRad(pitch), /* yaw */ SKDoubleNAN));
     update.setNavigationHeadingMagnetic(SKDegToRad(heading));
     _skHub.publish(update);
   }

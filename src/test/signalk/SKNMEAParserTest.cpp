@@ -46,7 +46,7 @@ TEST_CASE("SKNMEAParser: RMC") {
     CHECK( update.getNavigationCourseOverGroundTrue() == SKDegToRad(235.24) );
     CHECK( update.getNavigationPosition().latitude == 37.85564166666666 );
     CHECK( update.getNavigationPosition().longitude == -122.45818833333334 );
-    CHECK( update.getNavigationPosition().altitude == 0 );
+    CHECK( update.getNavigationPosition().altitude == SKDoubleNAN );
   }
 
   SECTION("RMC with invalid fix") {

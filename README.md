@@ -192,7 +192,11 @@ been possible!**
 
 ## Changelog
 
- * 2017 12 28
+ * 2018 01 04
+   * Add support for parsing PGN127257 Attitude (roll/pitch/yaw)
+   * Also improved the output in NMEA and SignalK format when some attitude
+   values are unknown
+  * 2017 12 28
    * KBox now supports a configuration file (`kbox-config.json`) on the sdcard.
    * KBox supports sending data to NMEA outputs
    * Generated NMEA sentences can be configured independently for each output
