@@ -46,38 +46,29 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
 
   switch (msg.PGN) {
     case 126992L: // System Time / Date
-        return parse126992(input, msg, timestamp);
-      break;
+      return parse126992(input, msg, timestamp);
     case 127245L: // Rudder
-        return parse127245(input, msg, timestamp);
-      break;
+      return parse127245(input, msg, timestamp);
     case 127250L: // Vessel Heading
-        return parse127250(input, msg, timestamp);
-      break;
+      return parse127250(input, msg, timestamp);
     //case 127251L: // Rate of Turn
     case 127257L: // Attitude Yaw, Pitch, Roll
-        return parse127257(input, msg, timestamp);
-      break;
+      return parse127257(input, msg, timestamp);
     //case 127258L:  // Magnetic Variation
     //    return parse127258(input, msg, timestamp);
     //  break;
     case 128259L: // Boat speed
-        return parse128259(input, msg, timestamp);
-      break;
+      return parse128259(input, msg, timestamp);
     case 128267L: // Water depth
-        return parse128267(input, msg, timestamp);
-      break;
+      return parse128267(input, msg, timestamp);
     //case 128275L: // Distance Log
     case 129025L: // Position, Rapid Update Lat/Lon
-        return parse129025(input, msg, timestamp);
-      break;
+      return parse129025(input, msg, timestamp);
     case 129026L: // COG SOG rapid
-        return parse129026(input, msg, timestamp);
-      break;
+      return parse129026(input, msg, timestamp);
     //case 129301L:  // Time to/from Mark
     case 130306L: // Wind Speed
-        return parse130306(input, msg, timestamp);
-      break;
+      return parse130306(input, msg, timestamp);
 
     //case 127488: // Engine parameters rapid
     //case 127493: // Transmission parameters: dynamic
