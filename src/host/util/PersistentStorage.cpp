@@ -108,39 +108,18 @@ bool PersistentStorage::writeNMEA2000Parameters(struct NMEA2000Parameters &p) {
   return write(nmea2000ParamsAddress, &p, sizeof(NMEA2000Parameters));
 }
 
-// reads calibration offset values of BNO055 IMU sensor
-bool PersistentStorage::readBNO055CalOffsets(struct BNO055CalOffsets &o) {
+bool PersistentStorage::readIMUCalibration(struct IMUCalibration &o){
   if (!isInitialized()) {
     return false;
   }
 
-  if (!read(bno055CalOffsetsAddress, &o, sizeof(BNO055CalOffsets))) {
-    return false;
-  }
-  return true;
+  return read(imuCalibrationAddress, &o, sizeof(IMUCalibration));
 }
 
-bool PersistentStorage::writeBNO055CalOffsets(struct BNO055CalOffsets &o) {
+bool PersistentStorage::writeIMUCalibration(struct IMUCalibration &o) {
   if (!isInitialized()) {
     initialize();
   }
 
-  return write(bno055CalOffsetsAddress, &o, sizeof(BNO055CalOffsets));
-}
-
-bool PersistentStorage::readImuHeelPitchOffsets(IMUHeelPitchOffsets &o) {
-  if (!isInitialized()) {
-    initialize();
-  }
-
-
-  return false;
-}
-
-bool PersistentStorage::writeImuHeelPitchOffsets(IMUHeelPitchOffsets &o){
-  if (!isInitialized()) {
-    initialize();
-  }
-
-  return false;
+  return write(imuCalibrationAddress, &o, sizeof(IMUCalibration));
 }
