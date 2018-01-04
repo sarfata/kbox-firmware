@@ -101,19 +101,13 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
     output.write(sb.toNMEA());
   }
 
-  if (_config.mwv &&
-      update.hasEnvironmentWindAngleApparent() &&
-      update.hasEnvironmentWindSpeedApparent() &&
-      update.getEnvironmentWindAngleApparent() != SKDoubleNAN &&
-      update.getEnvironmentWindSpeedApparent() != SKDoubleNAN) {
+  if (_config.mwv && update.hasEnvironmentWindAngleApparent()
+      && update.hasEnvironmentWindSpeedApparent()) {
     generateMWV(output, update.getEnvironmentWindAngleApparent(), update.getEnvironmentWindSpeedApparent(), true);
   }
 
-  if (_config.mwv &&
-      update.hasEnvironmentWindAngleTrueWater() &&
-      update.hasEnvironmentWindSpeedTrue() &&
-      update.getEnvironmentWindAngleTrueWater() != SKDoubleNAN &&
-      update.getEnvironmentWindSpeedTrue() != SKDoubleNAN) {
+  if (_config.mwv && update.hasEnvironmentWindAngleTrueWater()
+      && update.hasEnvironmentWindSpeedTrue()) {
     generateMWV(output, update.getEnvironmentWindAngleTrueWater(), update.getEnvironmentWindSpeedTrue(), false);
   }
 

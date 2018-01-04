@@ -97,12 +97,12 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
     CHECK( update.getNavigationAttitude().roll  == Approx(SKDegToRad(3.2)).epsilon(0.0001) );
   }
 
-  SECTION("127275: NavigationAttitude Heel, Pitch, Yaw = NaN = N2kDoubleNA = -1e9") {
+  SECTION("127275: NavigationAttitude Heel, Pitch, Yaw = SKDoubleNAN = N2kDoubleNA = -1e9") {
     // SID, yaw, pitch, roll in radians
     SetN2kAttitude(msg, 0, N2kDoubleNA, SKDegToRad(-2.3), SKDegToRad(3.2));
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     CHECK( update.getSize() == 1);
-    CHECK( update.getNavigationAttitude().yaw   == -1e9 );
+    CHECK( update.getNavigationAttitude().yaw   == SKDoubleNAN );
     CHECK( update.getNavigationAttitude().pitch == Approx(SKDegToRad(-2.3)).epsilon(0.0001) );
     CHECK( update.getNavigationAttitude().roll  == Approx(SKDegToRad(3.2)).epsilon(0.0001) );
   }
