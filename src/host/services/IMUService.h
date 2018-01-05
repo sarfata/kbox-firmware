@@ -70,7 +70,7 @@ class IMUService : public Task {
     };
 
     bool isRollAndPitchCalibrated() {
-      return _accelCalib >= 2 && _gyroCalib >= 2 && _sysCalib > 0;
+      return _accelCalib >= 2 && _gyroCalib >= 2;
     };
 
     void getLastValues(int &_sysCalibration, int &accelCalibration, double &pitch, double &roll, int &magCalibration, double &heading);
