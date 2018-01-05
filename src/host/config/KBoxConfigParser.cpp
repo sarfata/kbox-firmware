@@ -33,6 +33,10 @@
 #define READ_VALUE_WITH_TYPE(name, type) if (json[#name].is<type>()) { config.name = json[#name].as<type>(); }
 #define READ_BOOL_VALUE(name) READ_VALUE_WITH_TYPE(name, bool)
 #define READ_INT_VALUE(name) READ_VALUE_WITH_TYPE(name, int)
+#define READ_STRING_VALUE(name) if (json[#name].is<const char *>()) {\
+                                  config.name = \
+                                    String(json[#name].as<const char*>()); \
+                                }
 #define READ_INT_VALUE_WRANGE(name, min, max) if (json[#name].is<int>() && json[#name] > min && json[#name] < max) { config.name = json[#name].as<int>(); }
 
 #define READ_ENUM_VALUE(name, converter) if (json[#name].is<const char *>()) { config.name = converter(json[#name].as<const char*>()); }
@@ -59,6 +63,12 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.barometerConfig.frequency = 1;
 
   config.wifiConfig.enabled = true;
+
+  config.performanceConfig.enabled = true;
+  config.performanceConfig.boatSpeedCorrectionTable = "boatspeedCorr.cal";
+  config.performanceConfig.hullFactor = 100;
+  config.performanceConfig.windSensorHeight = 1250;
+  config.performanceConfig.polarDataFile = "polarData.pol";
 }
 
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
@@ -70,6 +80,15 @@ void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &confi
   parseBarometerConfig(json["barometer"], config.barometerConfig);
   parseWiFiConfig(json["wifi"], config.wifiConfig);
   parseNMEA2000Config(json["nmea2000"], config.nmea2000Config);
+  parsePerformanceConfig(json["performance"], config.performanceConfig);
+}
+
+void KBoxConfigParser::parsePerformanceConfig(const JsonObject &json, PerformanceConfig &config) {
+  READ_BOOL_VALUE(enabled);
+  READ_STRING_VALUE(boatSpeedCorrectionTable);
+  READ_INT_VALUE(hullFactor);
+  READ_INT_VALUE(windSensorHeight);
+  READ_STRING_VALUE(polarDataFile);
 }
 
 void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &config) {
@@ -89,6 +108,7 @@ void KBoxConfigParser::parseSerialConfig(const JsonObject &json, SerialConfig &c
 
   READ_INT_VALUE(baudRate);
   READ_ENUM_VALUE(inputMode, convertSerialMode);
+  READ_INT_VALUE(baudRate);
   READ_ENUM_VALUE(outputMode, convertSerialMode);
 
   parseNMEAConverterConfig(json["nmeaConverter"], config.nmeaConverter);

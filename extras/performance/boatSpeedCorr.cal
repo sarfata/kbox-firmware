@@ -1,0 +1,14 @@
+;Correction of non linearity of transducer
+;give a corrected value for each knots of speed for heel=0 and heel>15°
+;values in between will be interpolated linear
+;first line measured boat speed
+;second line corrected boat speed
+[CorrectionNoHeel]
+1 2 3 4 5 6 7 8 9 10  11  12
+1 1 1 1 1 1 1 1 1 1 1 1
+[CorrectionStbTack]
+1 2 3 4 5 6 7 8 9 10  11  12
+1 1 1 1 1 1 1 1 1 1 1 1
+[CorrectionPortTack]
+1 2 3 4 5 6 7 8 9 10  11  12
+1 1 1 1 1 1 1 1 1 1 1 1

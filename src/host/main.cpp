@@ -91,7 +91,8 @@ void setup() {
   else {
     DEBUG("No configuration file found. Using defaults.");
   }
-
+  
+  PerformanceService performance = PerformanceService(config.performanceConfig);
 
   // Instantiate all our services
   WiFiService *wifi = new WiFiService(config.wifiConfig, skHub, gc);

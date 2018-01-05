@@ -47,6 +47,12 @@
   "nmea2000": {
     "txEnabled": true,
     "rxEnabled": true
+  },
+  "performance": {
+    "enabled": true,
+    "boatSpeedCorrectionTable": "boatspeedCorr.cal"
+    "hullFactor": 16,
+    "windSensorHeight": 1250,
+    "polarDataFile": "polarData.pol"
   }
 }
-

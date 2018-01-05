@@ -6,8 +6,8 @@
        \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
 
   The MIT License
-
-  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2018 Ronnie Zeiller ronnie@zeiller.eu
+  Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -29,23 +29,12 @@
 */
 
 #pragma once
+#include <WString.h>
 
-#include "SerialConfig.h"
-#include "NMEA2000Config.h"
-#include "IMUConfig.h"
-#include "BarometerConfig.h"
-#include "WiFiConfig.h"
-#include "PerformanceConfig.h"
-
-/**
- * A KBox configuration in memory
- */
-struct KBoxConfig {
-  SerialConfig serial1Config;
-  SerialConfig serial2Config;
-  NMEA2000Config nmea2000Config;
-  IMUConfig imuConfig;
-  BarometerConfig barometerConfig;
-  WiFiConfig wifiConfig;
-  PerformanceConfig performanceConfig;
+struct PerformanceConfig {
+  bool enabled;
+  String boatSpeedCorrectionTable;
+  int hullFactor;         // usually between 8....10, here multiplied by 10
+  int windSensorHeight;   // in cm
+  String polarDataFile;
 };

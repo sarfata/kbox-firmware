@@ -6,8 +6,8 @@
        \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
 
   The MIT License
-
-  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2018 Ronnie Zeiller ronnie@zeiller.eu
+  Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -28,24 +28,37 @@
   THE SOFTWARE.
 */
 
-#pragma once
+//#include <KBoxLogging.h>
+#include "PerformanceService.h"
+#include "common/signalk/SKUnits.h"
 
-#include "SerialConfig.h"
-#include "NMEA2000Config.h"
-#include "IMUConfig.h"
-#include "BarometerConfig.h"
-#include "WiFiConfig.h"
-#include "PerformanceConfig.h"
 
-/**
- * A KBox configuration in memory
- */
-struct KBoxConfig {
-  SerialConfig serial1Config;
-  SerialConfig serial2Config;
-  NMEA2000Config nmea2000Config;
-  IMUConfig imuConfig;
-  BarometerConfig barometerConfig;
-  WiFiConfig wifiConfig;
-  PerformanceConfig performanceConfig;
-};
+PerformanceService::PerformanceService(const PerformanceConfig &config) : _config(config) {
+  // degrees for reading heeled values from table
+  // TODO: should go to config
+  _maxForHeelCorrectionBoatSpeed = SKDegToRad(15);
+}
+
+bool PerformanceService::corrForNonLinearTransducer(double &bs, double &heel) {
+  // Load correction table from SD-Card and correct boat speed
+  // If heel is more than _maxForHeelCorrectionBoatSpeed then take
+  // heeled correction values
+
+  return true;
+}
+
+bool PerformanceService::calcBoatSpeed(double &bs, double &heel) {
+
+  double leeway = SKDoubleNAN;
+
+  corrForNonLinearTransducer(bs, heel);
+
+  // Correct for Leeway
+  // if (calcLeeway(&bs, &leeway)) {
+  if ( true )
+    bs = bs / cos(leeway);
+  return true;
+  // }
+
+  return false;
+}

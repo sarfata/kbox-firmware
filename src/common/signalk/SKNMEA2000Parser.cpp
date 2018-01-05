@@ -32,6 +32,7 @@
 #include <KBoxLogging.h>
 #include "SKNMEA2000Parser.h"
 #include "SKUnits.h"
+#include "services/PerformanceService.h"
 
 SKNMEA2000Parser::~SKNMEA2000Parser() {
   if (_sku) {
@@ -250,7 +251,16 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
     update->setSource(source);
 
     if (!N2kIsNA(waterSpeed)) {
-      update->setNavigationSpeedThroughWater(waterSpeed);
+      // now we have uncorrected boat speed, let's get it corrected, but we need
+      // leeway for that, which we calculate from raw boat speed and heel
+      if (update->hasNavigationAttitude()){
+        double roll = update->getNavigationAttitude().roll;
+        if ( roll != SKDoubleNAN) {
+          if (performance.calcBoatSpeed(waterSpeed, roll)) {
+            update->setNavigationSpeedThroughWater(waterSpeed);
+          }
+        }
+      }
     }
 
     _sku = update;
