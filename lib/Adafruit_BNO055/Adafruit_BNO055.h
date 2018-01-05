@@ -280,8 +280,11 @@ class Adafruit_BNO055 : public Adafruit_Sensor
     } adafruit_vector_type_t;
 
     Adafruit_BNO055 ( int32_t sensorID = -1, uint8_t address = BNO055_ADDRESS_A );
+    // MOD for KBox to set axis and sign
+    bool  begin               ( adafruit_bno055_opmode_t mode = OPERATION_MODE_NDOF,
+                                  uint8_t axis_remap_orientation = REMAP_CONFIG_P1,
+                                  uint8_t axis_remap_sign = REMAP_SIGN_P1);
 
-    bool  begin               ( adafruit_bno055_opmode_t mode = OPERATION_MODE_NDOF );
     void  setMode             ( adafruit_bno055_opmode_t mode );
     void  getRevInfo          ( adafruit_bno055_rev_info_t* );
     void  displayRevInfo      ( void );

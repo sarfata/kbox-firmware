@@ -6,8 +6,9 @@
        \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
 
   The MIT License
-
-  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
+  
+  Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2018 Ronnie Zeiller ronnie@zeiller.eu
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -28,21 +29,28 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "common/ui/Page.h"
+#include "common/ui/TextLayer.h"
+#include "common/signalk/SKHub.h"
+#include "common/signalk/SKSubscriber.h"
+#include "services/IMUService.h"
+//TODO: damping and automatic damping according to service frequency
+#include "host/config/IMUConfig.h"
 
-enum IMUMounting {
-  VerticalStbHull,
-  VerticalPortHull,
-  VerticalTopToBow,
-  //VerticalTopToStern,
-  HorizontalLeftSideToBow,
-  //HorizontalRightSideToBow
-};
+class IMUMonitorPage : public Page, public SKSubscriber {
+  private:
+    TextLayer *_hdgTL, *_rollTL, *_pitchTL, *_calTL;
+    IMUConfig &_config;
+    IMUService &_imuService;
 
-struct IMUConfig {
-  bool enabled;
-  int frequency;
-  bool enableHdg;
-  bool enableHeelPitch;
-  enum IMUMounting mounting = VerticalPortHull;
+    int _magCalibration, _accelCalibration, _sysCalibration;
+    double _pitch, _roll, _heading;
+
+  public:
+    IMUMonitorPage(IMUConfig &config, SKHub& hub, IMUService &imuService);
+
+    virtual void updateReceived(const SKUpdate& up);
+
+    bool processEvent(const TickEvent &te);
+    bool processEvent(const ButtonEvent &be);
 };

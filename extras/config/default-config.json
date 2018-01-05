@@ -1,7 +1,10 @@
 {
   "imu": {
     "enabled": true,
-    "frequency": 20
+    "frequency": 20,
+    "enableHdg": true,
+    "enableHeelPitch": true,
+    "mounting": "verticalPortHull"
   },
   "barometer": {
     "enabled": true,
@@ -51,7 +54,7 @@
   "performance": {
     "enabled": true,
     "boatSpeedCorrectionTable": "boatspeedCorr.cal"
-    "hullFactor": 16,
+    "hullFactor": 100,
     "windSensorHeight": 1250,
     "polarDataFile": "polarData.pol"
   }
