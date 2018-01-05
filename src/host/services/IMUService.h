@@ -21,7 +21,9 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
 #pragma once
+
 #include <Adafruit_BNO055.h>
 #include "common/os/Task.h"
 #include "common/signalk/SKHub.h"
@@ -29,6 +31,14 @@
 
 class IMUService : public Task {
   private:
+    // Re-save calibration every 30min.
+    const unsigned int resaveCalibrationTimeMs = 1800000;
+
+    // Used when converting to an int to store with calibration data
+    // offset is an angle in radians (-3.14 -> 3.14) - scaled to -31459 ->
+    // 31459 which fits in an int16.
+    const int offsetScalingValueToInt = 10000;
+
     IMUConfig &_config;
     SKHub &_skHub;
     Adafruit_BNO055 bno055;
@@ -37,32 +47,31 @@ class IMUService : public Task {
     double _roll, _pitch, _heading;
     double _offsetRoll, _offsetPitch;
     elapsedMillis _timeSinceLastCalSave;
-    elapsedMillis _timeSinceLastSetOffset;
 
-    imu::Vector<3> eulerAngles;
+    bool restoreCalibration();
+    bool saveCalibration();
 
   public:
-    IMUService(IMUConfig &config, SKHub& skHub) : Task("IMU"),  _config(config), _skHub(skHub) {};
+    IMUService(IMUConfig &config, SKHub& skHub);
     void setup();
     void loop();
 
-    void resetIMU();
-    bool readCalibrationOffsets();
-    bool saveCalibrationOffsets();
-    void setHeelPitchOffset();
-    bool saveHeelPitchOffset();
-    bool readHeelPitchOffset();
+    /**
+     * Use current roll and pitch as offset so that if KBox does not move,
+     * future measurement will appear as 0 / 0.
+     */
+    void setRollPitchOffset();
 
     // sysCal '0' in NDOF mode means that the device has not yet found the 'north pole',
     // and orientation values will be off  The heading will jump to an absolute value
-    // once the BNO finds magnetic north (the system calibration status jumps to 1 or higher).
+    // once the BNO finds magnetic north (the system calibrationData status jumps to 1 or higher).
     bool isMagCalibrated() {
       return _magCalib == 3 && _sysCalib > 0;
-    }
+    };
 
-    bool isHeelAndPitchCalibrated() {
+    bool isRollAndPitchCalibrated() {
       return _accelCalib >= 2 && _gyroCalib >= 2 && _sysCalib > 0;
-    }
+    };
 
     void getLastValues(int &_sysCalibration, int &accelCalibration, double &pitch, double &roll, int &magCalibration, double &heading);
 

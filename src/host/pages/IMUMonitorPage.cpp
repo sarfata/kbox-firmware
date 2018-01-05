@@ -28,14 +28,13 @@
   THE SOFTWARE.
 */
 
-#include <stdio.h>
-#include "common/signalk/SKUpdate.h"
+
 #include "IMUMonitorPage.h"
-#include <KBoxLogging.h>
-#include "signalk/SKUnits.h"
+
+#include "common/signalk/SKUpdate.h"
+#include "common/signalk/SKUnits.h"
 
 IMUMonitorPage::IMUMonitorPage(IMUConfig &config, SKHub& hub, IMUService &imuService) : _config(config), _imuService(imuService) {
-
   static const int col1 = 5;
   static const int col2 = 200;
   static const int row1 = 26;
@@ -67,7 +66,7 @@ bool IMUMonitorPage::processEvent(const ButtonEvent &be){
     return false;
   }
   if (be.clickType == ButtonEventTypeLongClick) {
-    _imuService.setHeelPitchOffset();
+    _imuService.setRollPitchOffset();
   }
   return true;
 }
@@ -82,8 +81,8 @@ bool IMUMonitorPage::processEvent(const TickEvent &te){
   _rollTL->setText(String( SKRadToDeg(_roll), 1) + "°     ");
 
   // Always show Hdg from IMU-sensor, but if the value is not trusted (which means
-  // calibration below default setting, change color to red
-  if ( ! _imuService.isMagCalibrated() || ! _imuService.isHeelAndPitchCalibrated()) {
+  // calibrationData below default setting, change color to red
+  if ( ! _imuService.isMagCalibrated() || ! _imuService.isRollAndPitchCalibrated()) {
     _hdgTL->setColor(ColorRed);
     _calTL->setColor(ColorRed);
   } else {
