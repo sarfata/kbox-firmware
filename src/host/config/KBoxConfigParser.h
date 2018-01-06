@@ -41,7 +41,6 @@
 class KBoxConfigParser {
   private:
     SerialMode convertSerialMode(const String &s);
-    IMUMounting convertIMUMounting(const String &s);
 
   public:
     /**

@@ -22,57 +22,19 @@
   THE SOFTWARE.
 */
 
-#pragma once
-
 #include <Adafruit_BNO055.h>
 #include "common/os/Task.h"
 #include "common/signalk/SKHub.h"
-#include "host/config/IMUConfig.h"
 
 class IMUService : public Task {
   private:
-    // Re-save calibration every 30min.
-    const unsigned int resaveCalibrationTimeMs = 1800000;
-
-    // Used when converting to an int to store with calibration data
-    // offset is an angle in radians (-3.14 -> 3.14) - scaled to -31459 ->
-    // 31459 which fits in an int16.
-    const int offsetScalingValueToInt = 10000;
-
-    IMUConfig &_config;
     SKHub &_skHub;
     Adafruit_BNO055 bno055;
-    uint8_t _sysCalib, _gyroCalib, _accelCalib, _magCalib;
-    uint8_t _axisConfig, _signConfig;
-    double _roll, _pitch, _heading;
-    double _offsetRoll, _offsetPitch;
-    elapsedMillis _timeSinceLastCalSave;
-
-    bool restoreCalibration();
-    bool saveCalibration();
+    uint8_t sysCalib, gyroCalib, accelCalib, magCalib;
+    imu::Vector<3> eulerAngles;
 
   public:
-    IMUService(IMUConfig &config, SKHub& skHub);
+    IMUService(SKHub& skHub) : Task("IMU"), _skHub(skHub) {};
     void setup();
     void loop();
-
-    /**
-     * Use current roll and pitch as offset so that if KBox does not move,
-     * future measurement will appear as 0 / 0.
-     */
-    void setRollPitchOffset();
-
-    // sysCal '0' in NDOF mode means that the device has not yet found the 'north pole',
-    // and orientation values will be off  The heading will jump to an absolute value
-    // once the BNO finds magnetic north (the system calibrationData status jumps to 1 or higher).
-    bool isMagCalibrated() {
-      return _magCalib == 3 && _sysCalib > 0;
-    };
-
-    bool isRollAndPitchCalibrated() {
-      return _accelCalib >= 2 && _gyroCalib >= 2;
-    };
-
-    void getLastValues(int &_sysCalibration, int &accelCalibration, double &pitch, double &roll, int &magCalibration, double &heading);
-
 };

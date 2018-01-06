@@ -36,7 +36,7 @@
 static const uint32_t storageMagic = 0xB0A7F107;
 
 // This needs to be updated when the flash storage becomes incompatible!
-static const uint32_t storageVersion = 2;
+static const uint32_t storageVersion = 1;
 
 
 class PersistentStorage {
@@ -65,26 +65,15 @@ class PersistentStorage {
       };
     };
 
-    struct IMUCalibration {
-      uint8_t mountingPosition;
-      uint8_t calibrationData[22]; // NUM_BNO055_OFFSET_REGISTERS
-      int16_t offsetRoll;
-      int16_t offsetPitch;
-    };
-
   private:
     // Addresses of elements in flash storage
     static const uint16_t magicAddress = 0;
     static const uint16_t versionAddress = 4;
     static const uint16_t nmea2000ParamsAddress = 8;
-    static const uint16_t imuCalibrationAddress =
-      nmea2000ParamsAddress + sizeof(NMEA2000Parameters);
 
     // Size of flash
-    static const uint16_t storageUsed = 8 + sizeof(struct NMEA2000Parameters)
-      + sizeof(IMUCalibration);
-    static const uint16_t storageSize = 2048; // Teensy 3.2
-    //static const uint16_t storageSize = 4096; // Teensy 3.6
+    static const uint16_t storageUsed = 8 + sizeof(struct NMEA2000Parameters);
+    static const uint16_t storageSize = 2048;
 
     static bool read(uint16_t address, void *dest, uint16_t size);
     static bool write(uint16_t address, const void *src, uint16_t size);
@@ -97,7 +86,5 @@ class PersistentStorage {
   public:
     static bool readNMEA2000Parameters(struct NMEA2000Parameters &p);
     static bool writeNMEA2000Parameters(struct NMEA2000Parameters &p);
-
-    static bool readIMUCalibration(struct IMUCalibration &o);
-    static bool writeIMUCalibration(struct IMUCalibration &o);
 };
+

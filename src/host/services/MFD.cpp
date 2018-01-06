@@ -33,7 +33,6 @@ MFD::MFD(GC &gc, Encoder &e, Bounce &b) : Task("MFD"), gc(gc), encoder(e), butto
 void MFD::setup() {
   gc.fillRectangle(Origin, gc.getSize(), ColorBlack);
   lastTick = 0;
-  button.update();
 }
 
 void MFD::processInputs() {
@@ -46,26 +45,9 @@ void MFD::processInputs() {
   if (button.update()) {
     if (button.fallingEdge()) {
       events.add(new ButtonEvent(ButtonEventTypePressed));
-      lastButtonDown = millis();
-      lastMaintainedEvent = millis();
     }
     else {
       events.add(new ButtonEvent(ButtonEventTypeReleased));
-
-      if (millis() - lastButtonDown > longClickDuration) {
-        events.add(new ButtonEvent(ButtonEventTypeLongClick));
-      }
-      else {
-        events.add(new ButtonEvent(ButtonEventTypeClick));
-      }
-      lastButtonDown = 0;
-    }
-  }
-  // If the button is currently down...
-  if (lastButtonDown != 0) {
-    if (millis() - lastMaintainedEvent > maintainedEventPeriod) {
-      events.add(new ButtonEvent(ButtonEventTypeMaintained));
-      lastMaintainedEvent = millis();
     }
   }
 }
@@ -117,3 +99,4 @@ void MFD::loop() {
 
   (*pageIterator)->paint(gc);
 }
+

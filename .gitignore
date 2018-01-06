@@ -33,9 +33,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# Netbeans project folder
-nbproject
-
 # Platformio likes to auto-create this
 lib/readme.txt
 CMakeListsPrivate.txt

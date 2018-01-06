@@ -108,18 +108,3 @@ bool PersistentStorage::writeNMEA2000Parameters(struct NMEA2000Parameters &p) {
   return write(nmea2000ParamsAddress, &p, sizeof(NMEA2000Parameters));
 }
 
-bool PersistentStorage::readIMUCalibration(struct IMUCalibration &o){
-  if (!isInitialized()) {
-    return false;
-  }
-
-  return read(imuCalibrationAddress, &o, sizeof(IMUCalibration));
-}
-
-bool PersistentStorage::writeIMUCalibration(struct IMUCalibration &o) {
-  if (!isInitialized()) {
-    initialize();
-  }
-
-  return write(imuCalibrationAddress, &o, sizeof(IMUCalibration));
-}
