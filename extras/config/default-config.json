@@ -53,9 +53,9 @@
   },
   "performance": {
     "enabled": true,
-    "boatSpeedCorrectionTable": "boatspeedCorr.cal"
+    "boatSpeedCorrTableFileName": "boatspeedCorr.cal",
     "hullFactor": 100,
     "windSensorHeight": 1250,
-    "polarDataFile": "polarData.pol"
+    "polarDataFileName": "polarData.pol"
   }
 }
