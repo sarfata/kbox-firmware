@@ -44,5 +44,5 @@ class Performance {
     Performance(){};
     bool calcBoatSpeed(double &bs, double &heel, double &leeway);
     bool corrForNonLinearTransducer(double &bs, double &heel);
-    bool calcLeeway(double &bs, double &leeway);
+    bool calcLeeway(double &bs, double &heel, double &leeway);
 };

@@ -47,8 +47,6 @@ bool Performance::corrForNonLinearTransducer(double &bs, double &heel) {
 
 bool Performance::calcBoatSpeed(double &bs, double &heel, double &leeway) {
 
-  double leeway = SKDoubleNAN;
-
   // we get boat speed in m/s from N2k!, here needed in kts
   double bs_kts = SKMsToKnot(bs);
   corrForNonLinearTransducer(bs_kts, heel);
@@ -72,4 +70,7 @@ bool Performance::calcLeeway(double &bs, double &heel, double &leeway) {
 
   // As we have now leeway pos or neg depending of heel we could write leeway to SKupdate here?
   // or we deliver back to the calling function to keep this class independent from where it is called.
+
+  // if everything is ok....
+  return true;
 }
