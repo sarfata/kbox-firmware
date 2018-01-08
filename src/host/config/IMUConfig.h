@@ -30,8 +30,19 @@
 
 #pragma once
 
+enum IMUMounting {
+  VerticalStbHull,
+  VerticalPortHull,
+  VerticalTopToBow,
+  //VerticalTopToStern,
+  HorizontalLeftSideToBow,
+  //HorizontalRightSideToBow
+};
+
 struct IMUConfig {
   bool enabled;
   int frequency;
+  bool enableHdg;
+  bool enableHeelPitch;
+  enum IMUMounting mounting = VerticalPortHull;
 };
-

@@ -1,7 +1,10 @@
 {
   "imu": {
     "enabled": true,
-    "frequency": 20
+    "frequency": 20,
+    "enableHdg": true,
+    "enableHeelPitch": true,
+    "mounting": "verticalPortHull"
   },
   "barometer": {
     "enabled": true,
@@ -49,4 +52,3 @@
     "rxEnabled": true
   }
 }
-

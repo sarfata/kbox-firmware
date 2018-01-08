@@ -61,12 +61,15 @@ TEST_CASE("KBoxConfigParser") {
     CHECK( config.serial1Config.inputMode == SerialModeNMEA );
     CHECK( config.serial1Config.outputMode == SerialModeNMEA );
     CHECK( config.serial2Config.baudRate == 4800 );
+
+    CHECK( config.imuConfig.enableHdg );
+    CHECK( config.imuConfig.enableHeelPitch );
   }
 
   SECTION("basic config") {
     const char* jsonConfig = "{ 'serial1': { 'inputMode': 'disabled', 'outputMode': 'nmea', 'baudRate': 4800 }, \
                                 'serial2': { 'baudRate': 38400 }, \
-                                'imu': { 'enabled': false, frequency: 5 }\
+                                'imu': { 'enabled': false, frequency: 5, 'mounting': 'horizontalLeftSideToBow' }\
                               }";
 
     JsonObject& root = jsonBuffer.parseObject(jsonConfig);
@@ -82,6 +85,8 @@ TEST_CASE("KBoxConfigParser") {
     CHECK( config.serial2Config.baudRate == 38400 );
 
     CHECK( ! config.imuConfig.enabled );
+    CHECK( config.imuConfig.frequency == 5 );
+    CHECK( config.imuConfig.mounting ==  HorizontalLeftSideToBow );
   }
 
   SECTION("NMEA Converter Config") {

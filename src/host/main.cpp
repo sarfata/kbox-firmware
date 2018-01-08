@@ -34,6 +34,7 @@
 #include "host/services/ADCService.h"
 #include "host/services/BarometerService.h"
 #include "host/services/IMUService.h"
+#include "host/pages/IMUMonitorPage.h"
 #include "host/services/NMEA2000Service.h"
 #include "host/services/SerialService.h"
 #include "host/services/RunningLightService.h"
@@ -98,7 +99,7 @@ void setup() {
 
   ADCService *adcService = new ADCService(skHub, KBox.getADC());
   BarometerService *baroService = new BarometerService(skHub);
-  IMUService *imuService = new IMUService(skHub);
+  IMUService *imuService = new IMUService(config.imuConfig, skHub);
 
   NMEA2000Service *n2kService = new NMEA2000Service(config.nmea2000Config,
                                                     skHub);
@@ -133,6 +134,12 @@ void setup() {
 
   BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
   mfd.addPage(batPage);
+
+  if (config.imuConfig.enabled) {
+    // At the moment the IMUMonitorPage is working with built-in sensor only
+    IMUMonitorPage *imuPage = new IMUMonitorPage(config.imuConfig, skHub, *imuService);
+    mfd.addPage(imuPage);
+  }
 
   StatsPage *statsPage = new StatsPage();
   statsPage->setSDCardTask(sdcardTask);

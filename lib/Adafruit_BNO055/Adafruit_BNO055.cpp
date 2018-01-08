@@ -53,16 +53,14 @@ Adafruit_BNO055::Adafruit_BNO055(int32_t sensorID, uint8_t address)
  PUBLIC FUNCTIONS
  ***************************************************************************/
 
+
 /**************************************************************************/
 /*!
-    @brief  Sets up the HW
+    Sets up the IMU Sensor for KBox, including axis- and sign mapping
 */
 /**************************************************************************/
-bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode)
+bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode, uint8_t axis_remap_orientation, uint8_t axis_remap_sign)
 {
-  /* Enable I2C */
-  //Wire.begin();
-
   /* Make sure we have the right device */
   uint8_t id = read8(BNO055_CHIP_ID_ADDR);
   if(id != BNO055_ID)
@@ -90,8 +88,7 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode)
     //delay(100);
   //}
   //delay(50);
-
-  DEBUG("rebooted");
+  //DEBUG("rebooted");
 
   /* Set to normal power mode */
   DEBUG("going into normal power mode");
@@ -111,14 +108,12 @@ bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode)
   write8(BNO055_UNIT_SEL_ADDR, unitsel);
   */
 
-  /* Configure axis mapping (see section 3.4) */
-  //write8(BNO055_AXIS_MAP_CONFIG_ADDR, REMAP_CONFIG_P2); // P0-P7, Default is P1
-  write8(BNO055_AXIS_MAP_CONFIG_ADDR, 0b00001001); // P0-P7, Default is P1
+  /* Configure axis mapping (see section 3.4 Bosch manual) */
+  write8(BNO055_AXIS_MAP_CONFIG_ADDR, axis_remap_orientation);
   delay(10);
-  //write8(BNO055_AXIS_MAP_SIGN_ADDR, REMAP_SIGN_P2); // P0-P7, Default is P1
-  write8(BNO055_AXIS_MAP_SIGN_ADDR, 0b00000000); // P0-P7, Default is P1
+  write8(BNO055_AXIS_MAP_SIGN_ADDR, axis_remap_sign);
   delay(10);
-  
+
   write8(BNO055_SYS_TRIGGER_ADDR, 0x0);
   delay(10);
   /* Set the requested operating mode (see section 3.3) */
@@ -612,7 +607,7 @@ byte Adafruit_BNO055::read8(adafruit_bno055_reg_t reg )
   #else
     value = Wire.receive();
   #endif
-    
+
   //DEBUG("read => %x", value);
 
   return value;

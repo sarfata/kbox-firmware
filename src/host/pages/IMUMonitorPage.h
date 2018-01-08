@@ -6,8 +6,9 @@
        \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
 
   The MIT License
-
-  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
+  
+  Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2018 Ronnie Zeiller ronnie@zeiller.eu
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -28,40 +29,28 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "common/ui/Page.h"
+#include "common/ui/TextLayer.h"
+#include "common/signalk/SKHub.h"
+#include "common/signalk/SKSubscriber.h"
+#include "services/IMUService.h"
+//TODO: damping and automatic damping according to service frequency
+#include "host/config/IMUConfig.h"
 
-#include <ArduinoJson.h>
-#include <WString.h>
-#include "KBoxConfig.h"
-
-/**
- * Load a JSON file into a KBoxConfig object.
- *
- */
-class KBoxConfigParser {
+class IMUMonitorPage : public Page, public SKSubscriber {
   private:
-    SerialMode convertSerialMode(const String &s);
-    IMUMounting convertIMUMounting(const String &s);
+    TextLayer *_hdgTL, *_rollTL, *_pitchTL, *_calTL;
+    IMUConfig &_config;
+    IMUService &_imuService;
+
+    int _magCalibration, _accelCalibration, _sysCalibration;
+    double _pitch, _roll, _heading;
 
   public:
-    /**
-     * Configures default values in given KBoxConfig object.
-     */
-    void defaultConfig(KBoxConfig &config);
+    IMUMonitorPage(IMUConfig &config, SKHub& hub, IMUService &imuService);
 
-    /**
-     * Parse given JsonObject and transfers the new values found to the config
-     * object.
-     *
-     * Values not specific in the JSON will have the default values (same as
-     * the one provided by defaultConfig().
-     */
-    void parseKBoxConfig(const JsonObject &object, KBoxConfig &config);
+    virtual void updateReceived(const SKUpdate& up);
 
-    void parseIMUConfig(const JsonObject &object, IMUConfig &config);
-    void parseBarometerConfig(const JsonObject &json, BarometerConfig &config);
-    void parseSerialConfig(const JsonObject &object, SerialConfig &config);
-    void parseNMEA2000Config(const JsonObject &object, NMEA2000Config &config);
-    void parseWiFiConfig(const JsonObject &json, WiFiConfig &config);
-    void parseNMEAConverterConfig(const JsonObject &json, SKNMEAConverterConfig &config);
+    bool processEvent(const TickEvent &te);
+    bool processEvent(const ButtonEvent &be);
 };
