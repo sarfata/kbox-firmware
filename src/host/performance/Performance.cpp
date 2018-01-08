@@ -67,8 +67,8 @@ bool Performance::calcLeeway(double &bs_kts, double &heel, double &leeway) {
   // the boat speed
   double hullFactor = 10; // between 8....10
 
-  if (bs != 0 &&) {
-    leeway = (hullFactor * heel) / (bs * bs);
+  if (bs_kts != 0) {
+    leeway = (hullFactor * heel) / (bs_kts * bs_kts);
     return true;
   } else {
     return true;
