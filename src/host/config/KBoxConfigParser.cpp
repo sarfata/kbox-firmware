@@ -34,7 +34,10 @@
 #define READ_BOOL_VALUE(name) READ_VALUE_WITH_TYPE(name, bool)
 #define READ_INT_VALUE(name) READ_VALUE_WITH_TYPE(name, int)
 #define READ_INT_VALUE_WRANGE(name, min, max) if (json[#name].is<int>() && json[#name] > min && json[#name] < max) { config.name = json[#name].as<int>(); }
-
+#define READ_STRING_VALUE(name) if (json[#name].is<const char *>()) {\
+                                  config.name = \
+                                    String(json[#name].as<const char*>()); \
+                                }
 #define READ_ENUM_VALUE(name, converter) if (json[#name].is<const char *>()) { config.name = converter(json[#name].as<const char*>()); }
 
 void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
