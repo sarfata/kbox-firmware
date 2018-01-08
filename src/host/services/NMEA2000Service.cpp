@@ -23,12 +23,14 @@
 */
 
 #include "NMEA2000Service.h"
+
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
 #include <TimeLib.h>
 #include "common/stats/KBoxMetrics.h"
 #include "common/algo/crc.h"
 #include "common/version/KBoxVersion.h"
+#include "common/signalk/SKNMEA2000Parser.h"
 #include "host/util/PersistentStorage.h"
 
 static NMEA2000Service *handlerContext;
@@ -43,6 +45,14 @@ void NMEA2000Service::publishN2kMessage(const tN2kMsg& msg) {
     KBoxMetrics.event(KBoxEventNMEA2000MessageReceived);
     NMEA2000Message m(msg, now());
     sendMessage(m);
+
+    SKNMEA2000Parser p;
+    //FIXME: Get the time properly here!
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    if (update.getSize() > 0) {
+      _hub.publish(update);
+    }
+
   }
 }
 
