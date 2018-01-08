@@ -195,6 +195,12 @@ been possible!**
  * 2018 01 07
    * Data coming from NMEA2000 bus is now sent to SignalK websocket output
    and will be converted to NMEA0183 (if a conversion is available).
+   * Added an IMU page to show heel/roll/pitch on the screen
+   * Added options to configure orientation of KBox inside the boat (still needs
+     some work before it supports all possible orientations)
+   * IMU calibration will be automatically saved when IMU reports its calibrated
+   * User can do a long-press in the IMU page to save current offset for pitch &
+     heel
  * 2018 01 04
    * Add support for parsing PGN127257 Attitude (roll/pitch/yaw)
    * Also improved the output in NMEA and SignalK format when some attitude
