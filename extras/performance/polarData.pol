@@ -1,0 +1,16 @@
+;Rules for the data in polar files:
+;1)     One windspeed curve per line.
+;2)     The curves must be listed in increasing order of windspeed.
+;3)     There must be a least 3 points per curve.
+;4)     There must be at least one non-zero windspeed curve.
+;5)     In each line, the TWA's must be increasing down the list.
+;6)     The minimum TWA is zero, and the maximum is 180.
+;7)     The 2nd TWA in a line is the best VMG upwind angle for that windspeed.  The 2nd to last TWA is the best VMG downwind angle for that windspeed
+;8)     The first TWA should be less than any 2nd TWA in any curve.  Ideally, zero.
+;9)     The last TWA should be greater than any 2nd-to-last TWA in any curve.  Ideally, 180
+8	30.0	4.00	43.7	5.40	60.0	6.20	75.0	6.40	90.0	6.50	105.0	6.40	120.0	6.00	135.0	5.30	150.0	4.40	163.9	4.03	180.0	3.70
+10	30.0	4.50	42.7	5.82	60.0	6.65	75.0	6.90	90.0	7.00	105.0	6.95	120.0	6.60	135.0	6.20	150.0	5.30	164.8	4.91	180.0	4.50
+12	30.0	4.90	41.4	6.03	60.0	6.90	75.0	7.25	90.0	7.40	105.0	7.35	120.0	7.10	135.0	6.60	150.0	6.20	163.4	5.85	180.0	5.30
+16	30.0	5.00	41.8	6.25	60.0	7.15	75.0	7.55	90.0	7.80	105.0	8.00	120.0	8.00	135.0	7.50	150.0	7.10	168.9	6.72	180.0	6.50
+20	30.0	5.10	41.6	6.33	60.0	7.25	75.0	7.80	90.0	8.10	105.0	8.40	120.0	8.70	135.0	8.30	150.0	7.90	168.7	7.51	180.0	7.25
+25	30.0	5.20	41.4	6.42	60.0	7.35	75.0	8.05	90.0	8.30	105.0	8.75	120.0	9.20	135.0	9.00	150.0	8.60	168.6	8.21	180.0	7.90

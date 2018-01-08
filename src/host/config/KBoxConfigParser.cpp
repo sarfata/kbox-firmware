@@ -63,6 +63,12 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.barometerConfig.frequency = 1;
 
   config.wifiConfig.enabled = true;
+
+  config.performanceConfig.enabled = true;
+  config.performanceConfig.boatSpeedCorrectionTable = "boatspeedCorr.cal";
+  config.performanceConfig.hullFactor = 100;
+  config.performanceConfig.windSensorHeight = 1250;
+  config.performanceConfig.polarDataFile = "polarData.pol";
 }
 
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
@@ -73,7 +79,8 @@ void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &confi
   parseIMUConfig(json["imu"], config.imuConfig);
   parseBarometerConfig(json["barometer"], config.barometerConfig);
   parseWiFiConfig(json["wifi"], config.wifiConfig);
-  parseNMEA2000Config(json["nmea2000"], config.nmea2000Config);
+  parseNMEA2000Config(json["nmea2000"], config.nmea2000Config
+  parsePerformanceConfig(json["performance"], config.performanceConfig);
 }
 
 void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &config) {
@@ -129,6 +136,13 @@ void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEACo
   READ_BOOL_VALUE(mwv);
 }
 
+void KBoxConfigParser::parsePerformanceConfig(const JsonObject &json, PerformanceConfig &config) {
+  READ_BOOL_VALUE(enabled);
+  READ_STRING_VALUE(boatSpeedCorrectionTable);
+  READ_INT_VALUE(hullFactor);
+  READ_INT_VALUE(windSensorHeight);
+  READ_STRING_VALUE(polarDataFile);
+}
 
 enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {
   if (s == "disabled") {
