@@ -79,7 +79,7 @@ void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &confi
   parseIMUConfig(json["imu"], config.imuConfig);
   parseBarometerConfig(json["barometer"], config.barometerConfig);
   parseWiFiConfig(json["wifi"], config.wifiConfig);
-  parseNMEA2000Config(json["nmea2000"], config.nmea2000Config
+  parseNMEA2000Config(json["nmea2000"], config.nmea2000Config);
   parsePerformanceConfig(json["performance"], config.performanceConfig);
 }
 
