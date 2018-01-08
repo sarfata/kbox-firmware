@@ -36,7 +36,7 @@
 #include "Performance.h"
 #include "common/signalk/SKUnits.h"
 
-bool Performance::corrForNonLinearTransducer(double &bs, double &heel) {
+bool Performance::corrForNonLinearTransducer(double &bs_kts, double &heel) {
   // Load correction table from SD-Card and correct boat speed
 
   // If heel is more than _maxForHeelCorrectionBoatSpeed then take
@@ -45,32 +45,32 @@ bool Performance::corrForNonLinearTransducer(double &bs, double &heel) {
   return true;
 }
 
-bool Performance::calcBoatSpeed(double &bs, double &heel, double &leeway) {
+// param boatspeed in m/s
+bool Performance::calcBoatSpeed(double &boatspeed, double &heel, double &leeway) {
 
-  // we get boat speed in m/s from N2k!, here needed in kts
-  double bs_kts = SKMsToKnot(bs);
+  double bs_kts = SKMsToKnot(boatspeed);
   corrForNonLinearTransducer(bs_kts, heel);
 
   // Correct for Leeway
-  if (calcLeeway(bs_kts, heel, leeway)) {
-    bs = abs(SKKnotToMs(bs_kts / cos(leeway)));
-    return true;
-  }
+  if (calcLeeway(bs_kts, heel, leeway) && abs(leeway < M_PI_2)) {
 
-  return false;
+    boatspeed = abs(SKKnotToMs(bs_kts / cos(leeway)));
+    return true;
+  } else {
+    return false;
+  }
 }
 
-bool Performance::calcLeeway(double &bs, double &heel, double &leeway) {
+bool Performance::calcLeeway(double &bs_kts, double &heel, double &leeway) {
   // Leeway is an angle of drift due to sidewards wind force
   // it is depending of a hull-factor (given in config), actual heel and
   // the boat speed
   double hullFactor = 10; // between 8....10
 
-  leeway = (hullFactor * heel) / (bs * bs);
-
-  // As we have now leeway pos or neg depending of heel we could write leeway to SKupdate here?
-  // or we deliver back to the calling function to keep this class independent from where it is called.
-
-  // if everything is ok....
-  return true;
+  if (bs != 0 &&) {
+    leeway = (hullFactor * heel) / (bs * bs);
+    return true;
+  } else {
+    return true;
+  }
 }

@@ -42,7 +42,7 @@ class Performance {
 
   public:
     Performance(){};
-    bool calcBoatSpeed(double &bs, double &heel, double &leeway);
-    bool corrForNonLinearTransducer(double &bs, double &heel);
-    bool calcLeeway(double &bs, double &heel, double &leeway);
+    bool calcBoatSpeed(double &boatspeed, double &heel, double &leeway);
+    bool corrForNonLinearTransducer(double &bs_kts, double &heel);
+    bool calcLeeway(double &bs_kts, double &heel, double &leeway);
 };
