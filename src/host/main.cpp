@@ -41,6 +41,7 @@
 #include "host/services/SDCardTask.h"
 #include "host/services/USBService.h"
 #include "host/services/WiFiService.h"
+#include "host/services/AnalogSensorService.h"
 
 static const char *configFilename = "kbox-config.json";
 
@@ -115,6 +116,9 @@ void setup() {
   reader2->connectTo(*sdcardTask);
   n2kService->connectTo(*sdcardTask);
 
+  AnalogSensorService* analogSensorService =
+    new AnalogSensorService(config.analogSensorConfig, skHub);
+
   // Add all the tasks
   taskManager.addTask(&mfd);
   taskManager.addTask(new IntervalTask(new RunningLightService(), 250));
@@ -124,6 +128,12 @@ void setup() {
   }
   if (config.barometerConfig.enabled) {
     taskManager.addTask(new IntervalTask(baroService, 1000 / config.barometerConfig.frequency));
+  }
+  if (config.analogSensorConfig.enabled) {
+    taskManager.addTask(
+      new IntervalTask(analogSensorService,
+                       1000 / config.analogSensorConfig.frequency));
+
   }
   taskManager.addTask(n2kService);
   taskManager.addTask(reader1);
