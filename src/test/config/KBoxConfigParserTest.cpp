@@ -49,6 +49,9 @@ TEST_CASE("KBoxConfigParser") {
     CHECK( config.nmea2000Config.txEnabled == true );
     CHECK( config.nmea2000Config.rxEnabled == true );
     CHECK( config.wifiConfig.enabled == true );
+    CHECK( config.analogSensorConfig.enabled == false );
+    CHECK( config.analogSensorConfig.frequency == 10 );
+    CHECK( config.analogSensorConfig.pulsesPerNauticalMile == 20000 );
   }
 
   SECTION("No input") {
@@ -101,5 +104,20 @@ TEST_CASE("KBoxConfigParser") {
 
     CHECK( nmeaConfig.xdrPressure == true );
     CHECK( nmeaConfig.mwv == false );
+  }
+
+  SECTION("AnalogSensorConfig") {
+    const char *jsonConfig = "{ 'enabled': true, 'frequency': 10, "
+      "'pulsesPerNauticalMile': 20001 }";
+    JsonObject& root = jsonBuffer.parseObject(jsonConfig);
+
+    CHECK( root.success() );
+
+    AnalogSensorConfig config;
+    kboxConfigParser.parseAnalogSensorConfig(root, config);
+
+    CHECK( config.enabled == true );
+    CHECK( config.frequency == 10 );
+    CHECK( config.pulsesPerNauticalMile == 20001 );
   }
 }

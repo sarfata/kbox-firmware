@@ -30,22 +30,11 @@
 
 #pragma once
 
-#include "SerialConfig.h"
-#include "NMEA2000Config.h"
-#include "IMUConfig.h"
-#include "BarometerConfig.h"
-#include "WiFiConfig.h"
-#include "AnalogSensorConfig.h"
 
-/**
- * A KBox configuration in memory
- */
-struct KBoxConfig {
-  SerialConfig serial1Config;
-  SerialConfig serial2Config;
-  NMEA2000Config nmea2000Config;
-  IMUConfig imuConfig;
-  BarometerConfig barometerConfig;
-  WiFiConfig wifiConfig;
-  AnalogSensorConfig analogSensorConfig;
+struct AnalogSensorConfig {
+  bool enabled;
+  int frequency;
+  int pulsesPerNauticalMile;
 };
+
+
