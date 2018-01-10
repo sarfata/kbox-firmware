@@ -50,5 +50,11 @@
   "nmea2000": {
     "txEnabled": true,
     "rxEnabled": true
+  },
+  "sdcard": {
+    "enabled": true,
+    "logtype": "nmea+pcdin",
+    "timestamp": true,
+    "writeDebug": true
   }
 }

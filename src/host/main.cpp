@@ -110,10 +110,13 @@ void setup() {
   reader1->connectTo(*wifi);
   reader2->connectTo(*wifi);
 
-  SDCardTask *sdcardTask = new SDCardTask();
-  reader1->connectTo(*sdcardTask);
-  reader2->connectTo(*sdcardTask);
-  n2kService->connectTo(*sdcardTask);
+  SDCardTask *sdcardTask = new SDCardTask(config.sdcardConfig);
+  if (config.sdcardConfig.enabled){
+    reader1->connectTo(*sdcardTask);
+    reader2->connectTo(*sdcardTask);
+    n2kService->connectTo(*sdcardTask);
+    taskManager.addTask(sdcardTask);
+  }
 
   // Add all the tasks
   taskManager.addTask(&mfd);
@@ -129,7 +132,6 @@ void setup() {
   taskManager.addTask(reader1);
   taskManager.addTask(reader2);
   taskManager.addTask(wifi);
-  taskManager.addTask(sdcardTask);
   taskManager.addTask(&usbService);
 
   BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
@@ -142,7 +144,9 @@ void setup() {
   }
 
   StatsPage *statsPage = new StatsPage();
-  statsPage->setSDCardTask(sdcardTask);
+  if (config.sdcardConfig.enabled){
+    statsPage->setSDCardTask(sdcardTask);
+  }
 
   mfd.addPage(statsPage);
 

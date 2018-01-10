@@ -28,7 +28,7 @@
 
 #include "SDCardTask.h"
 
-SDCardTask::SDCardTask() : Task("SDCard") {
+SDCardTask::SDCardTask(SDCardConfig &config) : Task("SDCard"),  _config(config) {
 }
 
 void SDCardTask::setup() {

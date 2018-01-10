@@ -63,6 +63,8 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.barometerConfig.frequency = 1;
 
   config.wifiConfig.enabled = true;
+
+  config.sdcardConfig.enabled = true;
 }
 
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
@@ -129,6 +131,12 @@ void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEACo
   READ_BOOL_VALUE(mwv);
 }
 
+void KBoxConfigParser::parseSDCardConfig(const JsonObject &json, SDCardConfig &config) {
+  if (json == JsonObject::invalid()) {
+    return;
+  }
+  READ_BOOL_VALUE(enabled);
+}
 
 enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {
   if (s == "disabled") {
@@ -155,4 +163,18 @@ enum IMUMounting KBoxConfigParser::convertIMUMounting(const String &s) {
   }
   // default
   return VerticalPortHull;
+}
+
+enum LogType KBoxConfigParser::convertLogType(const String &s) {
+  if (s == "nmea") {
+    return NMEA;
+  }
+  if (s == "nmea+pcdin") {
+    return NMEA_PCDIN;
+  }
+  if (s == "pcdin") {
+    return PCDIN;
+  }
+  // default
+  return NMEA_PCDIN;
 }

@@ -27,6 +27,7 @@
 #include <SdFat.h>
 #include "os/Task.h"
 #include "signalk/KMessage.h"
+#include "host/config/SDCardConfig.h"
 
 class Loggable {
   public:
@@ -41,13 +42,15 @@ class SDCardTask : public Task, public KReceiver {
     SdFile *logFile = nullptr;
     bool cardReady = false;
 
+    SDCardConfig &_config;
+
     String generateNewFileName(const String& baseName);
     SdFile* createLogFile(const String& baseName);
 
     LinkedList<Loggable> receivedMessages;
 
   public:
-    SDCardTask();
+    SDCardTask(SDCardConfig &config);
     virtual ~SDCardTask() = default;
 
     void setup() override;
