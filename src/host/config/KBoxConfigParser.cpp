@@ -65,6 +65,7 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.wifiConfig.enabled = true;
 
   config.sdcardConfig.enabled = true;
+  config.sdcardConfig.writeTimestamp = true;
 }
 
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
@@ -136,6 +137,8 @@ void KBoxConfigParser::parseSDCardConfig(const JsonObject &json, SDCardConfig &c
     return;
   }
   READ_BOOL_VALUE(enabled);
+  READ_BOOL_VALUE(writeTimestamp);
+  READ_ENUM_VALUE(logtype, convertLogType);
 }
 
 enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {

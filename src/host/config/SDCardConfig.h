@@ -39,7 +39,7 @@ enum LogType {
 struct SDCardConfig {
   bool enabled;
   bool writeTimestamp;
-  enum LogType logType = NMEA_Seasmart;
+  enum LogType logtype = NMEA_Seasmart;
   // TODO: implement writing (debug-)messages to SD-Card
   bool writeDebug;
 };

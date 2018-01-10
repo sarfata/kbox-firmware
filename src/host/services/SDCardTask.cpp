@@ -55,7 +55,7 @@ void SDCardTask::loop() {
     return;
   }
   for (LinkedList<Loggable>::iterator it = receivedMessages.begin(); it != receivedMessages.end(); it++) {
-    if ( _config.timestamp) {
+    if ( _config.writeTimestamp) {
       logFile->print(it->timestamp);
       logFile->print(",");
     }
