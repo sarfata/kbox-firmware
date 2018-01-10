@@ -53,7 +53,7 @@
   },
   "sdcard": {
     "enabled": true,
-    "logtype": "nmea+pcdin",
+    "logtype": "nmea+seasmart",
     "timestamp": true,
     "writeDebug": true
   }

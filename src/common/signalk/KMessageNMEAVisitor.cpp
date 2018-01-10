@@ -35,10 +35,10 @@ void KMessageNMEAVisitor::visit(const NMEA2000Message &n2km) {
 
   const tN2kMsg& msg = n2km.getN2kMsg();
 
+  // TODO: integrate SDCardConfig to check if SeaSmart is enabled
   if (msg.DataLen < 500) {
     char pcdin[30 + msg.DataLen * 2];
     N2kToSeasmart(msg, n2km.getReceivedTime(), pcdin, sizeof(pcdin));
     nmeaContent += String(pcdin) + "\r\n";
   }
 }
-

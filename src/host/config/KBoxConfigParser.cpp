@@ -169,12 +169,12 @@ enum LogType KBoxConfigParser::convertLogType(const String &s) {
   if (s == "nmea") {
     return NMEA;
   }
-  if (s == "nmea+pcdin") {
-    return NMEA_PCDIN;
+  if (s == "nmea+seasmart") {
+    return NMEA_Seasmart;
   }
-  if (s == "pcdin") {
-    return PCDIN;
+  if (s == "seasmart") {
+    return Seasmart;
   }
   // default
-  return NMEA_PCDIN;
+  return NMEA_Seasmart;
 }
