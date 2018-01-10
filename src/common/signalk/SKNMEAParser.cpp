@@ -133,8 +133,7 @@ const SKUpdate& SKNMEAParser::parseMWV(const SKSourceInput& input, NMEASentenceR
 
   // Wind sensors return a number between 0 and 360 but we want an
   // angle in radian with negative values when wind coming from port
-  windAngle = SKDegToRad(windAngle);
-  SKNormalizeAngle(windAngle);
+  windAngle = SKDegToRad(SKNormalizeAngle(windAngle));
 
   SKUpdateStatic<2>* wmv = new SKUpdateStatic<2>();
   wmv->setTimestamp(time);
