@@ -55,8 +55,11 @@ void SDCardTask::loop() {
     return;
   }
   for (LinkedList<Loggable>::iterator it = receivedMessages.begin(); it != receivedMessages.end(); it++) {
-    logFile->print(it->timestamp);
-    logFile->print(",");
+    if ( _config.timestamp) {
+      logFile->print(it->timestamp);
+      logFile->print(",");
+    }
+    // TODO: delete double line-feed
     logFile->print(it->_message);
     logFile->println();
   }
