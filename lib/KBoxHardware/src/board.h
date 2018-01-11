@@ -82,7 +82,7 @@ static const pin_t nmea2_out_enable = 16;
 #define NMEA1_SERIAL Serial2
 #define NMEA2_SERIAL Serial3
 
-/* Analag Inputs */
+/* Analog Inputs */
 #ifdef BOARD_v1_revA
 static const pin_t adc1_analog = A10;
 static const pin_t adc2_analog = A11;
