@@ -67,7 +67,7 @@ class PersistentStorage {
 
     struct IMUCalibration {
       uint8_t mountingPosition;
-      uint8_t calibrationData[22]; // NUM_BNO055_OFFSET_REGISTERS
+      int calibrationData[22]; // NUM_BNO055_OFFSET_REGISTERS
       int16_t offsetRoll;
       int16_t offsetPitch;
     };
