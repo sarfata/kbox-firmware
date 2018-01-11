@@ -58,7 +58,7 @@ TEST_CASE("SKNMEAConverterTest") {
 
   SECTION("EnvironmentOutsidePressure") {
     SKUpdateStatic<1> u;
-    u.setEnvironmentOutsidePressure(1.02421);
+    u.setEnvironmentOutsidePressure(102421);
 
     converter.convert(u, out);
 
