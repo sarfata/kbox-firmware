@@ -98,3 +98,6 @@ static const pin_t supply_analog = A14;
 
 /* SDCard Interface */
 static const pin_t sdcard_cs = 15;
+
+/* Analog Sensor Interface */
+static const pin_t paddle_wheel_input = 25;

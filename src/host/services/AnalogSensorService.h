@@ -30,22 +30,21 @@
 
 #pragma once
 
-#include "SerialConfig.h"
-#include "NMEA2000Config.h"
-#include "IMUConfig.h"
-#include "BarometerConfig.h"
-#include "WiFiConfig.h"
-#include "AnalogSensorConfig.h"
+#include "common/os/Task.h"
+#include "common/signalk/SKHub.h"
+#include "host/config/AnalogSensorConfig.h"
 
-/**
- * A KBox configuration in memory
- */
-struct KBoxConfig {
-  SerialConfig serial1Config;
-  SerialConfig serial2Config;
-  NMEA2000Config nmea2000Config;
-  IMUConfig imuConfig;
-  BarometerConfig barometerConfig;
-  WiFiConfig wifiConfig;
-  AnalogSensorConfig analogSensorConfig;
+class AnalogSensorService : public Task {
+  private:
+    const AnalogSensorConfig& _config;
+    SKHub& _hub;
+
+  public:
+    AnalogSensorService(const AnalogSensorConfig& config, SKHub& hub);
+
+    AnalogSensorService(const char *taskName);
+
+    void setup() override;
+
+    void loop() override;
 };
