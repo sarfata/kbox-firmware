@@ -35,6 +35,10 @@
 #define SKMsToKnot(x)   (x) * 3600.0 / 1852.0
 #define SKMsToKmh(x)    (x) * 3.60
 
+inline double SKPascalToBar(double x) {
+  return x / 1e5;
+}
+
 /**
  * Normalizes any angle in radians to the range [0,2*M_PI)
  */
