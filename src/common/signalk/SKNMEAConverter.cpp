@@ -44,7 +44,7 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
   if (_config.xdrPressure && update.hasEnvironmentOutsidePressure()) {
     NMEASentenceBuilder sb("II", "XDR", 4);
     sb.setField(1, "P");
-    sb.setField(2, update.getEnvironmentOutsidePressure(), 5);
+    sb.setField(2, SKPascalToBar(update.getEnvironmentOutsidePressure()), 5);
     sb.setField(3, "B");
     sb.setField(4, "Barometer");
     output.write(sb.toNMEA());
