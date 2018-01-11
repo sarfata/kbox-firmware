@@ -75,8 +75,8 @@ TEST_CASE("SKNMEAParser: MWV") {
     CHECK( update.getSource() != SKSourceUnknown );
     CHECK( update.getContext() == SKContextSelf );
     CHECK( update.getTimestamp().getTime() == 42 );
-    CHECK( update.getEnvironmentWindSpeedApparent() == SKKnotToMs(5.19) );
-    CHECK( update.getEnvironmentWindAngleApparent() == SKDegToRad(56) );
+    CHECK( update.getEnvironmentWindSpeedApparent() == Approx(SKKnotToMs(5.19)) );
+    CHECK( update.getEnvironmentWindAngleApparent() == Approx(SKDegToRad(56)) );
   }
   SECTION("MWV true") {
     const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "$IIMWV,027,T,3.82,N,A*19", SKTime(42));
@@ -110,6 +110,12 @@ TEST_CASE("SKNMEAParser: MWV") {
     const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "$WIMWV,168.1,R,5.6,S,V*24", SKTime(42));
 
     CHECK( update.getSize() == 0 );
+  }
+  SECTION("MWV relative with wind angle > 180") {
+    // Unit S seems to be knots but I cannot find a real source here.
+    const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "$WIMWV,271,R,5.6,K,A*3F", SKTime(42));
+
+    CHECK( update.getEnvironmentWindAngleApparent() == Approx(SKDegToRad(-89)) );
   }
 }
 
