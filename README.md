@@ -192,6 +192,9 @@ been possible!**
 
 ## Changelog
 
+ * 2018 01 10
+   * Fixed bug #69 - We were sending pressure in Pascal instead of Bars in NMEA
+     XDR sentences for pressure.
  * 2018 01 07
    * Data coming from NMEA2000 bus is now sent to SignalK websocket output
    and will be converted to NMEA0183 (if a conversion is available).
