@@ -111,6 +111,12 @@ TEST_CASE("SKNMEAParser: MWV") {
 
     CHECK( update.getSize() == 0 );
   }
+  SECTION("MWV relative with wind angle > 180") {
+    // Unit S seems to be knots but I cannot find a real source here.
+    const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "$WIMWV,271,R,5.6,K,A*3F", SKTime(42));
+
+    CHECK( update.getEnvironmentWindAngleApparent() == Approx(SKDegToRad(-89)) );
+  }
 }
 
 TEST_CASE("SKNMEAParser: XDR wind temperature") {
