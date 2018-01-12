@@ -201,9 +201,7 @@ been possible!**
   it to be published officially but it's been more than a year and we need the 
   new goodies. 
   
-     Because it's not official yet, you need to run one command to have it 
-  available on your system: 
-  `platformio platform install https://github.com/platformio/platform-espressif8266.git#572bcc6`
+     You need platformio 3.5 to use it. Run `platformio upgrade`.
    * Fixed a bug where SDCard would not show free space properly
  * 2018 01 10
    * Fixed bug #69 - We were sending pressure in Pascal instead of Bars in NMEA
