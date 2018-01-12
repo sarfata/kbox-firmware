@@ -197,11 +197,7 @@ been possible!**
    also connect to an existing network. Both are possible at the same time.
    * KBox now shows WiFi info on the screen (status as a client and as an
    access point), number of clients connected, IP address)
-   * Updated ESP8266 framework version to 2.4-staging. I had been waiting for 
-  it to be published officially but it's been more than a year and we need the 
-  new goodies. 
-  
-     You need platformio 3.5 to use it. Run `platformio upgrade`.
+   * Updated ESP8266 framework version to 2.4.
    * Fixed a bug where SDCard would not show free space properly
  * 2018 01 10
    * Fixed bug #69 - We were sending pressure in Pascal instead of Bars in NMEA
