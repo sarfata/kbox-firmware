@@ -65,10 +65,10 @@ bool Performance::calcLeeway(double &bs_kts, double &heel, double &leeway) {
   // Leeway is an angle of drift due to sidewards wind force
   // it is depending of a hull-factor (given in config), actual heel and
   // the boat speed
-  double hullFactor = 10; // between 8....10
+  double leewayHullFactor = 10; // between 8....10
 
   if (bs_kts != 0) {
-    leeway = (hullFactor * heel) / (bs_kts * bs_kts);
+    leeway = (leewayHullFactor * heel) / (bs_kts * bs_kts);
     return true;
   } else {
     return true;

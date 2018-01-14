@@ -34,7 +34,7 @@
 struct PerformanceConfig {
   bool enabled;
   String boatSpeedCorrTableFileName;
-  int hullFactor;         // usually between 8....10, here multiplied by 10
+  int leewayHullFactor;         // usually between 8....10, here multiplied by 10
   int windSensorHeight;   // in cm
   String polarDataFileName;
 };

@@ -54,8 +54,13 @@
   "performance": {
     "enabled": true,
     "boatSpeedCorrTableFileName": "boatspeedCorr.cal",
-    "hullFactor": 100,
+    "leewayHullFactor": 100,
+    "leewayUpwashWindCorr": true,
+    "upwashFactor": 0,
+    "downwashFactor": 0,
+    "windCorr10m": true,
     "windSensorHeight": 1250,
-    "polarDataFileName": "polarData.pol"
+    "polarDataFileName": "polarData.pol",
+    "efficiencyFactor": 100,
   }
 }
