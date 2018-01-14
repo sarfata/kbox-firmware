@@ -58,8 +58,11 @@
     "leewayUpwashWindCorr": true,
     "upwashFactor": 0,
     "downwashFactor": 0,
-    "windCorr10m": true,
     "windSensorHeight": 1250,
+    "windCorr10m": true,
+    "calcTrueWind": true,
+    "sendTrueWindToN2k": true,
+    "TrueWindN2kID": 10,
     "polarDataFileName": "polarData.pol",
     "efficiencyFactor": 100,
   }
