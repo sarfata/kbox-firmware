@@ -128,7 +128,6 @@ void IMUService::getLastValues(int &sysCalibration, int &accelCalibration, doubl
 
 //  Calc offset for making Heel=0 and Pitch=0
 //  (e.g. called with long button press in IMUMonitorPage)
-//  If an setOffset will be done a second time within 5 Seconds,
 //  the values will be stored into EEPROM and loaded at start of KBox
 void IMUService::setRollPitchOffset() {
   bool changed = false;
@@ -198,4 +197,3 @@ bool IMUService::restoreCalibration() {
     return false;
   }
 }
-
