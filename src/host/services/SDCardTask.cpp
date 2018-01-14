@@ -59,9 +59,7 @@ void SDCardTask::loop() {
       logFile->print(it->timestamp);
       logFile->print(",");
     }
-    // TODO: delete double line-feed
     logFile->print(it->_message);
-    logFile->println();
   }
   // Force data to SD and update the directory entry to avoid data loss.
   if (!logFile->sync() || logFile->getWriteError()) {
