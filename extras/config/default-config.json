@@ -32,7 +32,8 @@
       "hdm": true,
       "mwv": true,
       "rsa": true
-    }
+    },
+    "dataFormatType": "NMEA"
   },
   "serial2": {
     "inputMode": "nmea",
@@ -53,8 +54,8 @@
   },
   "sdcard": {
     "enabled": true,
-    "logtype": "nmea+seasmart",
     "timestamp": true,
-    "writeDebug": true
+    "writeDebug": true,
+    "dataFormatType": "NMEA_Seasmart"
   }
 }

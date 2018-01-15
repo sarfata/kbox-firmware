@@ -30,16 +30,12 @@
 
 #pragma once
 
-enum LogType {
-  NMEA,
-  Seasmart,
-  NMEA_Seasmart
-};
+#include "DataFormatConfig.h"
 
 struct SDCardConfig {
   bool enabled;
   bool writeTimestamp;
-  enum LogType logtype = NMEA_Seasmart;
   // TODO: implement writing (debug-)messages to SD-Card
   bool writeDebug;
+  DataFormatType dataFormatType;
 };

@@ -30,11 +30,15 @@
 
 #pragma once
 
-#include "common/signalk/SKNMEAConverterConfig.h"
-#include "DataFormatConfig.h"
+enum DataFormatType {
+  NMEA,           // pure NMEA0183
+  Seasmart,       // $PCDIN
+  NMEA_Seasmart,  // Combination of both
+  // LoggingDataAsCSV
+  // ActisenseBinary
+  // SignalK ?
+};
 
-struct WiFiConfig {
-  bool enabled;
-  SKNMEAConverterConfig nmeaConverter;
-  DataFormatType dataFormatType;
+struct DataFormatConfig {
+  enum DataFormatType dataFormatType = NMEA_Seasmart;
 };
