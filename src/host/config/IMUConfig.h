@@ -31,12 +31,14 @@
 #pragma once
 
 enum IMUMounting {
-  VerticalStbHull,
-  VerticalPortHull,
-  VerticalTopToBow,
-  //VerticalTopToStern,
-  HorizontalLeftSideToBow,
-  //HorizontalRightSideToBow
+  verticalStbHull,
+  verticalPortHull,
+  verticalTopToBow,
+  //verticalTopToStern,
+  horizontalTopToBow,         // Bosch P0
+  horizontalLeftSideToBow,    // Bosch P1 (default)
+  horizontalBottomToBow,      // Bosch P2
+  horizontalRightSideToBow    // Bosch P3
 };
 
 struct IMUConfig {
@@ -44,5 +46,5 @@ struct IMUConfig {
   int frequency;
   bool enableHdg;
   bool enableHeelPitch;
-  enum IMUMounting mounting = VerticalPortHull;
+  enum IMUMounting mounting = verticalPortHull;
 };

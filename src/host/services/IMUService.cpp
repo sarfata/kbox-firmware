@@ -42,13 +42,25 @@ void IMUService::setup() {
   // Where each can be 00:X, 01: Y, 10:Z
   // Sign is the 3 lsb: 00000xyz
   switch (_config.mounting) {
-    case HorizontalLeftSideToBow:
+    case horizontalTopToBow:         // Bosch P0
+      _axisConfig = 0b00100001;
+      _signConfig = 0b00000100;
+    break;
+    case horizontalLeftSideToBow:    // Bosch P1 (default)
       _axisConfig = 0b00100100;
       _signConfig = 0b00000000;
     break;
-    case VerticalTopToBow:
-    case VerticalStbHull:
-    case VerticalPortHull:
+    case horizontalBottomToBow:      // Bosch P2
+      _axisConfig = 0b00100100;
+      _signConfig = 0b00000110;
+    break;
+    case horizontalRightSideToBow:   // Bosch P3
+      _axisConfig = 0b00100001;
+      _signConfig = 0b00000010;
+    break;
+    case verticalTopToBow:
+    case verticalStbHull:
+    case verticalPortHull:
       _axisConfig = 0b00001001;
       _signConfig = 0b00000000;
   }
@@ -73,22 +85,25 @@ void IMUService::loop() {
   //  roll:   Vessel roll, +ve is list to starboard
   //  pitch:  Pitch, +ve is bow up
   switch (_config.mounting) {
-    case VerticalPortHull:
+    case verticalPortHull:
       _roll = SKDegToRad(eulerAngles.z());
       _pitch = SKDegToRad(eulerAngles.y());
       _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
     break;
-    case VerticalStbHull:
+    case verticalStbHull:
       _roll = SKDegToRad(eulerAngles.z())*(-1);
       _pitch = SKDegToRad(eulerAngles.y())*(-1);
       _heading = SKDegToRad(eulerAngles.x());
     break;
-    case VerticalTopToBow:
+    case verticalTopToBow:
       _roll = SKDegToRad(eulerAngles.y());
       _pitch = SKDegToRad(eulerAngles.z());
       _heading = SKDegToRad(fmod(eulerAngles.x() + 180, 360));
     break;
-    case HorizontalLeftSideToBow:
+    case horizontalTopToBow:         // Bosch P0
+    case horizontalLeftSideToBow:    // Bosch P1 (default)
+    case horizontalBottomToBow:      // Bosch P2
+    case horizontalRightSideToBow:   // Bosch P3
       _roll = SKDegToRad(eulerAngles.y());
       _pitch = SKDegToRad(eulerAngles.z()) * (-1);
       _heading = SKDegToRad(eulerAngles.x());

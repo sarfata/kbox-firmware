@@ -86,7 +86,7 @@ TEST_CASE("KBoxConfigParser") {
 
     CHECK( ! config.imuConfig.enabled );
     CHECK( config.imuConfig.frequency == 5 );
-    CHECK( config.imuConfig.mounting ==  HorizontalLeftSideToBow );
+    CHECK( config.imuConfig.mounting ==  horizontalLeftSideToBow );
   }
 
   SECTION("NMEA Converter Config") {

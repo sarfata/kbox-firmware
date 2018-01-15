@@ -82,7 +82,7 @@ void setup() {
     JsonObject &root =jsonBuffer.parseObject(configFile);
 
     if (root.success()) {
-      DEBUG("Loading configuration from SDCard");
+      DEBUG("Loading configuration file %s from SDCard", configFilename);
       configParser.parseKBoxConfig(root, config);
     }
     else {
