@@ -22,23 +22,30 @@
   THE SOFTWARE.
 */
 
+#include <KBoxLogging.h>
 #include <Seasmart.h>
 #include "KMessageNMEAVisitor.h"
 #include "nmea/NMEASentenceBuilder.h"
 
 void KMessageNMEAVisitor::visit(const NMEASentence& s) {
-  nmeaContent += s.getSentence() + "\r\n";
+  if ( _config.dataFormat == NMEA_Seasmart || _config.dataFormat == NMEA) {
+    DEBUG("Sentence: %s", s.getSentence());
+    nmeaContent += s.getSentence() + "\r\n";
+  }
 }
 
 void KMessageNMEAVisitor::visit(const NMEA2000Message &n2km) {
-  // $PCDIN,<PGN 6>,<Timestamp 8>,<src 2>,<data>*20
 
   const tN2kMsg& msg = n2km.getN2kMsg();
-
-  // TODO: integrate SDCardConfig to check if SeaSmart is enabled
-  if (msg.DataLen < 500) {
-    char pcdin[30 + msg.DataLen * 2];
-    N2kToSeasmart(msg, n2km.getReceivedTime(), pcdin, sizeof(pcdin));
-    nmeaContent += String(pcdin) + "\r\n";
+  
+  DEBUG("ConfigDataFormat: %i",_config.dataFormat);
+  if ( _config.dataFormat == NMEA_Seasmart || _config.dataFormat == Seasmart) {
+    if (msg.DataLen < 500) {
+      char pcdin[30 + msg.DataLen * 2];
+      N2kToSeasmart(msg, n2km.getReceivedTime(), pcdin, sizeof(pcdin));
+      // $PCDIN,<PGN 6>,<Timestamp 8>,<src 2>,<data>*20
+      DEBUG(pcdin);
+      nmeaContent += String(pcdin) + "\r\n";
+    }
   }
 }

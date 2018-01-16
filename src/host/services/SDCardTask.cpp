@@ -45,7 +45,7 @@ void SDCardTask::processMessage(const KMessage &m) {
   }
 
   // FIXME: Should probably implement a custom visitor for logging.
-  KMessageNMEAVisitor v;
+  KMessageNMEAVisitor v(_config.dataFormatConfig);
   m.accept(v);
   receivedMessages.add(Loggable("", v.getNMEAContent()));
 }

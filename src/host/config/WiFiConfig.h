@@ -36,5 +36,5 @@
 struct WiFiConfig {
   bool enabled;
   SKNMEAConverterConfig nmeaConverter;
-  DataFormatType dataFormatType;
+  DataFormatConfig dataFormatConfig;
 };

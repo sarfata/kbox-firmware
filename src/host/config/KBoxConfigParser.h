@@ -42,7 +42,7 @@ class KBoxConfigParser {
   private:
     SerialMode convertSerialMode(const String &s);
     IMUMounting convertIMUMounting(const String &s);
-    LogType convertLogType(const String &s);
+    DataFormatType convertDataFormatType(const String &s);
 
   public:
     /**
@@ -66,4 +66,5 @@ class KBoxConfigParser {
     void parseWiFiConfig(const JsonObject &json, WiFiConfig &config);
     void parseNMEAConverterConfig(const JsonObject &json, SKNMEAConverterConfig &config);
     void parseSDCardConfig(const JsonObject &json, SDCardConfig &config);
+    void parseDataFormatConfig(const JsonObject &json, DataFormatConfig &config);
 };

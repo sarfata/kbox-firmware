@@ -23,6 +23,7 @@
 */
 
 #include "KMessage.h"
+#include "config/DataFormatConfig.h"
 
 /**
  * Converts KMessage objects into NMEA equivalents which are added
@@ -34,8 +35,10 @@
 class KMessageNMEAVisitor : public KVisitor {
   private:
     String nmeaContent;
+    const DataFormatConfig &_config;
 
   public:
+    KMessageNMEAVisitor(const DataFormatConfig &config) : _config(config) {};
     void visit(const NMEASentence& s);
     void visit(const NMEA2000Message &n2km);
 

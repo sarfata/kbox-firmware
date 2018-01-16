@@ -19,6 +19,9 @@
       "hdm": true,
       "mwv": true,
       "rsa": true
+    },
+    "dataFormatType": {
+      "dataFormat" : "NMEA_Seasmart"
     }
   },
   "serial1": {
@@ -33,7 +36,9 @@
       "mwv": true,
       "rsa": true
     },
-    "dataFormatType": "NMEA"
+    "dataFormatType": {
+      "dataFormat" : "NMEA"
+    }
   },
   "serial2": {
     "inputMode": "nmea",
@@ -56,6 +61,8 @@
     "enabled": true,
     "timestamp": true,
     "writeDebug": true,
-    "dataFormatType": "NMEA_Seasmart"
+    "dataFormatType": {
+      "dataFormat" : "NMEA_Seasmart"
+    }
   }
 }

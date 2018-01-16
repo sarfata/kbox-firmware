@@ -31,6 +31,7 @@
 #pragma once
 
 #include <signalk/SKNMEAConverterConfig.h>
+#include "DataFormatConfig.h"
 
 enum SerialMode {
   SerialModeDisabled,
@@ -42,4 +43,5 @@ struct  SerialConfig {
   enum SerialMode inputMode = SerialModeDisabled;
   enum SerialMode outputMode = SerialModeDisabled;
   SKNMEAConverterConfig nmeaConverter;
+  DataFormatConfig dataFormatConfig;
 };

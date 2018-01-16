@@ -63,9 +63,11 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.barometerConfig.frequency = 1;
 
   config.wifiConfig.enabled = true;
+  config.wifiConfig.dataFormatConfig.dataFormat = NMEA;
 
   config.sdcardConfig.enabled = true;
   config.sdcardConfig.writeTimestamp = true;
+  config.sdcardConfig.dataFormatConfig.dataFormat = NMEA_Seasmart;
 }
 
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
@@ -77,6 +79,7 @@ void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &confi
   parseBarometerConfig(json["barometer"], config.barometerConfig);
   parseWiFiConfig(json["wifi"], config.wifiConfig);
   parseNMEA2000Config(json["nmea2000"], config.nmea2000Config);
+  parseSDCardConfig(json["sdcard"], config.sdcardConfig);
 }
 
 void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &config) {
@@ -110,6 +113,14 @@ void KBoxConfigParser::parseNMEA2000Config(const JsonObject &json,
   READ_BOOL_VALUE(txEnabled);
 }
 
+void KBoxConfigParser::parseDataFormatConfig(const JsonObject &json, DataFormatConfig &config) {
+  if (json == JsonObject::invalid()) {
+    return;
+  }
+
+  READ_ENUM_VALUE(dataFormat, convertDataFormatType);
+}
+
 void KBoxConfigParser::parseWiFiConfig(const JsonObject &json, WiFiConfig &config) {
   if (json == JsonObject::invalid()) {
     return;
@@ -117,6 +128,7 @@ void KBoxConfigParser::parseWiFiConfig(const JsonObject &json, WiFiConfig &confi
 
   READ_BOOL_VALUE(enabled);
   parseNMEAConverterConfig(json["nmeaConverter"], config.nmeaConverter);
+  parseDataFormatConfig(json["dataFormatConfig"], config.dataFormatConfig);
 }
 
 void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEAConverterConfig &config) {
@@ -138,7 +150,7 @@ void KBoxConfigParser::parseSDCardConfig(const JsonObject &json, SDCardConfig &c
   }
   READ_BOOL_VALUE(enabled);
   READ_BOOL_VALUE(writeTimestamp);
-  READ_ENUM_VALUE(logtype, convertLogType);
+  parseDataFormatConfig(json["dataFormatConfig"], config.dataFormatConfig);
 }
 
 enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {
@@ -168,14 +180,14 @@ enum IMUMounting KBoxConfigParser::convertIMUMounting(const String &s) {
   return VerticalPortHull;
 }
 
-enum LogType KBoxConfigParser::convertLogType(const String &s) {
-  if (s == "nmea") {
+enum DataFormatType KBoxConfigParser::convertDataFormatType(const String &s) {
+  if (s == "NMEA") {
     return NMEA;
   }
-  if (s == "nmea+seasmart") {
+  if (s == "NMEA_Seasmart") {
     return NMEA_Seasmart;
   }
-  if (s == "seasmart") {
+  if (s == "Seasmart") {
     return Seasmart;
   }
   // default

@@ -74,7 +74,7 @@ void WiFiService::processMessage(const KMessage &m) {
     return;
   }
 
-  KMessageNMEAVisitor v;
+  KMessageNMEAVisitor v(_config.dataFormatConfig);
   m.accept(v);
 
   String data = v.getNMEAContent();

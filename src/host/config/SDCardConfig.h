@@ -37,5 +37,5 @@ struct SDCardConfig {
   bool writeTimestamp;
   // TODO: implement writing (debug-)messages to SD-Card
   bool writeDebug;
-  DataFormatType dataFormatType;
+  DataFormatConfig dataFormatConfig;
 };

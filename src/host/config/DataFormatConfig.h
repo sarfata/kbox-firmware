@@ -40,5 +40,5 @@ enum DataFormatType {
 };
 
 struct DataFormatConfig {
-  enum DataFormatType dataFormatType = NMEA_Seasmart;
+  enum DataFormatType dataFormat = NMEA;
 };
