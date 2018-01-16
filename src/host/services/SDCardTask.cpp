@@ -47,6 +47,10 @@ void SDCardTask::processMessage(const KMessage &m) {
   // FIXME: Should probably implement a custom visitor for logging.
   KMessageNMEAVisitor v(_config.dataFormatConfig);
   m.accept(v);
+  String data = v.getNMEAContent();
+  // if dataFormat "Seasmart" --> datas are coming in
+  // if dataFormat "NMEA" --> nothing is coming
+  DEBUG("processMessage: %s", data.c_str());
   receivedMessages.add(Loggable("", v.getNMEAContent()));
 }
 
@@ -59,6 +63,8 @@ void SDCardTask::loop() {
       logFile->print(it->timestamp);
       logFile->print(",");
     }
+    // PCDIN only are written
+    DEBUG("%s", it->_message);
     logFile->print(it->_message);
   }
   // Force data to SD and update the directory entry to avoid data loss.
@@ -68,7 +74,6 @@ void SDCardTask::loop() {
   // We always clear the list anyway.
   receivedMessages.clear();
 }
-
 
 String SDCardTask::generateNewFileName(const String& baseName) {
   if (baseName.length() > 6) {
