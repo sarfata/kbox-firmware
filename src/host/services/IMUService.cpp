@@ -50,19 +50,21 @@ void IMUService::setup() {
       _axisConfig = 0b00100100;
       _signConfig = 0b00000000;
     break;
-    case horizontalBottomToBow:      // Bosch P2
+    case horizontalRightSideToBow:
       _axisConfig = 0b00100100;
-      _signConfig = 0b00000110;
+      _signConfig = 0b00000100;
     break;
-    case horizontalRightSideToBow:   // Bosch P3
+    case horizontalBottomToBow:
       _axisConfig = 0b00100001;
-      _signConfig = 0b00000010;
+      _signConfig = 0b00000100;
     break;
+    case verticalRightSideToBow:
+    case verticalLeftSideToBow:
     case verticalTopToBow:
-    case verticalStbHull:
-    case verticalPortHull:
+    case verticalBottomToBow:
       _axisConfig = 0b00001001;
       _signConfig = 0b00000000;
+    break;
   }
 
   DEBUG("Initing BNO055");
@@ -85,29 +87,41 @@ void IMUService::loop() {
   //  roll:   Vessel roll, +ve is list to starboard
   //  pitch:  Pitch, +ve is bow up
   switch (_config.mounting) {
-    case verticalPortHull:
-      _roll = SKDegToRad(eulerAngles.z());
-      _pitch = SKDegToRad(eulerAngles.y());
-      _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
-    break;
-    case verticalStbHull:
+    case verticalRightSideToBow:
       _roll = SKDegToRad(eulerAngles.z())*(-1);
       _pitch = SKDegToRad(eulerAngles.y())*(-1);
-      _heading = SKDegToRad(eulerAngles.x());
+      _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
+    break;
+    case verticalLeftSideToBow:
+      _roll = SKDegToRad(eulerAngles.z());
+      _pitch = SKDegToRad(eulerAngles.y());
+      _heading = SKDegToRad(fmod(eulerAngles.x() + 90, 360));
     break;
     case verticalTopToBow:
       _roll = SKDegToRad(eulerAngles.y());
+      _pitch = SKDegToRad(eulerAngles.z())*(-1);
+      _heading = SKDegToRad(eulerAngles.x());
+    break;
+    case verticalBottomToBow:
+      _roll = SKDegToRad(eulerAngles.y())*(-1);
+      _pitch = SKDegToRad(eulerAngles.z());
+      _heading = SKDegToRad(fmod(eulerAngles.x() + 180, 360));
+    break;
+    case horizontalBottomToBow:
+      _roll = SKDegToRad(eulerAngles.y())*(-1);
       _pitch = SKDegToRad(eulerAngles.z());
       _heading = SKDegToRad(fmod(eulerAngles.x() + 180, 360));
     break;
     case horizontalTopToBow:         // Bosch P0
     case horizontalLeftSideToBow:    // Bosch P1 (default)
-    case horizontalBottomToBow:      // Bosch P2
-    case horizontalRightSideToBow:   // Bosch P3
       _roll = SKDegToRad(eulerAngles.y());
-      _pitch = SKDegToRad(eulerAngles.z()) * (-1);
+      _pitch = SKDegToRad(eulerAngles.z())*(-1);
       _heading = SKDegToRad(eulerAngles.x());
     break;
+    case horizontalRightSideToBow:   // Bosch P2
+      _roll = SKDegToRad(eulerAngles.y());
+      _pitch = SKDegToRad(eulerAngles.z());
+      _heading = SKDegToRad(eulerAngles.x());
   }
 
   if (isMagCalibrated()) {

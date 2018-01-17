@@ -29,16 +29,29 @@
 */
 
 #pragma once
+/*              Top (KBox)
+              __________________
+             / o               /|
+            /                 / /
+Left Side  /     BNO055      / /   Right Side
+          /       Top       / /
+         /_________________/ /
+         |________________ |/
+
+            Bottom (KBox)
+*/
+
+// You can use same mounting positions for KBox as for a free cabled sensor
 
 enum IMUMounting {
-  verticalStbHull,
-  verticalPortHull,
-  verticalTopToBow,
-  //verticalTopToStern,
+  verticalRightSideToBow,     // KBox mounted on port hull
+  verticalLeftSideToBow,      // KBox mounted on stb. hull
+  verticalTopToBow,           // KBox mounted on rear bulkhead
+  verticalBottomToBow,        // KBox mounted on front bulkhead,
   horizontalTopToBow,         // Bosch P0
   horizontalLeftSideToBow,    // Bosch P1 (default)
   horizontalBottomToBow,      // Bosch P2
-  horizontalRightSideToBow    // Bosch P3
+  horizontalRightSideToBow,    // Bosch P3
 };
 
 struct IMUConfig {
@@ -46,5 +59,5 @@ struct IMUConfig {
   int frequency;
   bool enableHdg;
   bool enableHeelPitch;
-  enum IMUMounting mounting = verticalPortHull;
+  enum IMUMounting mounting = verticalRightSideToBow;
 };

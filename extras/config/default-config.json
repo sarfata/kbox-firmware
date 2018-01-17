@@ -4,7 +4,7 @@
     "frequency": 20,
     "enableHdg": true,
     "enableHeelPitch": true,
-    "mounting": "verticalPortHull"
+    "mounting": "verticalRightSideToBow"
   },
   "barometer": {
     "enabled": true,
