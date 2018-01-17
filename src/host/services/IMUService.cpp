@@ -21,6 +21,21 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+/*
+           HEEL                    TRIM                   MAGNET COMPASS
+
+    -90° <- I -> +90°       +90° <- I -> -90°                 -> + 360°
+            I                       I                          #
+            I                       I                         ###
+            I                       I                        #####
+            I                       I                        ##o##
+         #######             ################# ->            #####
+          #####              ###############                 #####
+
+        back view           Starboard Side View             Top View
+
+(illustration, thanks to Peter Stefaner)
+*/
 
 #include <KBoxLogging.h>
 #include "common/signalk/SKUpdateStatic.h"
@@ -42,11 +57,12 @@ void IMUService::setup() {
   // Where each can be 00:X, 01: Y, 10:Z
   // Sign is the 3 lsb: 00000xyz
   switch (_config.mounting) {
-    case horizontalTopToBow:         // Bosch P0
-      _axisConfig = 0b00100001;
-      _signConfig = 0b00000100;
+    case horizontalTopToBow:
+    case horizontalBottomToBow:
+      _axisConfig = 0b00100001;   // 0x21
+      _signConfig = 0b00000100;   // 0x04
     break;
-    case horizontalLeftSideToBow:    // Bosch P1 (default)
+    case horizontalLeftSideToBow: // Bosch P1 (default)
       _axisConfig = 0b00100100;
       _signConfig = 0b00000000;
     break;
@@ -54,10 +70,8 @@ void IMUService::setup() {
       _axisConfig = 0b00100100;
       _signConfig = 0b00000100;
     break;
-    case horizontalBottomToBow:
-      _axisConfig = 0b00100001;
-      _signConfig = 0b00000100;
-    break;
+    case verticalPortHull:
+    case verticalStbHull:
     case verticalRightSideToBow:
     case verticalLeftSideToBow:
     case verticalTopToBow:
@@ -84,42 +98,36 @@ void IMUService::loop() {
   SKUpdateStatic<2> update;
 
   // In the SignalK Specification
-  //  roll:   Vessel roll, +ve is list to starboard
+  //  roll:   Vessel roll, +ve is list, heels to starboard
   //  pitch:  Pitch, +ve is bow up
   switch (_config.mounting) {
+    case verticalPortHull:
     case verticalRightSideToBow:
-      _roll = SKDegToRad(eulerAngles.z())*(-1);
+      _roll = SKDegToRad(eulerAngles.z());
       _pitch = SKDegToRad(eulerAngles.y())*(-1);
       _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
     break;
+    case verticalStbHull:
     case verticalLeftSideToBow:
-      _roll = SKDegToRad(eulerAngles.z());
+      _roll = SKDegToRad(eulerAngles.z())*(-1);
       _pitch = SKDegToRad(eulerAngles.y());
       _heading = SKDegToRad(fmod(eulerAngles.x() + 90, 360));
     break;
-    case verticalTopToBow:
-      _roll = SKDegToRad(eulerAngles.y());
-      _pitch = SKDegToRad(eulerAngles.z())*(-1);
-      _heading = SKDegToRad(eulerAngles.x());
-    break;
     case verticalBottomToBow:
-      _roll = SKDegToRad(eulerAngles.y())*(-1);
-      _pitch = SKDegToRad(eulerAngles.z());
-      _heading = SKDegToRad(fmod(eulerAngles.x() + 180, 360));
-    break;
     case horizontalBottomToBow:
-      _roll = SKDegToRad(eulerAngles.y())*(-1);
+      _roll = SKDegToRad(eulerAngles.y());
       _pitch = SKDegToRad(eulerAngles.z());
       _heading = SKDegToRad(fmod(eulerAngles.x() + 180, 360));
     break;
-    case horizontalTopToBow:         // Bosch P0
-    case horizontalLeftSideToBow:    // Bosch P1 (default)
-      _roll = SKDegToRad(eulerAngles.y());
+    case verticalTopToBow:
+    case horizontalTopToBow:
+    case horizontalLeftSideToBow:
+      _roll = SKDegToRad(eulerAngles.y())*(-1);
       _pitch = SKDegToRad(eulerAngles.z())*(-1);
       _heading = SKDegToRad(eulerAngles.x());
     break;
-    case horizontalRightSideToBow:   // Bosch P2
-      _roll = SKDegToRad(eulerAngles.y());
+    case horizontalRightSideToBow:
+      _roll = SKDegToRad(eulerAngles.y())*(-1);
       _pitch = SKDegToRad(eulerAngles.z());
       _heading = SKDegToRad(eulerAngles.x());
   }

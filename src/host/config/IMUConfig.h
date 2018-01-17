@@ -44,6 +44,8 @@ Left Side  /     BNO055      / /   Right Side
 // You can use same mounting positions for KBox as for a free cabled sensor
 
 enum IMUMounting {
+  verticalPortHull,
+  verticalStbHull,
   verticalRightSideToBow,     // KBox mounted on port hull
   verticalLeftSideToBow,      // KBox mounted on stb. hull
   verticalTopToBow,           // KBox mounted on rear bulkhead
@@ -59,5 +61,5 @@ struct IMUConfig {
   int frequency;
   bool enableHdg;
   bool enableHeelPitch;
-  enum IMUMounting mounting = verticalRightSideToBow;
+  enum IMUMounting mounting = verticalPortHull;
 };
