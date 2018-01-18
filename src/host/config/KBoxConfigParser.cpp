@@ -64,9 +64,9 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
 
   config.wifiConfig.enabled = true;
 
-  config.analogSensorConfig.enabled = false;
-  config.analogSensorConfig.frequency = 10;
-  config.analogSensorConfig.pulsesPerNauticalMile = 20000;
+  config.paddleWheelConfig.enabled = false;
+  config.paddleWheelConfig.frequency = 10;
+  config.paddleWheelConfig.pulsesPerNauticalMile = 20000;
 }
 
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
@@ -78,7 +78,7 @@ void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &confi
   parseBarometerConfig(json["barometer"], config.barometerConfig);
   parseWiFiConfig(json["wifi"], config.wifiConfig);
   parseNMEA2000Config(json["nmea2000"], config.nmea2000Config);
-  parseAnalogSensorConfig(json["analogSensor"], config.analogSensorConfig);
+  parsePaddleWheelConfig(json["analogSensor"], config.paddleWheelConfig);
 }
 
 void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &config) {
@@ -121,8 +121,8 @@ void KBoxConfigParser::parseWiFiConfig(const JsonObject &json, WiFiConfig &confi
   parseNMEAConverterConfig(json["nmeaConverter"], config.nmeaConverter);
 }
 
-void KBoxConfigParser::parseAnalogSensorConfig(const JsonObject &json,
-                                               AnalogSensorConfig &config) {
+void KBoxConfigParser::parsePaddleWheelConfig(const JsonObject &json,
+                                              PaddleWheelConfig &config) {
   if (json == JsonObject::invalid()) {
     return;
   }

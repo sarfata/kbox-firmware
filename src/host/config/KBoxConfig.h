@@ -35,7 +35,7 @@
 #include "IMUConfig.h"
 #include "BarometerConfig.h"
 #include "WiFiConfig.h"
-#include "AnalogSensorConfig.h"
+#include "PaddleWheelConfig.h"
 
 /**
  * A KBox configuration in memory
@@ -47,5 +47,5 @@ struct KBoxConfig {
   IMUConfig imuConfig;
   BarometerConfig barometerConfig;
   WiFiConfig wifiConfig;
-  AnalogSensorConfig analogSensorConfig;
+  PaddleWheelConfig paddleWheelConfig;
 };

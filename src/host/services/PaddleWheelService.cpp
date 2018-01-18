@@ -28,7 +28,7 @@
   THE SOFTWARE.
 */
 
-#include "AnalogSensorService.h"
+#include "PaddleWheelService.h"
 
 #include <KBoxHardware.h>
 #include <common/signalk/SKUpdateStatic.h>
@@ -40,70 +40,68 @@
  * At 1knot, that is 5.5 pulses per second which is not enough to provide an
  * accurate speed measurement by counting pulses per second.
  *
- * Instead we measure the period of the pulses and use this to calculate speed.
+ * Instead we average the duration of pulses between updates.
  */
-static volatile uint32_t lastPulseDuration;
+static volatile uint32_t s_sumPulsesDurationUS;
+static volatile uint32_t s_countPulses;
 
-
-/*
- * TODO:
- * - Detect when no pulse has been detected for a while. Right now we are
- * unable to detect this.
- *
- */
 /**
  * Interrupt handler called every time a new pulse is detected.
  */
 static void paddleWheelPulse() {
   static uint32_t lastPulse = UINT32_MAX;
 
+  uint32_t now = micros();
   // This handles the initial start and the overflow case. We just ignore the
   // pulse in this case.
-  uint32_t now = micros();
   if (now > lastPulse) {
-    lastPulseDuration = now - lastPulse;
+    uint32_t pulseDuration = now - lastPulse;
+    s_sumPulsesDurationUS += pulseDuration;
+    s_countPulses++;
   }
   lastPulse = micros();
 }
 
-AnalogSensorService::AnalogSensorService(const AnalogSensorConfig& config,
+PaddleWheelService::PaddleWheelService(const PaddleWheelConfig& config,
                                          SKHub& hub) :
-  Task("AnalogSensor"), _config(config), _hub(hub) {
+  Task("PaddleWheel"), _config(config), _hub(hub) {
 
 }
 
-void AnalogSensorService::setup() {
+void PaddleWheelService::setup() {
   Task::setup();
 
-  lastPulseDuration = 0;
+  s_sumPulsesDurationUS = 0;
+  s_countPulses = 0;
   pinMode(paddle_wheel_input, INPUT_PULLDOWN);
   attachInterrupt(digitalPinToInterrupt(paddle_wheel_input), paddleWheelPulse, RISING);
 }
 
 
-void AnalogSensorService::loop() {
-  uint32_t pulsePeriod;
+void PaddleWheelService::loop() {
   // Disable interrupt to make a copy of the variable that might be
   // manipulated by the interrupt handler while we process the loop.
   cli();
-  pulsePeriod = lastPulseDuration;
-  // This will allow us to detect when no pulses are sent.
-  lastPulseDuration = 0;
+  uint32_t sumPulsesDurationUS = s_sumPulsesDurationUS;
+  uint32_t countPulses = s_countPulses;
+  // Reset the variables to 0 now that we have read them.
+  s_sumPulsesDurationUS = 0;
+  s_countPulses = 0;
   sei();
 
+  double pulsePeriodUS = sumPulsesDurationUS / countPulses;
   double boatSpeed = 0;
 
-  if (pulsePeriod > 0) {
+  if (pulsePeriodUS > 0) {
     // calculate speed in mile / second
     boatSpeed = 1.0 /
-      (_config.pulsesPerNauticalMile * pulsePeriod * 1e-6);
+      (_config.pulsesPerNauticalMile * pulsePeriodUS * 1e-6);
     // convert to mile / hour
     boatSpeed *= 3600;
-
   }
 
-  DEBUG("Paddle wheel period: %i us boat speed: %.2f kt", pulsePeriod,
-        boatSpeed);
+  DEBUG("Paddle wheel period: %.2f us boat speed: %.2f kt - SumPeriod: %i Count: %i",
+        pulsePeriodUS, boatSpeed, sumPulsesDurationUS, countPulses);
   SKUpdateStatic<1> update;
   update.setNavigationSpeedThroughWater(SKKnotToMs(boatSpeed));
   _hub.publish(update);

@@ -65,6 +65,6 @@ class KBoxConfigParser {
     void parseWiFiConfig(const JsonObject &json, WiFiConfig &config);
     void parseNMEAConverterConfig(const JsonObject &json,
                                   SKNMEAConverterConfig &config);
-    void parseAnalogSensorConfig(const JsonObject &json,
-                                 AnalogSensorConfig &config);
+    void parsePaddleWheelConfig(const JsonObject &json,
+                                 PaddleWheelConfig &config);
 };

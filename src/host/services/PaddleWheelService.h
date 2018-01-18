@@ -30,11 +30,21 @@
 
 #pragma once
 
+#include "common/os/Task.h"
+#include "common/signalk/SKHub.h"
+#include "host/config/PaddleWheelConfig.h"
 
-struct AnalogSensorConfig {
-  bool enabled;
-  int frequency;
-  int pulsesPerNauticalMile;
+class PaddleWheelService : public Task {
+  private:
+    const PaddleWheelConfig& _config;
+    SKHub& _hub;
+
+  public:
+    PaddleWheelService(const PaddleWheelConfig& config, SKHub& hub);
+
+    PaddleWheelService(const char *taskName);
+
+    void setup() override;
+
+    void loop() override;
 };
-
-
