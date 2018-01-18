@@ -31,25 +31,32 @@
 #include "SKUnits.h"
 
 void SKNMEA2000Converter::convert(const SKUpdate& update, SKNMEA2000Output& out) {
-  // Trigger a call of visitSKElectricalBatteriesVoltage for every key with that path
-  // (there can be more than one and we do not know how they are called)
-  _currentOutput = &out;
-  update.accept(*this, SKPathElectricalBatteriesVoltage);
+  // Please keep the PGNs in order in this function!
 
-  if (update.hasEnvironmentOutsidePressure()) {
+  // PGN 127250: Magnetic Heading
+  if (update.hasNavigationHeadingMagnetic()) {
     tN2kMsg msg;
-    // PGN 130310 seems to be better supported
-    SetN2kOutsideEnvironmentalParameters(msg, 0, N2kDoubleNA, N2kDoubleNA, update.getEnvironmentOutsidePressure());
-    // PGN 130314 is more specific to pressure but not supported by Raymarine i70
-    //SetN2kPressure(*msg, /* sid */ 0, /* source */ 0, N2kps_Atmospheric, v.getNumberValue());
+    SetN2kMagneticHeading(msg, 0, update.getNavigationHeadingMagnetic());
     out.write(msg);
   }
 
+  // PGN: 127257: Attitude
   if (update.hasNavigationAttitude()) {
     tN2kMsg msg;
     SKTypeAttitude attitude = update.getNavigationAttitude();
     SetN2kAttitude(msg, 0, attitude.yaw, attitude.pitch, attitude.roll);
     out.write(msg);
+  }
+
+  // PGN 127508: Battery Staus
+  // Trigger a call of visitSKElectricalBatteriesVoltage for every key with that path
+  // (there can be more than one and we do not know how they are called)
+  _currentOutput = &out;
+  update.accept(*this, SKPathElectricalBatteriesVoltage);
+
+  // PGN 128259: Boat Speed
+  if (update.hasNavigationSpeedThroughWater()) {
+
   }
 
   // PGN 129026: Fast COG/SOG
@@ -61,12 +68,7 @@ void SKNMEA2000Converter::convert(const SKUpdate& update, SKNMEA2000Output& out)
     out.write(msg);
   }
 
-  if (update.hasNavigationHeadingMagnetic()) {
-    tN2kMsg msg;
-    SetN2kMagneticHeading(msg, 0, update.getNavigationHeadingMagnetic());
-    out.write(msg);
-  }
-
+  // PGN 130306: Wind speed
   if (update.hasEnvironmentWindAngleApparent() && update.hasEnvironmentWindSpeedApparent()) {
     generateWind(out, update.getEnvironmentWindAngleApparent(), update.getEnvironmentWindSpeedApparent(), N2kWind_Apparent);
   }
@@ -85,6 +87,16 @@ void SKNMEA2000Converter::convert(const SKUpdate& update, SKNMEA2000Output& out)
 
   if (update.hasEnvironmentWindDirectionTrue() && update.hasEnvironmentWindSpeedOverGround()) {
     generateWind(out, update.getEnvironmentWindDirectionTrue(), update.getEnvironmentWindSpeedOverGround(), N2kWind_True_North);
+  }
+
+  // PGN: 130310: OutsideEnvironmentalParameters
+  if (update.hasEnvironmentOutsidePressure()) {
+    tN2kMsg msg;
+    // PGN 130310 seems to be better supported
+    SetN2kOutsideEnvironmentalParameters(msg, 0, N2kDoubleNA, N2kDoubleNA, update.getEnvironmentOutsidePressure());
+    // PGN 130314 is more specific to pressure but not supported by Raymarine i70
+    //SetN2kPressure(*msg, /* sid */ 0, /* source */ 0, N2kps_Atmospheric, v.getNumberValue());
+    out.write(msg);
   }
 }
 
