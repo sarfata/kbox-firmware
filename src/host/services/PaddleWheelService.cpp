@@ -103,6 +103,7 @@ void PaddleWheelService::loop() {
   DEBUG("Paddle wheel period: %.2f us boat speed: %.2f kt - SumPeriod: %i Count: %i",
         pulsePeriodUS, boatSpeed, sumPulsesDurationUS, countPulses);
   SKUpdateStatic<1> update;
+  // TODO: Set the source properly once the WiFi PR is merged (it includes sources for sensors).
   update.setNavigationSpeedThroughWater(SKKnotToMs(boatSpeed));
   _hub.publish(update);
 }

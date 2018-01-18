@@ -32,8 +32,9 @@
 #include "common/signalk/SKUnits.h"
 #include "util.h"
 
-#define ApproxN2kWindSpeed(x) Approx(x).epsilon(0.01)
-#define ApproxN2kWindAngle(x) Approx(x).epsilon(0.0001)
+static Catch::Detail::Approx ApproxN2kWindSpeed(double x) { return Approx(x).epsilon(0.01); }
+static Catch::Detail::Approx ApproxN2kWindAngle(double x) { return Approx(x).epsilon(0.0001); }
+static Catch::Detail::Approx ApproxN2kBoatSpeed(double x) { return Approx(x).epsilon(0.01); }
 
 class N2kQueue : public LinkedList<tN2kMsg>, public SKNMEA2000Output {
   public:
@@ -295,6 +296,34 @@ TEST_CASE("NMEA2000Converter") {
         CHECK( windAngle == ApproxN2kWindAngle(SKDegToRad(270)) );
         CHECK( windReference == N2kWind_True_North );
       }
+    }
+  }
+
+  SECTION("Boat Speed & Log") {
+    SKUpdateStatic<1> update;
+
+    update.setNavigationSpeedThroughWater(SKKnotToMs(4.2));
+
+    SKNMEA2000Converter converter;
+    converter.convert(update, messages);
+
+    CHECK( messages.size() == 1 );
+
+    const tN2kMsg *mBoatSpeed = findMessage(messages, 128259, 0);
+
+    CHECK( mBoatSpeed );
+
+    if (mBoatSpeed) {
+      unsigned char sid;
+      double waterReferencedSpeed;
+      double groundReferencedSpeed;
+      tN2kSpeedWaterReferenceType transducerType;
+
+      CHECK( ParseN2kPGN128259(*mBoatSpeed, sid, waterReferencedSpeed, groundReferencedSpeed, transducerType) );
+
+      CHECK( waterReferencedSpeed == ApproxN2kBoatSpeed(SKKnotToMs(4.2)) );
+      CHECK( N2kIsNA(groundReferencedSpeed) );
+      CHECK( transducerType == N2kSWRT_Paddle_wheel );
     }
   }
 }

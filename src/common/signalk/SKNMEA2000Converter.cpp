@@ -56,7 +56,9 @@ void SKNMEA2000Converter::convert(const SKUpdate& update, SKNMEA2000Output& out)
 
   // PGN 128259: Boat Speed
   if (update.hasNavigationSpeedThroughWater()) {
-
+    tN2kMsg msg;
+    SetN2kBoatSpeed(msg, 0, update.getNavigationSpeedThroughWater(), N2kDoubleNA, N2kSWRT_Paddle_wheel);
+    out.write(msg);
   }
 
   // PGN 129026: Fast COG/SOG
