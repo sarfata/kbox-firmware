@@ -26,7 +26,7 @@
 #include "common/signalk/SKContext.h"
 
 TEST_CASE("SKContext") {
-  CHECK( SKContextSelf.getMRN() == "self" );
+  CHECK(SKContextSelf.getURN() == "self" );
 
   SKContext a = SKContextSelf;
   CHECK( a == SKContextSelf );

@@ -82,7 +82,7 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
 
   config.wifiConfig.enabled = true;
   // TODO: Make this depend on KBox hardware so two KBox do not have the same.
-  config.wifiConfig.vesselMRN =
+  config.wifiConfig.vesselURN =
     "urn:mrn:signalk:uuid:31807318-2C00-4A44-890A-7FDB3D53B760";
   config.wifiConfig.accessPoint.enabled = true;
   config.wifiConfig.accessPoint.ssid = "KBox";

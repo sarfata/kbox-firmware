@@ -51,8 +51,8 @@ TEST_CASE("KBoxConfigParser") {
     CHECK( config.wifiConfig.enabled == true );
     // urn:mrn:signalk:uuid:c0d79334-4e25-4245-8892-54e8ccc8021d
     // urn:mrn:imo:vesselMRN:230099999
-    CHECK( config.wifiConfig.vesselMRN != "" );
-    CHECK( config.wifiConfig.vesselMRN.startsWith("urn:mrn:signalk:uuid:") );
+    CHECK( config.wifiConfig.vesselURN != "" );
+    CHECK( config.wifiConfig.vesselURN.startsWith("urn:mrn:signalk:uuid:") );
   }
 
   SECTION("No input") {

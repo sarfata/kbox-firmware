@@ -25,6 +25,7 @@
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
 #include <config/WiFiConfig.h>
+#include <host/config/WiFiConfig.h>
 #include "common/signalk/SKNMEAConverter.h"
 #include "common/signalk/KMessageNMEAVisitor.h"
 #include "common/signalk/SKJSONVisitor.h"
@@ -106,7 +107,7 @@ void WiFiService::updateReceived(const SKUpdate& u) {
 
   // Now send in JSON format
   StaticJsonBuffer<1024> jsonBuffer;
-  SKJSONVisitor jsonVisitor(jsonBuffer);
+  SKJSONVisitor jsonVisitor(_config.vesselURN, jsonBuffer);
   JsonObject &jsonData = jsonVisitor.processUpdate(u);
   FixedSizeKommand<1024> k(KommandSKData);
   jsonData.printTo(k);
@@ -192,7 +193,7 @@ void WiFiService::sendConfiguration() {
   configFrame.appendNullTerminatedString(_config.client.ssid);
   configFrame.appendNullTerminatedString(_config.client.password);
 
-  configFrame.appendNullTerminatedString(_config.vesselMRN);
+  configFrame.appendNullTerminatedString(_config.vesselURN);
 
   _slip.writeFrame(configFrame.getBytes(), configFrame.getSize());
 }

@@ -42,7 +42,7 @@ struct WiFiConfiguration {
   String clientSSID;
   String clientPassword;
 
-  String vesselMRN;
+  String vesselURN;
 };
 
 class KommandHandlerWiFiConfiguration : public KommandHandler {
