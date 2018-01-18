@@ -63,7 +63,7 @@ const SKUpdate& parseInputLine(std::string line) {
 
 int main(int argc, char **argv) {
   DynamicJsonBuffer jsonBuffer;
-  SKJSONVisitor v = SKJSONVisitor(jsonBuffer);
+  SKJSONVisitor v = SKJSONVisitor("self", jsonBuffer);
 
   for (std::string line; std::getline(std::cin, line); ) {
     const SKUpdate& u = parseInputLine(line);

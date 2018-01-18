@@ -41,18 +41,22 @@
 // here, away from other KBox code that uses our LinkedList ...
 static AsyncWebServer webServer(80);
 static AsyncWebSocket ws("/signalk/v1/stream");
+static String s_vesselURN;
+static int s_countClients;
 
 // FIXME: We are going to have some threading problems here because the onEvent
 // will be called on a network thread and KBoxLogging is not thread-safe
-void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
+void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type,
+             void * arg, uint8_t *data, size_t len){
   if (type == WS_EVT_CONNECT) {
     DEBUG("%u: New connection from %s to %s", client->id(), client->remoteIP().toString().c_str(), server->url() );
+    s_countClients++;
 
     StaticJsonBuffer<500> jsonBuffer;
     JsonObject &root = jsonBuffer.createObject();
-    root["version"] = "";
-    root["timestamp"] = "";
-    root["self"] = "KBOX";
+    root["version"] = "1.0.2";
+    //root["timestamp"] = "";
+    root["self"] =  s_vesselURN;
 
     char buffer[256];
     root.printTo(buffer, sizeof(buffer));
@@ -61,9 +65,11 @@ void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
   }
   else if (type == WS_EVT_DISCONNECT) {
     DEBUG("%u: Disconnected", client->id());
+    s_countClients--;
   }
   else if (type == WS_EVT_ERROR) {
     DEBUG("%u: Error", client->id());
+    s_countClients--;
   }
   else if (type == WS_EVT_PONG) {
     DEBUG("%u: PONG", client->id());
@@ -80,6 +86,8 @@ KBoxWebServer::KBoxWebServer() {
 }
 
 void KBoxWebServer::setup() {
+  s_countClients = 0;
+
   // attach AsyncWebSocket
   ws.onEvent(onEvent);
   webServer.addHandler(&ws);
@@ -106,7 +114,8 @@ void KBoxWebServer::setup() {
   webServer.serveStatic("/fs", SPIFFS, "/");
 
   webServer.onNotFound([](AsyncWebServerRequest *request) {
-    request->send(404, "text/plain", "No bounty for you here sailor. Keep looking. (404)");
+      DEBUG("404: %s", request->url().c_str());
+      request->send(404, "text/plain", "No bounty for you here sailor. Keep looking. (404)");
   });
 
   webServer.begin();
@@ -118,3 +127,10 @@ void KBoxWebServer::publishSKUpdate(const char *message) {
   }
 }
 
+void KBoxWebServer::setVesselURN(const String &urn) {
+  s_vesselURN = urn;
+}
+
+int KBoxWebServer::countClients() const {
+  return s_countClients;
+}

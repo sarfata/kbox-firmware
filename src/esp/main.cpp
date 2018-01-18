@@ -150,7 +150,7 @@ void loop() {
         reportStatus(espState,
                      WiFi.softAPgetStationNum(),
                      server.clientsCount(),
-                     0, // FIXME: Signalk Clients
+                     webServer.countClients(),
                      static_cast<uint32_t>(WiFi.localIP()) );
         // TODO: Report other counters + and IP Address
         lastMessageTimer = 0;
@@ -220,6 +220,9 @@ static void configurationCallback(const WiFiConfiguration& config) {
   else {
     WiFi.enableAP(false);
   }
+
+  webServer.setVesselURN(config.vesselURN);
+
   espState = ESPState::ESPConfigured;
 }
 
