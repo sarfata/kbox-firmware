@@ -55,14 +55,11 @@
   },
   "nmea2000": {
     "txEnabled": true,
-    "rxEnabled": true
-  },
-  "sdcard": {
-    "enabled": true,
-    "writeTimestamp": false,
-    "writeDebug": true,
-    "dataFormatConfig": {
-      "dataFormat" : "Seasmart"
+    "rxEnabled": true,
+    "nmea2000Parser": {
+      "heading_127250_enabled": true,
+      "attitude_127257_enabled": true,
+      "depth_128267_enabled": true
     }
   }
 }
