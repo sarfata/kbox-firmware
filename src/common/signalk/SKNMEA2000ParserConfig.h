@@ -8,6 +8,7 @@
   The MIT License
 
   Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2018 Ronnie Zeiller ronnie@zeiller.eu
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -30,10 +31,11 @@
 
 #pragma once
 
-#include <signalk/SKNMEA2000ParserConfig.h>
-
-struct  NMEA2000Config {
-  bool rxEnabled;
-  bool txEnabled;
-  SKNMEA2000ParserConfig nmea2000Parser;
+/**
+ * Configuration for an instance of SKNMEA2000Parser.
+ */
+struct SKNMEA2000ParserConfig {
+  bool heading_127250_enabled = true;
+  bool attitude_127257_enabled = true;
+  bool depth_128267_enabled = true;
 };

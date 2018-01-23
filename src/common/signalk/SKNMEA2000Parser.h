@@ -33,14 +33,16 @@
 #include <N2kMsg.h>
 #include "SKUpdate.h"
 #include "SKUpdateStatic.h"
+#include "SKNMEA2000ParserConfig.h"
 
 class SKNMEA2000Parser {
   private:
+    const SKNMEA2000ParserConfig &_config;
     SKUpdate *_sku = 0;
     SKUpdateStatic<0> _invalidSku = SKUpdateStatic<0>();
 
   public:
-    SKNMEA2000Parser() {};
+    SKNMEA2000Parser(const SKNMEA2000ParserConfig &config) : _config(config) {};
     ~SKNMEA2000Parser();
 
     /**

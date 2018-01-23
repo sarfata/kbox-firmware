@@ -1,13 +1,13 @@
 {
   "imu": {
     "enabled": true,
-    "frequency": 20,
+    "frequency": 4,
     "enableHdg": true,
     "enableHeelPitch": true,
-    "mounting": "verticalPortHull"
+    "mounting": "horizontalTopToBow"
   },
   "barometer": {
-    "enabled": true,
+    "enabled": false,
     "frequency": 1
   },
   "wifi": {
@@ -19,6 +19,9 @@
       "hdm": true,
       "mwv": true,
       "rsa": true
+    },
+    "dataFormatConfig": {
+      "dataFormat" : "NMEA"
     }
   },
   "serial1": {
@@ -26,12 +29,15 @@
     "outputMode": "nmea",
     "baudRate": 38400,
     "nmeaConverter": {
-      "xdrPressure": true,
+      "xdrPressure": false,
       "xdrAttitude": true,
-      "xdrBattery": true,
+      "xdrBattery": false,
       "hdm": true,
       "mwv": true,
       "rsa": true
+    },
+    "dataFormatConfig": {
+      "dataFormat" : "Seasmart"
     }
   },
   "serial2": {
@@ -40,20 +46,23 @@
     "baudRate": 4800,
     "nmeaConverter": {
       "xdrPressure": false,
-      "xdrAttitude": false,
+      "xdrAttitude": true,
       "xdrBattery": false,
-      "hdm": true,
+      "hdm": false,
       "mwv": true,
       "rsa": true
     }
   },
   "nmea2000": {
     "txEnabled": true,
-    "rxEnabled": true,
-    "nmea2000Parser": {
-      "heading_127250_enabled": true,
-      "attitude_127257_enabled": true,
-      "depth_128267_enabled": true
+    "rxEnabled": true
+  },
+  "sdcard": {
+    "enabled": true,
+    "writeTimestamp": false,
+    "writeDebug": true,
+    "dataFormatConfig": {
+      "dataFormat" : "Seasmart"
     }
   }
 }

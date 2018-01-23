@@ -50,17 +50,23 @@ const SKUpdate& SKNMEA2000Parser::parse(const SKSourceInput& input, const tN2kMs
     case 127245L: // Rudder
       return parse127245(input, msg, timestamp);
     case 127250L: // Vessel Heading
-      return parse127250(input, msg, timestamp);
+      if (_config.heading_127250_enabled) {
+        return parse127250(input, msg, timestamp);
+      }
     //case 127251L: // Rate of Turn
     case 127257L: // Attitude Yaw, Pitch, Roll
-      return parse127257(input, msg, timestamp);
+      if (_config.attitude_127257_enabled) {
+        return parse127257(input, msg, timestamp);
+      }
     //case 127258L:  // Magnetic Variation
     //    return parse127258(input, msg, timestamp);
     //  break;
     case 128259L: // Boat speed
       return parse128259(input, msg, timestamp);
     case 128267L: // Water depth
-      return parse128267(input, msg, timestamp);
+      if (_config.depth_128267_enabled) {
+        return parse128267(input, msg, timestamp);
+      }
     //case 128275L: // Distance Log
     case 129025L: // Position, Rapid Update Lat/Lon
       return parse129025(input, msg, timestamp);

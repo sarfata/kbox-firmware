@@ -105,6 +105,8 @@ void KBoxConfigParser::parseNMEA2000Config(const JsonObject &json,
                                            NMEA2000Config &config) {
   READ_BOOL_VALUE(rxEnabled);
   READ_BOOL_VALUE(txEnabled);
+
+  parseNMEA2000ParserConfig(json["nmea2000Parser"], config.nmea2000Parser);
 }
 
 void KBoxConfigParser::parseWiFiConfig(const JsonObject &json, WiFiConfig &config) {
@@ -129,6 +131,16 @@ void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEACo
   READ_BOOL_VALUE(mwv);
 }
 
+void KBoxConfigParser::parseNMEA2000ParserConfig(const JsonObject &json,
+                                                 SKNMEA2000ParserConfig &config) {
+  if (json == JsonObject::invalid()) {
+    return;
+  }
+
+  READ_BOOL_VALUE(heading_127250_enabled);
+  READ_BOOL_VALUE(attitude_127257_enabled);
+  READ_BOOL_VALUE(depth_128267_enabled);
+}
 
 enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {
   if (s == "disabled") {

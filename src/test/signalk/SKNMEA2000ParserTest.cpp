@@ -29,7 +29,8 @@
 #include "common/signalk/SKNMEA2000Parser.h"
 
 TEST_CASE("SKNMEA2000Parser: Basic tests") {
-  SKNMEA2000Parser p;
+  SKNMEA2000ParserConfig config;
+  SKNMEA2000Parser p(config);
   tN2kMsg msg;
 
   SECTION("Parse invalid message") {

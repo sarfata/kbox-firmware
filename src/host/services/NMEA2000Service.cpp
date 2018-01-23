@@ -46,13 +46,12 @@ void NMEA2000Service::publishN2kMessage(const tN2kMsg& msg) {
     NMEA2000Message m(msg, now());
     sendMessage(m);
 
-    SKNMEA2000Parser p;
+    SKNMEA2000Parser p(_config.nmea2000Parser);
     //FIXME: Get the time properly here!
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
     if (update.getSize() > 0) {
       _hub.publish(update);
     }
-
   }
 }
 
@@ -61,15 +60,14 @@ void NMEA2000Service::setup() {
     // Make sure the CAN transceiver is enabled.
     digitalWrite(can_standby, 0);
 
-
     if (_config.txEnabled) {
       initializeNMEA2000forReceiveAndTransmit();
     }
     else {
       initializeNMEA2000forReceiveOnly();
     }
+    _hub.subscribe(this);
   }
-  _hub.subscribe(this);
 }
 
 bool NMEA2000Service::write(const tN2kMsg& msg) {
