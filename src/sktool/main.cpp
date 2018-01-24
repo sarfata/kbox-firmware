@@ -37,9 +37,10 @@
 #include "common/signalk/SKNMEA2000Parser.h"
 #include "common/signalk/SKJSONVisitor.h"
 
+SKNMEA2000ParserConfig config;
 
 SKNMEAParser nmeaParser = SKNMEAParser();
-SKNMEA2000Parser nmea2000Parser = SKNMEA2000Parser();
+SKNMEA2000Parser nmea2000Parser = SKNMEA2000Parser(config);
 
 const SKUpdate& parseInputLine(std::string line) {
   static const SKUpdateStatic<0> noUpdate = SKUpdateStatic<0>();
