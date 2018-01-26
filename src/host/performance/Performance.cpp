@@ -52,7 +52,7 @@ bool Performance::calcBoatSpeed(double &boatspeed, double &heel, double &leeway)
   corrForNonLinearTransducer(bs_kts, heel);
 
   // Correct for Leeway
-  if (calcLeeway(bs_kts, heel, leeway) && abs(leeway < M_PI_2)) {
+  if (calcLeeway(bs_kts, heel, leeway) && (leeway < M_PI_2) && (leeway > (-1)* M_PI_2)) {
 
     boatspeed = abs(SKKnotToMs(bs_kts / cos(leeway)));
     return true;
