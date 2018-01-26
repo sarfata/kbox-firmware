@@ -33,7 +33,7 @@
 #include <N2kMsg.h>
 #include "SKUpdate.h"
 #include "SKUpdateStatic.h"
-#include "performance/Performance.h"
+#include "host/performance/Performance.h"
 
 class SKNMEA2000Parser {
   private:
