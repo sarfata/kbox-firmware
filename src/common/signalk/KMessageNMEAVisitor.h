@@ -23,7 +23,7 @@
 */
 
 #include "KMessage.h"
-#include "config/DataFormatConfig.h"
+#include "host/config/DataFormatConfig.h"
 
 /**
  * Converts KMessage objects into NMEA equivalents which are added
