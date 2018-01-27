@@ -264,6 +264,9 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
             update->setNavigationSpeedThroughWater(waterSpeed);
           }
         }
+      } else {
+        DEBUG("Speed through water not corrected, no NavigationAttitude.roll update found");
+        update->setNavigationSpeedThroughWater(waterSpeed);
       }
     }
 
