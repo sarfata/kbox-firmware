@@ -29,8 +29,6 @@
 static inline double DegToRad(double v) { return v/180.0*3.1415926535897932384626433832795; }
 
 DataFormatConfig dataFormatConfig;
-//DataFormatType dataFormat;
-//enum dataFormat = NMEA_Seasmart;
 
 TEST_CASE("Visiting a NMEA0183 sentence message") {
   NMEASentence s("$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79");
