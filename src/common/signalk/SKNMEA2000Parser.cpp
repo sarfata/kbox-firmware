@@ -28,7 +28,6 @@
   THE SOFTWARE.
 */
 // TODO: N2kParser should parse only enabled by config PGN's
-// TODO: N2kParser should have access to performance class
 
 #include <N2kMessages.h>
 #include <KBoxLogging.h>
@@ -252,22 +251,9 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
     update->setSource(source);
 
     if (!N2kIsNA(waterSpeed)) {
-      // now we have uncorrected boat speed, let's get it corrected, but we need
-      // leeway for that, which we calculate from raw boat speed and heel
-      if (update->hasNavigationAttitude()){
-        double roll = update->getNavigationAttitude().roll;
-        double leeway = SKDoubleNAN;
-        if ( roll != SKDoubleNAN) {
-          // TODO: send waterSpeed and roll to performance to calculate real boat speed
-          if (_performance->calcBoatSpeed(waterSpeed, roll, leeway)) {
-            // update with corrected boat speed
-            update->setNavigationSpeedThroughWater(waterSpeed);
-          }
-        }
-      } else {
-        DEBUG("Speed through water not corrected, no NavigationAttitude.roll update found");
-        update->setNavigationSpeedThroughWater(waterSpeed);
-      }
+      update->setNavigationSpeedThroughWater(waterSpeed);
+    } else {
+      update->setNavigationSpeedThroughWater(waterSpeed);
     }
 
     _sku = update;
