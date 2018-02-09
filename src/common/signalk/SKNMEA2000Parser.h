@@ -33,13 +33,11 @@
 #include <N2kMsg.h>
 #include "SKUpdate.h"
 #include "SKUpdateStatic.h"
-#include "host/performance/Performance.h"
 
 class SKNMEA2000Parser {
   private:
     SKUpdate *_sku = 0;
     SKUpdateStatic<0> _invalidSku = SKUpdateStatic<0>();
-    Performance *_performance = 0;
 
   public:
     SKNMEA2000Parser() {};
