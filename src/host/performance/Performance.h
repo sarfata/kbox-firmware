@@ -7,7 +7,7 @@
 
   The MIT License
   Copyright (c) 2018 Ronnie Zeiller ronnie@zeiller.eu
-  Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
+  KBox Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -34,15 +34,32 @@
 */
 
 #pragma once
+
+#include "common/os/Task.h"
+#include "common/signalk/KMessage.h"
+#include "common/signalk/SKHub.h"
+#include "common/signalk/SKSubscriber.h"
+#include "common/signalk/SKSource.h"
 #include "host/config/PerformanceConfig.h"
 
-class Performance {
+
+class Performance : public Task, public SKSubscriber {
   private:
-    // const PerformanceConfig &_config;
+    const PerformanceConfig &_config;
+    SKHub &_hub;
+
+    double _leeway_deg, _heel_deg, _bs_kts, _bsCorr_kts;
 
   public:
-    Performance(){};
-    bool calcBoatSpeed(double &boatspeed, double &heel, double &leeway);
-    bool corrForNonLinearTransducer(double &bs_kts, double &heel);
-    bool calcLeeway(double &bs_kts, double &heel, double &leeway);
+    Performance(PerformanceConfig &config, SKHub &skHub);
+
+    //void setup();
+    void loop();
+
+    virtual void updateReceived(const SKUpdate& update);
+
+    void calcBoatSpeed(double &bs_kts);
+    double corrForNonLinearTransducer(double &bs_kts, double &heel_deg);
+    bool calcLeeway(double &bs_kts, double &heel_deg, double &leeway_deg);
+
 };
