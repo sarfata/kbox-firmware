@@ -41,6 +41,7 @@
 #include "host/services/SDCardTask.h"
 #include "host/services/USBService.h"
 #include "host/services/WiFiService.h"
+#include "host/performance/Performance.h"
 
 static const char *configFilename = "kbox-config.json";
 
@@ -139,6 +140,11 @@ void setup() {
     // At the moment the IMUMonitorPage is working with built-in sensor only
     IMUMonitorPage *imuPage = new IMUMonitorPage(config.imuConfig, skHub, *imuService);
     mfd.addPage(imuPage);
+  }
+
+  if (config.performanceConfig.enabled) {
+    Performance *performance = new Performance(config.performanceConfig, skHub);
+    taskManager.addTask(performance);
   }
 
   StatsPage *statsPage = new StatsPage();
