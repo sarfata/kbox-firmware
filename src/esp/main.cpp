@@ -39,14 +39,14 @@ static const uint32_t clientsConnectedColor = rgb.Color(0x00, 0x40, 0x00);
 
 #include <ESP8266WiFi.h>
 #include <elapsedMillis.h>
-#include "comms/SlipStream.h"
-#include "comms/KommandHandler.h"
-#include "comms/KommandHandlerPing.h"
+#include "common/comms/SlipStream.h"
+#include "common/comms/KommandHandler.h"
+#include "common/comms/KommandHandlerPing.h"
 #include "comms/KommandHandlerNMEA.h"
 #include "comms/KommandHandlerSKData.h"
 #include "comms/KommandHandlerWiFiConfiguration.h"
 #include "common/comms/ESPState.h"
-#include "stats/KBoxMetrics.h"
+#include "common/stats/KBoxMetrics.h"
 #include "net/KBoxWebServer.h"
 
 #include "ESPDebugLogger.h"
@@ -152,7 +152,6 @@ void loop() {
                      server.clientsCount(),
                      webServer.countClients(),
                      static_cast<uint32_t>(WiFi.localIP()) );
-        // TODO: Report other counters + and IP Address
         lastMessageTimer = 0;
       }
 
