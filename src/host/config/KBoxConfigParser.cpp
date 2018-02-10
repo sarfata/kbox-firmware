@@ -28,6 +28,7 @@
   THE SOFTWARE.
 */
 
+#include <KBoxHardware.h>
 #include "KBoxConfigParser.h"
 
 #define READ_VALUE_WITH_TYPE(name, type) if (json[#name].is<type>()) { \
@@ -81,9 +82,18 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.barometerConfig.frequency = 1;
 
   config.wifiConfig.enabled = true;
-  // TODO: Make this depend on KBox hardware so two KBox do not have the same.
-  config.wifiConfig.vesselURN =
-    "urn:mrn:signalk:uuid:31807318-2C00-4A44-890A-7FDB3D53B760";
+
+  const char *vesselURLFormat = "urn:mrn:signalk:uuid:%08lX-%04lX-4%03lX-%04lX-%04lX%08lX";
+  char vesselURN[80];
+  tKBoxSerialNumber kboxSN;
+  KBox.readKBoxSerialNumber(kboxSN);
+
+  snprintf(vesselURN, sizeof(vesselURN), vesselURLFormat,
+           kboxSN.dwords[0], (uint16_t)(kboxSN.dwords[1] >> 16), (uint16_t)(kboxSN.dwords[1] & 0x0fff),
+           (uint16_t)(kboxSN.dwords[2] >> 16), (uint16_t)(kboxSN.dwords[2] & 0xffff), kboxSN.dwords[3]);
+
+  config.wifiConfig.vesselURN = vesselURN;
+
   config.wifiConfig.accessPoint.enabled = true;
   config.wifiConfig.accessPoint.ssid = "KBox";
   config.wifiConfig.accessPoint.password = "";
