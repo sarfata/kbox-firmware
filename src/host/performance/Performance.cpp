@@ -5,9 +5,12 @@
      \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
        \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
 
-
-  Copyright (c) 2018 Ronnie Zeiller ronnie@zeiller.eu
   Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
+
+  Project  :  KBox
+  Purpose  :  Performance Calculations on KBox
+  Author(s):  Ronnie Zeiller ronnie@zeiller.eu
+  *****************************************************************************
 
   The MIT License
   Permission is hereby granted, free of charge, to any person obtaining a copy
