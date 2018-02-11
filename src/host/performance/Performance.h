@@ -48,18 +48,20 @@ class Performance : public Task, public SKSubscriber {
     const PerformanceConfig &_config;
     SKHub &_hub;
 
-    double _leeway_deg, _heel_deg, _bs_kts, _bsCorr_kts;
+    double _leeway, _heel, _bs_kts_corr, _awa_m, _aws_m;
+
+    void calcBoatSpeed(double &bs_kts);
+    double getCorrForNonLinearTransducer(double &bs_kts, double &heel_deg);
+    double getLeeway(double &bs_kts, double &heel);
+    void calcApparentWind(double &aws_m, double &awa_m, double &heel);
 
   public:
     Performance(PerformanceConfig &config, SKHub &skHub);
+    ~Performance(){};
 
     //void setup();
-    void loop();
+    void loop(){};
 
     virtual void updateReceived(const SKUpdate& update);
-
-    void calcBoatSpeed(double &bs_kts);
-    double corrForNonLinearTransducer(double &bs_kts, double &heel_deg);
-    bool calcLeeway(double &bs_kts, double &heel_deg, double &leeway_deg);
 
 };
