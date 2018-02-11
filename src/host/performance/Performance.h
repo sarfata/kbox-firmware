@@ -46,7 +46,6 @@
 #include "common/signalk/SKSource.h"
 #include "host/config/PerformanceConfig.h"
 
-
 class Performance : public Task, public SKSubscriber {
   private:
     const PerformanceConfig &_config;

@@ -25,15 +25,30 @@
 
 #include "KBoxConfigParser.h"
 
-#define READ_VALUE_WITH_TYPE(name, type) if (json[#name].is<type>()) { config.name = json[#name].as<type>(); }
+#define READ_VALUE_WITH_TYPE(name, type) if (json[#name].is<type>()) { \
+                                           config.name = \
+                                             json[#name].as<type>(); \
+                                         }
 #define READ_BOOL_VALUE(name) READ_VALUE_WITH_TYPE(name, bool)
 #define READ_INT_VALUE(name) READ_VALUE_WITH_TYPE(name, int)
-#define READ_INT_VALUE_WRANGE(name, min, max) if (json[#name].is<int>() && json[#name] > min && json[#name] < max) { config.name = json[#name].as<int>(); }
+
+#define READ_INT_VALUE_WRANGE(name, min, max) if (json[#name].is<int>() \
+                                                    && json[#name] > min \
+                                                    && json[#name] < max) { \
+                                                config.name = \
+                                                  json[#name] .as<int>(); \
+                                              }
+
 #define READ_STRING_VALUE(name) if (json[#name].is<const char *>()) {\
                                   config.name = \
                                     String(json[#name].as<const char*>()); \
                                 }
-#define READ_ENUM_VALUE(name, converter) if (json[#name].is<const char *>()) { config.name = converter(json[#name].as<const char*>()); }
+
+#define READ_ENUM_VALUE(name, converter) if (json[#name].is<const char *>()) { \
+                                           config.name =            \
+                                             converter(json[#name]  \
+                                               .as<const char*>()); \
+                                         }
 
 void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.serial1Config.baudRate = 38400;
@@ -61,6 +76,15 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.barometerConfig.frequency = 1;
 
   config.wifiConfig.enabled = true;
+
+  config.wifiConfig.vesselURN = _defaultVesselURN;
+
+  config.wifiConfig.accessPoint.enabled = true;
+  config.wifiConfig.accessPoint.ssid = "KBox";
+  config.wifiConfig.accessPoint.password = "";
+  config.wifiConfig.client.enabled = false;
+  config.wifiConfig.client.ssid = "";
+  config.wifiConfig.client.password = "";
 
   config.performanceConfig.enabled = true;
   config.performanceConfig.boatSpeedCorrTableFileName = "boatspeedCorr.cal";
@@ -118,6 +142,12 @@ void KBoxConfigParser::parseWiFiConfig(const JsonObject &json, WiFiConfig &confi
   }
 
   READ_BOOL_VALUE(enabled);
+
+  if (json["mmsi"].is<const char*>()) {
+    config.vesselURN = String("urn:mrn:imo:mmsi:") + String(json["mmsi"].as<const char*>());
+  }
+  parseWiFiNetworkConfig(json["client"], config.client);
+  parseWiFiNetworkConfig(json["accessPoint"], config.accessPoint);
   parseNMEAConverterConfig(json["nmeaConverter"], config.nmeaConverter);
 }
 
@@ -132,6 +162,13 @@ void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEACo
   READ_BOOL_VALUE(hdm);
   READ_BOOL_VALUE(rsa);
   READ_BOOL_VALUE(mwv);
+}
+
+void KBoxConfigParser::parseWiFiNetworkConfig(const JsonObject &json,
+                                              WiFiNetworkConfig &config) {
+  READ_BOOL_VALUE(enabled);
+  READ_STRING_VALUE(ssid);
+  READ_STRING_VALUE(password);
 }
 
 void KBoxConfigParser::parsePerformanceConfig(const JsonObject &json, PerformanceConfig &config) {

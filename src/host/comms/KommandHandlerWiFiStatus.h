@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,37 +30,27 @@
 
 #pragma once
 
-#include "ui/Page.h"
-#include "ui/TextLayer.h"
+#include <IPAddress.h>
+#include "common/comms/KommandHandler.h"
+#include "common/comms/ESPState.h"
 
-class SDCardTask;
-class WiFiService;
+class WiFiStatusObserver {
+  public:
+    virtual ~WiFiStatusObserver() {};
+    virtual void wiFiStatusUpdated(const ESPState& state, uint16_t dhcpClients,
+                           uint16_t tcpClients, uint16_t signalkClients,
+                           const IPAddress& ipAddress) = 0;
+};
 
-class StatsPage : public Page {
+class KommandHandlerWiFiStatus : public KommandHandler {
   private:
-    TextLayer *nmea1Rx, *nmea1Errors, *nmea2Rx, *nmea2Errors;
-    TextLayer *nmea1Tx, *nmea1TxErrors, *nmea2Tx, *nmea2TxErrors;
-    TextLayer *canRx, *canTx, *canTxErrors;
-    TextLayer *wifiAPStatus, *wifiAPIP;
-    TextLayer *wifiClientStatus, *wifiClientIP;
-    TextLayer *usedRam, *freeRam, *avgLoopTime;
-    TextLayer *logName, *logSize, *freeSpace;
-
-    const SDCardTask *sdcardTask = 0;
-    const WiFiService *wifiService = 0;
-
-    void loadView();
-    String formatDiskSize(uint64_t intSize);
+    WiFiStatusObserver& _observer;
 
   public:
-    StatsPage();
-    bool processEvent(const TickEvent &e);
+    KommandHandlerWiFiStatus(WiFiStatusObserver& o) : _observer(o) {};
 
-    void setSDCardTask(const SDCardTask *t) {
-      sdcardTask = t;
-    };
-
-    void setWiFiService(const WiFiService *s) {
-      wifiService = s;
-    }
+    bool
+    handleKommand(KommandReader &kreader, SlipStream &replyStream) override;
 };
+
+

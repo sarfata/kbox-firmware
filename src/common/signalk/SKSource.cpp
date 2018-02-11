@@ -89,6 +89,14 @@ SKSource SKSource::sourceForNMEA2000(const SKSourceInput input, const uint32_t p
   return s;
 }
 
+SKSource SKSource::sourceForKBoxSensor(const SKSourceInput input) {
+  SKSource s;
+
+  s._input = input;
+
+  return s;
+}
+
 bool SKSource::operator==(const SKSource &other) const {
   if (_input != other._input) {
     return false;
