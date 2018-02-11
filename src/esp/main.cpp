@@ -146,7 +146,8 @@ void loop() {
     case ESPState::ESPConfigured:
       // We are connected. Report status every 500ms.
       if (lastMessageTimer > 500) {
-        DEBUG("Still running ... %i connected clients - %i heap", server.clientsCount(), ESP.getFreeHeap());
+        DEBUG("Still running ... %i connected clients - %i heap",
+              server.clientsCount() + webServer.countClients(), ESP.getFreeHeap());
         reportStatus(espState,
                      WiFi.softAPgetStationNum(),
                      server.clientsCount(),
