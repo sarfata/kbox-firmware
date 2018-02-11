@@ -40,10 +40,12 @@
  */
 class KBoxConfigParser {
   private:
+    String _defaultVesselURN;
     SerialMode convertSerialMode(const String &s);
     IMUMounting convertIMUMounting(const String &s);
 
   public:
+    KBoxConfigParser(const String &defaultVesselURN) : _defaultVesselURN(defaultVesselURN) {};
     /**
      * Configures default values in given KBoxConfig object.
      */

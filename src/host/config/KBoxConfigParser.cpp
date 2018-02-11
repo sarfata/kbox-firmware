@@ -28,7 +28,6 @@
   THE SOFTWARE.
 */
 
-#include <KBoxHardware.h>
 #include "KBoxConfigParser.h"
 
 #define READ_VALUE_WITH_TYPE(name, type) if (json[#name].is<type>()) { \
@@ -83,16 +82,7 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
 
   config.wifiConfig.enabled = true;
 
-  const char *vesselURLFormat = "urn:mrn:signalk:uuid:%08lX-%04lX-4%03lX-%04lX-%04lX%08lX";
-  char vesselURN[80];
-  tKBoxSerialNumber kboxSN;
-  KBox.readKBoxSerialNumber(kboxSN);
-
-  snprintf(vesselURN, sizeof(vesselURN), vesselURLFormat,
-           kboxSN.dwords[0], (uint16_t)(kboxSN.dwords[1] >> 16), (uint16_t)(kboxSN.dwords[1] & 0x0fff),
-           (uint16_t)(kboxSN.dwords[2] >> 16), (uint16_t)(kboxSN.dwords[2] & 0xffff), kboxSN.dwords[3]);
-
-  config.wifiConfig.vesselURN = vesselURN;
+  config.wifiConfig.vesselURN = _defaultVesselURN;
 
   config.wifiConfig.accessPoint.enabled = true;
   config.wifiConfig.accessPoint.ssid = "KBox";
@@ -150,6 +140,10 @@ void KBoxConfigParser::parseWiFiConfig(const JsonObject &json, WiFiConfig &confi
   }
 
   READ_BOOL_VALUE(enabled);
+
+  if (json["mmsi"].is<const char*>()) {
+    config.vesselURN = String("urn:mrn:imo:mmsi:") + String(json["mmsi"].as<const char*>());
+  }
   parseWiFiNetworkConfig(json["client"], config.client);
   parseWiFiNetworkConfig(json["accessPoint"], config.accessPoint);
   parseNMEAConverterConfig(json["nmeaConverter"], config.nmeaConverter);

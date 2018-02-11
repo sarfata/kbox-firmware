@@ -78,7 +78,7 @@ JsonObject& SKJSONVisitor::processUpdate(const SKUpdate& update) {
   else {
     context = context + update.getContext().getURN();
   }
-  root["context"] = _jsonBuffer.strdup(context);
+  root["context"] = _jsonBuffer.strdup(context.c_str());
 
   JsonArray &jsonUpdates = root.createNestedArray("updates");
   JsonObject &thisUpdate = jsonUpdates.createNestedObject();

@@ -71,8 +71,17 @@ void setup() {
 
   digitalWrite(led_pin, 1);
 
+  // Generate a default URN based on MCU serial number.
+  const char *vesselURLFormat = "urn:mrn:signalk:uuid:%08lX-%04lX-4%03lX-%04lX-%04lX%08lX";
+  char defaultVesselURN[80];
+  tKBoxSerialNumber kboxSN;
+  KBox.readKBoxSerialNumber(kboxSN);
+  snprintf(defaultVesselURN, sizeof(defaultVesselURN), vesselURLFormat,
+           kboxSN.dwords[0], (uint16_t)(kboxSN.dwords[1] >> 16), (uint16_t)(kboxSN.dwords[1] & 0x0fff),
+           (uint16_t)(kboxSN.dwords[2] >> 16), (uint16_t)(kboxSN.dwords[2] & 0xffff), kboxSN.dwords[3]);
+
   // Load configuration if available
-  KBoxConfigParser configParser;
+  KBoxConfigParser configParser(defaultVesselURN);
   configParser.defaultConfig(config);
   if (KBox.getSdFat().exists(configFilename)) {
     File configFile = KBox.getSdFat().open(configFilename);

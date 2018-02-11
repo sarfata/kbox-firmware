@@ -33,7 +33,7 @@
 #include "host/config/KBoxConfigParser.h"
 
 TEST_CASE("KBoxConfigParser") {
-  KBoxConfigParser kboxConfigParser;
+  KBoxConfigParser kboxConfigParser("urn:mrn:kbox:unit-testing");
   KBoxConfig config;
   StaticJsonBuffer<4096> jsonBuffer;
 
@@ -49,11 +49,7 @@ TEST_CASE("KBoxConfigParser") {
     CHECK( config.nmea2000Config.txEnabled == true );
     CHECK( config.nmea2000Config.rxEnabled == true );
     CHECK( config.wifiConfig.enabled == true );
-    // urn:mrn:signalk:uuid:c0d79334-4e25-4245-8892-54e8ccc8021d
-    // urn:mrn:imo:vesselMRN:230099999
-    CHECK( config.wifiConfig.vesselURN != "" );
-    CHECK( config.wifiConfig.vesselURN.startsWith("urn:mrn:signalk:uuid:") );
-  }
+    CHECK( config.wifiConfig.vesselURN == "urn:mrn:kbox:unit-testing" );  }
 
   SECTION("No input") {
     JsonObject& root = jsonBuffer.parseObject("invalid json string");
@@ -146,5 +142,18 @@ TEST_CASE("KBoxConfigParser") {
     CHECK( wiFiConfig.client.enabled == false );
     CHECK( wiFiConfig.client.ssid == "Default-SSID" );
     CHECK( wiFiConfig.client.password == "Default-password" );
+  }
+
+  SECTION("WiFi config - MMSI") {
+    const char *jsonConfig = "{ 'mmsi': '412345678' }";
+    JsonObject &root = jsonBuffer.parseObject(jsonConfig);
+
+    CHECK( root.success() );
+
+    WiFiConfig wiFiConfig;
+
+    kboxConfigParser.parseWiFiConfig(root, wiFiConfig);
+
+    CHECK( wiFiConfig.vesselURN == "urn:mrn:imo:mmsi:412345678" );
   }
 }
