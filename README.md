@@ -192,7 +192,7 @@ been possible!**
 
 ## Changelog
 
- * 2018 01 11
+ * 2018 02 10
    * Configuration option for WiFi. KBox can act as an access point and can 
    also connect to an existing network. Both are possible at the same time.
    * KBox now shows WiFi info on the screen (status as a client and as an
