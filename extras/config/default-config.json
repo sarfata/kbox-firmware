@@ -73,6 +73,6 @@
     "sendTrueWindToN2k": true,
     "TrueWindN2kID": 10,
     "polarDataFileName": "polarData.pol",
-    "efficiencyFactor": 100,
+    "efficiencyFactor": 100
   }
 }
