@@ -41,10 +41,10 @@
 
 #include "common/os/Task.h"
 #include "common/signalk/KMessage.h"
+#include "host/config/PerformanceConfig.h"
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKSubscriber.h"
 #include "common/signalk/SKSource.h"
-#include "host/config/PerformanceConfig.h"
 
 class Performance : public Task, public SKSubscriber {
   private:

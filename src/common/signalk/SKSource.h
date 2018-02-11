@@ -33,7 +33,7 @@ enum SKSourceInput {
   SKSourceInputNMEA2000,
   SKSourceInputKBoxIMU,
   SKSourceInputKBoxADC,
-  SKSourceInputKBoxBarometer
+  SKSourceInputKBoxBarometer,
   SKSourceInputPerformance
 };
 
@@ -71,7 +71,6 @@ class SKSource {
      */
     static SKSource unknownSource();
 
-    static SKSource internalSensor();
     static SKSource performanceCalc();
     /**
      * Returns a source instance for the given NMEA0183 source info.
