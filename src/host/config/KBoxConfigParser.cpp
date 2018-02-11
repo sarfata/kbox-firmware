@@ -89,6 +89,7 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.performanceConfig.enabled = true;
   config.performanceConfig.boatSpeedCorrTableFileName = "boatspeedCorr.cal";
   config.performanceConfig.leewayHullFactor = 0;    // no entry
+  config.performanceConfig.windCorr10m = false;
   config.performanceConfig.windSensorHeight = 0;    // no entry
   config.performanceConfig.polarDataFileName = "polarData.pol";
 }
@@ -177,6 +178,7 @@ void KBoxConfigParser::parsePerformanceConfig(const JsonObject &json, Performanc
   READ_INT_VALUE(leewayHullFactor);
   READ_INT_VALUE(windSensorHeight);
   READ_STRING_VALUE(polarDataFileName);
+  READ_BOOL_VALUE(windCorr10m);
 }
 
 enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {

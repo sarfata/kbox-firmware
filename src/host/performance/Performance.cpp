@@ -47,7 +47,6 @@
 */
 
 #include <KBoxLogging.h>
-#include "host/config/KBoxConfig.h"
 #include "common/signalk/SKUpdate.h"
 #include "common/signalk/SKUpdateStatic.h"
 #include "Performance.h"
@@ -171,7 +170,8 @@ void Performance::calcApparentWind(double &aws_m, double &awa_m, double &heel){
   // Correction measurement from sensor height to 10m above water as needed
   // for ORC performance calculations
   // Is there any sensorheight (in mm) more than 10m in config?
-  if (_config.windSensorHeight > 10000) {
+  if (_config.windCorr10m &&
+      _config.windSensorHeight > 10000) {
     aws_corr = aws_corr * (1 / (0.9 + 0.1 * _config.windSensorHeight / 1000));
   }
   SKUpdateStatic<2> updateWrite;
