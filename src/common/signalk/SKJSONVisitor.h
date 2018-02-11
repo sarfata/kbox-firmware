@@ -36,6 +36,7 @@
 
 class SKJSONVisitor {
   private:
+    const String _vesselURN;
     JsonBuffer &_jsonBuffer;
 
     void processSource(const SKSource &source, JsonObject &sourceObject);
@@ -49,7 +50,8 @@ class SKJSONVisitor {
      *
      * You can pass a StaticJsonBuffer or a DynamicJsonBuffer here.
      */
-    SKJSONVisitor(JsonBuffer& jsonBuffer) : _jsonBuffer(jsonBuffer) {};
+    SKJSONVisitor(const String &vesselURN, JsonBuffer& jsonBuffer) :
+      _vesselURN(vesselURN), _jsonBuffer(jsonBuffer) {};
 
     /**
      * Process a SKUpdate and add messages to the internal queue of messages.

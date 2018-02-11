@@ -203,3 +203,10 @@ void KBoxHardware::rebootKBox() {
 
   *cpuRestartAddress = cpuRestartValue;
 }
+
+void KBoxHardware::readKBoxSerialNumber(tKBoxSerialNumber &sn) {
+  sn.dwords[0] = SIM_UIDH;
+  sn.dwords[1] = SIM_UIDMH;
+  sn.dwords[2] = SIM_UIDML;
+  sn.dwords[3] = SIM_UIDL;
+}

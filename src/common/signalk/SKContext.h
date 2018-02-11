@@ -36,19 +36,19 @@
  */
 class SKContext {
   private:
-    String _mrn;
+    String _urn;
 
   public:
     /**
-     * Create a new SKContext instance with a given MRN.
+     * Create a new SKContext instance with a given URN.
      */
-    SKContext(const String& mrn) : _mrn(mrn) {};
+    SKContext(const String& urn) : _urn(urn) {};
 
     /**
      * @return a unique identifier for a vessel.
      */
-    const String getMRN() const {
-      return _mrn;
+    const String getURN() const {
+      return _urn;
     };
 
     /**

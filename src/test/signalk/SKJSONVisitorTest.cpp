@@ -35,7 +35,7 @@
 
 TEST_CASE("SKJSONVisitor") {
   DynamicJsonBuffer jsonBuffer;
-  SKJSONVisitor jsonVisitor(jsonBuffer);
+  SKJSONVisitor jsonVisitor("urn:mrn:kbox:unit-test", jsonBuffer);
   SKUpdateStatic<5> update;
 
   SECTION("empty update") {

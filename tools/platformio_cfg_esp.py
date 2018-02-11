@@ -1,7 +1,5 @@
-from SCons.Script import DefaultEnvironment
 import os
-
-env = DefaultEnvironment()
+Import("env")
 
 LOCAL_UPLOADER=os.path.join("$PROJECT_DIR","tools/esptool.py")
 

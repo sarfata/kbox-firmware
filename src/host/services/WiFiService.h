@@ -33,15 +33,25 @@
 #include "comms/SlipStream.h"
 #include "comms/KommandHandlerPing.h"
 #include "comms/KommandHandlerWiFiLog.h"
-#include "config/WiFiConfig.h"
+#include "comms/KommandHandlerWiFiStatus.h"
+#include "host/config/WiFiConfig.h"
 
-class WiFiService : public Task, public KReceiver, public SKSubscriber, private SKNMEAOutput {
+/**
+ * Manages connection to the ESP module.
+ */
+class WiFiService : public Task, public KReceiver, public SKSubscriber,
+                    private SKNMEAOutput, private WiFiStatusObserver {
   private:
     const WiFiConfig &_config;
     SKHub &_hub;
     SlipStream _slip;
     KommandHandlerPing _pingHandler;
     KommandHandlerWiFiLog _wifiLogHandler;
+    KommandHandlerWiFiStatus _wifiStatusHandler;
+    ESPState _espState;
+
+    IPAddress _clientAddress;
+    uint16_t _dhcpClients;
 
   public:
     WiFiService(const WiFiConfig &config, SKHub &skHub, GC &gc);
@@ -52,5 +62,18 @@ class WiFiService : public Task, public KReceiver, public SKSubscriber, private 
     void updateReceived(const SKUpdate&) override;
 
     bool write(const SKNMEASentence& s) override;
+
+    const String clientInterfaceStatus() const;
+    const IPAddress clientInterfaceIP() const;
+    const String accessPointInterfaceStatus() const;
+    const IPAddress accessPointInterfaceIP() const;
+
+  private:
+    // WiFiStatusObserver
+    void wiFiStatusUpdated(const ESPState &state, uint16_t dhcpClients,
+                           uint16_t tcpClients, uint16_t signalkClients,
+                           const IPAddress &ipAddress) override;
+
+    void sendConfiguration();
 };
 

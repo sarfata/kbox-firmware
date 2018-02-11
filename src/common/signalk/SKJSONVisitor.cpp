@@ -36,26 +36,49 @@ void SKJSONVisitor::processSource(const SKSource &source, JsonObject &sourceObje
 
   switch (source.getInput()) {
     case SKSourceInputUnknown:
+      sourceObject["label"] = "unknown";
       sourceObject["type"] = "unknown";
       break;
     case SKSourceInputNMEA2000:
+      sourceObject["label"] = "NMEA2000";
       sourceObject["type"] = "NMEA2000";
       sourceObject["pgn"] = source.getPGN();
       sourceObject["src"] = source.getSourceAddress();
       sourceObject["priority"] = source.getPriority();
       break;
     case SKSourceInputNMEA0183_1:
+      sourceObject["label"] = "NMEA0183.1";
+      sourceObject["type"] = "NMEA0183";
+      sourceObject["talker"] = _jsonBuffer.strdup(source.getTalker());
+      sourceObject["sentence"] = _jsonBuffer.strdup(source.getSentence());
     case SKSourceInputNMEA0183_2:
+      sourceObject["label"] = "NMEA0183.2";
       sourceObject["type"] = "NMEA0183";
       sourceObject["talker"] = _jsonBuffer.strdup(source.getTalker());
       sourceObject["sentence"] = _jsonBuffer.strdup(source.getSentence());
       break;
+    case SKSourceInputKBoxIMU:
+      sourceObject["label"] = "KBox.IMU";
+      break;
+    case SKSourceInputKBoxADC:
+      sourceObject["label"] = "KBox.ADC";
+      break;
+    case SKSourceInputKBoxBarometer:
+      sourceObject["label"] = "KBox.Barometer";
   }
 }
 
 JsonObject& SKJSONVisitor::processUpdate(const SKUpdate& update) {
   JsonObject &root = _jsonBuffer.createObject();
-  root["context"] = _jsonBuffer.strdup(update.getContext().getMRN().c_str());
+
+  String context = "vessels.";
+  if (update.getContext() == SKContextSelf) {
+    context = context + _vesselURN;
+  }
+  else {
+    context = context + update.getContext().getURN();
+  }
+  root["context"] = _jsonBuffer.strdup(context.c_str());
 
   JsonArray &jsonUpdates = root.createNestedArray("updates");
   JsonObject &thisUpdate = jsonUpdates.createNestedObject();
