@@ -192,6 +192,9 @@ been possible!**
 
 ## Changelog
 
+ * 2018 02 15 - v1.2.1
+   * Send PGN 130314 for high-resolution barometer data on NMEA2000 networks
+     (that is in addition to PGN 130310 which was already sent before).
  * 2018 02 10 - v1.2.0
    * Configuration option for WiFi. KBox can act as an access point and can 
    also connect to an existing network. Both are possible at the same time.
