@@ -22,16 +22,14 @@
   THE SOFTWARE.
 */
 
+#include "WiFiService.h"
+
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
-#include <config/WiFiConfig.h>
-#include <host/config/WiFiConfig.h>
+#include <Seasmart.h>
 #include "common/signalk/SKNMEAConverter.h"
-#include "common/signalk/KMessageNMEAVisitor.h"
 #include "common/signalk/SKJSONVisitor.h"
-#include "stats/KBoxMetrics.h"
-
-#include "WiFiService.h"
+#include "common/stats/KBoxMetrics.h"
 
 WiFiService::WiFiService(const WiFiConfig &config, SKHub &skHub, GC &gc) :
   Task("WiFi"), _config(config), _hub(skHub), _slip(WiFiSerial, 2048),
@@ -42,6 +40,7 @@ WiFiService::WiFiService(const WiFiConfig &config, SKHub &skHub, GC &gc) :
 
 void WiFiService::setup() {
   KBox.espInit();
+  WiFiSerial.setTimeout(0);
   if (_config.enabled) {
     DEBUG("booting ESP!");
     KBox.espRebootInProgram();
@@ -73,25 +72,6 @@ void WiFiService::loop() {
   }
 }
 
-void WiFiService::processMessage(const KMessage &m) {
-  if (!_config.enabled) {
-    return;
-  }
-
-  KMessageNMEAVisitor v;
-  m.accept(v);
-
-  String data = v.getNMEAContent();
-
-  // TODO
-  // Should not limit like this to only 256 because there could be many nmea lines in this message.
-  // Let's figure this out when we pass SignalK data.
-  FixedSizeKommand<256> k(KommandNMEASentence);
-  k.appendNullTerminatedString(data.c_str());
-
-  _slip.writeFrame(k.getBytes(), k.getSize());
-}
-
 void WiFiService::updateReceived(const SKUpdate& u) {
   /* This is where we convert the data in SignalK format that floats inside KBox
    * to messages that will be sent to WiFi clients.
@@ -118,16 +98,32 @@ void WiFiService::updateReceived(const SKUpdate& u) {
 bool WiFiService::write(const SKNMEASentence& sentence) {
   // NMEA Sentences should always be 82 bytes or less
   FixedSizeKommand<100> k(KommandNMEASentence);
-  String s = sentence + "\r\n";
-  k.appendNullTerminatedString(s.c_str());
+  k.appendNullTerminatedString(sentence.c_str());
   _slip.writeFrame(k.getBytes(), k.getSize());
   return true;
 }
 
-void
-WiFiService::wiFiStatusUpdated(const ESPState &state, uint16_t dhcpClients,
-                               uint16_t tcpClients, uint16_t signalkClients,
-                               const IPAddress &ipAddress) {
+bool WiFiService::write(const tN2kMsg& msg) {
+  // PCDIN sentences should have a similar size as NMEA sentences.
+  FixedSizeKommand<500> k(KommandNMEASentence);
+
+  if (msg.DataLen > 500) {
+    return false;
+  }
+
+  char pcdin[30 + msg.DataLen * 2];
+  if (N2kToSeasmart(msg, millis(), pcdin, sizeof(pcdin)) < 500) {
+    k.appendNullTerminatedString(pcdin);
+    _slip.writeFrame(k.getBytes(), k.getSize());
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void WiFiService::wiFiStatusUpdated(const ESPState &state, uint16_t dhcpClients,
+                                    uint16_t tcpClients, uint16_t signalkClients,
+                                    const IPAddress &ipAddress) {
   _espState = state;
   _clientAddress = ipAddress;
   _dhcpClients = dhcpClients;

@@ -43,8 +43,10 @@ static void handler(const tN2kMsg &msg) {
 void NMEA2000Service::publishN2kMessage(const tN2kMsg& msg) {
   if (_config.rxEnabled) {
     KBoxMetrics.event(KBoxEventNMEA2000MessageReceived);
-    NMEA2000Message m(msg, now());
-    sendMessage(m);
+
+    for (auto it = _sentenceRepeaters.begin(); it != _sentenceRepeaters.end(); it++) {
+      (*it)->write(msg);
+    }
 
     SKNMEA2000Parser p;
     //FIXME: Get the time properly here!
@@ -184,4 +186,8 @@ void NMEA2000Service::saveNMEA2000Parameters() {
       ERROR("Error saving NMEA2000 parameters to flash.");
     }
   }
+}
+
+void NMEA2000Service::addSentenceRepeater(SKNMEA2000Output &repeater) {
+  _sentenceRepeaters.add(&repeater);
 }

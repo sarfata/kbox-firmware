@@ -25,22 +25,28 @@
 #include <Arduino.h>
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
-#include "comms/Kommand.h"
-#include "stats/KBoxMetrics.h"
+#include <Seasmart.h>
+#include "common/comms/Kommand.h"
+#include "common/stats/KBoxMetrics.h"
+#include "common/signalk/SKNMEAConverter.h"
+#include "common/signalk/SKNMEAConverterConfig.h"
 #include "../esp-programmer/ESPProgrammer.h"
 #include "../drivers/ILI9341GC.h"
 
 #include "USBService.h"
 
 
-USBService::USBService(GC &gc) : Task("USBService"), _slip(Serial, 2048),
-  _streamLogger(KBoxLoggerStream(Serial)),
-  _pingHandler(), _screenshotHandler(gc),
-  _state(ConnectedDebug) {
+USBService::USBService(GC &gc, SKHub &hub) : Task("USBService"), _slip(Serial, 2048),
+                                 _streamLogger(KBoxLoggerStream(Serial)),
+                                 _skHub(hub),
+                                 _pingHandler(), _screenshotHandler(gc),
+                                 _state(ConnectedDebug) {
 
 }
 
 void USBService::setup() {
+  Serial.setTimeout(0);
+  _skHub.subscribe(this);
 }
 
 void USBService::log(enum KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs) {
@@ -53,6 +59,9 @@ void USBService::log(enum KBoxLoggingLevel level, const char *fname, int lineno,
       break;
     case ConnectedESPProgramming:
       /* Discard all logs when in ESP programming mode. */
+      break;
+    case ConnectedNMEAInterface:
+      /* Discard all logs when in NMEA interface mode. */
       break;
   }
 }
@@ -79,15 +88,25 @@ void USBService::loop() {
     _state = ConnectedFrame;
   }
 
+  /* Switching serial port to 38400 on computer signals that the host
+   * wants to just receive NMEA sentences and no debug messages.
+   */
+  if (Serial.baud() == 38400) {
+    _state = ConnectedNMEAInterface;
+  }
+
   switch (_state) {
     case ConnectedDebug:
-      /* nop */
+      loopNMEAInterfaceMode();
       break;
     case ConnectedFrame:
       loopConnectedFrame();
       break;
     case ConnectedESPProgramming:
       loopConnectedESPProgramming();
+      break;
+    case ConnectedNMEAInterface:
+      loopNMEAInterfaceMode();
       break;
   };
 }
@@ -147,6 +166,19 @@ void USBService::loopConnectedESPProgramming() {
 }
 
 /**
+ * nothing yet. in the future we will read data sent by computer.
+ */
+void USBService::loopNMEAInterfaceMode() {
+  char buf[1024];
+
+  if (Serial.available()) {
+    /* int bytesRead = */Serial.readBytes(buf, sizeof(buf));
+
+    /* discard data for now */
+  }
+}
+
+/**
  * Sends a frame with a logging message.
  */
 void USBService::sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno, const char *fmt, va_list fmtargs) {
@@ -166,3 +198,44 @@ void USBService::sendLogFrame(KBoxLoggingLevel level, const char *fname, int lin
 
   _slip.writeFrame(bytes, *index);
 }
+
+void USBService::updateReceived(const SKUpdate& u) {
+  /* This is where we convert the data in SignalK format that floats inside KBox
+   * to messages that will be sent to the computer over USB in NMEA interface mode.
+   */
+
+  if (_state == ConnectedNMEAInterface) {
+    SKNMEAConverterConfig config;
+    SKNMEAConverter nmeaConverter(config);
+    // The converter will call this->write(NMEASentence) for every generated sentence
+    nmeaConverter.convert(u, *this);
+  }
+}
+
+bool USBService::write(const SKNMEASentence &nmeaSentence) {
+  if (_state != ConnectedNMEAInterface) {
+    return true;
+  }
+
+  Serial.println(nmeaSentence.c_str());
+  return true;
+}
+
+bool USBService::write(const tN2kMsg &msg) {
+  if (_state != ConnectedNMEAInterface) {
+    return true;
+  }
+
+  if (msg.DataLen > 500) {
+    return false;
+  }
+
+  char pcdin[30 + msg.DataLen * 2];
+  if (N2kToSeasmart(msg, millis(), pcdin, sizeof(pcdin)) < sizeof(pcdin)) {
+    Serial.println(pcdin);
+    return true;
+  } else {
+    return false;
+  }
+}
+

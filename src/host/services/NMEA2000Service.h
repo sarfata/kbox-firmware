@@ -27,20 +27,19 @@
 #include <N2kMsg.h>
 #include <NMEA2000_teensy.h>
 #include "common/os/Task.h"
-#include "common/signalk/KMessage.h"
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKSubscriber.h"
 #include "common/signalk/SKNMEA2000Converter.h"
 #include "host/config/NMEA2000Config.h"
 
-class NMEA2000Service : public Task, public SKSubscriber, public KGenerator,
+class NMEA2000Service : public Task, public SKSubscriber,
   SKNMEA2000Output {
   private:
     const NMEA2000Config &_config;
     SKHub &_hub;
     tNMEA2000_teensy NMEA2000;
     unsigned int _imuSequence;
-
+    LinkedList<SKNMEA2000Output*> _sentenceRepeaters;
 
     void sendN2kMessage(const tN2kMsg& msg);
 
@@ -78,4 +77,11 @@ class NMEA2000Service : public Task, public SKSubscriber, public KGenerator,
     bool write(const tN2kMsg&) override;
 
     void updateReceived(const SKUpdate& update);
+
+    /**
+     * All incoming NMEA2000 messages will be repeated to repeaters.
+     *
+     * @param repeater A reference to an object that implements SKNMEA2000Output.
+     */
+    void addSentenceRepeater(SKNMEA2000Output &repeater);
 };
