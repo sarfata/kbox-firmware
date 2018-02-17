@@ -70,7 +70,7 @@ static void reportStatus(ESPState state, uint16_t dhcpClients = 0,
 static void configurationCallback(const WiFiConfiguration&);
 
 static void onGotIP(const WiFiEventStationModeGotIP&);
-static void onDHCPTimeout(void);
+//static void onDHCPTimeout(void);
 static void onStationModeConnected(const WiFiEventStationModeConnected&);
 static void onStationModeDisconnected(const WiFiEventStationModeDisconnected&);
 
@@ -95,7 +95,7 @@ void setup() {
   wiFiConfigurationHandler.setCallback(configurationCallback);
 
   onGotIPHandler = WiFi.onStationModeGotIP(onGotIP);
-  onDhcpTimeoutHandler = WiFi.onStationModeDHCPTimeout(onDHCPTimeout);
+//  onDhcpTimeoutHandler = WiFi.onStationModeDHCPTimeout(onDHCPTimeout);
   onStationModeConnectedHandler =
     WiFi.onStationModeConnected(onStationModeConnected);
   onStationModeDisconnectedHandler =
@@ -146,8 +146,8 @@ void loop() {
     case ESPState::ESPConfigured:
       // We are connected. Report status every 500ms.
       if (lastMessageTimer > 500) {
-        DEBUG("Still running ... %i connected clients - %i heap",
-              server.clientsCount() + webServer.countClients(), ESP.getFreeHeap());
+        DEBUG("Still running ... %i connected clients - %i heap - uptime: %is",
+              server.clientsCount() + webServer.countClients(), ESP.getFreeHeap(), millis() / 1000);
         reportStatus(espState,
                      WiFi.softAPgetStationNum(),
                      server.clientsCount(),
@@ -230,9 +230,9 @@ static void onGotIP(const WiFiEventStationModeGotIP& e) {
   DEBUG("DHCP Got IP Address!");
 }
 
-static void onDHCPTimeout(void) {
-  DEBUG("DHCP Timeout");
-}
+//static void onDHCPTimeout(void) {
+//  DEBUG("DHCP Timeout");
+//}
 
 static void onStationModeConnected(const WiFiEventStationModeConnected& e) {
   DEBUG("StationModeConnected");
