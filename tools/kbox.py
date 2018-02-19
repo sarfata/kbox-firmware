@@ -10,6 +10,7 @@ import png
 import random
 import logging
 import sys
+import socket
 
 """ Courtesy of esptool.py - GPL 
 
@@ -96,6 +97,8 @@ class KBox(object):
     KommandScreenshot = 0x30
     KommandScreenshotData = 0x31
     KommandReboot = 0x33
+    KommandWiFiStatus = 0x50
+    KommandWiFiConfiguration = 0x51
 
     def __init__(self, port, debug = False):
         self._port = serial.Serial(port)
@@ -169,6 +172,9 @@ class KBox(object):
             elif cmd == KBox.KommandLog:
                 # Keep printing log messages while waiting
                 self.printLog(frame[2:])
+            elif cmd == KBox.KommandWiFiStatus:
+                # Print content of WiFi Status messages
+                self.printWiFiStatus(frame[2:])
             else:
                 print("Got unexpected frame with id {}".format(cmd))
 
@@ -189,6 +195,20 @@ class KBox(object):
 
         print("> {} {}:{} {}".format(loglevel, fname, lineno, log))
 
+    def parseWiFiStatus(self, data):
+        (state, dhcpClients, tcpClients, signalKClients) = struct.unpack('<HHHH', data[0:8])
+        (ipAddress) = struct.unpack('!L', data[8:12])[0]
+
+        print("ipaddress: {}".format(ipAddress))
+        ipAddress = socket.inet_ntoa(struct.pack('!L', ipAddress))
+
+        return state, dhcpClients, tcpClients, signalKClients, ipAddress
+
+    def printWiFiStatus(self, data):
+        (state, dhcpClients, tcpClients, signalKClients, ipAddress) = self.parseWiFiStatus(data)
+        print("WIFI-STATUS: State: {} IP: {} Clients DHCP: {}, TCP: {}, SignalK: {}".format(state, ipAddress, dhcpClients,
+                                                                                            tcpClients, signalKClients
+                                                                                            ))
 
     def ping(self, pingId):
         print("PING[{}]".format(pingId))
@@ -344,6 +364,25 @@ class KBox(object):
 
         raise KBoxError("Failed to write block - retries exceeded")
 
+    def send_wifi_config(self, apSSID, apPassword, clientSSID, clientPassword, vesselURN):
+        if apSSID is not None:
+            request = struct.pack('<?', True)
+            request = request + apSSID + '\0' + apPassword + '\0'
+        else:
+            request = struct.pack('<?, False')
+            request = request + '\0\0'
+
+        if clientSSID is not None:
+            request = request + struct.pack('<?', True)
+            request = request + clientSSID + '\0' + clientPassword + '\0'
+        else:
+            request = request + struct.pack('<?', False)
+            request = request + '\0\0'
+
+        request = request + vesselURN + '\0'
+
+        self.command(KBox.KommandWiFiConfiguration, request)
+
     @staticmethod
     def convertToRgb(pixel):
         r = (pixel>>8)&0x00F8
@@ -373,6 +412,13 @@ def main():
     file_write_parser = subparsers.add_parser("fwrite")
     file_write_parser.add_argument("filename")
     file_write_parser.add_argument("destination", nargs = '?')
+
+    wifi_parser = subparsers.add_parser("wificonfig")
+    wifi_parser.add_argument("--ap-ssid")
+    wifi_parser.add_argument("--ap-password")
+    wifi_parser.add_argument("--client-ssid")
+    wifi_parser.add_argument("--client-password")
+    wifi_parser.add_argument("vesselurn")
 
     args = parser.parse_args()
 
@@ -421,6 +467,14 @@ def main():
             if args.destination:
                 destination = args.destination
             kbox.write_file(destination, data)
+
+    elif args.command == "wificonfig":
+        kbox.send_wifi_config(args.ap_ssid, args.ap_password, args.client_ssid, args.client_password, args.vesselurn)
+
+        while True:
+            status = kbox.readCommand(KBox.KommandWiFiStatus)
+            kbox.printWiFiStatus(status)
+
 
 if __name__ == '__main__':
     main()
