@@ -21,7 +21,15 @@
       "rsa": true
     },
     "dataFormatType": {
-      "dataFormat" : "NMEA_Seasmart"
+      "dataFormat" : "NMEA_Seasmart",
+    "accessPoint": {
+      "enabled": true,
+      "ssid": "KBox"
+    },
+    "client": {
+      "enabled": false,
+      "ssid": "your-boat-network",
+      "password": "super-secret"
     }
   },
   "serial1": {

@@ -28,23 +28,31 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "KommandHandlerWiFiStatus.h"
 
-#include "common/signalk/SKNMEAConverterConfig.h"
-#include "DataFormatConfig.h"
+#include <IPAddress.h>
+#include <KBoxLogging.h>
+#include <comms/ESPState.h>
 
-struct WiFiNetworkConfig {
-  bool enabled;
-  String ssid;
-  String password;
-};
 
-struct WiFiConfig {
-  bool enabled;
-  SKNMEAConverterConfig nmeaConverter;
+bool KommandHandlerWiFiStatus::handleKommand(KommandReader &kreader,
+                                             SlipStream &replyStream) {
+  if (kreader.getKommandIdentifier() != KommandWiFiStatus) {
+    return false;
+  }
 
-  DataFormatConfig dataFormatConfig;
-  String vesselURN;
-  WiFiNetworkConfig client;
-  WiFiNetworkConfig accessPoint;
-};
+  auto state = static_cast<ESPState>(kreader.read16());
+  auto dhcpClients = kreader.read16();
+  auto tcpClients = kreader.read16();
+  auto signalkClients = kreader.read16();
+  auto ipAddress = static_cast<IPAddress>(kreader.read32());
+
+  DEBUG("WiFiStatus: state: %i dhcpClients: %i tcpClients: %i signalkClients: "
+          "%i ip: %u.%u.%u.%u",
+        static_cast<int>(state), dhcpClients, tcpClients, signalkClients,
+        ipAddress[0], ipAddress[1], ipAddress[2], ipAddress[3]);
+
+  _observer.wiFiStatusUpdated(state, dhcpClients, tcpClients, signalkClients,
+                              ipAddress);
+  return true;
+}

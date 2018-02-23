@@ -45,6 +45,7 @@ void BarometerService::fetchValues() {
   DEBUG("Read temperature=%.2f C and pressure=%.1f Pa", temperature, pressure);
 
   SKUpdateStatic<1> update;
+  update.setSource(SKSource::sourceForKBoxSensor(SKSourceInputKBoxBarometer));
   update.setEnvironmentOutsidePressure(pressure);
   _skHub.publish(update);
 }

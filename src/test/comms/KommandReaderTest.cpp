@@ -88,4 +88,34 @@ TEST_CASE("KommandReader") {
     KommandReader kr = KommandReader(frame, sizeof(frame));
     CHECK( kr.readNullTerminatedString() == 0 );
   }
+
+  SECTION("Kommand with two strings") {
+    const uint8_t frame[] = {0x2a, 0x00,
+                             'a', 'b', 'c', 'd', '\0',
+                             'd', 'e', 'f', 'g', '\0'
+    };
+
+    KommandReader kr = KommandReader(frame, sizeof(frame));
+    CHECK( kr.readNullTerminatedString() == reinterpret_cast<const char *>
+                                            (&frame[2]) );
+    CHECK( kr.readNullTerminatedString() == reinterpret_cast<const char *>
+                                            (&frame[7]) );
+  }
+
+  SECTION("Kommand with three strings - one empty") {
+    const uint8_t frame[] = {0x2a, 0x00,
+                             'a', 'b', '\0',
+                             '\0',
+                             'c', 'd', '\0'
+    };
+
+    KommandReader kr = KommandReader(frame, sizeof(frame));
+    CHECK( kr.readNullTerminatedString() == reinterpret_cast<const char *>
+                                            (&frame[2]) );
+    CHECK( kr.readNullTerminatedString() == reinterpret_cast<const char *>
+                                            (&frame[5]) );
+    CHECK( kr.readNullTerminatedString() == reinterpret_cast<const char *>
+                                            (&frame[6]) );
+  }
+
 }

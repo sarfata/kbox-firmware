@@ -108,15 +108,31 @@ TEST_CASE("NMEA2000Converter") {
 
   SECTION("Barometer") {
     SKUpdateStatic<1> pressureUpdate;
-    pressureUpdate.setEnvironmentOutsidePressure(1.013);
+    pressureUpdate.setEnvironmentOutsidePressure(101325);
 
     converter.convert(pressureUpdate, messages);
 
-    CHECK( messages.size() == 1 );
+    CHECK( messages.size() == 2 );
+    const tN2kMsg *m = findMessage(messages, 130310, 0);
+    CHECK(m);
+    if (m) {
+      unsigned char sid;
+      double waterTemperature;
+      double outsideAmbientAirTemperature;
+      double atmosphericPressure;
 
-    if (messages.size() > 1) {
-      const tN2kMsg *m = findMessage(messages, 130314, 0);
+      CHECK( ParseN2kPGN130310(*m, sid, waterTemperature, outsideAmbientAirTemperature, atmosphericPressure) );
 
+
+      CHECK( N2kIsNA(waterTemperature) );
+      CHECK( N2kIsNA(outsideAmbientAirTemperature) );
+      CHECK( atmosphericPressure == 101300 );
+    }
+
+    // Check that we send the high resolution too.
+    m = findMessage(messages, 130314, 0);
+    CHECK(m);
+    if (m) {
       unsigned char sid;
       unsigned char instance;
       tN2kPressureSource source;
@@ -124,7 +140,7 @@ TEST_CASE("NMEA2000Converter") {
       CHECK( ParseN2kPGN130314(*m, sid, instance, source, pressure) );
       CHECK( instance == 0 );
       CHECK( source == N2kps_Atmospheric );
-      CHECK( pressure == 130314 );
+      CHECK( pressure == 101325 );
     }
   }
 

@@ -36,6 +36,11 @@ void SDCardTask::setup() {
     cardReady = true;
     logFile = createLogFile("kbox-");
     DEBUG("SDCard logging to: %s", getLogFileName().c_str());
+
+    // Takes a long time to count free clusters so only do it once at startup.
+    _freeSpaceAtBoot = KBox.getSdFat().vol()->freeClusterCount();
+    _freeSpaceAtBoot *= logFile->volume()->blocksPerCluster();
+    _freeSpaceAtBoot *= 512;
   }
 }
 
@@ -107,19 +112,7 @@ SdFile* SDCardTask::createLogFile(const String& baseName) {
 }
 
 uint64_t SDCardTask::getFreeSpace() const {
-  if (!isLogging()) {
-    return 0;
-  }
-  // FIXME: Something weird happens when we call freeClusterCount()
-  // the running led stops flashing (although we do still call digitalWrite on it)
-  // the serial ports start messing up big time (missing a lot of data)
-  // eventually other things crash...
-  // Could be a memory problem or something like that. Have not found
-  // it yet but the culprit is this line so for now it is disabled.
-  uint64_t space = 0; //logFile->volume()->freeClusterCount();
-  space *= logFile->volume()->blocksPerCluster();
-  space *= 512;
-  return space;
+  return _freeSpaceAtBoot - getLogSize();
 }
 
 bool SDCardTask::isLogging() const {

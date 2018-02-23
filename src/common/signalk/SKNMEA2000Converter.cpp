@@ -40,8 +40,9 @@ void SKNMEA2000Converter::convert(const SKUpdate& update, SKNMEA2000Output& out)
     tN2kMsg msg;
     // PGN 130310 seems to be better supported
     SetN2kOutsideEnvironmentalParameters(msg, 0, N2kDoubleNA, N2kDoubleNA, update.getEnvironmentOutsidePressure());
-    // PGN 130314 is more specific to pressure but not supported by Raymarine i70
-    //SetN2kPressure(*msg, /* sid */ 0, /* source */ 0, N2kps_Atmospheric, v.getNumberValue());
+    out.write(msg);
+    // PGN 130314 is more specific and more precise (.1) to pressure but not supported by all displays (ie: Raymarine i70)
+    SetN2kPressure(msg, /* sid */ 0, /* source */ 0, N2kps_Atmospheric, update.getEnvironmentOutsidePressure());
     out.write(msg);
   }
 

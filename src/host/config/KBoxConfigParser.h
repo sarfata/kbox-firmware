@@ -40,11 +40,13 @@
  */
 class KBoxConfigParser {
   private:
+    String _defaultVesselURN;
     SerialMode convertSerialMode(const String &s);
     IMUMounting convertIMUMounting(const String &s);
     DataFormatType convertDataFormatType(const String &s);
 
   public:
+    KBoxConfigParser(const String &defaultVesselURN) : _defaultVesselURN(defaultVesselURN) {};
     /**
      * Configures default values in given KBoxConfig object.
      */
@@ -64,7 +66,14 @@ class KBoxConfigParser {
     void parseSerialConfig(const JsonObject &object, SerialConfig &config);
     void parseNMEA2000Config(const JsonObject &object, NMEA2000Config &config);
     void parseWiFiConfig(const JsonObject &json, WiFiConfig &config);
+
     void parseNMEAConverterConfig(const JsonObject &json, SKNMEAConverterConfig &config);
     void parseSDCardConfig(const JsonObject &json, SDCardConfig &config);
     void parseDataFormatConfig(const JsonObject &json, DataFormatConfig &config);
+
+    void parseWiFiNetworkConfig(const JsonObject &json,
+                                WiFiNetworkConfig &config);
+    void parseNMEAConverterConfig(const JsonObject &json,
+                                  SKNMEAConverterConfig &config);
+
 };

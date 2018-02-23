@@ -39,6 +39,7 @@ class Loggable {
 
 class SDCardTask : public Task, public KReceiver {
   private:
+    uint64_t _freeSpaceAtBoot;
     SdFile *logFile = nullptr;
     bool cardReady = false;
 

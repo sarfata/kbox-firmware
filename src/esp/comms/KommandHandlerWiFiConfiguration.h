@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,37 +30,30 @@
 
 #pragma once
 
-#include "ui/Page.h"
-#include "ui/TextLayer.h"
+#include <functional>
+#include "common/comms/KommandHandler.h"
 
-class SDCardTask;
-class WiFiService;
+struct WiFiConfiguration {
+  bool accessPointEnabled;
+  String accessPointSSID;
+  String accessPointPassword;
 
-class StatsPage : public Page {
+  bool clientEnabled;
+  String clientSSID;
+  String clientPassword;
+
+  String vesselURN;
+};
+
+class KommandHandlerWiFiConfiguration : public KommandHandler {
   private:
-    TextLayer *nmea1Rx, *nmea1Errors, *nmea2Rx, *nmea2Errors;
-    TextLayer *nmea1Tx, *nmea1TxErrors, *nmea2Tx, *nmea2TxErrors;
-    TextLayer *canRx, *canTx, *canTxErrors;
-    TextLayer *wifiAPStatus, *wifiAPIP;
-    TextLayer *wifiClientStatus, *wifiClientIP;
-    TextLayer *usedRam, *freeRam, *avgLoopTime;
-    TextLayer *logName, *logSize, *freeSpace;
-
-    const SDCardTask *sdcardTask = 0;
-    const WiFiService *wifiService = 0;
-
-    void loadView();
-    String formatDiskSize(uint64_t intSize);
+    std::function<void(const WiFiConfiguration&)> _callback;
 
   public:
-    StatsPage();
-    bool processEvent(const TickEvent &e);
+    KommandHandlerWiFiConfiguration() {};
+    bool handleKommand(KommandReader &kreader, SlipStream &replyStream) override;
 
-    void setSDCardTask(const SDCardTask *t) {
-      sdcardTask = t;
-    };
-
-    void setWiFiService(const WiFiService *s) {
-      wifiService = s;
+    void setCallback(std::function<void(const WiFiConfiguration&)> callback) {
+      _callback = callback;
     }
 };
