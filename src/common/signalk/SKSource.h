@@ -30,14 +30,20 @@ enum SKSourceInput {
   SKSourceInputUnknown,
   SKSourceInputNMEA0183_1,
   SKSourceInputNMEA0183_2,
-  SKSourceInputNMEA2000
+  SKSourceInputNMEA2000,
+  SKSourceInputKBoxIMU,
+  SKSourceInputKBoxADC,
+  SKSourceInputKBoxBarometer
 };
 
 const String skSourceInputLabels[] = {
   "InputUnknown",
   "InputNMEA1",
   "InputNMEA2",
-  "InputNMEA2000"
+  "InputNMEA2000",
+  "InputKBox.IMU",
+  "InputKBox.ADC",
+  "InputKBox.Barometer"
 };
 
 class SKSource {
@@ -72,6 +78,14 @@ class SKSource {
      * Returns a source instance for the given NMEA2000 source info.
      */
     static SKSource sourceForNMEA2000(const SKSourceInput input, const uint32_t pgn, const unsigned char priority, const unsigned char sourceAddress);
+
+    /**
+     * Returns a source instance for KBox internal sensors.
+     *
+     * The label is limited in size (see SKSource declaration above).
+     */
+    static SKSource sourceForKBoxSensor(const SKSourceInput input);
+
     /**
      * Compares two SKSource objects and returns true if they represent the same
      * source.

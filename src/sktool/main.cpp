@@ -62,9 +62,11 @@ const SKUpdate& parseInputLine(std::string line) {
   }
 }
 
+const char *vesselURN = "urn:mrn:kbox:validation-tests";
+
 int main(int argc, char **argv) {
   DynamicJsonBuffer jsonBuffer;
-  SKJSONVisitor v = SKJSONVisitor(jsonBuffer);
+  SKJSONVisitor v = SKJSONVisitor(vesselURN, jsonBuffer);
 
   for (std::string line; std::getline(std::cin, line); ) {
     const SKUpdate& u = parseInputLine(line);

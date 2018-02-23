@@ -407,8 +407,8 @@ def main():
     elif args.command == "reboot":
         kbox.reboot()
     elif args.command == "screenshot":
-        png = kbox.takeScreenshot()
-        png.from_array(pixels, 'RGB').save(args.filename)
+        image = kbox.takeScreenshot()
+        image.save(args.filename)
 
     elif args.command == "fread":
         data = kbox.read_file(args.filename)

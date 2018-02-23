@@ -127,11 +127,12 @@ void NMEA2000Service::initializeNMEA2000forReceiveOnly() {
 }
 
 void NMEA2000Service::initializeNMEA2000forReceiveAndTransmit() {
-  uint32_t serialNumber[4] = { SIM_UIDH, SIM_UIDMH, SIM_UIDML, SIM_UIDL };
+  tKBoxSerialNumber serialNumber;
+  KBox.readKBoxSerialNumber(serialNumber);
 
   char serialNumberString[33];
   snprintf(serialNumberString, sizeof(serialNumberString), "%08lX%08lX%08lX%08lX",
-      serialNumber[0], serialNumber[1], serialNumber[2], serialNumber[3]);
+      serialNumber.dwords[0], serialNumber.dwords[1], serialNumber.dwords[2], serialNumber.dwords[3]);
 
   NMEA2000.SetProductInformation(serialNumberString, 1, "KBox", KBOX_VERSION, "KBox");
 

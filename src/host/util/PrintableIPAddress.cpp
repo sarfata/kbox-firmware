@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,39 +28,15 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "PrintableIPAddress.h"
+#include <cstdio>
 
-#include "ui/Page.h"
-#include "ui/TextLayer.h"
-
-class SDCardTask;
-class WiFiService;
-
-class StatsPage : public Page {
-  private:
-    TextLayer *nmea1Rx, *nmea1Errors, *nmea2Rx, *nmea2Errors;
-    TextLayer *nmea1Tx, *nmea1TxErrors, *nmea2Tx, *nmea2TxErrors;
-    TextLayer *canRx, *canTx, *canTxErrors;
-    TextLayer *wifiAPStatus, *wifiAPIP;
-    TextLayer *wifiClientStatus, *wifiClientIP;
-    TextLayer *usedRam, *freeRam, *avgLoopTime;
-    TextLayer *logName, *logSize, *freeSpace;
-
-    const SDCardTask *sdcardTask = 0;
-    const WiFiService *wifiService = 0;
-
-    void loadView();
-    String formatDiskSize(uint64_t intSize);
-
-  public:
-    StatsPage();
-    bool processEvent(const TickEvent &e);
-
-    void setSDCardTask(const SDCardTask *t) {
-      sdcardTask = t;
-    };
-
-    void setWiFiService(const WiFiService *s) {
-      wifiService = s;
-    }
-};
+String PrintableIPAddress::toString() const {
+  char s[16];
+  snprintf(s, sizeof(s), "%d.%d.%d.%d",
+           this->operator[](0),
+           this->operator[](1),
+           this->operator[](2),
+           this->operator[](3));
+  return String(s);
+}

@@ -192,6 +192,22 @@ been possible!**
 
 ## Changelog
 
+ * 2018 02 16 - v1.2.2
+   * Go back to older version of ESP8266 framework (2.3 via framework 1.5) to
+     get rid of random crashes. Still need to investigate more but we do not
+     need 2.4 at the moment.
+ * 2018 02 15 - v1.2.1
+   * Send PGN 130314 for high-resolution barometer data on NMEA2000 networks
+     (that is in addition to PGN 130310 which was already sent before).
+ * 2018 02 10 - v1.2.0
+   * Configuration option for WiFi. KBox can act as an access point and can
+   also connect to an existing network. Both are possible at the same time.
+   * KBox now shows WiFi info on the screen (status as a client and as an
+   access point), number of clients connected, IP address)
+   * KBox now announces its SignalK "self" properly and you can set your own
+   MMSI via the config file.
+   * Updated ESP8266 framework version to 2.4.
+   * Fixed a bug where SDCard would not show free space properly
  * 2018 01 10
    * Fixed bug #69 - We were sending pressure in Pascal instead of Bars in NMEA
      XDR sentences for pressure.
