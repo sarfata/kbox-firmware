@@ -185,6 +185,7 @@ void KBoxConfigParser::parseSDCardConfig(const JsonObject &json, SDCardConfig &c
   READ_BOOL_VALUE(enabled);
   READ_BOOL_VALUE(writeTimestamp);
   parseDataFormatConfig(json["dataFormatConfig"], config.dataFormatConfig);
+}
 
 void KBoxConfigParser::parseWiFiNetworkConfig(const JsonObject &json,
                                               WiFiNetworkConfig &config) {
