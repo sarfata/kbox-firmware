@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,39 +28,28 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include <KBoxLogging.h>
+#include "KommandHandlerWiFiConfiguration.h"
 
-#include "ui/Page.h"
-#include "ui/TextLayer.h"
+bool KommandHandlerWiFiConfiguration::handleKommand(KommandReader &kreader,
+                                              SlipStream &replyStream) {
+  if (kreader.getKommandIdentifier() != KommandWiFiConfiguration) {
+    return false;
+  }
 
-class SDCardTask;
-class WiFiService;
+  WiFiConfiguration config;
 
-class StatsPage : public Page {
-  private:
-    TextLayer *nmea1Rx, *nmea1Errors, *nmea2Rx, *nmea2Errors;
-    TextLayer *nmea1Tx, *nmea1TxErrors, *nmea2Tx, *nmea2TxErrors;
-    TextLayer *canRx, *canTx, *canTxErrors;
-    TextLayer *wifiAPStatus, *wifiAPIP;
-    TextLayer *wifiClientStatus, *wifiClientIP;
-    TextLayer *usedRam, *freeRam, *avgLoopTime;
-    TextLayer *logName, *logSize, *freeSpace;
+  config.accessPointEnabled = kreader.read8();
+  config.accessPointSSID = kreader.readNullTerminatedString();
+  config.accessPointPassword = kreader.readNullTerminatedString();
 
-    const SDCardTask *sdcardTask = 0;
-    const WiFiService *wifiService = 0;
+  config.clientEnabled = kreader.read8();
+  config.clientSSID = kreader.readNullTerminatedString();
+  config.clientPassword = kreader.readNullTerminatedString();
 
-    void loadView();
-    String formatDiskSize(uint64_t intSize);
+  config.vesselURN = kreader.readNullTerminatedString();
 
-  public:
-    StatsPage();
-    bool processEvent(const TickEvent &e);
+  _callback(config);
 
-    void setSDCardTask(const SDCardTask *t) {
-      sdcardTask = t;
-    };
-
-    void setWiFiService(const WiFiService *s) {
-      wifiService = s;
-    }
-};
+  return true;
+}

@@ -43,6 +43,7 @@ void ADCService::loop() {
   // FIXME: We should have configuration options to describe what each input is
   // connected to instead of hard-coding names.
   SKUpdateStatic<4> sk;
+  sk.setSource(SKSource::sourceForKBoxSensor(SKSourceInputKBoxADC));
   sk.setElectricalBatteriesVoltage("engine", _adc1);
   sk.setElectricalBatteriesVoltage("house", _adc2);
   sk.setElectricalBatteriesVoltage("dc3", _adc3);

@@ -23,8 +23,11 @@
 */
 
 #include <malloc.h>
+#include <util/PrintableIPAddress.h>
 #include "StatsPage.h"
 #include "stats/KBoxMetrics.h"
+#include "host/services/SDCardTask.h"
+#include "host/services/WiFiService.h"
 
 StatsPage::StatsPage() {
   loadView();
@@ -94,6 +97,25 @@ void StatsPage::loadView() {
   canTxErrors = new TextLayer(Point(col4, row3), Size(colWidth, rowHeight), "0");
   addLayer(canRx); addLayer(canTx); addLayer(canTxErrors);
 
+  // WiFi AP
+  addLayer(new TextLayer(Point(col3, row5), Size(colWidth, rowHeight),
+                         "WiFi-AP:"));
+  addLayer(new TextLayer(Point(col3, row6), Size(colWidth, rowHeight), "IP:"));
+  wifiAPStatus = new TextLayer(Point(col4 - 20, row5), Size(colWidth,
+                                                            rowHeight), "");
+  wifiAPIP = new TextLayer(Point(col4 - 40, row6), Size(colWidth, rowHeight), "");
+  addLayer(wifiAPStatus); addLayer(wifiAPIP);
+
+  // WiFi Client
+  addLayer(new TextLayer(Point(col3, row7), Size(colWidth, rowHeight),
+                         "WiFi-C:"));
+  addLayer(new TextLayer(Point(col3, row8), Size(colWidth, rowHeight), "IP:"));
+  wifiClientStatus = new TextLayer(Point(col4 - 20, row7), Size(colWidth,
+                                                            rowHeight), "");
+  wifiClientIP = new TextLayer(Point(col4 - 40, row8), Size(colWidth,
+                                                           rowHeight), "");
+  addLayer(wifiClientStatus); addLayer(wifiClientIP);
+
   addLayer(new TextLayer(Point(col1, row9), Size(colWidth, rowHeight), "Avg Loop:"));
   addLayer(new TextLayer(Point(col1, row10), Size(colWidth, rowHeight), "Used RAM:"));
   addLayer(new TextLayer(Point(col1, row11), Size(colWidth, rowHeight), "Free RAM:"));
@@ -107,8 +129,8 @@ void StatsPage::loadView() {
   freeRam = new TextLayer(Point(col2, row11), Size(colWidth, rowHeight), "0");
   addLayer(usedRam); addLayer(freeRam); addLayer(avgLoopTime);
 
-  // FIXME: dirty hack below
-  logName = new TextLayer(Point(col4 - 10, row9), Size(colWidth, rowHeight), "");
+  logName = new TextLayer(Point(col4 - 40, row9), Size(colWidth, rowHeight),
+                          "");
   logSize = new TextLayer(Point(col4, row10), Size(colWidth, rowHeight), "");
   freeSpace = new TextLayer(Point(col4, row11), Size(colWidth, rowHeight), "");
   addLayer(logName); addLayer(logSize); addLayer(freeSpace);
@@ -148,6 +170,17 @@ bool StatsPage::processEvent(const TickEvent &e) {
   canRx->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA2000MessageReceived)));
   canTx->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA2000MessageSent)));
   canTxErrors->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA2000MessageSendError)));
+
+  if (wifiService) {
+    wifiAPStatus->setText(wifiService->accessPointInterfaceStatus());
+    wifiClientStatus->setText(wifiService->clientInterfaceStatus());
+
+    auto clientIP = PrintableIPAddress(wifiService->clientInterfaceIP());
+    wifiClientIP->setText(clientIP.toString());
+
+    auto apIP = PrintableIPAddress(wifiService->accessPointInterfaceIP());
+    wifiAPIP->setText(apIP.toString());
+  }
 
   freeRam->setText(String(getFreeRam()));
   usedRam->setText(String(getUsedRam()));

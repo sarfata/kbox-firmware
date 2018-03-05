@@ -1,8 +1,6 @@
-from SCons.Script import DefaultEnvironment
+Import("env")
 import subprocess
 from datetime import datetime
-
-env = DefaultEnvironment()
 
 version = "git-cmd-not-available"
 

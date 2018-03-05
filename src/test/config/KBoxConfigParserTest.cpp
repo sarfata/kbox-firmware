@@ -33,7 +33,7 @@
 #include "host/config/KBoxConfigParser.h"
 
 TEST_CASE("KBoxConfigParser") {
-  KBoxConfigParser kboxConfigParser;
+  KBoxConfigParser kboxConfigParser("urn:mrn:kbox:unit-testing");
   KBoxConfig config;
   StaticJsonBuffer<4096> jsonBuffer;
 
@@ -49,7 +49,7 @@ TEST_CASE("KBoxConfigParser") {
     CHECK( config.nmea2000Config.txEnabled == true );
     CHECK( config.nmea2000Config.rxEnabled == true );
     CHECK( config.wifiConfig.enabled == true );
-  }
+    CHECK( config.wifiConfig.vesselURN == "urn:mrn:kbox:unit-testing" );  }
 
   SECTION("No input") {
     JsonObject& root = jsonBuffer.parseObject("invalid json string");
@@ -64,6 +64,12 @@ TEST_CASE("KBoxConfigParser") {
 
     CHECK( config.imuConfig.enableHdg );
     CHECK( config.imuConfig.enableHeelPitch );
+
+    CHECK( config.wifiConfig.accessPoint.enabled == true );
+    CHECK( config.wifiConfig.accessPoint.ssid == "KBox" );
+    CHECK( config.wifiConfig.accessPoint.password == "" );
+
+    CHECK( config.wifiConfig.client.enabled == false );
   }
 
   SECTION("basic config") {
@@ -101,5 +107,53 @@ TEST_CASE("KBoxConfigParser") {
 
     CHECK( nmeaConfig.xdrPressure == true );
     CHECK( nmeaConfig.mwv == false );
+  }
+
+  SECTION("WiFi config") {
+    const char *jsonConfig = "{ 'client': "
+      "   { 'enabled': true, ssid: 'network', 'password': 'secret' }"
+      "}";
+    JsonObject &root = jsonBuffer.parseObject(jsonConfig);
+
+    CHECK( root.success() );
+
+    WiFiConfig wiFiConfig;
+    kboxConfigParser.parseWiFiConfig(root, wiFiConfig);
+
+    CHECK( wiFiConfig.client.enabled == true );
+    CHECK( wiFiConfig.client.ssid == "network" );
+    CHECK( wiFiConfig.client.password == "secret" );
+  }
+
+  SECTION("WiFi config - with no data") {
+    const char *jsonConfig = "{ 'client': "
+      "   { 'enabled': false }"
+      "}";
+    JsonObject &root = jsonBuffer.parseObject(jsonConfig);
+
+    CHECK( root.success() );
+
+    WiFiConfig wiFiConfig;
+    wiFiConfig.client.ssid = "Default-SSID";
+    wiFiConfig.client.password = "Default-password";
+
+    kboxConfigParser.parseWiFiConfig(root, wiFiConfig);
+
+    CHECK( wiFiConfig.client.enabled == false );
+    CHECK( wiFiConfig.client.ssid == "Default-SSID" );
+    CHECK( wiFiConfig.client.password == "Default-password" );
+  }
+
+  SECTION("WiFi config - MMSI") {
+    const char *jsonConfig = "{ 'mmsi': '412345678' }";
+    JsonObject &root = jsonBuffer.parseObject(jsonConfig);
+
+    CHECK( root.success() );
+
+    WiFiConfig wiFiConfig;
+
+    kboxConfigParser.parseWiFiConfig(root, wiFiConfig);
+
+    CHECK( wiFiConfig.vesselURN == "urn:mrn:imo:mmsi:412345678" );
   }
 }

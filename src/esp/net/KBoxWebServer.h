@@ -31,13 +31,14 @@
 #pragma once
 
 #include <stdint.h>
+#include <WString.h>
 
 class KBoxWebServer {
-  private:
-
   public:
     KBoxWebServer();
     void setup();
     void publishSKUpdate(const char *message);
+    void setVesselURN(const String &mmsi);
+    int countClients() const;
 };
 

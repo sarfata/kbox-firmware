@@ -35,9 +35,11 @@
 
 
 /* Backlight intensity control */
-typedef uint16_t BacklightIntensity;
+using BacklightIntensity = uint16_t;
 const BacklightIntensity BacklightIntensityMax = 255;
 const BacklightIntensity BacklightIntensityOff = 0;
+
+typedef struct { uint32_t dwords[4]; } tKBoxSerialNumber;
 
 /**
  * KBox class to represent all the hardware. This class is statically allocated in
@@ -110,6 +112,11 @@ class KBoxHardware {
      * Immediately reboots KBox.
      */
     void rebootKBox();
+
+    /**
+     * Read KBox serial number and return it.
+     */
+    void readKBoxSerialNumber(tKBoxSerialNumber &sn);
 };
 
 extern KBoxHardware KBox;
