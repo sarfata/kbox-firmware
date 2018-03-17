@@ -27,18 +27,30 @@
 
 static const String typeNMEA0183 = "NMEA0183";
 static const String typeNMEA2000 = "NMEA2000";
+static const String typeSensor = "InternalSensor";
+static const String typePerformance = "Performance Calculation";
 static const String typeUnknown = "unknown";
 
 static const String labelNMEA1 = "kbox.nmea0183.1";
 static const String labelNMEA2 = "kbox.nmea0183.2";
 static const String labelNMEA2k = "kbox.nmea2000";
+static const String labelSensor = "kbox.sensor";
+static const String labelPerformance = "kbox.performance";
 static const String labelUnknown = "kbox.unknown";
 
 const SKSource SKSourceUnknown = SKSource::unknownSource();
 
+const SKSource SKSourcePerformanceCalc = SKSource::performanceCalc();
+
 SKSource SKSource::unknownSource() {
   SKSource s;
   s._input = SKSourceInputUnknown;
+  return s;
+}
+
+SKSource SKSource::performanceCalc(){
+  SKSource s;
+  s._input = SKSourceInputPerformance;
   return s;
 }
 
@@ -115,6 +127,8 @@ const String& SKSource::getType() const {
       return typeNMEA0183;
     case SKSourceInputNMEA2000:
       return typeNMEA2000;
+    case SKSourceInputPerformance:
+      return typePerformance;
     default:
       return typeUnknown;
   }
@@ -128,6 +142,8 @@ const String& SKSource::getLabel() const {
       return labelNMEA2;
     case SKSourceInputNMEA2000:
       return labelNMEA2k;
+    case SKSourceInputPerformance:
+      return labelPerformance;
     default:
       return labelUnknown;
   }

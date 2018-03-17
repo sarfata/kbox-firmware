@@ -65,6 +65,9 @@ void SKJSONVisitor::processSource(const SKSource &source, JsonObject &sourceObje
       break;
     case SKSourceInputKBoxBarometer:
       sourceObject["label"] = "KBox.Barometer";
+      break;
+    case SKSourceInputPerformance:
+      sourceObject["type"] = "PerformanceCalc";
   }
 }
 

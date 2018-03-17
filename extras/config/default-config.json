@@ -59,5 +59,20 @@
   "nmea2000": {
     "txEnabled": true,
     "rxEnabled": true
+  },
+  "performance": {
+    "enabled": true,
+    "boatSpeedCorrTableFileName": "boatspeedCorr.cal",
+    "leewayHullFactor": 0,
+    "windCorr10m": true,
+    "windSensorHeight": 0,
+    "leewayUpwashWindCorr": true,
+    "upwashFactor": 0,
+    "downwashFactor": 0,
+    "calcTrueWind": true,
+    "sendTrueWindToN2k": true,
+    "TrueWindN2kID": 10,
+    "polarDataFileName": "polarData.pol",
+    "efficiencyFactor": 100
   }
 }

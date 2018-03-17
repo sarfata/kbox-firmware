@@ -33,7 +33,8 @@ enum SKSourceInput {
   SKSourceInputNMEA2000,
   SKSourceInputKBoxIMU,
   SKSourceInputKBoxADC,
-  SKSourceInputKBoxBarometer
+  SKSourceInputKBoxBarometer,
+  SKSourceInputPerformance
 };
 
 const String skSourceInputLabels[] = {
@@ -44,6 +45,7 @@ const String skSourceInputLabels[] = {
   "InputKBox.IMU",
   "InputKBox.ADC",
   "InputKBox.Barometer"
+  "InputPerformanceCalc"
 };
 
 class SKSource {
@@ -63,12 +65,13 @@ class SKSource {
 
   public:
     /**
-     * Returns an unknown source. 
+     * Returns an unknown source.
      * You should use the global SKSourceUnknown instead of calling this
      * function.
      */
     static SKSource unknownSource();
 
+    static SKSource performanceCalc();
     /**
      * Returns a source instance for the given NMEA0183 source info.
      */

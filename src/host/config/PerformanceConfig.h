@@ -5,10 +5,14 @@
      \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
        \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
 
+  Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
+
+  Project  :  KBox
+  Purpose  :  Performance Calculations on KBox
+  Author(s):  Ronnie Zeiller ronnie@zeiller.eu
+  *****************************************************************************
+
   The MIT License
-
-  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
-
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
@@ -29,23 +33,13 @@
 */
 
 #pragma once
+#include <WString.h>
 
-#include "SerialConfig.h"
-#include "NMEA2000Config.h"
-#include "IMUConfig.h"
-#include "BarometerConfig.h"
-#include "WiFiConfig.h"
-#include "PerformanceConfig.h"
-
-/**
- * A KBox configuration in memory
- */
-struct KBoxConfig {
-  SerialConfig serial1Config;
-  SerialConfig serial2Config;
-  NMEA2000Config nmea2000Config;
-  IMUConfig imuConfig;
-  BarometerConfig barometerConfig;
-  WiFiConfig wifiConfig;
-  PerformanceConfig performanceConfig;
+struct PerformanceConfig {
+  bool enabled;
+  String boatSpeedCorrTableFileName;
+  int leewayHullFactor;   // usually between 8....10, here multiplied by 10
+  int windSensorHeight;   // in mm
+  bool windCorr10m;       // correct wind speed from sensor height to 10m above water
+  String polarDataFileName;
 };

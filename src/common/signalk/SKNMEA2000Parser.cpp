@@ -27,6 +27,7 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+// TODO: N2kParser should parse only enabled by config PGN's
 
 #include <N2kMessages.h>
 #include <KBoxLogging.h>
@@ -250,6 +251,8 @@ const SKUpdate& SKNMEA2000Parser::parse128259(const SKSourceInput& input, const 
     update->setSource(source);
 
     if (!N2kIsNA(waterSpeed)) {
+      update->setNavigationSpeedThroughWater(waterSpeed);
+    } else {
       update->setNavigationSpeedThroughWater(waterSpeed);
     }
 

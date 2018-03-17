@@ -4,21 +4,16 @@
     \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
      \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
        \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
-
   The MIT License
-
   Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
-
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
   copies of the Software, and to permit persons to whom the Software is
   furnished to do so, subject to the following conditions:
-
   The above copyright notice and this permission notice shall be included in
   all copies or substantial portions of the Software.
-
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -90,6 +85,13 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.wifiConfig.client.enabled = false;
   config.wifiConfig.client.ssid = "";
   config.wifiConfig.client.password = "";
+
+  config.performanceConfig.enabled = true;
+  config.performanceConfig.boatSpeedCorrTableFileName = "boatspeedCorr.cal";
+  config.performanceConfig.leewayHullFactor = 0;    // no entry
+  config.performanceConfig.windCorr10m = false;
+  config.performanceConfig.windSensorHeight = 0;    // no entry
+  config.performanceConfig.polarDataFileName = "polarData.pol";
 }
 
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
@@ -101,6 +103,7 @@ void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &confi
   parseBarometerConfig(json["barometer"], config.barometerConfig);
   parseWiFiConfig(json["wifi"], config.wifiConfig);
   parseNMEA2000Config(json["nmea2000"], config.nmea2000Config);
+  parsePerformanceConfig(json["performance"], config.performanceConfig);
 }
 
 void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &config) {
@@ -167,6 +170,15 @@ void KBoxConfigParser::parseWiFiNetworkConfig(const JsonObject &json,
   READ_BOOL_VALUE(enabled);
   READ_STRING_VALUE(ssid);
   READ_STRING_VALUE(password);
+}
+
+void KBoxConfigParser::parsePerformanceConfig(const JsonObject &json, PerformanceConfig &config) {
+  READ_BOOL_VALUE(enabled);
+  READ_STRING_VALUE(boatSpeedCorrTableFileName);
+  READ_INT_VALUE(leewayHullFactor);
+  READ_INT_VALUE(windSensorHeight);
+  READ_STRING_VALUE(polarDataFileName);
+  READ_BOOL_VALUE(windCorr10m);
 }
 
 enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {

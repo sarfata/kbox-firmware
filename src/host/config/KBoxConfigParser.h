@@ -69,4 +69,6 @@ class KBoxConfigParser {
                                 WiFiNetworkConfig &config);
     void parseNMEAConverterConfig(const JsonObject &json,
                                   SKNMEAConverterConfig &config);
+    void parsePerformanceConfig(const JsonObject &json, PerformanceConfig &config);
+
 };
