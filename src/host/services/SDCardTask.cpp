@@ -28,7 +28,7 @@
 
 #include "SDCardTask.h"
 
-SDCardTask::SDCardTask() : Task("SDCard") {
+SDCardTask::SDCardTask(SDCardConfig &config) : Task("SDCard"),  _config(config) {
 }
 
 void SDCardTask::setup() {
@@ -50,8 +50,12 @@ void SDCardTask::processMessage(const KMessage &m) {
   }
 
   // FIXME: Should probably implement a custom visitor for logging.
-  KMessageNMEAVisitor v;
+  KMessageNMEAVisitor v(_config.dataFormatConfig);
   m.accept(v);
+  String data = v.getNMEAContent();
+  // if dataFormat "Seasmart" --> datas are coming in
+  // if dataFormat "NMEA" --> nothing is coming
+  DEBUG("processMessage: %s", data.c_str());
   receivedMessages.add(Loggable("", v.getNMEAContent()));
 }
 
@@ -60,10 +64,13 @@ void SDCardTask::loop() {
     return;
   }
   for (LinkedList<Loggable>::iterator it = receivedMessages.begin(); it != receivedMessages.end(); it++) {
-    logFile->print(it->timestamp);
-    logFile->print(",");
+    if ( _config.writeTimestamp) {
+      logFile->print(it->timestamp);
+      logFile->print(",");
+    }
+    // PCDIN only are written
+    DEBUG("%s", it->_message);
     logFile->print(it->_message);
-    logFile->println();
   }
   // Force data to SD and update the directory entry to avoid data loss.
   if (!logFile->sync() || logFile->getWriteError()) {
@@ -72,7 +79,6 @@ void SDCardTask::loop() {
   // We always clear the list anyway.
   receivedMessages.clear();
 }
-
 
 String SDCardTask::generateNewFileName(const String& baseName) {
   if (baseName.length() > 6) {

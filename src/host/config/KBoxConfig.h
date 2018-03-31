@@ -35,6 +35,8 @@
 #include "IMUConfig.h"
 #include "BarometerConfig.h"
 #include "WiFiConfig.h"
+#include "SDCardConfig.h"
+//#include "DataFormatConfig.h"
 
 /**
  * A KBox configuration in memory
@@ -46,4 +48,6 @@ struct KBoxConfig {
   IMUConfig imuConfig;
   BarometerConfig barometerConfig;
   WiFiConfig wifiConfig;
+  SDCardConfig sdcardConfig;
+  //DataFormatConfig dataFormatConfig;
 };

@@ -20,6 +20,8 @@
       "mwv": true,
       "rsa": true
     },
+    "dataFormatType": {
+      "dataFormat" : "NMEA_Seasmart",
     "accessPoint": {
       "enabled": true,
       "ssid": "KBox"
@@ -41,6 +43,9 @@
       "hdm": true,
       "mwv": true,
       "rsa": true
+    },
+    "dataFormatType": {
+      "dataFormat" : "NMEA"
     }
   },
   "serial2": {
@@ -59,5 +64,13 @@
   "nmea2000": {
     "txEnabled": true,
     "rxEnabled": true
+  },
+  "sdcard": {
+    "enabled": true,
+    "timestamp": true,
+    "writeDebug": true,
+    "dataFormatType": {
+      "dataFormat" : "NMEA_Seasmart"
+    }
   }
 }

@@ -24,13 +24,16 @@
 
 #include "KBoxTest.h"
 #include "signalk/KMessageNMEAVisitor.h"
+#include "host/config/DataFormatConfig.h"
 
 static inline double DegToRad(double v) { return v/180.0*3.1415926535897932384626433832795; }
+
+DataFormatConfig dataFormatConfig;
 
 TEST_CASE("Visiting a NMEA0183 sentence message") {
   NMEASentence s("$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79");
 
-  KMessageNMEAVisitor v;
+  KMessageNMEAVisitor v(dataFormatConfig);
   s.accept(v);
   CHECK( v.getNMEAContent() == "$GPRMC,003516.000,A,3751.6035,N,12228.8065,W,0.01,0.00,030416,,,D*79\r\n" );
 }
@@ -49,7 +52,7 @@ TEST_CASE("Visiting a NMEA2000 object") {
   N2kMsg.AddByte(0xff); // Reserved
 
   NMEA2000Message m(N2kMsg);
-  KMessageNMEAVisitor v;
+  KMessageNMEAVisitor v(dataFormatConfig);
   m.accept(v);
   // Confirmed with canboat-analyzer that this matches the packet above.
   CHECK( v.getNMEAContent() == "$PCDIN,01F119,00000000,0F,2AAF00D1067414FF*59\r\n" );

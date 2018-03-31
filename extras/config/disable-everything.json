@@ -19,6 +19,8 @@
   "nmea2000": {
     "txEnabled": false,
     "rxEnabled": false
+  },
+  "sdcard": {
+    "enabled": false
   }
 }
-

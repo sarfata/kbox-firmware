@@ -78,10 +78,13 @@ void WiFiService::processMessage(const KMessage &m) {
     return;
   }
 
-  KMessageNMEAVisitor v;
+  KMessageNMEAVisitor v(_config.dataFormatConfig);
   m.accept(v);
 
   String data = v.getNMEAContent();
+  // Output 0 bei "NMEA"
+  // Output $PCDIN,01F802,0000002C,0D,0000AD5A3F01FFFF*2D (inkl. \r\n) bei "SeaSmart"
+  DEBUG("processMessage: %s", data.c_str());
 
   // TODO
   // Should not limit like this to only 256 because there could be many nmea lines in this message.

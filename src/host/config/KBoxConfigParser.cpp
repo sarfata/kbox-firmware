@@ -82,6 +82,12 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
 
   config.wifiConfig.enabled = true;
 
+  config.wifiConfig.dataFormatConfig.dataFormat = NMEA;
+
+  config.sdcardConfig.enabled = true;
+  config.sdcardConfig.writeTimestamp = true;
+  config.sdcardConfig.dataFormatConfig.dataFormat = NMEA_Seasmart;
+
   config.wifiConfig.vesselURN = _defaultVesselURN;
 
   config.wifiConfig.accessPoint.enabled = true;
@@ -101,6 +107,7 @@ void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &confi
   parseBarometerConfig(json["barometer"], config.barometerConfig);
   parseWiFiConfig(json["wifi"], config.wifiConfig);
   parseNMEA2000Config(json["nmea2000"], config.nmea2000Config);
+  parseSDCardConfig(json["sdcard"], config.sdcardConfig);
 }
 
 void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &config) {
@@ -134,6 +141,14 @@ void KBoxConfigParser::parseNMEA2000Config(const JsonObject &json,
   READ_BOOL_VALUE(txEnabled);
 }
 
+void KBoxConfigParser::parseDataFormatConfig(const JsonObject &json, DataFormatConfig &config) {
+  if (json == JsonObject::invalid()) {
+    return;
+  }
+
+  READ_ENUM_VALUE(dataFormat, convertDataFormatType);
+}
+
 void KBoxConfigParser::parseWiFiConfig(const JsonObject &json, WiFiConfig &config) {
   if (json == JsonObject::invalid()) {
     return;
@@ -147,6 +162,7 @@ void KBoxConfigParser::parseWiFiConfig(const JsonObject &json, WiFiConfig &confi
   parseWiFiNetworkConfig(json["client"], config.client);
   parseWiFiNetworkConfig(json["accessPoint"], config.accessPoint);
   parseNMEAConverterConfig(json["nmeaConverter"], config.nmeaConverter);
+  parseDataFormatConfig(json["dataFormatConfig"], config.dataFormatConfig);
 }
 
 void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEAConverterConfig &config) {
@@ -160,6 +176,15 @@ void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEACo
   READ_BOOL_VALUE(hdm);
   READ_BOOL_VALUE(rsa);
   READ_BOOL_VALUE(mwv);
+}
+
+void KBoxConfigParser::parseSDCardConfig(const JsonObject &json, SDCardConfig &config) {
+  if (json == JsonObject::invalid()) {
+    return;
+  }
+  READ_BOOL_VALUE(enabled);
+  READ_BOOL_VALUE(writeTimestamp);
+  parseDataFormatConfig(json["dataFormatConfig"], config.dataFormatConfig);
 }
 
 void KBoxConfigParser::parseWiFiNetworkConfig(const JsonObject &json,
@@ -194,4 +219,18 @@ enum IMUMounting KBoxConfigParser::convertIMUMounting(const String &s) {
   }
   // default
   return VerticalPortHull;
+}
+
+enum DataFormatType KBoxConfigParser::convertDataFormatType(const String &s) {
+  if (s == "NMEA") {
+    return NMEA;
+  }
+  if (s == "NMEA_Seasmart") {
+    return NMEA_Seasmart;
+  }
+  if (s == "Seasmart") {
+    return Seasmart;
+  }
+  // default
+  return NMEA_Seasmart;
 }

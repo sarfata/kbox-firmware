@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,44 +30,15 @@
 
 #pragma once
 
-#include <SdFat.h>
-#include "os/Task.h"
-#include "signalk/KMessage.h"
-#include "host/config/SDCardConfig.h"
-
-class Loggable {
-  public:
-    Loggable(String s, String m) : _source(s), _message(m), timestamp(millis()) {};
-    String _source;
-    String _message;
-    uint32_t timestamp;
+enum DataFormatType {
+  NMEA,           // pure NMEA0183
+  Seasmart,       // $PCDIN
+  NMEA_Seasmart,  // Combination of both
+  // LoggingDataAsCSV
+  // ActisenseBinary
+  // SignalK ?
 };
 
-class SDCardTask : public Task, public KReceiver {
-  private:
-    uint64_t _freeSpaceAtBoot;
-    SdFile *logFile = nullptr;
-    bool cardReady = false;
-
-    SDCardConfig &_config;
-
-    String generateNewFileName(const String& baseName);
-    SdFile* createLogFile(const String& baseName);
-
-    LinkedList<Loggable> receivedMessages;
-
-  public:
-    SDCardTask(SDCardConfig &config);
-    virtual ~SDCardTask() = default;
-
-    void setup() override;
-    void loop() override;
-    void processMessage(const KMessage&) override;
-
-    // Those two functions returns value in bytes.
-    uint64_t getFreeSpace() const;
-    uint32_t getLogSize() const;
-
-    bool isLogging() const;
-    String getLogFileName() const;
+struct DataFormatConfig {
+  enum DataFormatType dataFormat = NMEA_Seasmart;
 };
