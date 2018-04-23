@@ -43,17 +43,16 @@ void NMEA2000Service::publishN2kMessage(const tN2kMsg& msg) {
   if (_config.rxEnabled) {
     KBoxMetrics.event(KBoxEventNMEA2000MessageReceived);
 
+    DEBUG("Received N2K Message with pgn: %i", msg.PGN);
+
     for (auto it = _sentenceRepeaters.begin(); it != _sentenceRepeaters.end(); it++) {
       (*it)->write(msg);
     }
 
-    DEBUG("Received N2K Message with pgn: %i", msg.PGN);
-    NMEA2000Message m(msg, now());
-    sendMessage(m);
-
     SKNMEA2000Parser p;
     //FIXME: Get the time properly here!
-    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    uint32_t ts = millis();
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(ts / 1000, ts % 1000));
     if (update.getSize() > 0) {
       _hub.publish(update);
     }

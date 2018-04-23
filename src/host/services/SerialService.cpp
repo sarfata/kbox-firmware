@@ -196,7 +196,7 @@ void SerialService::loop() {
       }
     }
     else {
-      DEBUG("Invalid NMEA sentence: %s", (*it).getSentence().c_str());
+      DEBUG("Invalid NMEA sentence: %s", (*it).c_str());
       KBoxMetrics.event(_rxErrorEvent);
     }
   }
