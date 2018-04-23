@@ -36,7 +36,6 @@
 static NMEA2000Service *handlerContext;
 
 static void handler(const tN2kMsg &msg) {
-  DEBUG("Received N2K Message with pgn: %i", msg.PGN);
   handlerContext->publishN2kMessage(msg);
 }
 
@@ -47,6 +46,10 @@ void NMEA2000Service::publishN2kMessage(const tN2kMsg& msg) {
     for (auto it = _sentenceRepeaters.begin(); it != _sentenceRepeaters.end(); it++) {
       (*it)->write(msg);
     }
+
+    DEBUG("Received N2K Message with pgn: %i", msg.PGN);
+    NMEA2000Message m(msg, now());
+    sendMessage(m);
 
     SKNMEA2000Parser p;
     //FIXME: Get the time properly here!
