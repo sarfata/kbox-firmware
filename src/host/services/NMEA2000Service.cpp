@@ -36,13 +36,14 @@
 static NMEA2000Service *handlerContext;
 
 static void handler(const tN2kMsg &msg) {
-  DEBUG("Received N2K Message with pgn: %i", msg.PGN);
   handlerContext->publishN2kMessage(msg);
 }
 
 void NMEA2000Service::publishN2kMessage(const tN2kMsg& msg) {
   if (_config.rxEnabled) {
     KBoxMetrics.event(KBoxEventNMEA2000MessageReceived);
+
+    DEBUG("Received N2K Message with pgn: %i", msg.PGN);
     NMEA2000Message m(msg, now());
     sendMessage(m);
 
