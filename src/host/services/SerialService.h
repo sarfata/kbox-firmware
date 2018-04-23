@@ -25,7 +25,6 @@
 
 #include "common/os/Task.h"
 #include "common/algo/List.h"
-#include "common/signalk/KMessage.h"
 #include "common/signalk/SKSubscriber.h"
 #include "common/signalk/SKNMEAOutput.h"
 #include "common/stats/KBoxMetrics.h"
@@ -38,14 +37,15 @@
 
 class HardwareSerial;
 
-class SerialService : public Task, public KGenerator, public SKSubscriber, private SKNMEAOutput {
+class SerialService : public Task, public SKSubscriber, private SKNMEAOutput {
   private:
     SerialConfig &_config;
     SKHub &_hub;
     HardwareSerial& stream;
-    LinkedList<NMEASentence> receiveQueue;
+    LinkedList<SKNMEASentence> receiveQueue;
     enum KBoxEvent _rxValidEvent, _rxErrorEvent, _txValidEvent, _txOverflowEvent;
     SKSourceInput _skSourceInput;
+    LinkedList<SKNMEAOutput*> _repeaters;
 
   public:
     SerialService(SerialConfig &_config, SKHub &hub, HardwareSerial&s);
@@ -54,5 +54,6 @@ class SerialService : public Task, public KGenerator, public SKSubscriber, priva
     void loop();
     void updateReceived(const SKUpdate&) override;
     bool write(const SKNMEASentence& nmeaSentence) override;
+    void addRepeater(SKNMEAOutput &repeater);
 };
 

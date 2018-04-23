@@ -40,6 +40,7 @@ bool KommandHandlerNMEA::handleKommand(KommandReader &kreader, SlipStream &reply
 
   if (nmeaSentence) {
     _netServer.writeAll((const uint8_t*)nmeaSentence, strlen(nmeaSentence));
+    _netServer.writeAll((const uint8_t*)"\r\n", 3);
   }
 
   return true;

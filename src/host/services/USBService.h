@@ -26,21 +26,28 @@
 
 #include <KBoxLogging.h>
 #include <KBoxLoggerStream.h>
-#include "comms/SlipStream.h"
-#include "os/Task.h"
-#include "ui/GC.h"
-#include "comms/KommandHandlerPing.h"
-#include "comms/KommandHandlerScreenshot.h"
-#include "comms/KommandHandlerFileRead.h"
-#include "comms/KommandHandlerFileWrite.h"
-#include "comms/KommandHandlerReboot.h"
+#include <common/signalk/SKNMEA2000Output.h>
+#include "common/comms/SlipStream.h"
+#include "common/os/Task.h"
+#include "common/ui/GC.h"
+#include "common/comms/SlipStream.h"
+#include "common/comms/KommandHandlerPing.h"
+#include "common/comms/KommandHandlerScreenshot.h"
+#include "common/signalk/SKHub.h"
+#include "common/signalk/SKSubscriber.h"
+#include "common/signalk/SKNMEAOutput.h"
+#include "host/comms/KommandHandlerFileRead.h"
+#include "host/comms/KommandHandlerFileWrite.h"
+#include "host/comms/KommandHandlerReboot.h"
 
-class USBService : public Task, public KBoxLogger {
+class USBService : public Task, public KBoxLogger, public SKSubscriber,
+                   public SKNMEAOutput, public SKNMEA2000Output {
   private:
     static const size_t MaxLogFrameSize = 256;
 
     SlipStream _slip;
     KBoxLoggerStream _streamLogger;
+    SKHub &_skHub;
     KommandHandlerPing _pingHandler;
     KommandHandlerScreenshot _screenshotHandler;
     KommandHandlerFileRead _fileReadHandler;
@@ -50,22 +57,28 @@ class USBService : public Task, public KBoxLogger {
     enum USBConnectionState{
       ConnectedDebug,
       ConnectedFrame,
-      ConnectedESPProgramming
+      ConnectedESPProgramming,
+      ConnectedNMEAInterface
     };
     USBConnectionState _state;
 
     void loopConnectedFrame();
     void loopConnectedESPProgramming();
+    void loopNMEAInterfaceMode();
 
     void sendLogFrame(KBoxLoggingLevel level, const char *fname, int lineno,
                       const char *fmt, va_list fmtargs);
 
   public:
-    USBService(GC &gc);
+    USBService(GC &gc, SKHub &hub);
     ~USBService() {};
 
     void setup();
     void loop();
     void log(enum KBoxLoggingLevel level, const char *fname, int lineno,
              const char *fmt, va_list args) override;
+    void updateReceived(const SKUpdate& u);
+
+    bool write(const SKNMEASentence &nmeaSentence);
+    bool write(const tN2kMsg&);
 };

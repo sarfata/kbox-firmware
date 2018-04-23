@@ -192,6 +192,12 @@ been possible!**
 
 ## Changelog
 
+ * 2018 04 23 - v1.2.3
+   * Repeat all NMEA and NMEA2000 data to the computer when the serial port is
+     opened at 38400 bauds.
+   * Do not lock up when connected to a Raspberry Pi (was bug #68).
+   * Publish internal sensors data to serial outputs.
+   * Save all NMEA and NMEA2000 messages to the SDCard again.
  * 2018 02 16 - v1.2.2
    * Go back to older version of ESP8266 framework (2.3 via framework 1.5) to
      get rid of random crashes. Still need to investigate more but we do not

@@ -23,24 +23,25 @@
 */
 #pragma once
 
-#include "ui/GC.h"
-#include "os/Task.h"
-#include "signalk/KMessage.h"
-#include "signalk/SKNMEAOutput.h"
-#include "signalk/SKHub.h"
-#include "signalk/SKSubscriber.h"
-#include "comms/Kommand.h"
-#include "comms/SlipStream.h"
-#include "comms/KommandHandlerPing.h"
-#include "comms/KommandHandlerWiFiLog.h"
-#include "comms/KommandHandlerWiFiStatus.h"
+#include "common/ui/GC.h"
+#include "common/os/Task.h"
+#include "common/signalk/SKNMEAOutput.h"
+#include "common/signalk/SKNMEA2000Output.h"
+#include "common/signalk/SKHub.h"
+#include "common/signalk/SKSubscriber.h"
+#include "common/comms/Kommand.h"
+#include "common/comms/SlipStream.h"
+#include "common/comms/KommandHandlerPing.h"
+#include "host/comms/KommandHandlerWiFiLog.h"
+#include "host/comms/KommandHandlerWiFiStatus.h"
 #include "host/config/WiFiConfig.h"
 
 /**
  * Manages connection to the ESP module.
  */
-class WiFiService : public Task, public KReceiver, public SKSubscriber,
-                    private SKNMEAOutput, private WiFiStatusObserver {
+class WiFiService : public Task, public SKSubscriber,
+                    public SKNMEAOutput, public SKNMEA2000Output,
+                    private WiFiStatusObserver {
   private:
     const WiFiConfig &_config;
     SKHub &_hub;
@@ -58,10 +59,10 @@ class WiFiService : public Task, public KReceiver, public SKSubscriber,
 
     void setup();
     void loop();
-    void processMessage(const KMessage &m) override;
     void updateReceived(const SKUpdate&) override;
 
     bool write(const SKNMEASentence& s) override;
+    bool write(const tN2kMsg& m) override;
 
     const String clientInterfaceStatus() const;
     const IPAddress clientInterfaceIP() const;
