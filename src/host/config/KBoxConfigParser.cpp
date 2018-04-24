@@ -38,8 +38,8 @@
 #define READ_INT_VALUE(name) READ_VALUE_WITH_TYPE(name, int)
 
 #define READ_INT_VALUE_WRANGE(name, min, max) if (json[#name].is<int>() \
-                                                    && json[#name] > min \
-                                                    && json[#name] < max) { \
+                                                    && json[#name] >= min \
+                                                    && json[#name] <= max) { \
                                                 config.name = \
                                                   json[#name] .as<int>(); \
                                               }
