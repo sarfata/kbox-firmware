@@ -34,29 +34,26 @@ NetServer::NetServer(int port) : server(port) {
 }
 
 void NetServer::handleDisconnect(int clientIndex) {
-  clients[clientIndex]->free();
-  delete(clients[clientIndex]);
-  clients[clientIndex] = 0;
-  queues[clientIndex].clear();
+  DEBUG("Disconnect for client %i", clientIndex);
+  // AsyncPrinter will delete the client object in the client->onDisconnect handler.
 }
 
 void NetServer::handleNewClient(AsyncClient *client) {
   DEBUG("New connection");
   int i;
   for (i = 0; i < maxClients; i++) {
-    if (!clients[i] || !clients[i]->connected()) {
-      clients[i] = client;
+    if (!clients[i]) {
+      clients[i] = AsyncPrinter(client, 2048);
 
-      client->onAck([this, i](void *s, AsyncClient *c, size_t len, uint32_t time) {
-          //DEBUG("Got ack for client %i len=%u time=%u", i, len, time);
-        }, 0);
-      client->onData([this, i](void *s, AsyncClient *c, void *data, size_t len) {
+      clients[i].onData([this, i](void *s, AsyncPrinter *c, uint8_t *data, size_t len) {
           DEBUG("Got data from client %i len=%i", i, len);
         }, 0);
-      client->onDisconnect([this, i](void *s, AsyncClient *c) {
-          DEBUG("Disconnect for client %i", i);
+      clients[i].onClose([this, i](void *s, AsyncPrinter *c) {
           handleDisconnect(i);
         }, 0);
+
+      // Attach some debug messages directly to the client for information.
+      // These handlers are not set by AsyncPrinter.
       client->onError([this, i](void *s, AsyncClient *c, int8_t error) {
           DEBUG("Error %s (%i) on client %i", c->errorToString(error), error, i);
         }, 0);
@@ -69,7 +66,8 @@ void NetServer::handleNewClient(AsyncClient *client) {
     }
   }
   DEBUG("Rejecting client - Too many connections already.");
-  // We cannot accept this connection at the moment
+  // We cannot accept this connection at the moment. Set a handler to free the object when disconnected
+  // and start disconnection.
   client->onDisconnect([](void *s, AsyncClient *c) {
       delete(c);
     });
@@ -78,8 +76,8 @@ void NetServer::handleNewClient(AsyncClient *client) {
 
 void NetServer::writeAll(const uint8_t *bytes, int len) {
   for (int i = 0; i < maxClients; i++) {
-    if (clients[i] && clients[i]->connected()) {
-      queues[i].add(NetMessage(bytes, len));
+    if (clients[i]) {
+      clients[i].write(bytes, len);
     }
   }
 }
@@ -87,9 +85,7 @@ void NetServer::writeAll(const uint8_t *bytes, int len) {
 int NetServer::clientsCount() {
   int count = 0;
   for (int i = 0; i < maxClients; i++) {
-    //DEBUG("counting - i=%i count=%i clients[i]=%p clients[i]->connected()=%s", 
-        //i, count, clients[i], clients[i] ? (clients[i]->connected() ? "connected" : "not connected") : "n/a");
-    if (clients[i] && clients[i]->connected()) {
+    if (clients[i]) {
       count++;
     }
   }
@@ -97,31 +93,7 @@ int NetServer::clientsCount() {
 }
 
 void NetServer::loop() {
-  for (int i = 0; i < maxClients; i++) {
-    if (clients[i] && clients[i]->connected()) {
-      if (clients[i]->canSend() && queues[i].size() > 0) {
-        //DEBUG("Sending for clients[%i] queue len=%i", i, queues[i].size());
-
-        LinkedList<NetMessage>::iterator it = queues[i].begin();
-        if (clients[i]->write((const char*)it->bytes(), it->len()) > 0) {
-          queues[i].removeFirst();
-        }
-      }
-    }
-    else {
-      queues[i].clear();
-    }
-  }
-  /*
-    if (!clients[i]->canSend()) {
-      DEBUG("client[%i]: BUSY in state %s", i, clients[i]->stateToString());
-      continue;
-    }
-    size_t sent = clients[i]->write((char*)bytes, len);
-    if (sent != len) {
-      DEBUG("client[%i]: sent %i of %i bytes", i, sent, len);
-    }
-    */
+  // Writes are performed asynchronously.
 }
 
 
