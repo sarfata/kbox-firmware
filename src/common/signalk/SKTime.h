@@ -57,12 +57,21 @@ class SKTime {
     };
 
     /**
-     * SKTime object from two strings for date and time.
+     * SKTime object from two strings for date and time (NMEA).
      *
      * @param date ddmmyy
      * @param time hhmmss.ss (utc)
+     * @return a SKTime representation of the given time and date.
      */
-    SKTime(String date, String time);
+    static SKTime timeFromNMEAStrings(String date, String time);
+
+    /**
+     * SKTime object from number of days and number of seconds (NMEA2000).
+     * @param daysSince1970 number of days since 1970
+     * @param secondsSinceMidnight number of seconds since midnight
+     * @return a SKTime representation of the given time and date.
+     */
+    static SKTime timeFromNMEA2000(uint16_t daysSince1970, double secondsSinceMidnight);
 
     bool operator==(const SKTime& v) const;
 

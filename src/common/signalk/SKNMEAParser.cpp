@@ -89,10 +89,8 @@ const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceR
     rmc->setValue(SKPathNavigationCourseOverGroundTrue, cog);
   }
 
-  SKTime timestamp = SKTime(date, utcTime);
-  if (timestamp != SKTime()) {
-    rmc->setNavigationDatetime(timestamp);
-  }
+  SKTime timestamp = SKTime::timeFromNMEAStrings(date, utcTime);
+  rmc->setNavigationDatetime(timestamp);
 
   // _sku is deleted every time a new sentence is parsed
   _sku = rmc;

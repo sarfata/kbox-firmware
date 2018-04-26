@@ -30,6 +30,8 @@
 
 #include "SKTime.h"
 
+#include <cmath>
+
 /*
  * Time math copied from Teensy/Time.cpp - Original copyright follows.
  *
@@ -169,7 +171,7 @@ uint32_t makeTime(const tmElements_t &tm){
   return seconds;
 }
 
-SKTime::SKTime(String dateString, String timeString) {
+SKTime SKTime::timeFromNMEAStrings(String dateString, String timeString) {
   tmElements_t tm;
 
   tm.Day = dateString.substring(0, 2).toInt();
@@ -186,8 +188,8 @@ SKTime::SKTime(String dateString, String timeString) {
   tm.Minute = timeString.substring(2, 4).toInt();
   tm.Second = timeString.substring(4, 6).toInt();
 
-  _timestamp = makeTime(tm);
-  _milliseconds = unknownMilliseconds;
+  uint32_t timestamp = makeTime(tm);
+  uint32_t milliseconds = unknownMilliseconds;
 
   if (timeString.length() > 7) {
     String ms = timeString.substring(7, 10);
@@ -201,9 +203,20 @@ SKTime::SKTime(String dateString, String timeString) {
     }
 
     if (millis < 1000) {
-      _milliseconds = millis;
+      milliseconds = millis;
     }
   }
+
+  return SKTime(timestamp, milliseconds);
+}
+
+SKTime SKTime::timeFromNMEA2000(uint16_t daysSince1970, double secondsSinceMidnight) {
+  double integralPart;
+  double fractionalPart = modf(secondsSinceMidnight, &integralPart);
+
+  uint32_t ts = daysSince1970 * SECS_PER_DAY + integralPart;
+
+  return SKTime(ts, round(fractionalPart * 1000));
 }
 
 bool SKTime::operator==(const SKTime &other) const {
