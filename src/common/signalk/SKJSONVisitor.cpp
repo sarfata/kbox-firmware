@@ -117,11 +117,16 @@ JsonObject& SKJSONVisitor::processUpdate(const SKUpdate& update) {
         }
         break;
       case SKValue::SKValueTypePosition:
-        JsonObject &position = obj.createNestedObject("value");
-        position["latitude"] = v.getPositionValue().latitude;
-        position["longitude"] = v.getPositionValue().longitude;
-        if ( v.getPositionValue().altitude != SKDoubleNAN)
-          position["altitude"] = v.getPositionValue().altitude;
+        {
+          JsonObject &position = obj.createNestedObject("value");
+          position["latitude"] = v.getPositionValue().latitude;
+          position["longitude"] = v.getPositionValue().longitude;
+          if ( v.getPositionValue().altitude != SKDoubleNAN)
+            position["altitude"] = v.getPositionValue().altitude;
+          break;
+        }
+      case SKValue::SKValueTypeTimestamp:
+        obj["value"] = _jsonBuffer.strdup(v.getTimestampValue().toString().c_str());
         break;
     }
   }

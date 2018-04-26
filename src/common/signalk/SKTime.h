@@ -56,6 +56,10 @@ class SKTime {
       }
     };
 
+    bool operator==(const SKTime& v) const;
+
+    bool operator!=(const SKTime& v) const;
+
     uint32_t getTime() const {
       return _timestamp;
     };

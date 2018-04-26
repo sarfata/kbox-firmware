@@ -41,6 +41,8 @@ bool SKValue::operator==(const SKValue& other) const {
         return (_value.attitude.roll == other._value.attitude.roll) &&
           (_value.attitude.pitch == other._value.attitude.pitch) &&
           (_value.attitude.yaw == other._value.attitude.yaw);
+      case SKValueTypeTimestamp:
+        return _value.timestamp == other._value.timestamp;
     }
   }
   return false;
@@ -69,4 +71,11 @@ SKTypeAttitude SKValue::getAttitudeValue() const {
     return SKTypeAttitude(0, 0, 0);
   }
   return _value.attitude;
+}
+
+SKTime SKValue::getTimestampValue() const {
+  if (_type != SKValueTypeTimestamp) {
+    return SKTime();
+  }
+  return _value.timestamp;
 }

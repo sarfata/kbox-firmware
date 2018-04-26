@@ -133,6 +133,14 @@ static void breakTime(uint32_t timeInput, tmElements_t &tm){
   tm.Day = time + 1;     // day of month
 }
 
+bool SKTime::operator==(const SKTime &other) const {
+  return _timestamp == other._timestamp && _milliseconds == other._milliseconds;
+}
+
+bool SKTime::operator!=(const SKTime &other) const {
+  return !(*this == other);
+}
+
 String SKTime::toString() const {
   tmElements_t tm;
   breakTime(_timestamp, tm);
