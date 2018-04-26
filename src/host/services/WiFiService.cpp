@@ -64,8 +64,24 @@ void WiFiService::loop() {
     else {
       KBoxMetrics.event(KBoxEventWiFiInvalidKommand);
       ERROR("Invalid command received from WiFi module (id=%i size=%i)", kr.getKommandIdentifier(), kr.dataSize());
+
+      // This is most likely a boot or reboot message from the ESP module.
+      // Print it line by line, otherwise the message will be truncated.
+
+      unsigned int index = 0;
+      uint8_t *currentLine = frame;
+      while (index < len) {
+        if (frame[index] == '\n') {
+          frame[index] = '\0';
+          DEBUG("> %s", currentLine);
+
+          currentLine = frame + index + 1;
+        }
+        index++;
+      }
+
       frame[len-1] = 0;
-      DEBUG("> %s", frame);
+      DEBUG("> %s", currentLine);
     }
 
     _slip.readFrame(0, 0);

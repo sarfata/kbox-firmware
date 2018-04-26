@@ -72,6 +72,7 @@ def send_sentence(output, nmea):
 
 def replay(input, output):
     for nmea in nmea_read_with_delay(input):
+        output.reset_input_buffer()
         send_sentence(output, nmea)
 
 def nmea_checksum(data):
@@ -133,7 +134,7 @@ def main():
 
     port = None
     if args.port:
-        port = serial.Serial(port = args.port, baudrate = args.baud, timeout = 1)
+        port = serial.Serial(port = args.port, baudrate = args.baud, timeout = 1, write_timeout = 1, xonxoff=False, rtscts=False, dsrdtr=False)
 
     if args.command == 'replay':
         if port:
