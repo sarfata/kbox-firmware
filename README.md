@@ -192,6 +192,10 @@ been possible!**
 
 ## Changelog
 
+ * 2018 04 25 - v1.2.4
+   * Improved WiFi connection stability
+     This required the latest version of ESP firmware.
+     And also some changes to the TCP/NMEA server.
  * 2018 04 23 - v1.2.3
    * Repeat all NMEA and NMEA2000 data to the computer when the serial port is
      opened at 38400 bauds.
