@@ -86,5 +86,48 @@ TEST_CASE("SKTime") {
     CHECK( t.getMilliseconds() == 0 );
     CHECK( t.toString() == "1982-12-23T18:30:00Z" );
   }
+
+  SECTION("Parse NMEA date/time without ms") {
+    SKTime t("141116", "004119");
+    CHECK( t.toString() == "2016-11-14T00:41:19Z" );
+  }
+
+  SECTION("Parse NMEA date/time with 000ms") {
+    SKTime t("141116", "004119.000");
+    CHECK( t.toString() == "2016-11-14T00:41:19.000Z" );
+  }
+
+  SECTION("Parse NMEA date/time with ms") {
+    SKTime t("141116", "004119.042");
+    CHECK( t.toString() == "2016-11-14T00:41:19.042Z" );
+  }
+
+  SECTION("Invalid milliseconds") {
+    SKTime t("141116", "004119.10212");
+    CHECK( t.toString() == "2016-11-14T00:41:19.102Z" );
+  }
+
+  SECTION("2 digits milliseconds") {
+    SKTime t("141116", "004119.10");
+    CHECK( t.toString() == "2016-11-14T00:41:19.100Z" );
+  }
+
+  SECTION("1 digits milliseconds") {
+    SKTime t("141116", "004119.9");
+    CHECK( t.toString() == "2016-11-14T00:41:19.900Z" );
+  }
+
+  SECTION("Programmed obsolescence") {
+    SECTION("Time before y2000") {
+      SKTime t("231282", "193000");
+      CHECK( t.toString() == "1982-12-23T19:30:00Z" );
+    }
+
+    SECTION("Jan 1 1970") {
+      SKTime t("010170", "010203");
+      CHECK( t.getTime() == 1 * 3600 + 2 * 60 + 3 );
+      CHECK( t.toString() == "1970-01-01T01:02:03Z" );
+    }
+  }
 }
 

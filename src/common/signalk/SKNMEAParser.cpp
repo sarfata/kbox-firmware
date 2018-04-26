@@ -64,16 +64,18 @@ const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceR
     return _invalidSku;
   }
 
-  SKUpdateStatic<3>* rmc = new SKUpdateStatic<3>();
+  SKUpdateStatic<4>* rmc = new SKUpdateStatic<4>();
   rmc->setTimestamp(time);
 
   SKSource source = SKSource::sourceForNMEA0183(input, reader.getTalkerId(), reader.getSentenceCode());
   rmc->setSource(source);
 
+  String utcTime = reader.getFieldAsString(1);
   double latitude = reader.getFieldAsLatLon(3);
   double longitude = reader.getFieldAsLatLon(5);
   double sog = SKKnotToMs(reader.getFieldAsDouble(7));
   double cog = SKDegToRad(reader.getFieldAsDouble(8));
+  String date = reader.getFieldAsString(9);
 
   if (!isnan(latitude) && !isnan(longitude)) {
     rmc->setValue(SKPathNavigationPosition, SKTypePosition(latitude,
@@ -86,6 +88,12 @@ const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceR
   if (!isnan(cog)) {
     rmc->setValue(SKPathNavigationCourseOverGroundTrue, cog);
   }
+
+  SKTime timestamp = SKTime(date, utcTime);
+  if (timestamp != SKTime()) {
+    rmc->setNavigationDatetime(timestamp);
+  }
+
   // _sku is deleted every time a new sentence is parsed
   _sku = rmc;
   return *_sku;

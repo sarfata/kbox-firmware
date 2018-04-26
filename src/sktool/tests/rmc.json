@@ -5,7 +5,8 @@
       { "path": "navigation.position",
         "value": { "latitude": 37.85564167, "longitude": -122.4581883 } },
       { "path": "navigation.speedOverGround", "value": 2.582511111 },
-      { "path": "navigation.courseOverGroundTrue", "value": 4.105712532 }
+      { "path": "navigation.courseOverGroundTrue", "value": 4.105712532 },
+      { "path": "navigation.datetime", "value": "2016-11-14T00:41:19.000Z" }
     ]
   }
 ]

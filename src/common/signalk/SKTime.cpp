@@ -68,6 +68,11 @@
 // leap year calulator expects year argument as years offset from 1970
 #define LEAP_YEAR(Y)     ( ((1970+Y)>0) && !((1970+Y)%4) && ( ((1970+Y)%100) || !((1970+Y)%400) ) )
 
+/* Useful Constants */
+#define SECS_PER_MIN  (60UL)
+#define SECS_PER_HOUR (3600UL)
+#define SECS_PER_DAY  (SECS_PER_HOUR * 24UL)
+
 typedef struct  {
   uint8_t Second;
   uint8_t Minute;
@@ -133,6 +138,74 @@ static void breakTime(uint32_t timeInput, tmElements_t &tm){
   tm.Day = time + 1;     // day of month
 }
 
+uint32_t makeTime(const tmElements_t &tm){
+// assemble time elements into time_t
+// note year argument is offset from 1970 (see macros in time.h to convert to other formats)
+// previous version used full four digit year (or digits since 2000),i.e. 2009 was 2009 or 9
+
+  int i;
+  uint32_t seconds;
+
+  // seconds from 1970 till 1 jan 00:00:00 of the given year
+  seconds= tm.Year*(SECS_PER_DAY * 365);
+  for (i = 0; i < tm.Year; i++) {
+    if (LEAP_YEAR(i)) {
+      seconds +=  SECS_PER_DAY;   // add extra days for leap years
+    }
+  }
+
+  // add days for this year, months start from 1
+  for (i = 1; i < tm.Month; i++) {
+    if ( (i == 2) && LEAP_YEAR(tm.Year)) {
+      seconds += SECS_PER_DAY * 29;
+    } else {
+      seconds += SECS_PER_DAY * monthDays[i-1];  //monthDay array starts from 0
+    }
+  }
+  seconds+= (tm.Day-1) * SECS_PER_DAY;
+  seconds+= tm.Hour * SECS_PER_HOUR;
+  seconds+= tm.Minute * SECS_PER_MIN;
+  seconds+= tm.Second;
+  return seconds;
+}
+
+SKTime::SKTime(String dateString, String timeString) {
+  tmElements_t tm;
+
+  tm.Day = dateString.substring(0, 2).toInt();
+  tm.Month = dateString.substring(2, 4).toInt();
+  // Year 2070 bug incoming ...
+  int year = dateString.substring(4, 6).toInt();
+  if (year < 70) {
+    tm.Year = year + 30;
+  }
+  else {
+    tm.Year = year - 70;
+  }
+  tm.Hour = timeString.substring(0, 2).toInt();
+  tm.Minute = timeString.substring(2, 4).toInt();
+  tm.Second = timeString.substring(4, 6).toInt();
+
+  _timestamp = makeTime(tm);
+  _milliseconds = unknownMilliseconds;
+
+  if (timeString.length() > 7) {
+    String ms = timeString.substring(7, 10);
+    int millis = ms.toInt();
+
+    if (ms.length() == 1) {
+      millis *= 100;
+    }
+    if (ms.length() == 2) {
+      millis *= 10;
+    }
+
+    if (millis < 1000) {
+      _milliseconds = millis;
+    }
+  }
+}
+
 bool SKTime::operator==(const SKTime &other) const {
   return _timestamp == other._timestamp && _milliseconds == other._milliseconds;
 }
@@ -151,8 +224,8 @@ String SKTime::toString() const {
     s.reserve(21);
   }
   else {
-    // "2014-04-10T08:33:53.0101Z" => 25
-    s.reserve(26);
+    // "2014-04-10T08:33:53.010Z" => 24
+    s.reserve(25);
   }
   s += (1970 + tm.Year); s += "-";
   if (tm.Month < 10) { s += "0"; }

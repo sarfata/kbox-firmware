@@ -56,6 +56,14 @@ class SKTime {
       }
     };
 
+    /**
+     * SKTime object from two strings for date and time.
+     *
+     * @param date ddmmyy
+     * @param time hhmmss.ss (utc)
+     */
+    SKTime(String date, String time);
+
     bool operator==(const SKTime& v) const;
 
     bool operator!=(const SKTime& v) const;
