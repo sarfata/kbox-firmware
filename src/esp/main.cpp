@@ -153,7 +153,7 @@ void loop() {
         lastMessageTimer = 0;
       }
 
-      if (server.clientsCount() > 0) {
+      if (server.clientsCount() + webServer.countClients() > 0) {
         rgb.setPixelColor(0, clientsConnectedColor);
       }
       else {
