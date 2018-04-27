@@ -107,5 +107,19 @@ class SKTime {
     };
 
     String toString() const;
+
+    /**
+     * Returns the date written in ISO8601 format: YYYY-MM-DD.
+     *
+     * @return
+     */
+    String iso8601date() const;
+
+    /**
+     * Returns the time written in ISO8601 extended format: HH:MM:SS (24h).
+     *
+     * @return
+     */
+    String iso8601extendedTime() const;
 };
 

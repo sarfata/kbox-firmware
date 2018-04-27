@@ -283,3 +283,34 @@ String SKTime::toString() const {
   s += "Z";
   return s;
 }
+
+String SKTime::iso8601date() const {
+  String s;
+  s.reserve(11);
+
+  tmElements_t tm;
+  breakTime(_timestamp, tm);
+  s += (1970 + tm.Year); s += "-";
+  if (tm.Month < 10) { s += "0"; }
+  s += tm.Month; s += "-";
+  if (tm.Day < 10) { s += "0"; }
+  s += tm.Day;
+
+  return s;
+}
+
+String SKTime::iso8601extendedTime() const {
+  String s;
+  s.reserve(9);
+
+  tmElements_t tm;
+  breakTime(_timestamp, tm);
+  if (tm.Hour < 10) { s += "0"; }
+  s += tm.Hour; s += ":";
+  if (tm.Minute < 10) { s += "0"; }
+  s += tm.Minute; s += ":";
+  if (tm.Second < 10) { s += "0"; }
+  s += tm.Second;
+
+  return s;
+}

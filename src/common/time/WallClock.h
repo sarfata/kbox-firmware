@@ -43,6 +43,7 @@ class WallClock {
     typedef uint32_t (*millisecondsProvider_t)();
 
   private:
+    bool _timeWasSet;
     SKTime _lastKnownTime;
     uint32_t _millisecondsOfLastKnownTime;
 
@@ -54,8 +55,24 @@ class WallClock {
     WallClock();
 
     void setMillisecondsProvider(WallClock::millisecondsProvider_t millisecondsProvider);
-    const SKTime now() const;
     void setTime(const SKTime &t);
+
+    /**
+     * Return the current time.
+     *
+     * If the time was not set, this will probably be in 1970.
+     * If a milliseconds provider was not set, the time will never be updated.
+     *
+     * @return
+     */
+    const SKTime now() const;
+
+    /**
+     * Returns true if the time has been set at least once and is therefore believed to be correct.
+     *
+     * @return
+     */
+    bool isTimeSet() const;
 };
 
 extern WallClock wallClock;

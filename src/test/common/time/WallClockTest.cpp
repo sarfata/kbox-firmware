@@ -45,6 +45,7 @@ TEST_CASE("WallClockTest") {
   SECTION("Check default values") {
     CHECK( clock.now().getTime() == 0 );
     CHECK( clock.now().getMilliseconds() == 0 );
+    CHECK( !clock.isTimeSet() );
   }
 
   SECTION("Check you can set and keep the time") {
@@ -55,6 +56,7 @@ TEST_CASE("WallClockTest") {
 
     CHECK( clock.now().getTime() == t.getTime() );
     CHECK( clock.now().getMilliseconds() == t.getMilliseconds() );
+    CHECK( clock.isTimeSet() );
 
     SECTION("Time increases with milliseconds") {
       mockedTimeMs += 10;
@@ -104,5 +106,14 @@ TEST_CASE("WallClockTest") {
         CHECK( clock.now().getMilliseconds() == t.getMilliseconds());
       }
     }
+  }
+
+  SECTION("Changing provider should reset time") {
+    clock.setTime(SKTime(42, 42));
+    CHECK( clock.isTimeSet() );
+
+    clock.setMillisecondsProvider(0);
+
+    CHECK( !clock.isTimeSet() );
   }
 }

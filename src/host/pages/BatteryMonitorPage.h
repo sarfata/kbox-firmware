@@ -29,6 +29,7 @@
 
 class BatteryMonitorPage : public Page, public SKSubscriber {
   private:
+    TextLayer *clockLayer;
     TextLayer *houseVoltage, *houseCurrent, *engineVoltage, *supplyVoltage;
 
     Color colorForVoltage(float v);
@@ -38,4 +39,6 @@ class BatteryMonitorPage : public Page, public SKSubscriber {
     BatteryMonitorPage(SKHub& hub);
 
     virtual void updateReceived(const SKUpdate& up);
+
+    bool processEvent(const TickEvent &e) override;
 };

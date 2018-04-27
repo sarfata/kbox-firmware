@@ -158,5 +158,12 @@ TEST_CASE("SKTime") {
     CHECK( (t + 1000).getTime() == 143 );
     CHECK( (t + 1000).getMilliseconds() == 0 );
   }
+
+  SECTION("ISO8601 Date and Time") {
+    SKTime t = SKTime::timeFromNMEAStrings("231282", "193042");
+
+    CHECK( t.iso8601date() == "1982-12-23" );
+    CHECK( t.iso8601extendedTime() == "19:30:42");
+  }
 }
 

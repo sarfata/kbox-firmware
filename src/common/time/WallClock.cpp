@@ -32,7 +32,7 @@
 
 WallClock wallClock;
 
-WallClock::WallClock() : _lastKnownTime(), _millisecondsOfLastKnownTime(0), _millisecondsProvider(nullptr) {
+WallClock::WallClock() : _timeWasSet(false), _millisecondsOfLastKnownTime(0), _millisecondsProvider(nullptr) {
 
 }
 
@@ -48,12 +48,15 @@ uint32_t WallClock::currentMilliseconds() const {
 void WallClock::setMillisecondsProvider(WallClock::millisecondsProvider_t millisecondsProvider) {
   _millisecondsProvider = millisecondsProvider;
 
-  setTime(SKTime());
+  _millisecondsOfLastKnownTime = currentMilliseconds();
+  _lastKnownTime = SKTime();
+  _timeWasSet = false;
 }
 
 void WallClock::setTime(const SKTime &t) {
   _millisecondsOfLastKnownTime = currentMilliseconds();
   _lastKnownTime = t;
+  _timeWasSet = true;
 }
 
 const SKTime WallClock::now() const {
@@ -70,4 +73,8 @@ const SKTime WallClock::now() const {
   SKTime t = _lastKnownTime + deltaMs;
 
   return t;
+}
+
+bool WallClock::isTimeSet() const {
+  return _timeWasSet;
 }
