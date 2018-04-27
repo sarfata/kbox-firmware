@@ -25,10 +25,11 @@
 #pragma once
 
 #include <SdFat.h>
-#include <common/signalk/SKNMEAOutput.h>
-#include <common/signalk/SKNMEA2000Output.h>
-#include <common/algo/List.h>
+#include "common/signalk/SKNMEAOutput.h"
+#include "common/signalk/SKNMEA2000Output.h"
+#include "common/algo/List.h"
 #include "common/os/Task.h"
+#include "host/config/SDLoggingConfig.h"
 
 class Loggable {
   public:
@@ -38,11 +39,12 @@ class Loggable {
     uint32_t timestamp;
 };
 
-class SDCardTask : public Task, public SKNMEAOutput, public SKNMEA2000Output {
+class SDLoggingService : public Task, public SKNMEAOutput, public SKNMEA2000Output {
   private:
     uint64_t _freeSpaceAtBoot;
     SdFile *logFile = nullptr;
     bool cardReady = false;
+    const SDLoggingConfig &_config;
 
     String generateNewFileName(const String& baseName);
     SdFile* createLogFile(const String& baseName);
@@ -50,8 +52,8 @@ class SDCardTask : public Task, public SKNMEAOutput, public SKNMEA2000Output {
     LinkedList<Loggable> receivedMessages;
 
   public:
-    SDCardTask();
-    virtual ~SDCardTask() = default;
+    SDLoggingService(const SDLoggingConfig &config);
+    virtual ~SDLoggingService() = default;
 
     void setup() override;
     void loop() override;
@@ -65,4 +67,6 @@ class SDCardTask : public Task, public SKNMEAOutput, public SKNMEA2000Output {
 
     bool write(const SKNMEASentence &nmeaSentence) override;
     bool write(const tN2kMsg &m) override;
+
+    void startLogging();
 };

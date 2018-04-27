@@ -39,7 +39,7 @@
 #include "host/services/NMEA2000Service.h"
 #include "host/services/SerialService.h"
 #include "host/services/RunningLightService.h"
-#include "host/services/SDCardTask.h"
+#include "host/services/SDLoggingService.h"
 #include "host/services/TimeService.h"
 #include "host/services/USBService.h"
 #include "host/services/WiFiService.h"
@@ -59,15 +59,15 @@ void setup() {
   // https://forum.pjrc.com/threads/27827-Float-in-sscanf-on-Teensy-3-1
   asm(".global _printf_float");
 
+  Serial.begin(115200);
+  KBoxLogging.setLogger(&usbService);
+
   KBox.setup();
 
   // Clears the screen
   mfd.setup();
 
-  delay(1000);
-
-  Serial.begin(115200);
-  KBoxLogging.setLogger(&usbService);
+  delay(200);
 
   DEBUG("Starting");
 
@@ -124,7 +124,7 @@ void setup() {
   reader1->addRepeater(usbService);
   reader2->addRepeater(usbService);
 
-  SDCardTask *sdcardTask = new SDCardTask();
+  SDLoggingService *sdcardTask = new SDLoggingService(config.sdLoggingConfig);
   reader1->addRepeater(*sdcardTask);
   reader2->addRepeater(*sdcardTask);
   n2kService->addSentenceRepeater(*sdcardTask);

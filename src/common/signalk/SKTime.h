@@ -121,5 +121,12 @@ class SKTime {
      * @return
      */
     String iso8601extendedTime() const;
+
+    /**
+     * Returns the time written in ISO8601 basic format: HHMMSS (24h).
+     *
+     * @return
+     */
+    String iso8601basicTime() const;
 };
 

@@ -299,6 +299,22 @@ String SKTime::iso8601date() const {
   return s;
 }
 
+String SKTime::iso8601basicTime() const {
+  String s;
+  s.reserve(7);
+
+  tmElements_t tm;
+  breakTime(_timestamp, tm);
+  if (tm.Hour < 10) { s += "0"; }
+  s += tm.Hour;
+  if (tm.Minute < 10) { s += "0"; }
+  s += tm.Minute;
+  if (tm.Second < 10) { s += "0"; }
+  s += tm.Second;
+
+  return s;
+}
+
 String SKTime::iso8601extendedTime() const {
   String s;
   s.reserve(9);

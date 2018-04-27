@@ -27,7 +27,7 @@
 #include "ui/Page.h"
 #include "ui/TextLayer.h"
 
-class SDCardTask;
+class SDLoggingService;
 class WiFiService;
 
 class StatsPage : public Page {
@@ -40,7 +40,7 @@ class StatsPage : public Page {
     TextLayer *usedRam, *freeRam, *avgLoopTime;
     TextLayer *logName, *logSize, *freeSpace;
 
-    const SDCardTask *sdcardTask = 0;
+    const SDLoggingService *sdcardTask = 0;
     const WiFiService *wifiService = 0;
 
     void loadView();
@@ -50,7 +50,7 @@ class StatsPage : public Page {
     StatsPage();
     bool processEvent(const TickEvent &e);
 
-    void setSDCardTask(const SDCardTask *t) {
+    void setSDCardTask(const SDLoggingService *t) {
       sdcardTask = t;
     };
 

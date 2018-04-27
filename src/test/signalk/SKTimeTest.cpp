@@ -163,6 +163,7 @@ TEST_CASE("SKTime") {
     SKTime t = SKTime::timeFromNMEAStrings("231282", "193042");
 
     CHECK( t.iso8601date() == "1982-12-23" );
+    CHECK( t.iso8601basicTime() == "193042");
     CHECK( t.iso8601extendedTime() == "19:30:42");
   }
 }

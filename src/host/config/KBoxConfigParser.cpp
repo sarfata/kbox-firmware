@@ -90,6 +90,9 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.wifiConfig.client.enabled = false;
   config.wifiConfig.client.ssid = "";
   config.wifiConfig.client.password = "";
+
+  config.sdLoggingConfig.enabled = true;
+  config.sdLoggingConfig.logWithoutTime = false;
 }
 
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
@@ -101,6 +104,7 @@ void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &confi
   parseBarometerConfig(json["barometer"], config.barometerConfig);
   parseWiFiConfig(json["wifi"], config.wifiConfig);
   parseNMEA2000Config(json["nmea2000"], config.nmea2000Config);
+  parseSDLoggingConfig(json["logging"], config.sdLoggingConfig);
 }
 
 void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &config) {
@@ -147,6 +151,15 @@ void KBoxConfigParser::parseWiFiConfig(const JsonObject &json, WiFiConfig &confi
   parseWiFiNetworkConfig(json["client"], config.client);
   parseWiFiNetworkConfig(json["accessPoint"], config.accessPoint);
   parseNMEAConverterConfig(json["nmeaConverter"], config.nmeaConverter);
+}
+
+void KBoxConfigParser::parseSDLoggingConfig(const JsonObject &json, SDLoggingConfig &config) {
+  if (json == JsonObject::invalid()) {
+    return;
+  }
+
+  READ_BOOL_VALUE(enabled);
+  READ_BOOL_VALUE(logWithoutTime);
 }
 
 void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEAConverterConfig &config) {

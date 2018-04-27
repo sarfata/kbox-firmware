@@ -22,20 +22,20 @@
   THE SOFTWARE.
 */
 
-#include "SDCardTask.h"
+#include "SDLoggingService.h"
+#include "../config/KBoxConfig.h"
 
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
 #include <Seasmart.h>
+#include <common/time/WallClock.h>
 
-SDCardTask::SDCardTask() : Task("SDCard") {
+SDLoggingService::SDLoggingService(const SDLoggingConfig &config) : Task("SDCard"), _config(config) {
 }
 
-void SDCardTask::setup() {
+void SDLoggingService::setup() {
   if (KBox.isSdCardUsable()) {
     cardReady = true;
-    logFile = createLogFile("kbox-");
-    DEBUG("SDCard logging to: %s", getLogFileName().c_str());
 
     // Takes a long time to count free clusters so only do it once at startup.
     _freeSpaceAtBoot = KBox.getSdFat().vol()->freeClusterCount();
@@ -44,9 +44,46 @@ void SDCardTask::setup() {
   }
 }
 
-void SDCardTask::loop() {
-  if (!isLogging()) {
+void SDLoggingService::startLogging() {
+  if (isLogging() || !_config.enabled || !KBox.isSdCardUsable()) {
     return;
+  }
+
+  String fileName;
+  if (_config.logWithoutTime) {
+    // start a new logfile with a number
+    fileName = generateNewFileName("kbox-");
+  }
+  else if (wallClock.isTimeSet()) {
+    // start a new logfile with date and time
+    fileName = "kbox-";
+    fileName += wallClock.now().iso8601date();
+    fileName += "-";
+    fileName += wallClock.now().iso8601basicTime();
+    fileName += "Z.log";
+  }
+
+  if (fileName.length() > 0) {
+    logFile = createLogFile(fileName);
+
+    if (logFile) {
+      DEBUG("Starting new logfile: %s", fileName.c_str());
+    }
+    else if (fileName) {
+      DEBUG("Unable to create logfile %s", fileName.c_str());
+    }
+  }
+}
+
+void SDLoggingService::loop() {
+  // Try to start logging if we are not already.
+  // If it fails, clear messages and bails.
+  if (!isLogging()) {
+    startLogging();
+    if (!isLogging()) {
+      receivedMessages.clear();
+      return;
+    }
   }
   for (LinkedList<Loggable>::iterator it = receivedMessages.begin(); it != receivedMessages.end(); it++) {
     logFile->print(it->timestamp);
@@ -63,12 +100,7 @@ void SDCardTask::loop() {
 }
 
 
-String SDCardTask::generateNewFileName(const String& baseName) {
-  if (baseName.length() > 6) {
-    DEBUG("basename too long (%s)", baseName.c_str());
-    return "";
-  }
-
+String SDLoggingService::generateNewFileName(const String& baseName) {
   char fileName[20];
   for (int i = 0; i < 99999; i++) {
     snprintf(fileName, sizeof(fileName), "%s%i.log", baseName.c_str(), i);
@@ -80,11 +112,10 @@ String SDCardTask::generateNewFileName(const String& baseName) {
   return "";
 }
 
-SdFile* SDCardTask::createLogFile(const String& baseName) {
+SdFile* SDLoggingService::createLogFile(const String& fileName) {
   if (!cardReady) {
     return nullptr;
   }
-  String fileName = generateNewFileName(baseName);
 
   SdFile *file = new SdFile();
   if (fileName == "" || !file->open(fileName.c_str(), O_CREAT | O_WRITE | O_EXCL)) {
@@ -94,31 +125,31 @@ SdFile* SDCardTask::createLogFile(const String& baseName) {
   return file;
 }
 
-uint64_t SDCardTask::getFreeSpace() const {
+uint64_t SDLoggingService::getFreeSpace() const {
   return _freeSpaceAtBoot - getLogSize();
 }
 
-bool SDCardTask::isLogging() const {
+bool SDLoggingService::isLogging() const {
   return cardReady && logFile;
 }
 
-uint32_t SDCardTask::getLogSize() const {
+uint32_t SDLoggingService::getLogSize() const {
   if (!isLogging()) {
     return 0;
   }
   return logFile->fileSize();
 }
 
-String SDCardTask::getLogFileName() const {
+String SDLoggingService::getLogFileName() const {
   if (!isLogging()) {
     return String();
   }
-  char name[13];
+  char name[50];
   logFile->getName(name, sizeof(name));
   return String(name);
 }
 
-bool SDCardTask::write(const SKNMEASentence &nmeaSentence) {
+bool SDLoggingService::write(const SKNMEASentence &nmeaSentence) {
   if (!isLogging()) {
     return true;
   }
@@ -127,7 +158,7 @@ bool SDCardTask::write(const SKNMEASentence &nmeaSentence) {
   return true;
 }
 
-bool SDCardTask::write(const tN2kMsg &msg) {
+bool SDLoggingService::write(const tN2kMsg &msg) {
   if (!isLogging()) {
     return true;
   }
