@@ -79,13 +79,18 @@ void KBoxHardware::setup() {
   //adc.setConversionSpeed(ADC_LOW_SPEED, ADC_1);
   //adc.setSamplingSpeed(ADC_HIGH_SPEED, ADC_1);
 
+  // We need to do this because the SdSpiAltDriver does not do it.
+  SPI.setMOSI(display_mosi);
+  SPI.setMISO(display_miso);
+  SPI.setSCK(display_sck);
+
+  _sdCardSuccess = sdCardInit();
+
   display.begin();
   display.fillScreen(ILI9341_BLUE);
   display.setRotation(display_rotation);
 
   setBacklight(BacklightIntensityMax);
-
-  _sdCardSuccess = sdCardInit();
 }
 
 void KBoxHardware::setBacklight(BacklightIntensity intensity) {
@@ -155,7 +160,7 @@ bool KBoxHardware::sdCardInit() {
     if (!_sd.begin(sdcard_cs)){
   #endif
     if (_sd.card()->errorCode()) {
-      DEBUG("Something went wrong ... SD card errorCode: %i errorData: %i", _sd.card()->errorCode(),
+      DEBUG("Something went wrong ... SD card errorCode: 0x%x errorData: 0x%x", _sd.card()->errorCode(),
             _sd.card()->errorData());
       return false;
     }
