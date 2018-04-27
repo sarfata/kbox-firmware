@@ -227,6 +227,24 @@ bool SKTime::operator!=(const SKTime &other) const {
   return !(*this == other);
 }
 
+SKTime& SKTime::operator+=(uint32_t ms) {
+  if (!hasMilliseconds()) {
+    _milliseconds = 0;
+  }
+
+  _timestamp += ms / 1000;
+  // This will never overflow because both operands are less than 1000
+  _milliseconds += ms % 1000;
+
+  // Should loop once at most.
+  while (_milliseconds >= 1000) {
+    _timestamp += 1;
+    _milliseconds -= 1000;
+  }
+
+  return *this; // return the result by reference
+}
+
 String SKTime::toString() const {
   tmElements_t tm;
   breakTime(_timestamp, tm);

@@ -148,5 +148,15 @@ TEST_CASE("SKTime") {
       CHECK( t.toString() == "2018-04-26T09:30:42.124Z" );
     }
   }
+
+  SECTION("Operator+") {
+    SKTime t(142);
+
+    CHECK( (t + 100).getTime() == 142 );
+    CHECK( (t + 100).getMilliseconds() == 100 );
+
+    CHECK( (t + 1000).getTime() == 143 );
+    CHECK( (t + 1000).getMilliseconds() == 0 );
+  }
 }
 

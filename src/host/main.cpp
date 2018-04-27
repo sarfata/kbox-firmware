@@ -25,6 +25,7 @@
 #include <KBoxHardware.h>
 #include "common/os/TaskManager.h"
 #include "common/signalk/SKHub.h"
+#include "common/time/WallClock.h"
 #include "host/config/KBoxConfig.h"
 #include "host/config/KBoxConfigParser.h"
 #include "host/drivers/ILI9341GC.h"
@@ -39,6 +40,7 @@
 #include "host/services/SerialService.h"
 #include "host/services/RunningLightService.h"
 #include "host/services/SDCardTask.h"
+#include "host/services/TimeService.h"
 #include "host/services/USBService.h"
 #include "host/services/WiFiService.h"
 
@@ -126,6 +128,14 @@ void setup() {
   reader1->addRepeater(*sdcardTask);
   reader2->addRepeater(*sdcardTask);
   n2kService->addSentenceRepeater(*sdcardTask);
+
+
+  // Tell the wallClock how to get the number of ms elapsed since boot.
+  wallClock.setMillisecondsProvider(millis);
+
+  // Create a new instance of TimeService - We do not need a pointer to it.
+  // It will subscribe to the hub and update the wallClock.
+  new TimeService(skHub);
 
   // Add all the tasks
   taskManager.addTask(&mfd);

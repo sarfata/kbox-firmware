@@ -77,6 +77,18 @@ class SKTime {
 
     bool operator!=(const SKTime& v) const;
 
+    /**
+     * Add milliseconds to a SKTime object.
+     * @param ms
+     * @return
+     */
+    SKTime& operator+=(uint32_t ms);
+
+    friend SKTime operator+(SKTime lhs, uint32_t rhs) {
+      lhs += rhs;
+      return lhs;
+    };
+
     uint32_t getTime() const {
       return _timestamp;
     };
