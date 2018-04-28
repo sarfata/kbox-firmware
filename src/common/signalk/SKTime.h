@@ -135,5 +135,21 @@ class SKTime {
      * @return
      */
     String iso8601basicTime() const;
+
+    /**
+     * Date as expected by a FAT filesystem.
+     *
+     * cf https://github.com/adafruit/SD/blob/master/utility/SdFat.h#L97
+     *
+     * @return
+     */
+    uint16_t getFatDate() const;
+
+    /**
+     * Time as expected by a FAT filesystem.
+     *
+     * @return
+     */
+    uint16_t getFatTime() const;
 };
 

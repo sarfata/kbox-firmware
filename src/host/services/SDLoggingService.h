@@ -51,6 +51,8 @@ class SDLoggingService : public Task, public SKNMEAOutput, public SKNMEA2000Outp
     SKHub &_hub;
     // Limit log size to 1 GB.
     static const uint32_t MaximumLogSize = 1024 * 1024 * 1024 * 1;
+    // We will not log if free space is below 100 kB
+    static const uint32_t MinimumFreeSpace = 1024 * 100;
 
     String generateNewFileName(const String& baseName);
     void createLogFile(const String& baseName);

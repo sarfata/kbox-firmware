@@ -37,6 +37,13 @@ SDLoggingService::SDLoggingService(const SDLoggingConfig &config, SKHub &hub) :
   Task("SDCard"), _config(config), _hub(hub) {
 }
 
+static void dateTime(uint16_t* date, uint16_t* time) {
+  SKTime t = wallClock.now();
+
+  *date = t.getFatDate();
+  *time = t.getFatTime();
+}
+
 void SDLoggingService::setup() {
   if (KBox.isSdCardUsable()) {
     cardReady = true;
@@ -48,10 +55,13 @@ void SDLoggingService::setup() {
   }
 
   _hub.subscribe(this);
+
+  // Tell SDFat how to get the current time
+  SdFile::dateTimeCallback(dateTime);
 }
 
 void SDLoggingService::startLogging() {
-  if (isLogging() || !_config.enabled || !KBox.isSdCardUsable()) {
+  if (isLogging() || !_config.enabled || !KBox.isSdCardUsable() || getFreeSpace() < MinimumFreeSpace) {
     return;
   }
 
@@ -83,7 +93,7 @@ void SDLoggingService::startLogging() {
 
 void SDLoggingService::loop() {
   // Make sure file is not getting out of hand.
-  if (getLogSize() > SDLoggingService::MaximumLogSize) {
+  if (getLogSize() > SDLoggingService::MaximumLogSize || getFreeSpace() < MinimumFreeSpace) {
     rotateLogfile();
   }
 
@@ -120,6 +130,7 @@ void SDLoggingService::loop() {
   // Force data to SD and update the directory entry to avoid data loss.
   if (!logFile.sync() || logFile.getWriteError()) {
     DEBUG("Logfile write error");
+    rotateLogfile();
   }
   // We always clear the list anyway.
   receivedMessages.clear();

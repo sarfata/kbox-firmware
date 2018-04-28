@@ -330,3 +330,17 @@ String SKTime::iso8601extendedTime() const {
 
   return s;
 }
+
+uint16_t SKTime::getFatDate() const {
+  tmElements_t tm;
+  breakTime(_timestamp, tm);
+
+  return (tm.Year - 10) << 9 | tm.Month << 5 | tm.Day;
+}
+
+uint16_t SKTime::getFatTime() const {
+  tmElements_t tm;
+  breakTime(_timestamp, tm);
+
+  return tm.Hour << 11 | tm.Minute << 5 | tm.Second >> 1;
+}
