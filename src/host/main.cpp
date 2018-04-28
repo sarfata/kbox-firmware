@@ -155,8 +155,10 @@ void setup() {
   taskManager.addTask(&sdLoggingService);
   taskManager.addTask(&usbService);
 
-  BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
-  mfd.addPage(batPage);
+  StatsPage *statsPage = new StatsPage();
+  statsPage->setSDLoggingService(&sdLoggingService);
+  statsPage->setWiFiService(wifi);
+  mfd.addPage(statsPage);
 
   if (config.imuConfig.enabled) {
     // At the moment the IMUMonitorPage is working with built-in sensor only
@@ -164,11 +166,8 @@ void setup() {
     mfd.addPage(imuPage);
   }
 
-  StatsPage *statsPage = new StatsPage();
-  statsPage->setSDLoggingService(&sdLoggingService);
-  statsPage->setWiFiService(wifi);
-
-  mfd.addPage(statsPage);
+  BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
+  mfd.addPage(batPage);
 
   taskManager.setup();
 
