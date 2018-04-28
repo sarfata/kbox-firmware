@@ -135,6 +135,8 @@ void StatsPage::loadView() {
   usedRam = new TextLayer(Point(col4, row11), Size(colWidth, rowHeight), "0");
   freeRam = new TextLayer(Point(col4, row12), Size(colWidth, rowHeight), "0");
   addLayer(usedRam); addLayer(freeRam); addLayer(avgLoopTime);
+
+  addLayer(new TextLayer(Point(col1, row12), Size(col4 - col1, rowHeight), KBOX_VERSION));
 }
 
 bool StatsPage::processEvent(const TickEvent &e) {
