@@ -124,7 +124,7 @@ void setup() {
   reader1->addRepeater(usbService);
   reader2->addRepeater(usbService);
 
-  SDLoggingService *sdcardTask = new SDLoggingService(config.sdLoggingConfig);
+  SDLoggingService *sdcardTask = new SDLoggingService(config.sdLoggingConfig, skHub);
   reader1->addRepeater(*sdcardTask);
   reader2->addRepeater(*sdcardTask);
   n2kService->addSentenceRepeater(*sdcardTask);

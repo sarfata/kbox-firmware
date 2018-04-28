@@ -40,7 +40,7 @@ class StatsPage : public Page {
     TextLayer *usedRam, *freeRam, *avgLoopTime;
     TextLayer *logName, *logSize, *freeSpace;
 
-    const SDLoggingService *sdcardTask = 0;
+    SDLoggingService *sdcardTask = 0;
     const WiFiService *wifiService = 0;
 
     void loadView();
@@ -50,7 +50,7 @@ class StatsPage : public Page {
     StatsPage();
     bool processEvent(const TickEvent &e);
 
-    void setSDCardTask(const SDLoggingService *t) {
+    void setSDCardTask(SDLoggingService *t) {
       sdcardTask = t;
     };
 

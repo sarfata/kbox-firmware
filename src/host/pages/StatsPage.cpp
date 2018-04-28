@@ -118,23 +118,22 @@ void StatsPage::loadView() {
   addLayer(wifiClientStatus); addLayer(wifiClientIP);
 
   addLayer(new TextLayer(Point(col1, row9), Size(colWidth, rowHeight), "Log:"));
+  addLayer(new TextLayer(Point(col1, row10), Size(colWidth, rowHeight), "Used:"));
+  addLayer(new TextLayer(Point(col1, row11), Size(colWidth, rowHeight), "Free:"));
 
-  addLayer(new TextLayer(Point(col1, row10), Size(colWidth, rowHeight), "Avg Loop:"));
-  addLayer(new TextLayer(Point(col1, row11), Size(colWidth, rowHeight), "Used RAM:"));
-  addLayer(new TextLayer(Point(col1, row12), Size(colWidth, rowHeight), "Free RAM:"));
+  addLayer(new TextLayer(Point(col3, row10), Size(colWidth, rowHeight), "Avg Loop:"));
+  addLayer(new TextLayer(Point(col3, row11), Size(colWidth, rowHeight), "Used RAM:"));
+  addLayer(new TextLayer(Point(col3, row12), Size(colWidth, rowHeight), "Free RAM:"));
 
-  addLayer(new TextLayer(Point(col3, row11), Size(colWidth, rowHeight), "Used:"));
-  addLayer(new TextLayer(Point(col3, row12), Size(colWidth, rowHeight), "Free:"));
-
-  avgLoopTime = new TextLayer(Point(col2, row10), Size(colWidth, rowHeight), "0");
-  usedRam = new TextLayer(Point(col2, row11), Size(colWidth, rowHeight), "0");
-  freeRam = new TextLayer(Point(col2, row12), Size(colWidth, rowHeight), "0");
-  addLayer(usedRam); addLayer(freeRam); addLayer(avgLoopTime);
-
-  logName = new TextLayer(Point(col2, row9), Size(320 - col1 - colWidth, rowHeight), "");
-  logSize = new TextLayer(Point(col4, row11), Size(colWidth, rowHeight), "");
-  freeSpace = new TextLayer(Point(col4, row12), Size(colWidth, rowHeight), "");
+  logName = new TextLayer(Point(col2 - 20, row9), Size(320 - col1 - colWidth, rowHeight), "");
+  logSize = new TextLayer(Point(col2 - 20, row10), Size(colWidth, rowHeight), "");
+  freeSpace = new TextLayer(Point(col2 - 20, row11), Size(colWidth, rowHeight), "");
   addLayer(logName); addLayer(logSize); addLayer(freeSpace);
+
+  avgLoopTime = new TextLayer(Point(col4, row10), Size(colWidth, rowHeight), "0");
+  usedRam = new TextLayer(Point(col4, row11), Size(colWidth, rowHeight), "0");
+  freeRam = new TextLayer(Point(col4, row12), Size(colWidth, rowHeight), "0");
+  addLayer(usedRam); addLayer(freeRam); addLayer(avgLoopTime);
 }
 
 // https://forum.pjrc.com/threads/25676-Teensy-3-how-to-know-RAM-usage

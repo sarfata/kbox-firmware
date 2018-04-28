@@ -28,9 +28,13 @@
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
 #include <Seasmart.h>
-#include <common/time/WallClock.h>
+#include <ArduinoJSON.h>
+#include "common/time/WallClock.h"
+#include "common/time/WallClock.h"
+#include "common/signalk/SKJSONVisitor.h"
 
-SDLoggingService::SDLoggingService(const SDLoggingConfig &config) : Task("SDCard"), _config(config) {
+SDLoggingService::SDLoggingService(const SDLoggingConfig &config, SKHub &hub) :
+  Task("SDCard"), _config(config), _hub(hub) {
 }
 
 void SDLoggingService::setup() {
@@ -39,9 +43,11 @@ void SDLoggingService::setup() {
 
     // Takes a long time to count free clusters so only do it once at startup.
     _freeSpaceAtBoot = KBox.getSdFat().vol()->freeClusterCount();
-    _freeSpaceAtBoot *= logFile->volume()->blocksPerCluster();
+    _freeSpaceAtBoot *= KBox.getSdFat().vol()->blocksPerCluster();
     _freeSpaceAtBoot *= 512;
   }
+
+  _hub.subscribe(this);
 }
 
 void SDLoggingService::startLogging() {
@@ -64,18 +70,23 @@ void SDLoggingService::startLogging() {
   }
 
   if (fileName.length() > 0) {
-    logFile = createLogFile(fileName);
+    createLogFile(fileName);
 
     if (logFile) {
       DEBUG("Starting new logfile: %s", fileName.c_str());
     }
-    else if (fileName) {
+    else {
       DEBUG("Unable to create logfile %s", fileName.c_str());
     }
   }
 }
 
 void SDLoggingService::loop() {
+  // Make sure file is not getting out of hand.
+  if (getLogSize() > SDLoggingService::MaximumLogSize) {
+    rotateLogfile();
+  }
+
   // Try to start logging if we are not already.
   // If it fails, clear messages and bails.
   if (!isLogging()) {
@@ -85,15 +96,30 @@ void SDLoggingService::loop() {
       return;
     }
   }
+
   for (LinkedList<Loggable>::iterator it = receivedMessages.begin(); it != receivedMessages.end(); it++) {
-    logFile->print(it->timestamp);
-    logFile->print(",");
-    logFile->print(it->_message);
-    logFile->println();
+    logFile.print(it->_timestamp.getTime());
+    if (it->_timestamp.hasMilliseconds() && it->_timestamp.getMilliseconds() != 0) {
+      if (it->_timestamp.getMilliseconds() < 100) {
+        logFile.print("0");
+      }
+      if (it->_timestamp.getMilliseconds() < 10) {
+        logFile.print("00");
+      }
+      logFile.print(it->_timestamp.getMilliseconds());
+    }
+    else {
+      logFile.print("000");
+    }
+    logFile.print(";");
+    logFile.print(it->_source);
+    logFile.print(";");
+    logFile.print(it->_message);
+    logFile.println();
   }
   // Force data to SD and update the directory entry to avoid data loss.
-  if (!logFile->sync() || logFile->getWriteError()) {
-    DEBUG("Logfile write error: %i", logFile->Print::getWriteError());
+  if (!logFile.sync() || logFile.getWriteError()) {
+    DEBUG("Logfile write error");
   }
   // We always clear the list anyway.
   receivedMessages.clear();
@@ -112,40 +138,38 @@ String SDLoggingService::generateNewFileName(const String& baseName) {
   return "";
 }
 
-SdFile* SDLoggingService::createLogFile(const String& fileName) {
+void SDLoggingService::createLogFile(const String& fileName) {
   if (!cardReady) {
-    return nullptr;
+    return;
   }
 
-  SdFile *file = new SdFile();
-  if (fileName == "" || !file->open(fileName.c_str(), O_CREAT | O_WRITE | O_EXCL)) {
+  logFile = KBox.getSdFat().open(fileName, O_CREAT | O_WRITE | O_EXCL);
+  if (!logFile) {
     DEBUG("Error while opening file '%s'", fileName.c_str());
-    return nullptr;
   }
-  return file;
 }
 
-uint64_t SDLoggingService::getFreeSpace() const {
+uint64_t SDLoggingService::getFreeSpace() {
   return _freeSpaceAtBoot - getLogSize();
 }
 
-bool SDLoggingService::isLogging() const {
-  return cardReady && logFile;
+bool SDLoggingService::isLogging() {
+  return cardReady && logFile && logFile.isOpen();
 }
 
-uint32_t SDLoggingService::getLogSize() const {
+uint32_t SDLoggingService::getLogSize() {
   if (!isLogging()) {
     return 0;
   }
-  return logFile->fileSize();
+  return logFile.fileSize();
 }
 
-String SDLoggingService::getLogFileName() const {
+String SDLoggingService::getLogFileName() {
   if (!isLogging()) {
     return String();
   }
   char name[50];
-  logFile->getName(name, sizeof(name));
+  logFile.getName(name, sizeof(name));
   return String(name);
 }
 
@@ -154,7 +178,7 @@ bool SDLoggingService::write(const SKNMEASentence &nmeaSentence) {
     return true;
   }
 
-  receivedMessages.add(Loggable("", nmeaSentence));
+  receivedMessages.add(Loggable("N", nmeaSentence, wallClock.now()));
   return true;
 }
 
@@ -168,10 +192,34 @@ bool SDLoggingService::write(const tN2kMsg &msg) {
   }
 
   char pcdin[30 + msg.DataLen * 2];
-  if (N2kToSeasmart(msg, millis(), pcdin, sizeof(pcdin)) < sizeof(pcdin)) {
-    receivedMessages.add(Loggable("", pcdin));
+  if (N2kToSeasmart(msg, wallClock.now().getTime(), pcdin, sizeof(pcdin)) < sizeof(pcdin)) {
+    receivedMessages.add(Loggable("P", pcdin, wallClock.now()));
     return true;
   } else {
     return false;
   }
+}
+
+void SDLoggingService::updateReceived(const SKUpdate &update) {
+  if (!isLogging()) {
+    return;
+  }
+
+  StaticJsonBuffer<1024> jsonBuffer;
+  SKJSONVisitor jsonVisitor("self", jsonBuffer);
+  JsonObject &jsonData = jsonVisitor.processUpdate(update);
+
+  String jsonString;
+  jsonData.printTo(jsonString);
+
+  receivedMessages.add(Loggable("I", jsonString, wallClock.now()));
+}
+
+void SDLoggingService::rotateLogfile() {
+  if (!isLogging()) {
+    return;
+  }
+
+  _freeSpaceAtBoot = _freeSpaceAtBoot - logFile.fileSize();
+  logFile.close();
 }

@@ -106,6 +106,13 @@ class SKTime {
       }
     };
 
+    /**
+     * Returns an RFC3339 representation of the time aka "Internet Time".
+     *
+     * Example 2014-04-10T08:33:53Z or 2014-04-10T08:33:53.420Z
+     *
+     * @return
+     */
     String toString() const;
 
     /**

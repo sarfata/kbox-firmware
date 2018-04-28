@@ -27,46 +27,55 @@
 #include <SdFat.h>
 #include "common/signalk/SKNMEAOutput.h"
 #include "common/signalk/SKNMEA2000Output.h"
+#include "common/signalk/SKSubscriber.h"
+#include "common/signalk/SKHub.h"
+#include "common/signalk/SKTime.h"
 #include "common/algo/List.h"
 #include "common/os/Task.h"
 #include "host/config/SDLoggingConfig.h"
 
 class Loggable {
   public:
-    Loggable(String s, String m) : _source(s), _message(m), timestamp(millis()) {};
+    Loggable(String s, String m, SKTime timestamp) : _source(s), _message(m), _timestamp(timestamp) {};
     String _source;
     String _message;
-    uint32_t timestamp;
+    SKTime _timestamp;
 };
 
-class SDLoggingService : public Task, public SKNMEAOutput, public SKNMEA2000Output {
+class SDLoggingService : public Task, public SKNMEAOutput, public SKNMEA2000Output, public SKSubscriber {
   private:
     uint64_t _freeSpaceAtBoot;
-    SdFile *logFile = nullptr;
+    File logFile;
     bool cardReady = false;
     const SDLoggingConfig &_config;
+    SKHub &_hub;
+    // Limit log size to 1 GB.
+    static const uint32_t MaximumLogSize = 1024 * 1024 * 1024 * 1;
 
     String generateNewFileName(const String& baseName);
-    SdFile* createLogFile(const String& baseName);
+    void createLogFile(const String& baseName);
+    void rotateLogfile();
 
     LinkedList<Loggable> receivedMessages;
 
   public:
-    SDLoggingService(const SDLoggingConfig &config);
+    SDLoggingService(const SDLoggingConfig &config, SKHub &hub);
     virtual ~SDLoggingService() = default;
 
     void setup() override;
     void loop() override;
 
     // Those two functions returns value in bytes.
-    uint64_t getFreeSpace() const;
-    uint32_t getLogSize() const;
+    uint64_t getFreeSpace();
+    uint32_t getLogSize();
 
-    bool isLogging() const;
-    String getLogFileName() const;
+    bool isLogging();
+    String getLogFileName();
 
     bool write(const SKNMEASentence &nmeaSentence) override;
     bool write(const tN2kMsg &m) override;
+    void updateReceived(const SKUpdate &update) override;
 
     void startLogging();
+
 };
