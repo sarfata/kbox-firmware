@@ -185,7 +185,7 @@ String SDLoggingService::getLogFileName() {
 }
 
 bool SDLoggingService::write(const SKNMEASentence &nmeaSentence) {
-  if (!isLogging()) {
+  if (!isLogging() || !_config.logNMEA) {
     return true;
   }
 
@@ -194,7 +194,7 @@ bool SDLoggingService::write(const SKNMEASentence &nmeaSentence) {
 }
 
 bool SDLoggingService::write(const tN2kMsg &msg) {
-  if (!isLogging()) {
+  if (!isLogging() || !_config.logNMEA2000) {
     return true;
   }
 
@@ -212,7 +212,7 @@ bool SDLoggingService::write(const tN2kMsg &msg) {
 }
 
 void SDLoggingService::updateReceived(const SKUpdate &update) {
-  if (!isLogging()) {
+  if (!isLogging() || !_config.logSignalK) {
     return;
   }
 

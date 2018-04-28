@@ -30,6 +30,13 @@
       "password": "super-secret"
     }
   },
+  "logging": {
+    "enabled": true,
+    "logWithoutTime": false,
+    "logNMEA2000": true,
+    "logNMEA": true,
+    "logSignalK": true
+  },
   "serial1": {
     "inputMode": "nmea",
     "outputMode": "nmea",

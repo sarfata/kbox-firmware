@@ -33,4 +33,7 @@
 struct SDLoggingConfig {
   bool enabled;
   bool logWithoutTime;
+  bool logNMEA2000;
+  bool logNMEA;
+  bool logSignalK;
 };

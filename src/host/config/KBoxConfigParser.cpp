@@ -93,6 +93,9 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
 
   config.sdLoggingConfig.enabled = true;
   config.sdLoggingConfig.logWithoutTime = false;
+  config.sdLoggingConfig.logNMEA2000 = true;
+  config.sdLoggingConfig.logNMEA = true;
+  config.sdLoggingConfig.logSignalK = true;
 }
 
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
@@ -160,6 +163,9 @@ void KBoxConfigParser::parseSDLoggingConfig(const JsonObject &json, SDLoggingCon
 
   READ_BOOL_VALUE(enabled);
   READ_BOOL_VALUE(logWithoutTime);
+  READ_BOOL_VALUE(logNMEA2000);
+  READ_BOOL_VALUE(logNMEA);
+  READ_BOOL_VALUE(logSignalK);
 }
 
 void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEAConverterConfig &config) {
