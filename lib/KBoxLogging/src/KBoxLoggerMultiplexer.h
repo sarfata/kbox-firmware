@@ -1,7 +1,13 @@
 /*
+     __  __     ______     ______     __  __
+    /\ \/ /    /\  == \   /\  __ \   /\_\_\_\
+    \ \  _"-.  \ \  __<   \ \ \/\ \  \/_/\_\/_
+     \ \_\ \_\  \ \_____\  \ \_____\   /\_\/\_\
+       \/_/\/_/   \/_____/   \/_____/   \/_/\/_/
+
   The MIT License
 
-  Copyright (c) 2016 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,37 +30,17 @@
 
 #pragma once
 
-#include "ui/Page.h"
-#include "ui/TextLayer.h"
+#include "KBoxLogging.h"
 
-class SDLoggingService;
-class WiFiService;
-
-class StatsPage : public Page {
+class KBoxLoggerMultiplexer : public KBoxLogger {
   private:
-    TextLayer *nmea1Rx, *nmea1Errors, *nmea2Rx, *nmea2Errors;
-    TextLayer *nmea1Tx, *nmea1TxErrors, *nmea2Tx, *nmea2TxErrors;
-    TextLayer *canRx, *canTx, *canTxErrors;
-    TextLayer *wifiAPStatus, *wifiAPIP;
-    TextLayer *wifiClientStatus, *wifiClientIP;
-    TextLayer *usedRam, *freeRam, *avgLoopTime;
-    TextLayer *logName, *logSize, *freeSpace;
-
-    SDLoggingService *sdcardTask = 0;
-    const WiFiService *wifiService = 0;
-
-    void loadView();
-    String formatDiskSize(uint64_t intSize);
+    KBoxLogger &_loggerA;
+    KBoxLogger &_loggerB;
 
   public:
-    StatsPage();
-    bool processEvent(const TickEvent &e);
-
-    void setSDLoggingService(SDLoggingService *t) {
-      sdcardTask = t;
-    };
-
-    void setWiFiService(const WiFiService *s) {
-      wifiService = s;
-    }
+    KBoxLoggerMultiplexer(KBoxLogger &a, KBoxLogger &b);
+    void log(enum KBoxLoggingLevel level, const char* filename, int lineNumber, const char *fmt, va_list fmtargs)
+      override;
 };
+
+

@@ -36,4 +36,5 @@ struct SDLoggingConfig {
   bool logNMEA2000;
   bool logNMEA;
   bool logSignalK;
+  bool logSystemMessages;
 };

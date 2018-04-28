@@ -143,7 +143,7 @@ void loop() {
     case ESPState::ESPConfigured:
       // We are connected. Report status every 500ms.
       if (lastMessageTimer > 500) {
-        DEBUG("Still running ... %i connected clients - %i heap - uptime: %is",
+        INFO("Still running ... %i connected clients - %i heap - uptime: %is",
               server.clientsCount() + webServer.countClients(), ESP.getFreeHeap(), millis() / 1000);
         reportStatus(espState,
                      WiFi.softAPgetStationNum(),
@@ -224,15 +224,15 @@ static void configurationCallback(const WiFiConfiguration& config) {
 }
 
 static void onGotIP(const WiFiEventStationModeGotIP& e) {
-  DEBUG("DHCP Got IP Address!");
+  INFO("DHCP Got IP Address!");
 }
 
 static void onStationModeConnected(const WiFiEventStationModeConnected& e) {
-  DEBUG("StationModeConnected");
+  INFO("StationModeConnected");
 }
 static void onStationModeDisconnected(const WiFiEventStationModeDisconnected&
 e) {
-  DEBUG("StationModeDisconnected - reason=%i", e.reason);
+  ERROR("StationModeDisconnected - reason=%i", e.reason);
 }
 
 static void reportStatus(ESPState state, uint16_t dhcpClients,

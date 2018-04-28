@@ -234,3 +234,29 @@ void SDLoggingService::rotateLogfile() {
   _freeSpaceAtBoot = _freeSpaceAtBoot - logFile.fileSize();
   logFile.close();
 }
+
+void SDLoggingService::log(enum KBoxLoggingLevel level, const char *filename, int lineNumber, const char *fmt,
+                           va_list fmtargs) {
+  if (!isLogging() || !_config.logSystemMessages) {
+    return;
+  }
+
+  if (level == KBoxLoggingLevelDebug || level == KBoxLoggingLevelESPDebug) {
+    // do not save debug messages
+    return;
+  }
+
+  static const char *logLevelPrefixes[] = { "LHD", "LHI", "LHE", "LWD", "LWI", "LWE" };
+
+  String message = filename;
+  message += ":";
+  message += lineNumber;
+
+  char tmp[128];
+  vsnprintf(tmp, sizeof(tmp), fmt, fmtargs);
+
+  message += "|";
+  message += tmp;
+
+  receivedMessages.add(Loggable(logLevelPrefixes[level], message, wallClock.now()));
+}

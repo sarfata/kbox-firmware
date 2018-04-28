@@ -23,6 +23,7 @@
 */
 
 #include <KBoxHardware.h>
+#include <KBoxLoggerMultiplexer.h>
 #include "common/os/TaskManager.h"
 #include "common/signalk/SKHub.h"
 #include "common/time/WallClock.h"
@@ -53,6 +54,8 @@ SKHub skHub;
 KBoxConfig config;
 
 USBService usbService(gc, skHub);
+SDLoggingService sdLoggingService(config.sdLoggingConfig, skHub);
+KBoxLoggerMultiplexer loggerMultiplexer(usbService, sdLoggingService);
 
 void setup() {
   // Enable float in printf:
@@ -60,7 +63,7 @@ void setup() {
   asm(".global _printf_float");
 
   Serial.begin(115200);
-  KBoxLogging.setLogger(&usbService);
+  KBoxLogging.setLogger(&loggerMultiplexer);
 
   KBox.setup();
 
@@ -124,11 +127,9 @@ void setup() {
   reader1->addRepeater(usbService);
   reader2->addRepeater(usbService);
 
-  SDLoggingService *sdcardTask = new SDLoggingService(config.sdLoggingConfig, skHub);
-  reader1->addRepeater(*sdcardTask);
-  reader2->addRepeater(*sdcardTask);
-  n2kService->addSentenceRepeater(*sdcardTask);
-
+  reader1->addRepeater(sdLoggingService);
+  reader2->addRepeater(sdLoggingService);
+  n2kService->addSentenceRepeater(sdLoggingService);
 
   // Tell the wallClock how to get the number of ms elapsed since boot.
   wallClock.setMillisecondsProvider(millis);
@@ -151,7 +152,7 @@ void setup() {
   taskManager.addTask(reader1);
   taskManager.addTask(reader2);
   taskManager.addTask(wifi);
-  taskManager.addTask(sdcardTask);
+  taskManager.addTask(&sdLoggingService);
   taskManager.addTask(&usbService);
 
   BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
@@ -164,7 +165,7 @@ void setup() {
   }
 
   StatsPage *statsPage = new StatsPage();
-  statsPage->setSDCardTask(sdcardTask);
+  statsPage->setSDLoggingService(&sdLoggingService);
   statsPage->setWiFiService(wifi);
 
   mfd.addPage(statsPage);

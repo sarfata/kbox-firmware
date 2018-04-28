@@ -35,7 +35,8 @@
     "logWithoutTime": false,
     "logNMEA2000": true,
     "logNMEA": true,
-    "logSignalK": true
+    "logSignalK": true,
+    "logSystemMessages": true
   },
   "serial1": {
     "inputMode": "nmea",

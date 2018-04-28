@@ -25,6 +25,7 @@
 #pragma once
 
 #include <SdFat.h>
+#include <KBoxLogging.h>
 #include "common/signalk/SKNMEAOutput.h"
 #include "common/signalk/SKNMEA2000Output.h"
 #include "common/signalk/SKSubscriber.h"
@@ -42,7 +43,8 @@ class Loggable {
     SKTime _timestamp;
 };
 
-class SDLoggingService : public Task, public SKNMEAOutput, public SKNMEA2000Output, public SKSubscriber {
+class SDLoggingService : public Task, public SKNMEAOutput, public SKNMEA2000Output, public SKSubscriber,
+  public KBoxLogger {
   private:
     uint64_t _freeSpaceAtBoot;
     File logFile;
@@ -80,4 +82,6 @@ class SDLoggingService : public Task, public SKNMEAOutput, public SKNMEA2000Outp
 
     void startLogging();
 
+    void
+    log(enum KBoxLoggingLevel level, const char *filename, int lineNumber, const char *fmt, va_list fmtargs) override;
 };

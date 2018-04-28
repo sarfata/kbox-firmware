@@ -162,7 +162,7 @@ void SerialService::setup() {
     NMEA2_SERIAL.begin(_config.baudRate);
     NMEA2_SERIAL.setTimeout(0);
     digitalWrite(nmea2_out_enable, _config.outputMode != SerialModeDisabled);
-    INFO("SerialService[2] Baudrate: %i Input: %s Output: %s",
+    DEBUG("SerialService[2] Baudrate: %i Input: %s Output: %s",
           _config.baudRate,
           _config.inputMode == SerialModeNMEA ? "true" : "false",
           _config.outputMode == SerialModeNMEA ? "true" : "false");
