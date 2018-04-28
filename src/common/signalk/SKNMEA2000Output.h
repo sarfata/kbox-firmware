@@ -28,6 +28,8 @@
   THE SOFTWARE.
 */
 
+#pragma once
+
 class tN2kMsg;
 
 class SKNMEA2000Output {

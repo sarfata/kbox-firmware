@@ -35,6 +35,9 @@ logs:
 logs-n2kanalyzer:
 	miniterm.py --rts 0 $(PORT) 115200 | grep 'TX: $$PCDIN' |perl -pe 's/.*TX: //' |analyzer -json
 
+nmeainterface:
+	miniterm.py --rts 0 $(PORT) 38400
+
 reboot:
 	tools/kbox.py --port $(PORT) reboot
 

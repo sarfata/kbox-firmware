@@ -25,8 +25,10 @@
 #pragma once
 
 #include <SdFat.h>
-#include "os/Task.h"
-#include "signalk/KMessage.h"
+#include <common/signalk/SKNMEAOutput.h>
+#include <common/signalk/SKNMEA2000Output.h>
+#include <common/algo/List.h>
+#include "common/os/Task.h"
 
 class Loggable {
   public:
@@ -36,7 +38,7 @@ class Loggable {
     uint32_t timestamp;
 };
 
-class SDCardTask : public Task, public KReceiver {
+class SDCardTask : public Task, public SKNMEAOutput, public SKNMEA2000Output {
   private:
     uint64_t _freeSpaceAtBoot;
     SdFile *logFile = nullptr;
@@ -53,7 +55,6 @@ class SDCardTask : public Task, public KReceiver {
 
     void setup() override;
     void loop() override;
-    void processMessage(const KMessage&) override;
 
     // Those two functions returns value in bytes.
     uint64_t getFreeSpace() const;
@@ -61,4 +62,7 @@ class SDCardTask : public Task, public KReceiver {
 
     bool isLogging() const;
     String getLogFileName() const;
+
+    bool write(const SKNMEASentence &nmeaSentence) override;
+    bool write(const tN2kMsg &m) override;
 };

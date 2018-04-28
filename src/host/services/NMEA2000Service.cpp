@@ -36,19 +36,23 @@
 static NMEA2000Service *handlerContext;
 
 static void handler(const tN2kMsg &msg) {
-  DEBUG("Received N2K Message with pgn: %i", msg.PGN);
   handlerContext->publishN2kMessage(msg);
 }
 
 void NMEA2000Service::publishN2kMessage(const tN2kMsg& msg) {
   if (_config.rxEnabled) {
     KBoxMetrics.event(KBoxEventNMEA2000MessageReceived);
-    NMEA2000Message m(msg, now());
-    sendMessage(m);
+
+    DEBUG("Received N2K Message with pgn: %i", msg.PGN);
+
+    for (auto it = _sentenceRepeaters.begin(); it != _sentenceRepeaters.end(); it++) {
+      (*it)->write(msg);
+    }
 
     SKNMEA2000Parser p;
     //FIXME: Get the time properly here!
-    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    uint32_t ts = millis();
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(ts / 1000, ts % 1000));
     if (update.getSize() > 0) {
       _hub.publish(update);
     }
@@ -184,4 +188,8 @@ void NMEA2000Service::saveNMEA2000Parameters() {
       ERROR("Error saving NMEA2000 parameters to flash.");
     }
   }
+}
+
+void NMEA2000Service::addSentenceRepeater(SKNMEA2000Output &repeater) {
+  _sentenceRepeaters.add(&repeater);
 }

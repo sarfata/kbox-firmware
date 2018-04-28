@@ -31,10 +31,15 @@
 #pragma once
 
 #include <WString.h>
+#include "common/nmea/nmea.h"
 
 // FIXME: We should have a better representation of a NMEASentence that does
 // not depend on dynamic memory or Arduino strings.
 class SKNMEASentence : public String {
   public:
     SKNMEASentence(const String &s) : String(s) {};
+
+    bool isValid() const {
+      return nmea_is_valid(this->c_str());
+    }
 };
