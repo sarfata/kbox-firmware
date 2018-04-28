@@ -28,7 +28,7 @@
 #include <KBoxLogging.h>
 #include <KBoxHardware.h>
 #include <Seasmart.h>
-#include <ArduinoJSON.h>
+#include <ArduinoJson.h>
 #include "common/time/WallClock.h"
 #include "common/time/WallClock.h"
 #include "common/signalk/SKJSONVisitor.h"
