@@ -25,7 +25,7 @@
 #pragma once
 
 #include <Adafruit_BNO055.h>
-#include "common/os/Task.h"
+#include "host/os/Task.h"
 #include "common/signalk/SKHub.h"
 #include "host/config/IMUConfig.h"
 

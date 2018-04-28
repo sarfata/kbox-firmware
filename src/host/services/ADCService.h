@@ -25,7 +25,7 @@
 #pragma once
 
 #include <ADC.h>
-#include "common/os/Task.h"
+#include "host/os/Task.h"
 #include "common/signalk/SKHub.h"
 
 class ADCService : public Task {

@@ -23,6 +23,7 @@
 */
 
 #include <KBoxLogging.h>
+#include <KBoxHardware.h>
 #include "TaskManager.h"
 #include "stats/KBoxMetrics.h"
 
@@ -67,11 +68,13 @@ void TaskManager::loop() {
   if (statDisplayTimer > statDisplayInterval) {
     displayStats();
     statDisplayTimer = 0;
+    restartStats();
   }
 }
 
 void TaskManager::displayStats() {
   // FIXME: Should upgrade all of this to use KBoxMetrics instead.
+  INFO("KBox uptime: %lus RAM Used: %d bytes Free: %d bytes", uptime / 1000, KBox.getUsedRam(), KBox.getFreeRam());
   INFO("-------------------------------------------------------------------------------------");
   int i = 0;
   INFO("%2s %16s %10s %10s %9s %9s %9s", "ID", "TaskName", "Runs", "Total (ms)", "Average (us)", "Min (us)", "Max (us)");
@@ -91,5 +94,6 @@ void TaskManager::restartStats() {
   if (taskStats) {
     delete[] taskStats;
   }
+  loopStats = RunStat();
   taskStats = new RunStat[tasks.size()];
 }

@@ -24,7 +24,6 @@
 #pragma once
 
 #include "common/ui/GC.h"
-#include "common/os/Task.h"
 #include "common/signalk/SKNMEAOutput.h"
 #include "common/signalk/SKNMEA2000Output.h"
 #include "common/signalk/SKHub.h"
@@ -32,6 +31,7 @@
 #include "common/comms/Kommand.h"
 #include "common/comms/SlipStream.h"
 #include "common/comms/KommandHandlerPing.h"
+#include "host/os/Task.h"
 #include "host/comms/KommandHandlerWiFiLog.h"
 #include "host/comms/KommandHandlerWiFiStatus.h"
 #include "host/config/WiFiConfig.h"

@@ -32,7 +32,7 @@
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKTime.h"
 #include "common/algo/List.h"
-#include "common/os/Task.h"
+#include "host/os/Task.h"
 #include "host/config/SDLoggingConfig.h"
 
 class Loggable {

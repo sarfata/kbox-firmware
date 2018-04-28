@@ -22,6 +22,7 @@
   THE SOFTWARE.
 */
 
+#include <malloc.h>
 #include <i2c_t3.h>
 #include <KBoxLogging.h>
 #include "KBoxHardware.h"
@@ -214,4 +215,14 @@ void KBoxHardware::readKBoxSerialNumber(tKBoxSerialNumber &sn) {
   sn.dwords[1] = SIM_UIDMH;
   sn.dwords[2] = SIM_UIDML;
   sn.dwords[3] = SIM_UIDL;
+}
+
+// https://forum.pjrc.com/threads/25676-Teensy-3-how-to-know-RAM-usage
+// http://man7.org/linux/man-pages/man3/mallinfo.3.html
+int KBoxHardware::getFreeRam() {
+  return mallinfo().arena - mallinfo().keepcost;
+}
+
+int KBoxHardware::getUsedRam() {
+  return mallinfo().uordblks;
 }

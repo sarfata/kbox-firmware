@@ -26,7 +26,7 @@
 
 #include <N2kMsg.h>
 #include <NMEA2000_teensy.h>
-#include "common/os/Task.h"
+#include "host/os/Task.h"
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKSubscriber.h"
 #include "common/signalk/SKNMEA2000Converter.h"

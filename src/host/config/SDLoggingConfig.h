@@ -36,5 +36,8 @@ struct SDLoggingConfig {
   bool logNMEA2000;
   bool logNMEA;
   bool logSignalK;
+  bool logSignalKGeneratedFromNMEA;
+  bool logSignalKGeneratedFromNMEA2000;
+  bool logSignalKGeneratedByKBoxSensors;
   bool logSystemMessages;
 };

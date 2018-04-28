@@ -36,7 +36,10 @@
     "logNMEA2000": true,
     "logNMEA": true,
     "logSignalK": true,
-    "logSystemMessages": true
+    "logSystemMessages": true,
+    "logSignalKGeneratedFromNMEA": false,
+    "logSignalKGeneratedFromNMEA2000": false,
+    "logSignalKGeneratedByKBoxSensors": true
   },
   "serial1": {
     "inputMode": "nmea",

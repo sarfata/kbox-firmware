@@ -31,8 +31,8 @@
 #pragma once
 
 
-#include "../../common/signalk/SKSubscriber.h"
-#include "../../common/signalk/SKHub.h"
+#include "common/signalk/SKSubscriber.h"
+#include "common/signalk/SKHub.h"
 
 class TimeService : public SKSubscriber {
   public:

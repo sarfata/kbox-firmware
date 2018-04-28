@@ -24,11 +24,11 @@
 
 #include <KBoxHardware.h>
 #include <KBoxLoggerMultiplexer.h>
-#include "common/os/TaskManager.h"
 #include "common/signalk/SKHub.h"
 #include "common/time/WallClock.h"
 #include "host/config/KBoxConfig.h"
 #include "host/config/KBoxConfigParser.h"
+#include "host/os/TaskManager.h"
 #include "host/drivers/ILI9341GC.h"
 #include "host/pages/BatteryMonitorPage.h"
 #include "host/pages/StatsPage.h"

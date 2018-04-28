@@ -97,6 +97,9 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.sdLoggingConfig.logNMEA = true;
   config.sdLoggingConfig.logSignalK = true;
   config.sdLoggingConfig.logSystemMessages = true;
+  config.sdLoggingConfig.logSignalKGeneratedFromNMEA = false;
+  config.sdLoggingConfig.logSignalKGeneratedFromNMEA2000 = false;
+  config.sdLoggingConfig.logSignalKGeneratedByKBoxSensors = true;
 }
 
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
@@ -168,6 +171,9 @@ void KBoxConfigParser::parseSDLoggingConfig(const JsonObject &json, SDLoggingCon
   READ_BOOL_VALUE(logNMEA);
   READ_BOOL_VALUE(logSignalK);
   READ_BOOL_VALUE(logSystemMessages);
+  READ_BOOL_VALUE(logSignalKGeneratedFromNMEA);
+  READ_BOOL_VALUE(logSignalKGeneratedFromNMEA2000);
+  READ_BOOL_VALUE(logSignalKGeneratedByKBoxSensors);
 }
 
 void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEAConverterConfig &config) {

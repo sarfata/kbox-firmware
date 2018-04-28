@@ -23,13 +23,13 @@
 */
 #pragma once
 
-#include "common/os/Task.h"
 #include "common/algo/List.h"
 #include "common/signalk/SKSubscriber.h"
 #include "common/signalk/SKNMEAOutput.h"
 #include "common/stats/KBoxMetrics.h"
 #include "common/signalk/SKSource.h"
 #include "common/signalk/SKHub.h"
+#include "host/os/Task.h"
 #include "host/config/SerialConfig.h"
 
 // Defined by the NMEA Standard

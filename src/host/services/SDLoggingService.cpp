@@ -216,6 +216,24 @@ void SDLoggingService::updateReceived(const SKUpdate &update) {
     return;
   }
 
+  // Do not log NMEA messages that have been converted to SignalK unless requested by user.
+  if (!_config.logSignalKGeneratedFromNMEA &&
+      (update.getSource().getInput() == SKSourceInputNMEA0183_1
+       || update.getSource().getInput() == SKSourceInputNMEA0183_2)) {
+    return;
+  }
+  // Same for NMEA2000
+  if (!_config.logSignalKGeneratedFromNMEA2000 && update.getSource().getInput() == SKSourceInputNMEA2000) {
+    return;
+  }
+  // And for KBox Sensors
+  if (!_config.logSignalKGeneratedByKBoxSensors &&
+      (update.getSource().getInput() == SKSourceInputKBoxADC
+       || update.getSource().getInput() == SKSourceInputKBoxBarometer
+       || update.getSource().getInput() == SKSourceInputKBoxIMU)) {
+    return;
+  }
+
   StaticJsonBuffer<1024> jsonBuffer;
   SKJSONVisitor jsonVisitor("self", jsonBuffer);
   JsonObject &jsonData = jsonVisitor.processUpdate(update);

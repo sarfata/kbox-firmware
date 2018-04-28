@@ -22,10 +22,11 @@
   THE SOFTWARE.
 */
 
-#include <malloc.h>
-#include <util/PrintableIPAddress.h>
 #include "StatsPage.h"
-#include "stats/KBoxMetrics.h"
+
+#include <util/PrintableIPAddress.h>
+#include <KBoxHardware.h>
+#include "common/stats/KBoxMetrics.h"
 #include "host/services/SDLoggingService.h"
 #include "host/services/WiFiService.h"
 
@@ -136,16 +137,6 @@ void StatsPage::loadView() {
   addLayer(usedRam); addLayer(freeRam); addLayer(avgLoopTime);
 }
 
-// https://forum.pjrc.com/threads/25676-Teensy-3-how-to-know-RAM-usage
-// http://man7.org/linux/man-pages/man3/mallinfo.3.html
-int getFreeRam() {
-  return mallinfo().arena - mallinfo().keepcost;
-}
-
-int getUsedRam() {
-  return mallinfo().uordblks;
-}
-
 bool StatsPage::processEvent(const TickEvent &e) {
   double avgLoopTimeUS = KBoxMetrics.averageMetric(KBoxMetricTaskManagerLoopUS);
   if (avgLoopTimeUS > 10000) {
@@ -182,8 +173,8 @@ bool StatsPage::processEvent(const TickEvent &e) {
     wifiAPIP->setText(apIP.toString());
   }
 
-  freeRam->setText(String(getFreeRam()));
-  usedRam->setText(String(getUsedRam()));
+  freeRam->setText(String(KBox.getFreeRam()));
+  usedRam->setText(String(KBox.getUsedRam()));
 
   if (sdcardTask) {
     if (sdcardTask->isLogging()) {
