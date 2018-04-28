@@ -70,8 +70,6 @@ void IMUService::setup() {
       _axisConfig = 0b00100100;
       _signConfig = 0b00000100;
     break;
-    case verticalPortHull:
-    case verticalStbHull:
     case verticalRightSideToBow:
     case verticalLeftSideToBow:
     case verticalTopToBow:
@@ -102,13 +100,11 @@ void IMUService::loop() {
   //  roll:   Vessel roll, +ve is list, heels to starboard
   //  pitch:  Pitch, +ve is bow up
   switch (_config.mounting) {
-    case verticalPortHull:
     case verticalRightSideToBow:
       _roll = SKDegToRad(eulerAngles.z());
       _pitch = SKDegToRad(eulerAngles.y())*(-1);
       _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
     break;
-    case verticalStbHull:
     case verticalLeftSideToBow:
       _roll = SKDegToRad(eulerAngles.z())*(-1);
       _pitch = SKDegToRad(eulerAngles.y());

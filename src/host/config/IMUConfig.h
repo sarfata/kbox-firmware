@@ -36,14 +36,12 @@ Left Side  /     BNO055      / /   Right Side
          /_________________/ /
          |________________ |/
 
-       Bottom (KBox or sensor)
+       horiz. bottom (KBox or sensor)
 */
 
 #pragma once
 
 enum IMUMounting {
-  verticalPortHull,           // KBox mounted on port hull
-  verticalStbHull,            // KBox mounted on stb. hull
   verticalRightSideToBow,     // KBox mounted on port hull
   verticalLeftSideToBow,      // KBox mounted on stb. hull
   verticalTopToBow,           // KBox mounted on rear bulkhead
@@ -59,5 +57,5 @@ struct IMUConfig {
   int frequency;
   bool enableHdg;
   bool enableHeelPitch;
-  enum IMUMounting mounting = verticalPortHull;
+  enum IMUMounting mounting = verticalRightSideToBow;
 };

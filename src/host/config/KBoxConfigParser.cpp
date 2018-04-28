@@ -75,7 +75,7 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.imuConfig.enabled = true;           // enable internal IMU sensor
   config.imuConfig.enableHdg = true;         // true if values taken from internal sensor
   config.imuConfig.enableHeelPitch = true;   // true if values taken from internal sensor
-  config.imuConfig.mounting = verticalPortHull;
+  config.imuConfig.mounting = verticalRightSideToBow;
 
   config.barometerConfig.enabled = true;
   config.barometerConfig.frequency = 1;
@@ -180,12 +180,6 @@ enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {
 }
 
 enum IMUMounting KBoxConfigParser::convertIMUMounting(const String &s) {
-  if (s == "verticalPortHull") {
-    return  verticalPortHull;
-  }
-  if (s == "verticalStbHull") {
-    return  verticalStbHull;
-  }
   if (s == "verticalRightSideToBow") {
     return  verticalRightSideToBow;
   }
@@ -198,16 +192,16 @@ enum IMUMounting KBoxConfigParser::convertIMUMounting(const String &s) {
   if (s == "verticalBottomToBow") {
     return  verticalBottomToBow;
   }
-  if (s == "horizontalTopToBow") {  // Bosch P0
+  if (s == "horizontalTopToBow") {
     return  horizontalTopToBow;
   }
-  if (s == "horizontalLeftSideToBow") { // Bosch P1 (default)
+  if (s == "horizontalLeftSideToBow") {
     return  horizontalLeftSideToBow;
   }
-  if (s == "horizontalBottomToBow") { // Bosch P2
+  if (s == "horizontalBottomToBow") {
     return  horizontalBottomToBow;
   }
-  if (s == "horizontalRightSideToBow") { // Bosch P3
+  if (s == "horizontalRightSideToBow") {
     return  horizontalRightSideToBow;
   }
   // default
