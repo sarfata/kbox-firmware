@@ -115,7 +115,7 @@ void SDLoggingService::loop() {
         logFile.print("0");
       }
       if (it->_timestamp.getMilliseconds() < 10) {
-        logFile.print("00");
+        logFile.print("0");
       }
       logFile.print(it->_timestamp.getMilliseconds());
     }
