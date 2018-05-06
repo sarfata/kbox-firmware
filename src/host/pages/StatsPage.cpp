@@ -135,17 +135,17 @@ static String formatCounterWithEventualError(uint32_t c, uint32_t e) {
 bool StatsPage::processEvent(const TickEvent &e) {
   // Update the time if a time is available
   SKTime now = wallClock.now();
-  String timeDisplay = now.iso8601date();
-  timeDisplay += " ";
-  timeDisplay += now.iso8601extendedTime();
-
   if (wallClock.isTimeSet()) {
+    String timeDisplay = now.iso8601date();
+    timeDisplay += " ";
+    timeDisplay += now.iso8601extendedTime();
+
     dateTime->setColor(ColorWhite);
     dateTime->setText(timeDisplay);
   }
   else {
     dateTime->setColor(ColorRed);
-    dateTime->setText(timeDisplay);
+    dateTime->setText(now.iso8601extendedTime());
   }
 
   nmea1Rx->setText(formatCounterWithEventualError(KBoxMetrics.countEvent(KBoxEventNMEA1RX),
