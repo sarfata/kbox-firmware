@@ -71,6 +71,10 @@ void WiFiService::loop() {
       unsigned int index = 0;
       uint8_t *currentLine = frame;
       while (index < len) {
+        // Remove \r to avoid extra blank lines in logs
+        if (frame[index] == '\r') {
+          frame[index] = '\0';
+        }
         if (frame[index] == '\n') {
           frame[index] = '\0';
           ERROR("> %s", currentLine);
