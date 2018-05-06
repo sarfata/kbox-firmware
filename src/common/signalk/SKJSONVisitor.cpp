@@ -43,7 +43,7 @@ void SKJSONVisitor::processSource(const SKSource &source, JsonObject &sourceObje
       sourceObject["label"] = "NMEA2000";
       sourceObject["type"] = "NMEA2000";
       sourceObject["pgn"] = source.getPGN();
-      sourceObject["src"] = source.getSourceAddress();
+      sourceObject["src"] = _jsonBuffer.strdup(String(source.getSourceAddress()).c_str());
       sourceObject["priority"] = source.getPriority();
       break;
     case SKSourceInputNMEA0183_1:
