@@ -87,6 +87,13 @@ void StatsPage::loadView() {
   canTx = new TextLayer(Point(col4, row2), Size(colWidth, rowHeight), "0");
   addLayer(canRx); addLayer(canTx);
 
+  addLayer(new TextLayer(Point(col3, row3), Size(colWidth, rowHeight), "ESP Rx:"));
+  addLayer(new TextLayer(Point(col3, row4), Size(colWidth, rowHeight), "ESP Tx:"));
+
+  espRx = new TextLayer(Point(col4, row3), Size(colWidth, rowHeight), "0");
+  espTx = new TextLayer(Point(col4, row4), Size(colWidth, rowHeight), "0");
+  addLayer(espRx); addLayer(espTx);
+
   // WiFi AP
   wifiAPStatus = new TextLayer(Point(col1, row5), Size(colWidth, rowHeight), "");
   wifiAPIP = new TextLayer(Point(col1, row6), Size(colWidth, rowHeight), "");
@@ -158,6 +165,11 @@ bool StatsPage::processEvent(const TickEvent &e) {
   canRx->setText(String(KBoxMetrics.countEvent(KBoxEventNMEA2000MessageReceived)));
   canTx->setText(formatCounterWithEventualError(KBoxMetrics.countEvent(KBoxEventNMEA2000MessageSent),
                                                 KBoxMetrics.countEvent(KBoxEventNMEA2000MessageSendError)));
+
+  espRx->setText(formatCounterWithEventualError(KBoxMetrics.countEvent(KBoxEventWiFiRxValidKommand),
+                                                KBoxMetrics.countEvent(KBoxEventWiFiRxInvalidKommand)));
+  espTx->setText(formatCounterWithEventualError(KBoxMetrics.countEvent(KBoxEventWiFiTxFrame),
+                                                KBoxMetrics.countEvent(KBoxEventWiFiRxInvalidKommand)));
 
   if (wifiService) {
     if (wifiService->accessPointEnabled()) {

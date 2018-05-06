@@ -51,8 +51,11 @@ enum KBoxEvent {
   KBoxEventUSBValidKommand,
   KBoxEventUSBInvalidKommand,
 
-  KBoxEventWiFiValidKommand,
-  KBoxEventWiFiInvalidKommand,
+  KBoxEventWiFiRxValidKommand,
+  KBoxEventWiFiRxInvalidKommand,
+  KBoxEventWiFiTxFrame,
+  KBoxEventWiFiRxErrorFrame,
+
 
   // Events used by the ESP module
   KBoxEventESPValidKommand,

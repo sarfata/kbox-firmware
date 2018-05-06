@@ -36,6 +36,7 @@ class StatsPage : public Page {
     TextLayer *nmea1Rx, *nmea2Rx;
     TextLayer *nmea1Tx, *nmea2Tx;
     TextLayer *canRx, *canTx;
+    TextLayer *espRx, *espTx;
     TextLayer *wifiAPStatus, *wifiAPIP;
     TextLayer *wifiClientStatus, *wifiClientIP;
     TextLayer *usedRam, *freeRam, *avgLoopTime;

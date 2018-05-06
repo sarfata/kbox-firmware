@@ -81,5 +81,6 @@ class WiFiService : public Task, public SKSubscriber,
                            const IPAddress &ipAddress) override;
 
     void sendConfiguration();
+    void sendKommand(Kommand &k);
 };
 

@@ -59,10 +59,15 @@ void WiFiService::loop() {
     KommandHandler *handlers[] = { &_pingHandler, &_wifiLogHandler,
                                    &_wifiStatusHandler, 0 };
     if (KommandHandler::handleKommandWithHandlers(handlers, kr, _slip)) {
-      KBoxMetrics.event(KBoxEventWiFiValidKommand);
+      if (kr.getKommandIdentifier() == KommandErr) {
+        KBoxMetrics.event(KBoxEventWiFiRxErrorFrame);
+      }
+      else {
+        KBoxMetrics.event(KBoxEventWiFiRxValidKommand);
+      }
     }
     else {
-      KBoxMetrics.event(KBoxEventWiFiInvalidKommand);
+      KBoxMetrics.event(KBoxEventWiFiRxInvalidKommand);
       ERROR("Invalid command received from WiFi module (id=%i size=%i)", kr.getKommandIdentifier(), kr.dataSize());
 
       // This is most likely a boot or reboot message from the ESP module.
@@ -92,6 +97,11 @@ void WiFiService::loop() {
   }
 }
 
+void WiFiService::sendKommand(Kommand &k) {
+  _slip.writeFrame(k.getBytes(), k.getSize());
+  KBoxMetrics.event(KBoxEventWiFiTxFrame);
+}
+
 void WiFiService::updateReceived(const SKUpdate& u) {
   /* This is where we convert the data in SignalK format that floats inside KBox
    * to messages that will be sent to WiFi clients.
@@ -112,14 +122,14 @@ void WiFiService::updateReceived(const SKUpdate& u) {
   FixedSizeKommand<1024> k(KommandSKData);
   jsonData.printTo(k);
   k.write(0);
-  _slip.writeFrame(k.getBytes(), k.getSize());
+  sendKommand(k);
 }
 
 bool WiFiService::write(const SKNMEASentence& sentence) {
   // NMEA Sentences should always be 82 bytes or less
   FixedSizeKommand<100> k(KommandNMEASentence);
   k.appendNullTerminatedString(sentence.c_str());
-  _slip.writeFrame(k.getBytes(), k.getSize());
+  sendKommand(k);
   return true;
 }
 
@@ -134,7 +144,7 @@ bool WiFiService::write(const tN2kMsg& msg) {
   char pcdin[30 + msg.DataLen * 2];
   if (N2kToSeasmart(msg, millis(), pcdin, sizeof(pcdin)) < 500) {
     k.appendNullTerminatedString(pcdin);
-    _slip.writeFrame(k.getBytes(), k.getSize());
+    sendKommand(k);
     return true;
   } else {
     return false;
@@ -229,5 +239,5 @@ void WiFiService::sendConfiguration() {
 
   configFrame.appendNullTerminatedString(_config.vesselURN);
 
-  _slip.writeFrame(configFrame.getBytes(), configFrame.getSize());
+  sendKommand(configFrame);
 }
