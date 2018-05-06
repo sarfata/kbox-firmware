@@ -39,6 +39,7 @@ enum KBoxEvent {
 
   KBoxEventNMEA2RX,
   KBoxEventNMEA2RXBufferOverflow,
+  KBoxEventNMEA2RXOverflow,
   KBoxEventNMEA2RXError,
   KBoxEventNMEA2TX,
   KBoxEventNMEA2TXOverflow,

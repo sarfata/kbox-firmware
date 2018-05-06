@@ -33,7 +33,7 @@
 
 WiFiService::WiFiService(const WiFiConfig &config, SKHub &skHub, GC &gc) :
   Task("WiFi"), _config(config), _hub(skHub), _slip(WiFiSerial, 2048),
-  _wifiStatusHandler(*this), _espState(ESPState::ESPStarting)
+  _wifiStatusHandler(*this), _espState(ESPState::ESPStarting), _dhcpClients(0)
 {
   // We will need gc at some point to be able to take screenshot
 }
@@ -160,19 +160,27 @@ void WiFiService::wiFiStatusUpdated(const ESPState &state, uint16_t dhcpClients,
   }
 }
 
-const String WiFiService::clientInterfaceStatus() const {
-  if (_config.client.enabled) {
-    IPAddress ip = _clientAddress;
-    if (static_cast<uint32_t >(ip) != 0) {
-      return "connected";
-    }
-    else {
-      return "connecting";
-    }
-  }
-  return "(disabled)";
+const bool WiFiService::clientInterfaceEnabled() const {
+  return _config.client.enabled;
 }
 
+const String WiFiService::clientInterfaceNetworkName() const {
+  if (_config.client.enabled) {
+    return _config.client.ssid;
+  }
+  else {
+    return "";
+  }
+}
+
+const bool WiFiService::clientInterfaceConnected() const {
+  IPAddress ip = _clientAddress;
+  if (static_cast<uint32_t>(ip) == 0) {
+    return false;
+  } else {
+    return true;
+  }
+}
 const IPAddress WiFiService::clientInterfaceIP() const {
   if (_config.client.enabled) {
     return _clientAddress;
@@ -182,11 +190,21 @@ const IPAddress WiFiService::clientInterfaceIP() const {
   }
 }
 
-const String WiFiService::accessPointInterfaceStatus() const {
+const bool WiFiService::accessPointEnabled() const {
+  return _config.accessPoint.enabled;
+}
+
+const String WiFiService::accessPointNetworkName() const {
   if (_config.accessPoint.enabled) {
-    return String(_config.accessPoint.ssid) + "(" + _dhcpClients + ")";
+    return _config.accessPoint.ssid;
   }
-  return "(disabled)";
+  else {
+    return "";
+  }
+}
+
+const uint16_t WiFiService::accessPointClients() const {
+  return _dhcpClients;
 }
 
 const IPAddress WiFiService::accessPointInterfaceIP() const {
