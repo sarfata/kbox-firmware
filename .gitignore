@@ -40,8 +40,15 @@ nbproject
 lib/readme.txt
 CMakeListsPrivate.txt
 
-# CLion
-cmake-build-debug
+# CLion User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# CMake
+cmake-build-debug/
+cmake-build-release/
 
 # Python VirtualEnv
 venv
