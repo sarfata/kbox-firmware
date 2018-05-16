@@ -25,6 +25,7 @@
 #pragma once
 
 #include <WString.h>
+#include <cstdint>
 
 enum SKSourceInput {
   SKSourceInputUnknown,

@@ -24,7 +24,7 @@
 
 #include <KBoxLogging.h>
 #include "TaskManager.h"
-#include "stats/KBoxMetrics.h"
+#include "common/stats/KBoxMetrics.h"
 
 void TaskManager::addTask(Task* task) {
   if (running) {
