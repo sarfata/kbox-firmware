@@ -16,6 +16,12 @@ add_custom_target(
 )
 
 add_custom_target(
+        PLATFORMIO_UPLOAD_ESP32_OTA
+        COMMAND ${PLATFORMIO_CMD} -f -c clion run -e esp32 -t upload --upload-port kbox32.local
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(
         PLATFORMIO_RUN_ESP32 ${PLATFORMIO_CMD} -f -c clion run -e esp32 -t upload
         COMMAND ${PLATFORMIO_CMD} device monitor
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
