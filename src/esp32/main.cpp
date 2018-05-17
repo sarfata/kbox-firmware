@@ -39,6 +39,8 @@
 #include <SPIFFSEditor.h>
 #include <SPIFFS.h>
 #include <SD.h>
+#include <Update.h>
+#include <ESPmDNS.h>
 #include "NMEA2000Task.h"
 #include "SDLogging.h"
 #include "NMEAServer.h"
@@ -48,6 +50,8 @@ AsyncWebSocket ws("/signalk/v1/stream");
 NMEA2000Task nmea2000Task;
 SDLogging sdLoggingTask;
 NMEAServer nmeaServer;
+
+static bool restartRequired = false;
 
 static int s_countClients = 0;
 static const char *s_vesselURN = "myVesselURN";
@@ -103,6 +107,21 @@ class WebSocketSender : public NMEA2000WriterInterface {
     }
 };
 
+void kboxMDNSSetup() {
+  MDNS.begin("kbox32");
+  MDNS.addService("http","tcp",80);
+
+  const char *services[] = { "signalk-http", "signalk-ws" };
+  for (auto service : services) {
+    MDNS.addService(service,"tcp",80);
+    MDNS.addServiceTxt(service, "tcp", "txtvers", "1");
+    MDNS.addServiceTxt(service, "tcp", "roles", "master,main");
+    MDNS.addServiceTxt(service, "tcp", "self", "urn:mrn:signalk:uuid:52586A48-E2BE-41B6-8F3E-AEA344245593");
+    MDNS.addServiceTxt(service, "tcp", "swname", "kbox32");
+    MDNS.addServiceTxt(service, "tcp", "swvers", "0.0.1");
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   KBoxLogging.setLogger(new KBoxLoggerStream(Serial));
@@ -126,7 +145,8 @@ void setup() {
   }, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
 
   WiFi.onEvent([](WiFiEvent_t event){
-      DEBUG("WiFi Station Got IP");
+      DEBUG("WiFi Station Got IP %s", WiFi.localIP().toString().c_str());
+      kboxMDNSSetup();
   }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
 
   WiFi.begin("DorothyPacke-PC-Wireless", "PalmSpringsWireless");
@@ -138,6 +158,43 @@ void setup() {
   });
   // attach AsyncWebSocket
   ws.onEvent(onEvent);
+
+  // OTA
+  webServer.on("/update", HTTP_POST, [](AsyncWebServerRequest *request){
+      // the request handler is triggered after the upload has finished...
+      // create the response, add header, and send response
+      AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", (Update.hasError())?"FAIL":"OK");
+      response->addHeader("Connection", "close");
+      response->addHeader("Access-Control-Allow-Origin", "*");
+      restartRequired = true;  // Tell the main loop to restart the ESP
+      request->send(response);
+  },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
+      //Upload handler chunks in data
+
+      if(!index){ // if index == 0 then this is the first frame of data
+        DEBUG("Starting upload of %s", filename.c_str());
+        if(!Update.begin()){//start with max available size
+          DEBUG("Unable to start update %d", Update.getError());
+          Update.printError(Serial);
+        }
+      }
+
+      //Write chunked data to the free sketch space
+      if(Update.write(data, len) != len){
+        DEBUG("Error writing update data %d", Update.getError());
+        Update.printError(Serial);
+      }
+
+      if(final){ // if the final flag is set then this is the last frame of data
+        if(Update.end(true)){ //true to set the size to the current progress
+          DEBUG("Update success: %u B", index + len);
+        } else {
+          DEBUG("Update error %d", Update.getError());
+          Update.printError(Serial);
+        }
+      }
+  });
+
   webServer.addHandler(&ws);
 
   SPIFFS.begin();
@@ -156,7 +213,6 @@ void setup() {
 
   nmea2000Task.addWriter(&nmeaServer);
   nmeaServer.start();
-
 
   size_t ul;
   esp_partition_iterator_t _mypartiterator;
@@ -184,7 +240,7 @@ void setup() {
 void loop() {
   static elapsedMillis lastLogMessage = 0;
   if (lastLogMessage > 1000) {
-    DEBUG("KBox Running");
+    DEBUG("KBox Running with update!");
     lastLogMessage = 0;
   }
 
@@ -194,4 +250,9 @@ void loop() {
     lastSDCardWrite = 0;
   }
   nmea2000Task.loop();
+
+  if (restartRequired) {
+    DEBUG("Rebooting ESP");
+    ESP.restart();
+  }
 }
