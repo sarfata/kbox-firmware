@@ -35,6 +35,10 @@
 #include <elapsedMillis.h>
 #include <ArduinoJson.h>
 #include <Seasmart.h>
+#include <esp_partition.h>
+#include <SPIFFSEditor.h>
+#include <SPIFFS.h>
+#include <SD.h>
 #include "NMEA2000Task.h"
 #include "SDLogging.h"
 #include "NMEAServer.h"
@@ -136,12 +140,15 @@ void setup() {
   ws.onEvent(onEvent);
   webServer.addHandler(&ws);
 
+  SPIFFS.begin();
+  sdLoggingTask.initializeCard();
+
+  webServer.addHandler(new SPIFFSEditor(SD, "kbox", "test"));
+  webServer.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
   webServer.begin();
 
 
   nmea2000Task.setup();
-  sdLoggingTask.initializeCard();
-
   nmea2000Task.addWriter(&sdLoggingTask);
 
   WebSocketSender *wsSender = new WebSocketSender();
@@ -149,6 +156,29 @@ void setup() {
 
   nmea2000Task.addWriter(&nmeaServer);
   nmeaServer.start();
+
+
+  size_t ul;
+  esp_partition_iterator_t _mypartiterator;
+  const esp_partition_t *_mypart;
+  ul = spi_flash_get_chip_size(); Serial.print("Flash chip size: "); Serial.println(ul);
+  Serial.println("Partiton table:");
+  _mypartiterator = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, NULL);
+  if (_mypartiterator) {
+    do {
+      _mypart = esp_partition_get(_mypartiterator);
+      printf("%x - %x - %x - %x - %s - %i\n", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
+    } while ((_mypartiterator = esp_partition_next(_mypartiterator)));
+  }
+  esp_partition_iterator_release(_mypartiterator);
+  _mypartiterator = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, NULL);
+  if (_mypartiterator) {
+    do {
+      _mypart = esp_partition_get(_mypartiterator);
+      printf("%x - %x - %x - %x - %s - %i\n", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
+    } while ((_mypartiterator = esp_partition_next(_mypartiterator)));
+  }
+  esp_partition_iterator_release(_mypartiterator);
 }
 
 void loop() {
@@ -161,6 +191,7 @@ void loop() {
   static elapsedMillis lastSDCardWrite = 0;
   if (lastSDCardWrite > 2000) {
     sdLoggingTask.loop();
+    lastSDCardWrite = 0;
   }
   nmea2000Task.loop();
 }
