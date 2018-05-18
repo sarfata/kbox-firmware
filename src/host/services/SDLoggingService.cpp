@@ -83,7 +83,7 @@ void SDLoggingService::startLogging() {
     createLogFile(fileName);
 
     if (logFile) {
-      INFO("New logfile by KBox %s", KBOX_VERSION);
+      INFO("New logfile by KBox %s - Reboot reason %s", KBOX_VERSION, KBox.rebootReason().c_str());
       DEBUG("Starting new logfile: %s", fileName.c_str());
     }
     else {

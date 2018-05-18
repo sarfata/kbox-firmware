@@ -72,7 +72,7 @@ void setup() {
 
   delay(200);
 
-  DEBUG("Starting");
+  DEBUG("Starting - reboot: %s", KBox.rebootReason().c_str());
 
   digitalWrite(led_pin, 1);
 
@@ -171,6 +171,8 @@ void setup() {
 
   taskManager.setup();
 
+  KBox.watchdogSetup();
+
   // Reinitialize debug here because in some configurations
   // (like logging to nmea2 output), the kbox setup might have messed
   // up the debug configuration.
@@ -179,4 +181,6 @@ void setup() {
 
 void loop() {
   taskManager.loop();
+
+  KBox.watchdogRefresh();
 }

@@ -120,6 +120,10 @@ class KBoxHardware {
 
     int getFreeRam();
     int getUsedRam();
+
+    void watchdogSetup();
+    void watchdogRefresh();
+    String rebootReason();
 };
 
 extern KBoxHardware KBox;
