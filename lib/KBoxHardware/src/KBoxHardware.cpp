@@ -106,7 +106,7 @@ void KBoxHardware::setBacklight(BacklightIntensity intensity) {
 }
 
 void KBoxHardware::espInit() {
-  WiFiSerial.begin(115200);
+  WiFiSerial.begin(1000000);
   WiFiSerial.setTimeout(0);
 
   digitalWrite(wifi_enable, 0);

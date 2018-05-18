@@ -80,7 +80,7 @@ void setup() {
   rgb.setPixelColor(0, startingColor);
   rgb.show();
 
-  Serial.begin(115200);
+  Serial.begin(1000000);
   // We do want a timeout to make sure write() does not return
   // without having written everything.
   // FIXME: We should not use this!
