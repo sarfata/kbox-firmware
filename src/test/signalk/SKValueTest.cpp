@@ -56,6 +56,14 @@ TEST_CASE("SKValue: Create a few values and make sure we can read their data bac
 
     CHECK( attitude.getNumberValue() == 0 );
   }
+
+  SECTION("Timestamp value") {
+    SKValue ts = SKValue(SKTime(1524764848, 102));
+
+    CHECK( ts.getTimestampValue().getTime() == 1524764848 );
+    CHECK( ts.getTimestampValue().getMilliseconds() == 102 );
+    CHECK( ts.getTimestampValue().toString() == "2018-04-26T17:47:28.102Z");
+  }
 };
 
 

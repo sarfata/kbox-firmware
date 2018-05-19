@@ -88,4 +88,29 @@ TEST_CASE("SKJSONVisitor") {
     CHECK(voltageUpdate["path"].as<std::string>() == "electrical.batteries.starter.voltage");
     CHECK(voltageUpdate["value"] == 12.0);
   }
+
+  SECTION("update with a value that is a timestamp") {
+    update.setNavigationDatetime(SKTime(1524764848, 102));
+
+    JsonObject &o = jsonVisitor.processUpdate(update);
+
+    CHECK( o.containsKey("updates") );
+    CHECK( o["updates"].is<JsonArray>() );
+
+    JsonArray &updates = o["updates"].as<JsonArray>();
+
+    CHECK( updates.size() == 1 );
+    CHECK( updates[0].is<JsonObject>() );
+
+    JsonObject &update = updates[0].as<JsonObject&>();
+
+    CHECK( update.containsKey("source") );
+    CHECK( update.containsKey("values") );
+
+    JsonObject &datetimeUpdate = update["values"][0];
+    CHECK(datetimeUpdate != JsonObject::invalid());
+    CHECK(datetimeUpdate["path"].as<std::string>() == "navigation.datetime");
+    CHECK(datetimeUpdate["value"] == "2018-04-26T17:47:28.102Z");
+
+  }
 }

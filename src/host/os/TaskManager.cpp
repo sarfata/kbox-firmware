@@ -23,6 +23,7 @@
 */
 
 #include <KBoxLogging.h>
+#include <KBoxHardware.h>
 #include "TaskManager.h"
 #include "stats/KBoxMetrics.h"
 
@@ -67,29 +68,32 @@ void TaskManager::loop() {
   if (statDisplayTimer > statDisplayInterval) {
     displayStats();
     statDisplayTimer = 0;
+    restartStats();
   }
 }
 
 void TaskManager::displayStats() {
   // FIXME: Should upgrade all of this to use KBoxMetrics instead.
-  DEBUG("-------------------------------------------------------------------------------------");
+  INFO("KBox uptime: %lus RAM Used: %d bytes Free: %d bytes", uptime / 1000, KBox.getUsedRam(), KBox.getFreeRam());
+  INFO("-------------------------------------------------------------------------------------");
   int i = 0;
-  DEBUG("%2s %16s %10s %10s %9s %9s %9s", "ID", "TaskName", "Runs", "Total (ms)", "Average (us)", "Min (us)", "Max (us)");
+  INFO("%2s %16s %10s %10s %9s %9s %9s", "ID", "TaskName", "Runs", "Total (ms)", "Average (us)", "Min (us)", "Max (us)");
   for (LinkedList<Task*>::iterator it = tasks.begin(); it != tasks.end(); it++) {
-    DEBUG("%2i %16s %10lu %10lu %9lu %9lu %9lu",
+    INFO("%2i %16s %10lu %10lu %9lu %9lu %9lu",
         i, (*it)->getTaskName(), taskStats[i].count(), taskStats[i].totalTime() / 1000,
         taskStats[i].avgTime(), taskStats[i].minTime(), taskStats[i].maxTime());
     i++;
   }
-  DEBUG("-- %16s %10lu %10lu %9lu %9lu %9lu", "totals (in ms)",
+  INFO("-- %16s %10lu %10lu %9lu %9lu %9lu", "totals (in ms)",
       loopStats.count(), loopStats.totalTime() / 1000, loopStats.avgTime() / 1000, loopStats.minTime() / 1000, loopStats.maxTime() / 1000);
 
-  DEBUG("-------------------------------------------------------------------------------------");
+  INFO("-------------------------------------------------------------------------------------");
 }
 
 void TaskManager::restartStats() {
   if (taskStats) {
     delete[] taskStats;
   }
+  loopStats = RunStat();
   taskStats = new RunStat[tasks.size()];
 }

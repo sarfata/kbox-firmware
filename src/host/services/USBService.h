@@ -28,7 +28,6 @@
 #include <KBoxLoggerStream.h>
 #include <common/signalk/SKNMEA2000Output.h>
 #include "common/comms/SlipStream.h"
-#include "common/os/Task.h"
 #include "common/ui/GC.h"
 #include "common/comms/SlipStream.h"
 #include "common/comms/KommandHandlerPing.h"
@@ -36,6 +35,7 @@
 #include "common/signalk/SKHub.h"
 #include "common/signalk/SKSubscriber.h"
 #include "common/signalk/SKNMEAOutput.h"
+#include "host/os/Task.h"
 #include "host/comms/KommandHandlerFileRead.h"
 #include "host/comms/KommandHandlerFileWrite.h"
 #include "host/comms/KommandHandlerReboot.h"

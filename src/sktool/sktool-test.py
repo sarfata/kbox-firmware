@@ -164,7 +164,7 @@ class SKTestRunnerSKOfficial(SKTestRunner):
                 raise SKRunnerError("Unable to run canboat/analyzer - Use --canboat to point to it. (OSError {}: {})".format(
                     error.errno, error.strerror))
             try:
-                n2k_signalk_process = subprocess.Popen([ self.n2k_signalk ], stdin = canboat_process.stdout,
+                n2k_signalk_process = subprocess.Popen([ self.n2k_signalk, '--delta' ], stdin = canboat_process.stdout,
                         stdout = subprocess.PIPE, stderr = subprocess.PIPE)
             except OSError as error:
                 raise SKRunnerError("Unable to run n2k-signalk - Use --n2k-signalk to point to it. (OSError {}: {})".format(

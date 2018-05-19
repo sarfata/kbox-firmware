@@ -25,6 +25,7 @@
 #pragma once
 
 #include <WString.h>
+#include "SKTime.h"
 
 class SKUpdate;
 
@@ -80,7 +81,8 @@ class SKValue {
       SKValueTypeNone,
       SKValueTypeNumber,
       SKValueTypePosition,
-      SKValueTypeAttitude
+      SKValueTypeAttitude,
+      SKValueTypeTimestamp
     };
 
   private:
@@ -92,10 +94,12 @@ class SKValue {
       value(double n) : numberValue(n) {};
       value(SKTypePosition p) : position(p) {};
       value(SKTypeAttitude a) : attitude(a) {};
+      value(SKTime ts) : timestamp(ts) {};
 
       double numberValue;
       SKTypePosition position;
       SKTypeAttitude attitude;
+      SKTime timestamp;
       // need to add:
       // smallString - fits in the size of the union
       // largeString - uses dynamic memory allocation
@@ -103,15 +107,12 @@ class SKValue {
       // etc
     } _value;
 
-    // TODO: We should add here
-    // - timestamp
-    // - $source (maybe - this can also be grouped at the SKUpdate level
-
   public:
     SKValue() : _type(SKValueTypeNone), _value(0) {};
     SKValue(double v) : _type(SKValueTypeNumber), _value(v) {};
-    SKValue(SKTypePosition p) : _type(SKValueTypePosition), _value(p) {}
-    SKValue(SKTypeAttitude a) : _type(SKValueTypeAttitude), _value(a) {}
+    SKValue(SKTypePosition p) : _type(SKValueTypePosition), _value(p) {};
+    SKValue(SKTypeAttitude a) : _type(SKValueTypeAttitude), _value(a) {};
+    SKValue(SKTime ts) : _type(SKValueTypeTimestamp), _value(ts) {};
 
     /**
      * Returns true if the two SKValues compared have the same value.
@@ -123,6 +124,7 @@ class SKValue {
     double getNumberValue() const;
     SKTypePosition getPositionValue() const;
     SKTypeAttitude getAttitudeValue() const;
+    SKTime getTimestampValue() const;
 
     enum SKValueType getType() const {
       return _type;

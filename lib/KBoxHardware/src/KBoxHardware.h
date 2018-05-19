@@ -117,6 +117,9 @@ class KBoxHardware {
      * Read KBox serial number and return it.
      */
     void readKBoxSerialNumber(tKBoxSerialNumber &sn);
+
+    int getFreeRam();
+    int getUsedRam();
 };
 
 extern KBoxHardware KBox;

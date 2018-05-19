@@ -37,7 +37,7 @@ TEST_CASE("SKNMEAParser: RMC") {
   SECTION("RMC") {
     const SKUpdate& update = p.parse(SKSourceInputNMEA0183_2, "$GPRMC,004119.000,A,3751.3385,N,12227.4913,W,5.02,235.24,141116,,,D*75", SKTime(0));
 
-    CHECK( update.getSize() == 3 );
+    CHECK( update.getSize() == 4 );
     CHECK( update.getSource() != SKSourceUnknown );
     CHECK( update.getSource().getLabel() == "kbox.nmea0183.2" );
     CHECK( update.getContext() == SKContextSelf );
@@ -47,6 +47,7 @@ TEST_CASE("SKNMEAParser: RMC") {
     CHECK( update.getNavigationPosition().latitude == 37.85564166666666 );
     CHECK( update.getNavigationPosition().longitude == -122.45818833333334 );
     CHECK( update.getNavigationPosition().altitude == SKDoubleNAN );
+    CHECK( update.getNavigationDatetime().toString() == "2016-11-14T00:41:19.000Z" );
   }
 
   SECTION("RMC with invalid fix") {

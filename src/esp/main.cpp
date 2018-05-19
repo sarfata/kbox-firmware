@@ -111,15 +111,23 @@ void setup() {
   delay(1000);
 
   String resetInfo = ESP.getResetInfo();
-  INFO("ESP8266 reboot reason: %s", resetInfo.c_str());
+  INFO("ESP version: %s Reboot reason: %s", KBOX_VERSION, resetInfo.c_str());
 }
 
 void loop() {
   static elapsedMillis lastMessageTimer = 0;
+  static elapsedMillis lastInfoMessageTimer = 0;
 
   processSlipMessages();
   server.loop();
 
+  if (lastInfoMessageTimer > 5000) {
+    INFO("ESP Connected clients: %i Free heap: %i Uptime: %is",
+         server.clientsCount() + webServer.countClients(),
+         ESP.getFreeHeap(),
+         millis() / 1000);
+    lastInfoMessageTimer = 0;
+  }
   switch (espState) {
     case ESPState::ESPStarting:
       espState = ESPState::ESPReady;
@@ -143,8 +151,6 @@ void loop() {
     case ESPState::ESPConfigured:
       // We are connected. Report status every 500ms.
       if (lastMessageTimer > 500) {
-        DEBUG("Still running ... %i connected clients - %i heap - uptime: %is",
-              server.clientsCount() + webServer.countClients(), ESP.getFreeHeap(), millis() / 1000);
         reportStatus(espState,
                      WiFi.softAPgetStationNum(),
                      server.clientsCount(),
@@ -224,15 +230,15 @@ static void configurationCallback(const WiFiConfiguration& config) {
 }
 
 static void onGotIP(const WiFiEventStationModeGotIP& e) {
-  DEBUG("DHCP Got IP Address!");
+  INFO("DHCP Got IP Address!");
 }
 
 static void onStationModeConnected(const WiFiEventStationModeConnected& e) {
-  DEBUG("StationModeConnected");
+  INFO("StationModeConnected");
 }
 static void onStationModeDisconnected(const WiFiEventStationModeDisconnected&
 e) {
-  DEBUG("StationModeDisconnected - reason=%i", e.reason);
+  ERROR("StationModeDisconnected - reason=%i", e.reason);
 }
 
 static void reportStatus(ESPState state, uint16_t dhcpClients,

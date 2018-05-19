@@ -22,6 +22,7 @@
   THE SOFTWARE.
 */
 
+#include <malloc.h>
 #include <i2c_t3.h>
 #include <KBoxLogging.h>
 #include "KBoxHardware.h"
@@ -79,13 +80,18 @@ void KBoxHardware::setup() {
   //adc.setConversionSpeed(ADC_LOW_SPEED, ADC_1);
   //adc.setSamplingSpeed(ADC_HIGH_SPEED, ADC_1);
 
+  // We need to do this because the SdSpiAltDriver does not do it.
+  SPI.setMOSI(display_mosi);
+  SPI.setMISO(display_miso);
+  SPI.setSCK(display_sck);
+
+  _sdCardSuccess = sdCardInit();
+
   display.begin();
   display.fillScreen(ILI9341_BLUE);
   display.setRotation(display_rotation);
 
   setBacklight(BacklightIntensityMax);
-
-  _sdCardSuccess = sdCardInit();
 }
 
 void KBoxHardware::setBacklight(BacklightIntensity intensity) {
@@ -155,7 +161,7 @@ bool KBoxHardware::sdCardInit() {
     if (!_sd.begin(sdcard_cs)){
   #endif
     if (_sd.card()->errorCode()) {
-      DEBUG("Something went wrong ... SD card errorCode: %i errorData: %i", _sd.card()->errorCode(),
+      DEBUG("Something went wrong ... SD card errorCode: 0x%x errorData: 0x%x", _sd.card()->errorCode(),
             _sd.card()->errorData());
       return false;
     }
@@ -209,4 +215,14 @@ void KBoxHardware::readKBoxSerialNumber(tKBoxSerialNumber &sn) {
   sn.dwords[1] = SIM_UIDMH;
   sn.dwords[2] = SIM_UIDML;
   sn.dwords[3] = SIM_UIDL;
+}
+
+// https://forum.pjrc.com/threads/25676-Teensy-3-how-to-know-RAM-usage
+// http://man7.org/linux/man-pages/man3/mallinfo.3.html
+int KBoxHardware::getFreeRam() {
+  return mallinfo().arena - mallinfo().keepcost;
+}
+
+int KBoxHardware::getUsedRam() {
+  return mallinfo().uordblks;
 }

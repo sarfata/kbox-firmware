@@ -73,7 +73,7 @@ void WiFiService::loop() {
       while (index < len) {
         if (frame[index] == '\n') {
           frame[index] = '\0';
-          DEBUG("> %s", currentLine);
+          ERROR("> %s", currentLine);
 
           currentLine = frame + index + 1;
         }
@@ -81,7 +81,7 @@ void WiFiService::loop() {
       }
 
       frame[len-1] = 0;
-      DEBUG("> %s", currentLine);
+      ERROR("> %s", currentLine);
     }
 
     _slip.readFrame(0, 0);

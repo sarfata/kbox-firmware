@@ -116,6 +116,11 @@
       "description": "Course over ground (true)"
     },
     {
+      "path": "navigation.datetime",
+      "type": "timestampValue",
+      "description": "Time and Date from the GNSS Positioning System"
+    },
+    {
       "path": "navigation.headingMagnetic",
       "type": "numberValue",
       "units": "rad",

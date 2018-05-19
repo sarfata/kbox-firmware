@@ -7,7 +7,7 @@
 
   The MIT License
 
-  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -30,22 +30,17 @@
 
 #pragma once
 
-#include "SerialConfig.h"
-#include "NMEA2000Config.h"
-#include "IMUConfig.h"
-#include "BarometerConfig.h"
-#include "WiFiConfig.h"
-#include "SDLoggingConfig.h"
+#include "KBoxLogging.h"
 
-/**
- * A KBox configuration in memory
- */
-struct KBoxConfig {
-  SerialConfig serial1Config;
-  SerialConfig serial2Config;
-  NMEA2000Config nmea2000Config;
-  IMUConfig imuConfig;
-  BarometerConfig barometerConfig;
-  WiFiConfig wifiConfig;
-  SDLoggingConfig sdLoggingConfig;
+class KBoxLoggerMultiplexer : public KBoxLogger {
+  private:
+    KBoxLogger &_loggerA;
+    KBoxLogger &_loggerB;
+
+  public:
+    KBoxLoggerMultiplexer(KBoxLogger &a, KBoxLogger &b);
+    void log(enum KBoxLoggingLevel level, const char* filename, int lineNumber, const char *fmt, va_list fmtargs)
+      override;
 };
+
+

@@ -23,6 +23,7 @@
 */
 
 #include <stdio.h>
+#include <common/time/WallClock.h>
 #include "common/signalk/SKUpdate.h"
 #include "BatteryMonitorPage.h"
 
@@ -39,11 +40,14 @@ BatteryMonitorPage::BatteryMonitorPage(SKHub& hub) {
   addLayer(new TextLayer(Point(col1, row3), Size(20, 20), "Engine Battery", ColorWhite, ColorBlack, FontDefault));
   addLayer(new TextLayer(Point(col2, row3), Size(20, 20), "Supply Voltage", ColorWhite, ColorBlack, FontDefault));
 
+  clockLayer = new TextLayer(Point(80, 0), Size(160, 20), "", ColorWhite, ColorBlack, FontDefault);
+
   houseVoltage = new TextLayer(Point(col1, row2), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
   houseCurrent = new TextLayer(Point(col2, row2), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
   engineVoltage  = new TextLayer(Point(col1, row4), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
   supplyVoltage = new TextLayer(Point(col2, row4), Size(20, 20), "--", ColorWhite, ColorBlack, FontLarge);
 
+  addLayer(clockLayer);
   addLayer(houseVoltage);
   addLayer(houseCurrent);
   addLayer(engineVoltage);
@@ -89,4 +93,22 @@ void BatteryMonitorPage::updateReceived(const SKUpdate& up) {
     supplyVoltage->setText(formatMeasurement(vm.getNumberValue(), "V"));
     supplyVoltage->setColor(colorForVoltage(vm.getNumberValue()));
   }
+}
+
+bool BatteryMonitorPage::processEvent(const TickEvent &e) {
+  // Update the time if a time is available
+  SKTime now = wallClock.now();
+  String timeDisplay = now.iso8601date();
+  timeDisplay += " ";
+  timeDisplay += now.iso8601extendedTime();
+
+  if (wallClock.isTimeSet()) {
+    clockLayer->setColor(ColorWhite);
+    clockLayer->setText(timeDisplay);
+  }
+  else {
+    clockLayer->setColor(ColorRed);
+    clockLayer->setText(timeDisplay);
+  }
+  return BasePage::processEvent(e);
 }

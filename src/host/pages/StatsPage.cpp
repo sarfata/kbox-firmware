@@ -22,11 +22,12 @@
   THE SOFTWARE.
 */
 
-#include <malloc.h>
-#include <util/PrintableIPAddress.h>
 #include "StatsPage.h"
-#include "stats/KBoxMetrics.h"
-#include "host/services/SDCardTask.h"
+
+#include <util/PrintableIPAddress.h>
+#include <KBoxHardware.h>
+#include "common/stats/KBoxMetrics.h"
+#include "host/services/SDLoggingService.h"
 #include "host/services/WiFiService.h"
 
 StatsPage::StatsPage() {
@@ -50,10 +51,11 @@ void StatsPage::loadView() {
   static const int row6 = row5 + rowHeight;
   static const int row7 = row6 + rowHeight;
   static const int row8 = row7 + rowHeight;
+  static const int row9 = row8 + rowHeight;
 
-  static const int row11 = 240 - rowHeight - margin;
-  static const int row10 = row11 - rowHeight;
-  static const int row9 = row10 - rowHeight;
+  static const int row10 = row9 + rowHeight;
+  static const int row11 = row10 + rowHeight;
+  static const int row12 = row11 + rowHeight;
 
   //FIXME: the width below are incorrect. it might matter some day ...
   addLayer(new TextLayer(Point(col1, row1), Size(colWidth, rowHeight), "N1 Rx:"));
@@ -116,34 +118,23 @@ void StatsPage::loadView() {
                                                            rowHeight), "");
   addLayer(wifiClientStatus); addLayer(wifiClientIP);
 
-  addLayer(new TextLayer(Point(col1, row9), Size(colWidth, rowHeight), "Avg Loop:"));
-  addLayer(new TextLayer(Point(col1, row10), Size(colWidth, rowHeight), "Used RAM:"));
-  addLayer(new TextLayer(Point(col1, row11), Size(colWidth, rowHeight), "Free RAM:"));
+  addLayer(new TextLayer(Point(col1, row9), Size(colWidth, rowHeight), "Log:"));
+  addLayer(new TextLayer(Point(col1, row10), Size(colWidth, rowHeight), "Used:"));
+  addLayer(new TextLayer(Point(col1, row11), Size(colWidth, rowHeight), "Free:"));
 
-  addLayer(new TextLayer(Point(col3, row9), Size(colWidth, rowHeight), "Log:"));
-  addLayer(new TextLayer(Point(col3, row10), Size(colWidth, rowHeight), "Used:"));
-  addLayer(new TextLayer(Point(col3, row11), Size(colWidth, rowHeight), "Free:"));
+  addLayer(new TextLayer(Point(col3, row10), Size(colWidth, rowHeight), "Avg Loop:"));
+  addLayer(new TextLayer(Point(col3, row11), Size(colWidth, rowHeight), "Used RAM:"));
+  addLayer(new TextLayer(Point(col3, row12), Size(colWidth, rowHeight), "Free RAM:"));
 
-  avgLoopTime = new TextLayer(Point(col2, row9), Size(colWidth, rowHeight), "0");
-  usedRam = new TextLayer(Point(col2, row10), Size(colWidth, rowHeight), "0");
-  freeRam = new TextLayer(Point(col2, row11), Size(colWidth, rowHeight), "0");
-  addLayer(usedRam); addLayer(freeRam); addLayer(avgLoopTime);
-
-  logName = new TextLayer(Point(col4 - 40, row9), Size(colWidth, rowHeight),
-                          "");
-  logSize = new TextLayer(Point(col4, row10), Size(colWidth, rowHeight), "");
-  freeSpace = new TextLayer(Point(col4, row11), Size(colWidth, rowHeight), "");
+  logName = new TextLayer(Point(col2 - 20, row9), Size(320 - col1 - colWidth, rowHeight), "");
+  logSize = new TextLayer(Point(col2 - 20, row10), Size(colWidth, rowHeight), "");
+  freeSpace = new TextLayer(Point(col2 - 20, row11), Size(colWidth, rowHeight), "");
   addLayer(logName); addLayer(logSize); addLayer(freeSpace);
-}
 
-// https://forum.pjrc.com/threads/25676-Teensy-3-how-to-know-RAM-usage
-// http://man7.org/linux/man-pages/man3/mallinfo.3.html
-int getFreeRam() {
-  return mallinfo().arena - mallinfo().keepcost;
-}
-
-int getUsedRam() {
-  return mallinfo().uordblks;
+  avgLoopTime = new TextLayer(Point(col4, row10), Size(colWidth, rowHeight), "0");
+  usedRam = new TextLayer(Point(col4, row11), Size(colWidth, rowHeight), "0");
+  freeRam = new TextLayer(Point(col4, row12), Size(colWidth, rowHeight), "0");
+  addLayer(usedRam); addLayer(freeRam); addLayer(avgLoopTime);
 }
 
 bool StatsPage::processEvent(const TickEvent &e) {
@@ -182,12 +173,13 @@ bool StatsPage::processEvent(const TickEvent &e) {
     wifiAPIP->setText(apIP.toString());
   }
 
-  freeRam->setText(String(getFreeRam()));
-  usedRam->setText(String(getUsedRam()));
+  freeRam->setText(String(KBox.getFreeRam()));
+  usedRam->setText(String(KBox.getUsedRam()));
 
   if (sdcardTask) {
     if (sdcardTask->isLogging()) {
       logName->setText(sdcardTask->getLogFileName());
+      logName->setColor(ColorWhite);
     }
     else {
       logName->setText("NOLOG");

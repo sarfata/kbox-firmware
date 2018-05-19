@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "os/Task.h"
+#include "host/os/Task.h"
 
 class RunningLightService : public Task {
   private:
