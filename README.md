@@ -192,7 +192,7 @@ been possible!**
 
 ## Changelog
 
- * 2018 04 28 - v1.3.0
+ * 2018 06 18 - v1.3.0
    * New logfile format, compatible with SignalK server, saves NMEA messages, 
      NMEA2000 messages and SignalK messages.
    * KBox will get the date from NMEA or NMEA2000 and display it on the screen.
@@ -216,6 +216,7 @@ been possible!**
          
    * KBox will print version number and time on the "StatsPage"
    * StatsPage is the new default page
+   * ![KBox v1.3.0](kbox-v1.3.0.png)
 
  * 2018 04 25 - v1.2.4
    * Improved WiFi connection stability
