@@ -54,3 +54,5 @@ enum class ESPState {
      */
       ESPConfigured
 };
+
+const char* espStateToString(ESPState state);

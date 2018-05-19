@@ -45,6 +45,9 @@ void ILI9341GC::drawText(const Point &a, const Font &font, const Color &color, c
     case FontDefault:
       display.setFont(DroidSans_12);
       break;
+    case FontLarger:
+      display.setFont(DroidSans_20);
+      break;
     case FontLarge:
       display.setFont(DroidSans_32);
       break;

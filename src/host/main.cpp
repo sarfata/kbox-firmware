@@ -72,7 +72,7 @@ void setup() {
 
   delay(200);
 
-  DEBUG("Starting");
+  DEBUG("Starting - reboot: %s", KBox.rebootReason().c_str());
 
   digitalWrite(led_pin, 1);
 
@@ -155,8 +155,10 @@ void setup() {
   taskManager.addTask(&sdLoggingService);
   taskManager.addTask(&usbService);
 
-  BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
-  mfd.addPage(batPage);
+  StatsPage *statsPage = new StatsPage();
+  statsPage->setSDLoggingService(&sdLoggingService);
+  statsPage->setWiFiService(wifi);
+  mfd.addPage(statsPage);
 
   if (config.imuConfig.enabled) {
     // At the moment the IMUMonitorPage is working with built-in sensor only
@@ -164,13 +166,12 @@ void setup() {
     mfd.addPage(imuPage);
   }
 
-  StatsPage *statsPage = new StatsPage();
-  statsPage->setSDLoggingService(&sdLoggingService);
-  statsPage->setWiFiService(wifi);
-
-  mfd.addPage(statsPage);
+  BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
+  mfd.addPage(batPage);
 
   taskManager.setup();
+
+  KBox.watchdogSetup();
 
   // Reinitialize debug here because in some configurations
   // (like logging to nmea2 output), the kbox setup might have messed
@@ -180,4 +181,6 @@ void setup() {
 
 void loop() {
   taskManager.loop();
+
+  KBox.watchdogRefresh();
 }

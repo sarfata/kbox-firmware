@@ -64,9 +64,14 @@ class WiFiService : public Task, public SKSubscriber,
     bool write(const SKNMEASentence& s) override;
     bool write(const tN2kMsg& m) override;
 
-    const String clientInterfaceStatus() const;
+    const bool clientInterfaceEnabled() const;
+    const String clientInterfaceNetworkName() const;
+    const bool clientInterfaceConnected() const;
     const IPAddress clientInterfaceIP() const;
-    const String accessPointInterfaceStatus() const;
+
+    const bool accessPointEnabled() const;
+    const String accessPointNetworkName() const;
+    const uint16_t accessPointClients() const;
     const IPAddress accessPointInterfaceIP() const;
 
   private:
@@ -76,5 +81,6 @@ class WiFiService : public Task, public SKSubscriber,
                            const IPAddress &ipAddress) override;
 
     void sendConfiguration();
+    void sendKommand(Kommand &k);
 };
 

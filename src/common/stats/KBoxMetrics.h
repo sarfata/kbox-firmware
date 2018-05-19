@@ -39,6 +39,7 @@ enum KBoxEvent {
 
   KBoxEventNMEA2RX,
   KBoxEventNMEA2RXBufferOverflow,
+  KBoxEventNMEA2RXOverflow,
   KBoxEventNMEA2RXError,
   KBoxEventNMEA2TX,
   KBoxEventNMEA2TXOverflow,
@@ -50,8 +51,11 @@ enum KBoxEvent {
   KBoxEventUSBValidKommand,
   KBoxEventUSBInvalidKommand,
 
-  KBoxEventWiFiValidKommand,
-  KBoxEventWiFiInvalidKommand,
+  KBoxEventWiFiRxValidKommand,
+  KBoxEventWiFiRxInvalidKommand,
+  KBoxEventWiFiTxFrame,
+  KBoxEventWiFiRxErrorFrame,
+
 
   // Events used by the ESP module
   KBoxEventESPValidKommand,

@@ -31,6 +31,7 @@
 #include "common/algo/crc.h"
 #include "common/version/KBoxVersion.h"
 #include "common/signalk/SKNMEA2000Parser.h"
+#include "common/time/WallClock.h"
 #include "host/util/PersistentStorage.h"
 
 static NMEA2000Service *handlerContext;
@@ -50,9 +51,7 @@ void NMEA2000Service::publishN2kMessage(const tN2kMsg& msg) {
     }
 
     SKNMEA2000Parser p;
-    //FIXME: Get the time properly here!
-    uint32_t ts = millis();
-    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(ts / 1000, ts % 1000));
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, wallClock.now());
     if (update.getSize() > 0) {
       _hub.publish(update);
     }

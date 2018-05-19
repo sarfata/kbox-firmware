@@ -33,7 +33,7 @@
 
 WiFiService::WiFiService(const WiFiConfig &config, SKHub &skHub, GC &gc) :
   Task("WiFi"), _config(config), _hub(skHub), _slip(WiFiSerial, 2048),
-  _wifiStatusHandler(*this), _espState(ESPState::ESPStarting)
+  _wifiStatusHandler(*this), _espState(ESPState::ESPStarting), _dhcpClients(0)
 {
   // We will need gc at some point to be able to take screenshot
 }
@@ -59,10 +59,15 @@ void WiFiService::loop() {
     KommandHandler *handlers[] = { &_pingHandler, &_wifiLogHandler,
                                    &_wifiStatusHandler, 0 };
     if (KommandHandler::handleKommandWithHandlers(handlers, kr, _slip)) {
-      KBoxMetrics.event(KBoxEventWiFiValidKommand);
+      if (kr.getKommandIdentifier() == KommandErr) {
+        KBoxMetrics.event(KBoxEventWiFiRxErrorFrame);
+      }
+      else {
+        KBoxMetrics.event(KBoxEventWiFiRxValidKommand);
+      }
     }
     else {
-      KBoxMetrics.event(KBoxEventWiFiInvalidKommand);
+      KBoxMetrics.event(KBoxEventWiFiRxInvalidKommand);
       ERROR("Invalid command received from WiFi module (id=%i size=%i)", kr.getKommandIdentifier(), kr.dataSize());
 
       // This is most likely a boot or reboot message from the ESP module.
@@ -71,6 +76,10 @@ void WiFiService::loop() {
       unsigned int index = 0;
       uint8_t *currentLine = frame;
       while (index < len) {
+        // Remove \r to avoid extra blank lines in logs
+        if (frame[index] == '\r') {
+          frame[index] = '\0';
+        }
         if (frame[index] == '\n') {
           frame[index] = '\0';
           ERROR("> %s", currentLine);
@@ -86,6 +95,11 @@ void WiFiService::loop() {
 
     _slip.readFrame(0, 0);
   }
+}
+
+void WiFiService::sendKommand(Kommand &k) {
+  _slip.writeFrame(k.getBytes(), k.getSize());
+  KBoxMetrics.event(KBoxEventWiFiTxFrame);
 }
 
 void WiFiService::updateReceived(const SKUpdate& u) {
@@ -108,14 +122,14 @@ void WiFiService::updateReceived(const SKUpdate& u) {
   FixedSizeKommand<1024> k(KommandSKData);
   jsonData.printTo(k);
   k.write(0);
-  _slip.writeFrame(k.getBytes(), k.getSize());
+  sendKommand(k);
 }
 
 bool WiFiService::write(const SKNMEASentence& sentence) {
   // NMEA Sentences should always be 82 bytes or less
   FixedSizeKommand<100> k(KommandNMEASentence);
   k.appendNullTerminatedString(sentence.c_str());
-  _slip.writeFrame(k.getBytes(), k.getSize());
+  sendKommand(k);
   return true;
 }
 
@@ -130,7 +144,7 @@ bool WiFiService::write(const tN2kMsg& msg) {
   char pcdin[30 + msg.DataLen * 2];
   if (N2kToSeasmart(msg, millis(), pcdin, sizeof(pcdin)) < 500) {
     k.appendNullTerminatedString(pcdin);
-    _slip.writeFrame(k.getBytes(), k.getSize());
+    sendKommand(k);
     return true;
   } else {
     return false;
@@ -156,19 +170,27 @@ void WiFiService::wiFiStatusUpdated(const ESPState &state, uint16_t dhcpClients,
   }
 }
 
-const String WiFiService::clientInterfaceStatus() const {
-  if (_config.client.enabled) {
-    IPAddress ip = _clientAddress;
-    if (static_cast<uint32_t >(ip) != 0) {
-      return "connected";
-    }
-    else {
-      return "connecting";
-    }
-  }
-  return "(disabled)";
+const bool WiFiService::clientInterfaceEnabled() const {
+  return _config.client.enabled;
 }
 
+const String WiFiService::clientInterfaceNetworkName() const {
+  if (_config.client.enabled) {
+    return _config.client.ssid;
+  }
+  else {
+    return "";
+  }
+}
+
+const bool WiFiService::clientInterfaceConnected() const {
+  IPAddress ip = _clientAddress;
+  if (static_cast<uint32_t>(ip) == 0) {
+    return false;
+  } else {
+    return true;
+  }
+}
 const IPAddress WiFiService::clientInterfaceIP() const {
   if (_config.client.enabled) {
     return _clientAddress;
@@ -178,11 +200,21 @@ const IPAddress WiFiService::clientInterfaceIP() const {
   }
 }
 
-const String WiFiService::accessPointInterfaceStatus() const {
+const bool WiFiService::accessPointEnabled() const {
+  return _config.accessPoint.enabled;
+}
+
+const String WiFiService::accessPointNetworkName() const {
   if (_config.accessPoint.enabled) {
-    return String(_config.accessPoint.ssid) + "(" + _dhcpClients + ")";
+    return _config.accessPoint.ssid;
   }
-  return "(disabled)";
+  else {
+    return "";
+  }
+}
+
+const uint16_t WiFiService::accessPointClients() const {
+  return _dhcpClients;
 }
 
 const IPAddress WiFiService::accessPointInterfaceIP() const {
@@ -207,5 +239,5 @@ void WiFiService::sendConfiguration() {
 
   configFrame.appendNullTerminatedString(_config.vesselURN);
 
-  _slip.writeFrame(configFrame.getBytes(), configFrame.getSize());
+  sendKommand(configFrame);
 }
