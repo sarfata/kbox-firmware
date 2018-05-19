@@ -45,3 +45,6 @@ cmake-build-debug
 
 # Python VirtualEnv
 venv
+
+# local config file for personal settings
+extras/config/kbox-config.json
