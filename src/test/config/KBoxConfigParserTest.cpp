@@ -29,6 +29,7 @@
 */
 
 #include <ArduinoJson.h>
+#include <host/config/SDLoggingConfig.h>
 #include "../KBoxTest.h"
 #include "host/config/KBoxConfigParser.h"
 
@@ -49,7 +50,10 @@ TEST_CASE("KBoxConfigParser") {
     CHECK( config.nmea2000Config.txEnabled == true );
     CHECK( config.nmea2000Config.rxEnabled == true );
     CHECK( config.wifiConfig.enabled == true );
-    CHECK( config.wifiConfig.vesselURN == "urn:mrn:kbox:unit-testing" );  }
+    CHECK( config.wifiConfig.vesselURN == "urn:mrn:kbox:unit-testing" );
+    CHECK( config.sdLoggingConfig.enabled == true );
+    CHECK( config.sdLoggingConfig.logWithoutTime == false );
+  }
 
   SECTION("No input") {
     JsonObject& root = jsonBuffer.parseObject("invalid json string");
@@ -155,5 +159,19 @@ TEST_CASE("KBoxConfigParser") {
     kboxConfigParser.parseWiFiConfig(root, wiFiConfig);
 
     CHECK( wiFiConfig.vesselURN == "urn:mrn:imo:mmsi:412345678" );
+  }
+
+  SECTION("SDLoggingConfig") {
+    const char *jsonConfig = "{ 'enabled': false, 'logWithoutTime': true }";
+    JsonObject &root = jsonBuffer.parseObject(jsonConfig);
+
+    CHECK(root.success());
+
+    SDLoggingConfig sdLoggingConfig;
+
+    kboxConfigParser.parseSDLoggingConfig(root, sdLoggingConfig);
+
+    CHECK(!sdLoggingConfig.enabled);
+    CHECK(sdLoggingConfig.logWithoutTime);
   }
 }

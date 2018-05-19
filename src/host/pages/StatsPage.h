@@ -24,23 +24,25 @@
 
 #pragma once
 
-#include "ui/Page.h"
-#include "ui/TextLayer.h"
+#include "common/ui/Page.h"
+#include "common/ui/TextLayer.h"
 
-class SDCardTask;
+class SDLoggingService;
 class WiFiService;
 
 class StatsPage : public Page {
   private:
-    TextLayer *nmea1Rx, *nmea1Errors, *nmea2Rx, *nmea2Errors;
-    TextLayer *nmea1Tx, *nmea1TxErrors, *nmea2Tx, *nmea2TxErrors;
-    TextLayer *canRx, *canTx, *canTxErrors;
+    TextLayer *dateTime;
+    TextLayer *nmea1Rx, *nmea2Rx;
+    TextLayer *nmea1Tx, *nmea2Tx;
+    TextLayer *canRx, *canTx;
+    TextLayer *espRx, *espTx;
     TextLayer *wifiAPStatus, *wifiAPIP;
     TextLayer *wifiClientStatus, *wifiClientIP;
     TextLayer *usedRam, *freeRam, *avgLoopTime;
     TextLayer *logName, *logSize, *freeSpace;
 
-    const SDCardTask *sdcardTask = 0;
+    SDLoggingService *sdcardTask = 0;
     const WiFiService *wifiService = 0;
 
     void loadView();
@@ -50,7 +52,7 @@ class StatsPage : public Page {
     StatsPage();
     bool processEvent(const TickEvent &e);
 
-    void setSDCardTask(const SDCardTask *t) {
+    void setSDLoggingService(SDLoggingService *t) {
       sdcardTask = t;
     };
 

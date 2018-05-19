@@ -7,7 +7,7 @@
 
   The MIT License
 
-  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -28,24 +28,53 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "WallClock.h"
 
-#include "SerialConfig.h"
-#include "NMEA2000Config.h"
-#include "IMUConfig.h"
-#include "BarometerConfig.h"
-#include "WiFiConfig.h"
-#include "SDLoggingConfig.h"
+WallClock wallClock;
 
-/**
- * A KBox configuration in memory
- */
-struct KBoxConfig {
-  SerialConfig serial1Config;
-  SerialConfig serial2Config;
-  NMEA2000Config nmea2000Config;
-  IMUConfig imuConfig;
-  BarometerConfig barometerConfig;
-  WiFiConfig wifiConfig;
-  SDLoggingConfig sdLoggingConfig;
-};
+WallClock::WallClock() : _timeWasSet(false), _millisecondsOfLastKnownTime(0), _millisecondsProvider(nullptr) {
+
+}
+
+uint32_t WallClock::currentMilliseconds() const {
+  if (_millisecondsProvider) {
+    return _millisecondsProvider();
+  }
+  else {
+    return 0;
+  }
+}
+
+void WallClock::setMillisecondsProvider(WallClock::millisecondsProvider_t millisecondsProvider) {
+  _millisecondsProvider = millisecondsProvider;
+
+  _millisecondsOfLastKnownTime = currentMilliseconds();
+  _lastKnownTime = SKTime();
+  _timeWasSet = false;
+}
+
+void WallClock::setTime(const SKTime &t) {
+  _millisecondsOfLastKnownTime = currentMilliseconds();
+  _lastKnownTime = t;
+  _timeWasSet = true;
+}
+
+const SKTime WallClock::now() const {
+  uint32_t nowMs = currentMilliseconds();
+  uint32_t deltaMs;
+
+  if (_millisecondsOfLastKnownTime > nowMs) {
+    deltaMs = UINT32_MAX - _millisecondsOfLastKnownTime + 1 + nowMs;
+  }
+  else {
+    deltaMs = nowMs - _millisecondsOfLastKnownTime;
+  }
+
+  SKTime t = _lastKnownTime + deltaMs;
+
+  return t;
+}
+
+bool WallClock::isTimeSet() const {
+  return _timeWasSet;
+}

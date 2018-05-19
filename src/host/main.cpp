@@ -23,10 +23,12 @@
 */
 
 #include <KBoxHardware.h>
-#include "common/os/TaskManager.h"
+#include <KBoxLoggerMultiplexer.h>
 #include "common/signalk/SKHub.h"
+#include "common/time/WallClock.h"
 #include "host/config/KBoxConfig.h"
 #include "host/config/KBoxConfigParser.h"
+#include "host/os/TaskManager.h"
 #include "host/drivers/ILI9341GC.h"
 #include "host/pages/BatteryMonitorPage.h"
 #include "host/pages/StatsPage.h"
@@ -38,7 +40,8 @@
 #include "host/services/NMEA2000Service.h"
 #include "host/services/SerialService.h"
 #include "host/services/RunningLightService.h"
-#include "host/services/SDCardTask.h"
+#include "host/services/SDLoggingService.h"
+#include "host/services/TimeService.h"
 #include "host/services/USBService.h"
 #include "host/services/WiFiService.h"
 
@@ -51,23 +54,25 @@ SKHub skHub;
 KBoxConfig config;
 
 USBService usbService(gc, skHub);
+SDLoggingService sdLoggingService(config.sdLoggingConfig, skHub);
+KBoxLoggerMultiplexer loggerMultiplexer(usbService, sdLoggingService);
 
 void setup() {
   // Enable float in printf:
   // https://forum.pjrc.com/threads/27827-Float-in-sscanf-on-Teensy-3-1
   asm(".global _printf_float");
 
+  Serial.begin(115200);
+  KBoxLogging.setLogger(&loggerMultiplexer);
+
   KBox.setup();
 
   // Clears the screen
   mfd.setup();
 
-  delay(1000);
+  delay(200);
 
-  Serial.begin(115200);
-  KBoxLogging.setLogger(&usbService);
-
-  DEBUG("Starting");
+  DEBUG("Starting - reboot: %s", KBox.rebootReason().c_str());
 
   digitalWrite(led_pin, 1);
 
@@ -122,10 +127,16 @@ void setup() {
   reader1->addRepeater(usbService);
   reader2->addRepeater(usbService);
 
-  SDCardTask *sdcardTask = new SDCardTask();
-  reader1->addRepeater(*sdcardTask);
-  reader2->addRepeater(*sdcardTask);
-  n2kService->addSentenceRepeater(*sdcardTask);
+  reader1->addRepeater(sdLoggingService);
+  reader2->addRepeater(sdLoggingService);
+  n2kService->addSentenceRepeater(sdLoggingService);
+
+  // Tell the wallClock how to get the number of ms elapsed since boot.
+  wallClock.setMillisecondsProvider(millis);
+
+  // Create a new instance of TimeService - We do not need a pointer to it.
+  // It will subscribe to the hub and update the wallClock.
+  new TimeService(skHub);
 
   // Add all the tasks
   taskManager.addTask(&mfd);
@@ -141,11 +152,13 @@ void setup() {
   taskManager.addTask(reader1);
   taskManager.addTask(reader2);
   taskManager.addTask(wifi);
-  taskManager.addTask(sdcardTask);
+  taskManager.addTask(&sdLoggingService);
   taskManager.addTask(&usbService);
 
-  BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
-  mfd.addPage(batPage);
+  StatsPage *statsPage = new StatsPage();
+  statsPage->setSDLoggingService(&sdLoggingService);
+  statsPage->setWiFiService(wifi);
+  mfd.addPage(statsPage);
 
   if (config.imuConfig.enabled) {
     // At the moment the IMUMonitorPage is working with built-in sensor only
@@ -153,13 +166,12 @@ void setup() {
     mfd.addPage(imuPage);
   }
 
-  StatsPage *statsPage = new StatsPage();
-  statsPage->setSDCardTask(sdcardTask);
-  statsPage->setWiFiService(wifi);
-
-  mfd.addPage(statsPage);
+  BatteryMonitorPage *batPage = new BatteryMonitorPage(skHub);
+  mfd.addPage(batPage);
 
   taskManager.setup();
+
+  KBox.watchdogSetup();
 
   // Reinitialize debug here because in some configurations
   // (like logging to nmea2 output), the kbox setup might have messed
@@ -169,4 +181,6 @@ void setup() {
 
 void loop() {
   taskManager.loop();
+
+  KBox.watchdogRefresh();
 }

@@ -4,7 +4,7 @@ ifeq ($(UNAME), Linux)
     PORT := /dev/ttyACM0
 endif
 ifeq ($(UNAME), Darwin)
-    PORT := $(shell ls /dev/tty.usbmodem14* )
+    PORT := $(shell ls -t /dev/tty.usbmodem* |head -n 1 )
 endif
 
 

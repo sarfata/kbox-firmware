@@ -96,6 +96,8 @@ class SKKey(object):
             return 'SKTypeAttitude'
         if self.skType == 'positionValue':
             return 'SKTypePosition'
+        if self.skType == 'timestampValue':
+            return 'SKTime'
         raise ValueError("Invalid SignalK type {}".format(self.skType))
 
     def cTypeAccessor(self):
@@ -105,6 +107,8 @@ class SKKey(object):
             return 'getAttitudeValue'
         if self.skType == 'positionValue':
             return 'getPositionValue'
+        if self.skType == 'timestampValue':
+            return 'getTimestampValue'
         raise ValueError("Invalid SignalK type {}".format(self.skType))
 
 class TemplateGenerator(object):

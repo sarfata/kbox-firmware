@@ -108,6 +108,8 @@ class TaskManager {
     RunStat loopStats;
     RunStat *taskStats = 0;
 
+    elapsedMillis uptime;
+
     elapsedMillis statDisplayTimer;
     unsigned long statDisplayInterval = 5000;
 

@@ -37,6 +37,13 @@ TEST_CASE("SKNMEA2000Parser: Basic tests") {
     CHECK( update.getSize() == 0 );
   }
 
+  SECTION("126992: System time and date") {
+    SetN2kSystemTime(msg, 0, 17647, 3600 * 9 + 30 * 60 + 42);
+    const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));
+    CHECK( update.getSize() == 1);
+    CHECK( update.getNavigationDatetime().toString() == "2018-04-26T09:30:42.000Z");
+  }
+
   SECTION("128259: Speed in water") {
     SetN2kBoatSpeed(msg, 0, 3.4, N2kDoubleNA, N2kSWRT_Paddle_wheel);
     const SKUpdate &update = p.parse(SKSourceInputNMEA2000, msg, SKTime(0));

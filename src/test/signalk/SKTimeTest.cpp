@@ -86,5 +86,85 @@ TEST_CASE("SKTime") {
     CHECK( t.getMilliseconds() == 0 );
     CHECK( t.toString() == "1982-12-23T18:30:00Z" );
   }
+
+  SECTION("timeFromNMEAStrings") {
+    SECTION("Parse NMEA date/time without ms") {
+      SKTime t = SKTime::timeFromNMEAStrings("141116", "004119");
+      CHECK( t.toString() == "2016-11-14T00:41:19Z" );
+    }
+
+    SECTION("Parse NMEA date/time with 000ms") {
+      SKTime t = SKTime::timeFromNMEAStrings("141116", "004119.000");
+      CHECK( t.toString() == "2016-11-14T00:41:19.000Z" );
+    }
+
+    SECTION("Parse NMEA date/time with ms") {
+      SKTime t = SKTime::timeFromNMEAStrings("141116", "004119.042");
+      CHECK( t.toString() == "2016-11-14T00:41:19.042Z" );
+    }
+
+    SECTION("Invalid milliseconds") {
+      SKTime t = SKTime::timeFromNMEAStrings("141116", "004119.10212");
+      CHECK( t.toString() == "2016-11-14T00:41:19.102Z" );
+    }
+
+    SECTION("2 digits milliseconds") {
+      SKTime t = SKTime::timeFromNMEAStrings("141116", "004119.10");
+      CHECK( t.toString() == "2016-11-14T00:41:19.100Z" );
+    }
+
+    SECTION("1 digits milliseconds") {
+      SKTime t = SKTime::timeFromNMEAStrings("141116", "004119.9");
+      CHECK( t.toString() == "2016-11-14T00:41:19.900Z" );
+    }
+
+    SECTION("Programmed obsolescence") {
+      SECTION("Time before y2000") {
+        SKTime t = SKTime::timeFromNMEAStrings("231282", "193000");
+        CHECK( t.toString() == "1982-12-23T19:30:00Z" );
+      }
+
+      SECTION("Jan 1 1970") {
+        SKTime t = SKTime::timeFromNMEAStrings("010170", "010203");
+        CHECK( t.getTime() == 1 * 3600 + 2 * 60 + 3 );
+        CHECK( t.toString() == "1970-01-01T01:02:03Z" );
+      }
+    }
+  }
+
+  SECTION("timeFromNMEA2000") {
+    SECTION("Without ms") {
+      SKTime t = SKTime::timeFromNMEA2000(17647, 3600 * 9 + 30 * 60 + 42);
+      CHECK( t.toString() == "2018-04-26T09:30:42.000Z" );
+    }
+
+    SECTION("With ms") {
+      SKTime t = SKTime::timeFromNMEA2000(17647, 3600 * 9 + 30 * 60 + 42 + 0.123456);
+      CHECK( t.toString() == "2018-04-26T09:30:42.123Z" );
+    }
+
+    SECTION("With ms rounding up") {
+      SKTime t = SKTime::timeFromNMEA2000(17647, 3600 * 9 + 30 * 60 + 42 + 0.1239);
+      CHECK( t.toString() == "2018-04-26T09:30:42.124Z" );
+    }
+  }
+
+  SECTION("Operator+") {
+    SKTime t(142);
+
+    CHECK( (t + 100).getTime() == 142 );
+    CHECK( (t + 100).getMilliseconds() == 100 );
+
+    CHECK( (t + 1000).getTime() == 143 );
+    CHECK( (t + 1000).getMilliseconds() == 0 );
+  }
+
+  SECTION("ISO8601 Date and Time") {
+    SKTime t = SKTime::timeFromNMEAStrings("231282", "193042");
+
+    CHECK( t.iso8601date() == "1982-12-23" );
+    CHECK( t.iso8601basicTime() == "193042");
+    CHECK( t.iso8601extendedTime() == "19:30:42");
+  }
 }
 

@@ -101,14 +101,15 @@ const SKUpdate& SKNMEA2000Parser::parse126992(const SKSourceInput& input, const 
   tN2kTimeSource timeSource;  // see tN2kTimeSource (z.B.: GPS)
 
   if (ParseN2kSystemTime(msg,sid,systemDate,systemTime,timeSource) ) {
-    /*
-    TODO: Signal K for /environment/time + 3 fields
-    SKUpdateStatic<2> *update = new SKUpdateStatic<2>();
+    SKTime networkTime = SKTime::timeFromNMEA2000(systemDate, systemTime);
+
+    SKUpdateStatic<1> *update = new SKUpdateStatic<1>();
     update->setTimestamp(timestamp);
+
+    update->setNavigationDatetime(networkTime);
 
     _sku = update;
     return *_sku;
-    */
   }
 
   DEBUG("Unable to parse N2kMsg with PGN %i", msg.PGN);

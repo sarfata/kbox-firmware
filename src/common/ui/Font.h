@@ -26,6 +26,7 @@
 
 enum Font {
   FontDefault,
+  FontLarger,
   FontLarge
 };
 

@@ -22,6 +22,7 @@
   THE SOFTWARE.
 */
 
+#include <malloc.h>
 #include <i2c_t3.h>
 #include <KBoxLogging.h>
 #include "KBoxHardware.h"
@@ -79,13 +80,18 @@ void KBoxHardware::setup() {
   //adc.setConversionSpeed(ADC_LOW_SPEED, ADC_1);
   //adc.setSamplingSpeed(ADC_HIGH_SPEED, ADC_1);
 
+  // We need to do this because the SdSpiAltDriver does not do it.
+  SPI.setMOSI(display_mosi);
+  SPI.setMISO(display_miso);
+  SPI.setSCK(display_sck);
+
+  _sdCardSuccess = sdCardInit();
+
   display.begin();
   display.fillScreen(ILI9341_BLUE);
   display.setRotation(display_rotation);
 
   setBacklight(BacklightIntensityMax);
-
-  _sdCardSuccess = sdCardInit();
 }
 
 void KBoxHardware::setBacklight(BacklightIntensity intensity) {
@@ -100,7 +106,7 @@ void KBoxHardware::setBacklight(BacklightIntensity intensity) {
 }
 
 void KBoxHardware::espInit() {
-  WiFiSerial.begin(115200);
+  WiFiSerial.begin(1000000);
   WiFiSerial.setTimeout(0);
 
   digitalWrite(wifi_enable, 0);
@@ -155,7 +161,7 @@ bool KBoxHardware::sdCardInit() {
     if (!_sd.begin(sdcard_cs)){
   #endif
     if (_sd.card()->errorCode()) {
-      DEBUG("Something went wrong ... SD card errorCode: %i errorData: %i", _sd.card()->errorCode(),
+      DEBUG("Something went wrong ... SD card errorCode: 0x%x errorData: 0x%x", _sd.card()->errorCode(),
             _sd.card()->errorData());
       return false;
     }
@@ -209,4 +215,76 @@ void KBoxHardware::readKBoxSerialNumber(tKBoxSerialNumber &sn) {
   sn.dwords[1] = SIM_UIDMH;
   sn.dwords[2] = SIM_UIDML;
   sn.dwords[3] = SIM_UIDL;
+}
+
+// https://forum.pjrc.com/threads/25676-Teensy-3-how-to-know-RAM-usage
+// http://man7.org/linux/man-pages/man3/mallinfo.3.html
+int KBoxHardware::getFreeRam() {
+  return mallinfo().arena - mallinfo().keepcost;
+}
+
+int KBoxHardware::getUsedRam() {
+  return mallinfo().uordblks;
+}
+
+// see https://bigdanzblog.wordpress.com/2017/10/27/watch-dog-timer-wdt-for-teensy-3-1-and-3-2/
+void KBoxHardware::watchdogSetup() {
+  noInterrupts();
+  // unlock access to WDOG registers
+  WDOG_UNLOCK = WDOG_UNLOCK_SEQ1;
+  WDOG_UNLOCK = WDOG_UNLOCK_SEQ2;
+  // Need to wait a bit..
+  delayMicroseconds(1);
+
+  // use 1 second WDT timeout
+  WDOG_TOVALH = 0x006d;
+  WDOG_TOVALL = 0xdd00;
+
+  // This sets prescale clock so that the watchdog timer ticks at 7.2MHz
+  WDOG_PRESC  = 0x400;
+
+  // Set options to enable WDT. You must always do this as a SINGLE write to WDOG_CTRLH
+  WDOG_STCTRLH |= WDOG_STCTRLH_ALLOWUPDATE |
+                  WDOG_STCTRLH_WDOGEN | WDOG_STCTRLH_WAITEN |
+                  WDOG_STCTRLH_STOPEN | WDOG_STCTRLH_CLKSRC |
+                  WDOG_STCTRLH_IRQRSTEN;
+  interrupts();
+
+  NVIC_ENABLE_IRQ(IRQ_WDOG);
+}
+
+void KBoxHardware::watchdogRefresh() {
+  noInterrupts();
+  WDOG_REFRESH = 0xA602;
+  WDOG_REFRESH = 0xB480;
+  interrupts();
+}
+
+String KBoxHardware::rebootReason() {
+  if (RCM_SRS1 & RCM_SRS1_SACKERR)
+    return "Stop Mode Acknowledge Error Reset";
+  if (RCM_SRS1 & RCM_SRS1_MDM_AP)
+    return "MDM-AP Reset";
+  if (RCM_SRS1 & RCM_SRS1_SW)
+    return "Software Reset";                   // reboot with SCB_AIRCR = 0x05FA0004
+  if (RCM_SRS1 & RCM_SRS1_LOCKUP)
+    return "Core Lockup Event Reset";
+  if (RCM_SRS0 & RCM_SRS0_POR)
+    return "Power-on Reset";                   // removed / applied power
+  if (RCM_SRS0 & RCM_SRS0_PIN)
+    return "External Pin Reset";               // Reboot with software download
+  if (RCM_SRS0 & RCM_SRS0_WDOG)
+    return "Watchdog(COP) Reset";              // WDT timed out
+  if (RCM_SRS0 & RCM_SRS0_LOC)
+    return "Loss of External Clock Reset";
+  if (RCM_SRS0 & RCM_SRS0_LOL)
+    return "Loss of Lock in PLL Reset";
+  if (RCM_SRS0 & RCM_SRS0_LVD)
+    return "Low-voltage Detect Reset";
+  return "unknwon reset";
+}
+
+void watchdog_isr() {
+  KBox.getDisplay().fillScreen(ILI9341_RED);
+  delay(3000);
 }

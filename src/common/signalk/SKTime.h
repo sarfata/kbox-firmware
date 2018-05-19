@@ -56,6 +56,39 @@ class SKTime {
       }
     };
 
+    /**
+     * SKTime object from two strings for date and time (NMEA).
+     *
+     * @param date ddmmyy
+     * @param time hhmmss.ss (utc)
+     * @return a SKTime representation of the given time and date.
+     */
+    static SKTime timeFromNMEAStrings(String date, String time);
+
+    /**
+     * SKTime object from number of days and number of seconds (NMEA2000).
+     * @param daysSince1970 number of days since 1970
+     * @param secondsSinceMidnight number of seconds since midnight
+     * @return a SKTime representation of the given time and date.
+     */
+    static SKTime timeFromNMEA2000(uint16_t daysSince1970, double secondsSinceMidnight);
+
+    bool operator==(const SKTime& v) const;
+
+    bool operator!=(const SKTime& v) const;
+
+    /**
+     * Add milliseconds to a SKTime object.
+     * @param ms
+     * @return
+     */
+    SKTime& operator+=(uint32_t ms);
+
+    friend SKTime operator+(SKTime lhs, uint32_t rhs) {
+      lhs += rhs;
+      return lhs;
+    };
+
     uint32_t getTime() const {
       return _timestamp;
     };
@@ -73,6 +106,50 @@ class SKTime {
       }
     };
 
+    /**
+     * Returns an RFC3339 representation of the time aka "Internet Time".
+     *
+     * Example 2014-04-10T08:33:53Z or 2014-04-10T08:33:53.420Z
+     *
+     * @return
+     */
     String toString() const;
+
+    /**
+     * Returns the date written in ISO8601 format: YYYY-MM-DD.
+     *
+     * @return
+     */
+    String iso8601date() const;
+
+    /**
+     * Returns the time written in ISO8601 extended format: HH:MM:SS (24h).
+     *
+     * @return
+     */
+    String iso8601extendedTime() const;
+
+    /**
+     * Returns the time written in ISO8601 basic format: HHMMSS (24h).
+     *
+     * @return
+     */
+    String iso8601basicTime() const;
+
+    /**
+     * Date as expected by a FAT filesystem.
+     *
+     * cf https://github.com/adafruit/SD/blob/master/utility/SdFat.h#L97
+     *
+     * @return
+     */
+    uint16_t getFatDate() const;
+
+    /**
+     * Time as expected by a FAT filesystem.
+     *
+     * @return
+     */
+    uint16_t getFatTime() const;
 };
 

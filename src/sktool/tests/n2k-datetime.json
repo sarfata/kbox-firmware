@@ -1,0 +1,9 @@
+[
+  {
+    "nmea": "$PCDIN,01F010,00000CAD,7F,00F0CF44E859B42C*24",
+    "expectedValues": [
+      { "path": "navigation.datetime", "value": "2018-03-25T20:50:01.700Z" }
+    ]
+    ,"ignoreFail": false
+  }
+]

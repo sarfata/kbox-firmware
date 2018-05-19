@@ -37,7 +37,6 @@
 #include "common/signalk/SKNMEA2000Parser.h"
 #include "common/signalk/SKJSONVisitor.h"
 
-
 SKNMEAParser nmeaParser = SKNMEAParser();
 SKNMEA2000Parser nmea2000Parser = SKNMEA2000Parser();
 
@@ -75,3 +74,21 @@ int main(int argc, char **argv) {
     std::cout << o << std::endl;
   }
 }
+
+// This function is exported in JavaScript when we use emscripten to compile sktool
+// Allows JS code to convert from a NMEA/N2K string to a signalk json string.
+extern "C" {
+  // used to pass strings back to JS.
+  char jsonStringBuffer[4096];
+
+  const char *sktoolConvert(const char *line) {
+    DynamicJsonBuffer jsonBuffer;
+    SKJSONVisitor v = SKJSONVisitor("urn:mrn:kbox:sktooljs", jsonBuffer);
+
+    const SKUpdate& u = parseInputLine(line);
+    JsonObject &o = v.processUpdate(u);
+    o.printTo(jsonStringBuffer, sizeof(jsonStringBuffer));
+    return jsonStringBuffer;
+  }
+}
+

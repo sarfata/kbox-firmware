@@ -24,7 +24,6 @@
 #pragma once
 
 #include "common/ui/GC.h"
-#include "common/os/Task.h"
 #include "common/signalk/SKNMEAOutput.h"
 #include "common/signalk/SKNMEA2000Output.h"
 #include "common/signalk/SKHub.h"
@@ -32,6 +31,7 @@
 #include "common/comms/Kommand.h"
 #include "common/comms/SlipStream.h"
 #include "common/comms/KommandHandlerPing.h"
+#include "host/os/Task.h"
 #include "host/comms/KommandHandlerWiFiLog.h"
 #include "host/comms/KommandHandlerWiFiStatus.h"
 #include "host/config/WiFiConfig.h"
@@ -64,9 +64,14 @@ class WiFiService : public Task, public SKSubscriber,
     bool write(const SKNMEASentence& s) override;
     bool write(const tN2kMsg& m) override;
 
-    const String clientInterfaceStatus() const;
+    const bool clientInterfaceEnabled() const;
+    const String clientInterfaceNetworkName() const;
+    const bool clientInterfaceConnected() const;
     const IPAddress clientInterfaceIP() const;
-    const String accessPointInterfaceStatus() const;
+
+    const bool accessPointEnabled() const;
+    const String accessPointNetworkName() const;
+    const uint16_t accessPointClients() const;
     const IPAddress accessPointInterfaceIP() const;
 
   private:
@@ -76,5 +81,6 @@ class WiFiService : public Task, public SKSubscriber,
                            const IPAddress &ipAddress) override;
 
     void sendConfiguration();
+    void sendKommand(Kommand &k);
 };
 

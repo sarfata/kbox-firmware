@@ -192,11 +192,37 @@ been possible!**
 
 ## Changelog
 
+ * 2018 06 18 - v1.3.0
+   * New logfile format, compatible with SignalK server, saves NMEA messages, 
+     NMEA2000 messages and SignalK messages.
+   * KBox will get the date from NMEA or NMEA2000 and display it on the screen.
+   * KBox will wait until it knows the current time to start logging (this can 
+     be changed via configuration)
+   * Log files are named after date and time of their creation
+   * KBox will save in the logfile important system messages and some stats
+   * Bunch of new configuration options:
+
+         "logging": {
+           "enabled": true,
+           "logWithoutTime": false,
+           "logNMEA2000": true,
+           "logNMEA": true,
+           "logSignalK": true,
+           "logSystemMessages": true,
+           "logSignalKGeneratedFromNMEA": false,
+           "logSignalKGeneratedFromNMEA2000": false,
+           "logSignalKGeneratedByKBoxSensors": true
+         },
+         
+   * KBox will print version number and time on the "StatsPage"
+   * StatsPage is the new default page
+   * ![KBox v1.3.0](kbox-v1.3.0.png)
+
  * 2018 04 25 - v1.2.4
    * Improved WiFi connection stability
      This required the latest version of ESP firmware.
      And also some changes to the TCP/NMEA server.
-   * #96: make wifi led go green when we have a websocket client connected
+   * Bug#96: make wifi led go green when we have a websocket client connected
  * 2018 04 23 - v1.2.3
    * Repeat all NMEA and NMEA2000 data to the computer when the serial port is
      opened at 38400 bauds.

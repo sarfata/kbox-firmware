@@ -7,7 +7,7 @@
 
   The MIT License
 
-  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -28,24 +28,20 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "TimeService.h"
 
-#include "SerialConfig.h"
-#include "NMEA2000Config.h"
-#include "IMUConfig.h"
-#include "BarometerConfig.h"
-#include "WiFiConfig.h"
-#include "SDLoggingConfig.h"
+#include <KBoxLogging.h>
+#include "common/time/WallClock.h"
+#include "common/signalk/SKUpdate.h"
 
-/**
- * A KBox configuration in memory
- */
-struct KBoxConfig {
-  SerialConfig serial1Config;
-  SerialConfig serial2Config;
-  NMEA2000Config nmea2000Config;
-  IMUConfig imuConfig;
-  BarometerConfig barometerConfig;
-  WiFiConfig wifiConfig;
-  SDLoggingConfig sdLoggingConfig;
-};
+TimeService::TimeService(SKHub &skHub) {
+  skHub.subscribe(this);
+}
+
+void TimeService::updateReceived(const SKUpdate &update) {
+  if (update.hasNavigationDatetime()) {
+    DEBUG("Setting system time to: %s - was %s", update.getNavigationDatetime().toString().c_str(),
+          wallClock.now().toString().c_str());
+    wallClock.setTime(update.getNavigationDatetime());
+  }
+}
