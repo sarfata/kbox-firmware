@@ -369,7 +369,7 @@ class KBox(object):
             request = struct.pack('<?', True)
             request = request + apSSID + '\0' + apPassword + '\0'
         else:
-            request = struct.pack('<?, False')
+            request = struct.pack('<?', False)
             request = request + '\0\0'
 
         if clientSSID is not None:
