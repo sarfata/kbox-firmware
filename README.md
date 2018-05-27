@@ -192,7 +192,10 @@ been possible!**
 
 ## Changelog
 
- * 2018 06 18 - v1.3.0
+ * 2018 05 26 - v1.3.1
+   * Fix bug which prevented WiFiRXError from being displayed on stats page.
+   * Fix bug in `kbox.py` tool send wifi config command.
+ * 2018 05 18 - v1.3.0
    * New logfile format, compatible with SignalK server, saves NMEA messages, 
      NMEA2000 messages and SignalK messages.
    * KBox will get the date from NMEA or NMEA2000 and display it on the screen.

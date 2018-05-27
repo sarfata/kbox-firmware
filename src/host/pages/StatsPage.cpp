@@ -167,7 +167,7 @@ bool StatsPage::processEvent(const TickEvent &e) {
                                                 KBoxMetrics.countEvent(KBoxEventNMEA2000MessageSendError)));
 
   espRx->setText(formatCounterWithEventualError(KBoxMetrics.countEvent(KBoxEventWiFiRxValidKommand),
-                                                KBoxMetrics.countEvent(KBoxEventWiFiRxInvalidKommand)));
+                                                KBoxMetrics.countEvent(KBoxEventWiFiRxErrorFrame)));
   espTx->setText(formatCounterWithEventualError(KBoxMetrics.countEvent(KBoxEventWiFiTxFrame),
                                                 KBoxMetrics.countEvent(KBoxEventWiFiRxInvalidKommand)));
 
