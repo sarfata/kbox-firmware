@@ -8,4 +8,3 @@ try:
     print("Compiler {} has STRLCPY".format(projenv['CC']))
 except Exception as e:
     print("Compiler {} *does not* have STRLCPY\n{}".format(projenv['CC'], e))
-    raise e
