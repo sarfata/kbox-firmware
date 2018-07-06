@@ -27,7 +27,7 @@ cache: pip
 install:
     - pip install -U platformio cpp-coveralls
     - pip install -r src/sktool/requirements.txt
-    - apt-get install emscripten -y
+    - sudo apt-get install emscripten -y
 
 script:
     # This builds all the target

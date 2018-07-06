@@ -1,0 +1,7 @@
+install:
+    - cmd: SET PATH=%PATH%;C:\Python27\Scripts
+    - cmd: pip install -U platformio
+
+build_script:
+    - cmd: platformio run -e host
+    - cmd: platformio run -e esp
