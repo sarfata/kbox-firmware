@@ -1,4 +1,4 @@
-Import("env")
+Import("projenv")
 import subprocess
 from datetime import datetime
 
@@ -9,4 +9,4 @@ try:
 except:
     pass
 
-env.Append(CCFLAGS=["-DKBOX_VERSION=\"\\\"{}\\\"\"".format(version)])
+projenv.Append(CCFLAGS=["-DKBOX_VERSION=\"\\\"{}\\\"\"".format(version)])
