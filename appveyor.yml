@@ -1,5 +1,5 @@
 install:
-    - cmd: SET PATH=%PATH%;C:\Python27\Scripts;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\bin
+    - cmd: SET PATH=%PATH%;C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw32\bin\
     - cmd: pip install -U platformio
 
 build_script:
