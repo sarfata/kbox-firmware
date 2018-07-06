@@ -1,5 +1,5 @@
 install:
-    - cmd: SET PATH=%PATH%;C:\Python27\Scripts;
+    - cmd: SET PATH=%PATH%;C:\Python27\Scripts;C:\MinGW\bin
     - cmd: pip install -U platformio
 
 build_script:

@@ -27,11 +27,11 @@ cache: pip
 install:
     - pip install -U platformio cpp-coveralls
     - pip install -r src/sktool/requirements.txt
-    - sudo apt-get install emscripten -y
 
 script:
-    # This builds all the targets
-    - platformio run
+    # This builds all the targets compatible with travis
+    # we do not build sktooljs on travis at the moment
+    - platformio run -e host -e esp -e program-esp -e mfg -e sktool -e test
     # Run the few unit tests (C code running on computer)
     - make test
     # Run the sktool-test.py script to validate that SignalK output is valid and
