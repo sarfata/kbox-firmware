@@ -1,5 +1,4 @@
 Import("env")
-from sys import platform
 
 env.Replace(
     PROGNAME="sktool.js",

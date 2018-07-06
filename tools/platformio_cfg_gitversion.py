@@ -1,6 +1,5 @@
 Import("projenv")
 import subprocess
-from datetime import datetime
 
 version = "git-cmd-not-available"
 

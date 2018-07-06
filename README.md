@@ -193,8 +193,9 @@ been possible!**
 ## Changelog
 
  * 2018 07 06 - v1.3.2
-   * No changes to the code, just changes to the build configuration to improve
-     compatibility with Windows and address breaking changes in plaformio.
+   * Changes to the build configuration to improve compatibility with Windows 
+     and address breaking changes in plaformio.
+   * Fix some issues that prevented the tests and sktool from compiling on Windows.
    * Also added automatic builds on AppVeyor with Windows to hopefully detect
      Windows issues sooner in the future.
  * 2018 05 26 - v1.3.1
