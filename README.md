@@ -199,6 +199,14 @@ been possible!**
             platform run -e host -t upload
             platformio run -e esp -t upload
 
+   * Change default esp upload speed to 921600 because 2000000 does not seem well
+     supported on Windows.
+   * Changed the 'end of programming' detection method to more reliably detect when
+     we are done programming and reboot KBox.
+   * Tested the official ESP uploader on Windows and OS X. Comment out the line 
+     `tools/platformio_cfg_esp.py` in `platformio.ini` to use it.
+     It will be a little bit slower but might work better for some people.
+
  * 2018 07 06 - v1.3.2
    * Changes to the build configuration to improve compatibility with Windows 
      and address breaking changes in plaformio.
