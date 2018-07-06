@@ -192,6 +192,9 @@ been possible!**
 
 ## Changelog
 
+ * 2018 07 06 - v1.3.4
+   * Specify a list of default environment so platformio does not build all variants
+     of the project by default.
  * 2018 07 06 - v1.3.3
    * Fix a bug which forced us to use `program-esp` to update the wifi module.
      It is now possible again to just use the following commands to update KBox:
