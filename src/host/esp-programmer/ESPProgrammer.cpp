@@ -210,7 +210,7 @@ void ESPProgrammer::updateColors() {
     wheelIndex++;
   }
 
-  // Intensity of color will be proportial to how recent the last byte received was
+  // Intensity of color will be proportional to how recent the last byte received was
   // After 500ms, the color will be 0
   int dim = 0;
   if (timeSinceLastByte < 500) {

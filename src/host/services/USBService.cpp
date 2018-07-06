@@ -158,10 +158,19 @@ void USBService::loopConnectedESPProgramming() {
   ESPProgrammerDelegateImpl delegate;
   ESPProgrammer programmer(KBox.getNeopixels(), Serial, Serial1, delegate);
 
+#if DEBUGGING_ESP_UPLOAD
+  // Redirect all logs to NMEA2 at 1Mbit/s.
+  NMEA2_SERIAL.begin(1000000);
+  KBoxLogging.setLogger(new KBoxLoggerStream(NMEA2_SERIAL));
+#endif
+  DEBUG("Switching to ESP Programming mode");
+
   while (programmer.getState() != ESPProgrammer::ProgrammerState::Done) {
     programmer.loop();
+    KBox.watchdogRefresh();
   }
-  DEBUG("Exiting programmer mode");
+
+  DEBUG("Exiting programmer mode"); delay(100);
   KBox.rebootKBox();
 }
 

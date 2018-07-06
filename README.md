@@ -192,6 +192,13 @@ been possible!**
 
 ## Changelog
 
+ * 2018 07 06 - v1.3.3
+   * Fix a bug which forced us to use `program-esp` to update the wifi module.
+     It is now possible again to just use the following commands to update KBox:
+     
+            platform run -e host -t upload
+            platformio run -e esp -t upload
+
  * 2018 07 06 - v1.3.2
    * Changes to the build configuration to improve compatibility with Windows 
      and address breaking changes in plaformio.
