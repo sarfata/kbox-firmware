@@ -30,7 +30,7 @@ install:
     - sudo apt-get install emscripten -y
 
 script:
-    # This builds all the target
+    # This builds all the targets
     - platformio run
     # Run the few unit tests (C code running on computer)
     - make test
