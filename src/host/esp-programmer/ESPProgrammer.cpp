@@ -121,7 +121,6 @@ void ESPProgrammer::loopByteMode() {
     if (espSerial.available()) {
       int read = espSerial.readBytes(buffer, min(bootloaderMtu, espSerial.available()));
       computerSerial.write(buffer, read);
-      timeSinceLastByte = 0;
     }
   }
 }
@@ -165,7 +164,6 @@ void ESPProgrammer::loopFrameMode() {
     size_t len = espConnection.readFrame(buffer, bootloaderMtu);
     debugFrame("ESP", buffer, len);
     computerConnection.writeFrame(buffer, len);
-    timeSinceLastByte = 0;
   }
 }
 

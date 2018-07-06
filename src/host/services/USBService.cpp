@@ -74,10 +74,10 @@ void USBService::loop() {
     _state = ConnectedDebug;
   }
 
-  /* Switching serial port to 230400 on computer signals that the host
+  /* Switching serial port to 230400 (or 921600) on computer signals that the host
    * wants to go into ESP Programming mode.
    */
-  if (Serial.baud() == 230400) {
+  if (Serial.baud() == 230400 || Serial.baud() == 921600) {
     _state = ConnectedESPProgramming;
   }
 
