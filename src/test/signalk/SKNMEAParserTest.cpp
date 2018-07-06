@@ -105,7 +105,7 @@ TEST_CASE("SKNMEAParser: MWV") {
     // Unit S seems to be knots but I cannot find a real source here.
     const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "$WIMWV,168.1,R,5.6,K,A*2B", SKTime(42));
 
-    CHECK( update.getEnvironmentWindSpeedApparent() == SKKmphToMs(5.6) );
+    CHECK( update.getEnvironmentWindSpeedApparent() == Approx(SKKmphToMs(5.6)) );
   }
   SECTION("MWV with invalid sensor status (V)") {
     const SKUpdate& update = p.parse(SKSourceInputNMEA0183_1, "$WIMWV,168.1,R,5.6,S,V*24", SKTime(42));

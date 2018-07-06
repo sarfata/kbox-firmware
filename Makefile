@@ -8,7 +8,8 @@ ifeq ($(UNAME), Darwin)
 endif
 
 
-all: host esp mfg test sktool validation
+all:
+	platformio run
 
 clean:
 	platformio -f -c vim run --target clean

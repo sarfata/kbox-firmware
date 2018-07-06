@@ -1,6 +1,5 @@
-Import("env")
+Import("projenv")
 import subprocess
-from datetime import datetime
 
 version = "git-cmd-not-available"
 
@@ -9,4 +8,4 @@ try:
 except:
     pass
 
-env.Append(CCFLAGS=["-DKBOX_VERSION=\"\\\"{}\\\"\"".format(version)])
+projenv.Append(CCFLAGS=["-DKBOX_VERSION=\"\\\"{}\\\"\"".format(version)])

@@ -25,6 +25,9 @@
 #pragma once
 
 #include <math.h>
+#ifndef M_PI
+  #define M_PI 3.14159265358979323846
+#endif
 
 #define SKKnotToMs(x) (x) * 1852 / 3600
 #define SKStatuteMphToMs(x) (x) * 1609.344 / 3600

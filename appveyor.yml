@@ -1,0 +1,14 @@
+install:
+    - cmd: SET PATH=%PATH%;C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw32\bin\
+    - cmd: pip install -U platformio
+
+build_script:
+    - cmd: platformio run -e host
+    - cmd: platformio run -e program-esp
+    - cmd: platformio run -e mfg
+    - cmd: platformio run -e esp
+    - cmd: platformio run -e test
+    - cmd: platformio run -e sktool
+
+test_script:
+    - cmd: .pioenvs\test\program.exe

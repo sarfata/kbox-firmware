@@ -192,14 +192,20 @@ been possible!**
 
 ## Changelog
 
+ * 2018 07 06 - v1.3.2
+   * Changes to the build configuration to improve compatibility with Windows 
+     and address breaking changes in plaformio.
+   * Fix some issues that prevented the tests and sktool from compiling on Windows.
+   * Also added automatic builds on AppVeyor with Windows to hopefully detect
+     Windows issues sooner in the future.
  * 2018 05 26 - v1.3.1
    * Fix bug which prevented WiFiRXError from being displayed on stats page.
    * Fix bug in `kbox.py` tool send wifi config command.
  * 2018 05 18 - v1.3.0
-   * New logfile format, compatible with SignalK server, saves NMEA messages, 
+   * New logfile format, compatible with SignalK server, saves NMEA messages,
      NMEA2000 messages and SignalK messages.
    * KBox will get the date from NMEA or NMEA2000 and display it on the screen.
-   * KBox will wait until it knows the current time to start logging (this can 
+   * KBox will wait until it knows the current time to start logging (this can
      be changed via configuration)
    * Log files are named after date and time of their creation
    * KBox will save in the logfile important system messages and some stats
@@ -216,7 +222,7 @@ been possible!**
            "logSignalKGeneratedFromNMEA2000": false,
            "logSignalKGeneratedByKBoxSensors": true
          },
-         
+
    * KBox will print version number and time on the "StatsPage"
    * StatsPage is the new default page
    * ![KBox v1.3.0](kbox-v1.3.0.png)

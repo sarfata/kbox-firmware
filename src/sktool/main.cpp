@@ -30,6 +30,7 @@
 
 #include <iostream>
 #include <string>
+#include <ctime>
 #include <WString.h>
 #include <ArduinoJson.h>
 #include <Seasmart.h>
