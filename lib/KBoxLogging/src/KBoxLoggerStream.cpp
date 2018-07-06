@@ -24,6 +24,8 @@
 
 #include "KBoxLoggerStream.h"
 
+#include <stdio.h>
+
 static int strrpos(const char *string, char c) {
   int index = -1;
   int i = 0;
