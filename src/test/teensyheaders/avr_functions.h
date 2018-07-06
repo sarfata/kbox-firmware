@@ -96,10 +96,10 @@ char * ultoa(unsigned long val, char *buf, int radix);
 char * ltoa(long val, char *buf, int radix);
 
 #if defined(KBOX_TESTS) || (defined(_NEWLIB_VERSION) && (__NEWLIB__ < 2 || __NEWLIB__ == 2 && __NEWLIB_MINOR__ < 2))
-static inline char * utoa(unsigned int val, char *buf, int radix) __attribute__((always_inline, unused));
-static inline char * utoa(unsigned int val, char *buf, int radix) { return ultoa(val, buf, radix); }
-static inline char * itoa(int val, char *buf, int radix) __attribute__((always_inline, unused));
-static inline char * itoa(int val, char *buf, int radix) { return ltoa(val, buf, radix); }
+inline char * utoa(unsigned int val, char *buf, int radix) __attribute__((always_inline, unused));
+inline char * utoa(unsigned int val, char *buf, int radix) { return ultoa(val, buf, radix); }
+inline char * itoa(int val, char *buf, int radix) __attribute__((always_inline, unused));
+inline char * itoa(int val, char *buf, int radix) { return ltoa(val, buf, radix); }
 #endif
 
 char * dtostrf(float val, int width, unsigned int precision, char *buf);
