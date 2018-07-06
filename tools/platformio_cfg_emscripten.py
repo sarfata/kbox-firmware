@@ -1,7 +1,5 @@
-from SCons.Script import DefaultEnvironment
+Import("env")
 from sys import platform
-
-env = DefaultEnvironment()
 
 env.Replace(
     PROGNAME="sktool.js",
