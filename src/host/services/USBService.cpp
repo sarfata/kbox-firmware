@@ -74,10 +74,10 @@ void USBService::loop() {
     _state = ConnectedDebug;
   }
 
-  /* Switching serial port to 230400 on computer signals that the host
+  /* Switching serial port to 230400 (or 921600) on computer signals that the host
    * wants to go into ESP Programming mode.
    */
-  if (Serial.baud() == 230400) {
+  if (Serial.baud() == 230400 || Serial.baud() == 921600) {
     _state = ConnectedESPProgramming;
   }
 
@@ -158,10 +158,19 @@ void USBService::loopConnectedESPProgramming() {
   ESPProgrammerDelegateImpl delegate;
   ESPProgrammer programmer(KBox.getNeopixels(), Serial, Serial1, delegate);
 
+#if DEBUGGING_ESP_UPLOAD
+  // Redirect all logs to NMEA2 at 1Mbit/s.
+  NMEA2_SERIAL.begin(1000000);
+  KBoxLogging.setLogger(new KBoxLoggerStream(NMEA2_SERIAL));
+#endif
+  DEBUG("Switching to ESP Programming mode");
+
   while (programmer.getState() != ESPProgrammer::ProgrammerState::Done) {
     programmer.loop();
+    KBox.watchdogRefresh();
   }
-  DEBUG("Exiting programmer mode");
+
+  DEBUG("Exiting programmer mode"); delay(100);
   KBox.rebootKBox();
 }
 

@@ -121,7 +121,6 @@ void ESPProgrammer::loopByteMode() {
     if (espSerial.available()) {
       int read = espSerial.readBytes(buffer, min(bootloaderMtu, espSerial.available()));
       computerSerial.write(buffer, read);
-      timeSinceLastByte = 0;
     }
   }
 }
@@ -165,7 +164,6 @@ void ESPProgrammer::loopFrameMode() {
     size_t len = espConnection.readFrame(buffer, bootloaderMtu);
     debugFrame("ESP", buffer, len);
     computerConnection.writeFrame(buffer, len);
-    timeSinceLastByte = 0;
   }
 }
 
@@ -210,7 +208,7 @@ void ESPProgrammer::updateColors() {
     wheelIndex++;
   }
 
-  // Intensity of color will be proportial to how recent the last byte received was
+  // Intensity of color will be proportional to how recent the last byte received was
   // After 500ms, the color will be 0
   int dim = 0;
   if (timeSinceLastByte < 500) {
