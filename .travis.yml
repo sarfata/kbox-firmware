@@ -41,16 +41,23 @@ script:
 after_success:
     - coveralls --exclude src/test --exclude /lib --exclude lib --exclude .piolibdeps
 
+before_deploy:
+    - mv .pioenvs/host/firmware.elf ./kbox-firmware-$TRAVIS_TAG.elf
+    - mv .pioenvs/host/firmware.hex ./kbox-firmware-$TRAVIS_TAG.hex
+    - mv .pioenvs/esp/firmware.elf ./kbox-wifi-$TRAVIS_TAG.elf
+    - mv .pioenvs/esp/firmware.bin ./kbox-wifi-$TRAVIS_TAG.bin
+    - mv .pioenvs/sktool/program ./sktool-$TRAVIS_TAG
+
 deploy:
   provider: releases
   api_key:
     secure: QYe/1yIJZbSe5uZfoCROTT7s+1Yhe0lY1Ww8Ia//yYMQOYjvkjY+UAHaZ7FN+X3MBHPcMQCEPxeG4Hmy7fvTTV2nIRPlkheirZqSYt7HYr9WdbA/N29F92o/EMT5nQgqfmOf9u61Hx5K3JLyBnLIilajOpnHgARJXgg7w8lC2hE57k9oO0PWlFLGrNZRa9xfHeHnrOVL90TW3sk6/YR6J5u+cg2ZMwFPs8PPCxw/cBDowvQ3JrXrrQwRxHiAnrTscYlHoFEidsAAnrL99GROiRgFEGYQhddilztQ/h52AUy9+QDxAlVgxV/hi1+AUOGeeSK4GQPugrfH1+3kTR4a6T/XdTBoydTQSUYTHU4PcKJwzoaEwOVGVr4lg0Fl5ZCktcPLlY+TBHfBfitPAaNujWTA5P/pUv3Vwdq5pX4xYfhqFKIqZohlDOYEhk0xtAYvlYB4teaLCGkPNjtBi+8e11FghdaSZ/G6vXCkvGeOPrSIcp9g4pwnpwwhMMJISdpnpxm5cSLZJBOAJybsYUIPjVtjfvAQ6e0GpvcQsePDFBz6qSFSvYIpgEBE8gOcNotWHyiHjCkV4aAm+mBFmJ5Ndfr6XMSK+uARWG98FRrGNN4HZJl3h7cRrd2f1cOIm9N7SWLIXmMwEMYyIq+X++ZCKqOMhFnw3THhFxZ+U5ACOQM=
   file:
-    - ".pioenvs/host/firmware.elf"
-    - ".pioenvs/host/firmware.hex"
-    - ".pioenvs/esp/firmware.elf"
-    - ".pioenvs/esp/firmware.bin"
-    - ".pioenvs/sktool/program"
+    - ./kbox-firmware-$TRAVIS_TAG.elf
+    - ./kbox-firmware-$TRAVIS_TAG.hex
+    - ./kbox-wifi-$TRAVIS_TAG.elf
+    - ./kbox-wifi-$TRAVIS_TAG.bin
+    - ./sktool-$TRAVIS_TAG
   skip_cleanup: true
   on:
     repo: sarfata/kbox-firmware
