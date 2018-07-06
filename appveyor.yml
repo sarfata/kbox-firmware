@@ -4,5 +4,11 @@ install:
 
 build_script:
     - cmd: platformio run -e host
+    - cmd: platformio run -e program-esp
+    - cmd: platformio run -e mfg
     - cmd: platformio run -e esp
     - cmd: platformio run -e test
+    - cmd: platformio run -e sktool
+
+test_script:
+    - cmd: .pioenvs\test\program.exe
