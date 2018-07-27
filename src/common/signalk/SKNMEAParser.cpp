@@ -193,7 +193,7 @@ const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceR
     return _invalidSku;
   }
 
-  SKUpdateStatic<4>* rmc = new SKUpdateStatic<4>();
+  auto rmc = new SKUpdateStatic<5>();
   rmc->setTimestamp(time);
 
   SKSource source = SKSource::sourceForNMEA0183(input, reader.getTalkerId(), reader.getSentenceCode());
@@ -218,8 +218,19 @@ const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceR
     rmc->setValue(SKPathNavigationCourseOverGroundTrue, cog);
   }
 
-  SKTime timestamp = SKTime::timeFromNMEAStrings(date, utcTime);
-  rmc->setNavigationDatetime(timestamp);
+  double magVar = reader.getFieldAsDouble(10);
+  char magVarSign = reader.getFieldAsChar(11);
+  if (!isnan(magVar) && (magVarSign == 'E' || magVarSign == 'W')) {
+    if (magVarSign == 'W') {
+      magVar *= -1;
+    }
+    rmc->setValue(SKPathNavigationMagneticVariation, SKDegToRad(magVar));
+  }
+
+  if (date.length() >= 6 && utcTime.length() >= 6) {
+    SKTime timestamp = SKTime::timeFromNMEAStrings(date, utcTime);
+    rmc->setNavigationDatetime(timestamp);
+  }
 
   // _sku is deleted every time a new sentence is parsed
   _sku = rmc;

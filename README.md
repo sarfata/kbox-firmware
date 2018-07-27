@@ -197,6 +197,9 @@ been possible!**
    * Added support for parsing DPT and DBT NMEA sentences
    * Added support for generating DBT and DPT sentences. By default only DPT is enabled.
    * Added support for parsing XDR air temperature measurements.
+   * Fix a bug where RMC sentence without a date would crash KBox
+   * Parse magnetic variation from RMC sentence
+   * Genrate NMEA2000 messages for air temperature measurements
  * 2018 07 06 - v1.3.4
    * Specify a list of default environment so platformio does not build all variants
      of the project by default.
