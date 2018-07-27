@@ -47,54 +47,76 @@ const SKUpdate& SKNMEAParser::parse(const SKSourceInput& input, const String& se
     return _invalidSku;
   }
 
+  if (reader.getSentenceCode() == "DBT") {
+    return parseDBT(input, reader, time);
+  }
+
+  if (reader.getSentenceCode() == "DPT") {
+    return parseDPT(input, reader, time);
+  }
+
+  if (reader.getSentenceCode() == "MWV") {
+    return parseMWV(input, reader, time);
+  }
+
   if (reader.getSentenceCode() == "RMC") {
     return parseRMC(input, reader, time);
   }
-  if (reader.getSentenceCode() == "MWV") {
-    return parseMWV(input, reader, time);
+
+  if (reader.getSentenceCode() == "XDR") {
+    return parseXDR(input, reader, time);
   }
 
   DEBUG("%s: %s%s - Unable to parse sentence", skSourceInputLabels[input].c_str(), reader.getTalkerId().c_str(), reader.getSentenceCode().c_str());
   return _invalidSku;
 }
 
-const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& time) {
-  // We first need to make sure the data is valid.
-  if (reader.getFieldAsChar(2) != 'A') {
+const SKUpdate& SKNMEAParser::parseDBT(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& time) {
+  double depthBelowTransducer = reader.getFieldAsDouble(3);
+
+  if (reader.getFieldAsChar(4) == 'M' && !isnan(depthBelowTransducer)) {
+    auto *dbt = new SKUpdateStatic<1>();
+    dbt->setTimestamp(time);
+    SKSource source = SKSource::sourceForNMEA0183(input, reader.getTalkerId(), reader.getSentenceCode());
+    dbt->setSource(source);
+
+    dbt->setEnvironmentDepthBelowTransducer(depthBelowTransducer);
+
+    _sku = dbt;
+    return *dbt;
+  }
+  else {
     return _invalidSku;
   }
+}
 
-  SKUpdateStatic<4>* rmc = new SKUpdateStatic<4>();
-  rmc->setTimestamp(time);
+const SKUpdate& SKNMEAParser::parseDPT(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& time) {
+  double depthBelowTransducer = reader.getFieldAsDouble(1);
+  double transducerOffset = reader.getFieldAsDouble(2);
 
-  SKSource source = SKSource::sourceForNMEA0183(input, reader.getTalkerId(), reader.getSentenceCode());
-  rmc->setSource(source);
+  if (!isnan(depthBelowTransducer)) {
+    auto dpt = new SKUpdateStatic<3>();
+    dpt->setTimestamp(time);
+    SKSource source = SKSource::sourceForNMEA0183(input, reader.getTalkerId(), reader.getSentenceCode());
+    dpt->setSource(source);
 
-  String utcTime = reader.getFieldAsString(1);
-  double latitude = reader.getFieldAsLatLon(3);
-  double longitude = reader.getFieldAsLatLon(5);
-  double sog = SKKnotToMs(reader.getFieldAsDouble(7));
-  double cog = SKDegToRad(reader.getFieldAsDouble(8));
-  String date = reader.getFieldAsString(9);
+    dpt->setEnvironmentDepthBelowTransducer(depthBelowTransducer);
 
-  if (!isnan(latitude) && !isnan(longitude)) {
-    rmc->setValue(SKPathNavigationPosition, SKTypePosition(latitude,
-                                                           longitude,
-                                                           SKDoubleNAN));
+    if (!isnan(transducerOffset)) {
+      if (transducerOffset > 0) {
+        dpt->setEnvironmentDepthSurfaceToTransducer(transducerOffset);
+        dpt->setEnvironmentDepthBelowSurface(depthBelowTransducer + transducerOffset);
+      } else if (transducerOffset < 0) {
+        dpt->setEnvironmentDepthTransducerToKeel(-transducerOffset);
+        dpt->setEnvironmentDepthBelowKeel(depthBelowTransducer + transducerOffset);
+      }
+    }
+    _sku = dpt;
+    return *dpt;
   }
-  if (!isnan(sog)) {
-    rmc->setValue(SKPathNavigationSpeedOverGround, sog);
+  else {
+    return _invalidSku;
   }
-  if (!isnan(cog)) {
-    rmc->setValue(SKPathNavigationCourseOverGroundTrue, cog);
-  }
-
-  SKTime timestamp = SKTime::timeFromNMEAStrings(date, utcTime);
-  rmc->setNavigationDatetime(timestamp);
-
-  // _sku is deleted every time a new sentence is parsed
-  _sku = rmc;
-  return *_sku;
 }
 
 const SKUpdate& SKNMEAParser::parseMWV(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& time) {
@@ -163,4 +185,74 @@ const SKUpdate& SKNMEAParser::parseMWV(const SKSourceInput& input, NMEASentenceR
   // _sku is deleted every time a new sentence is parsed
   _sku = wmv;
   return *_sku;
+}
+
+const SKUpdate& SKNMEAParser::parseRMC(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& time) {
+  // We first need to make sure the data is valid.
+  if (reader.getFieldAsChar(2) != 'A') {
+    return _invalidSku;
+  }
+
+  SKUpdateStatic<4>* rmc = new SKUpdateStatic<4>();
+  rmc->setTimestamp(time);
+
+  SKSource source = SKSource::sourceForNMEA0183(input, reader.getTalkerId(), reader.getSentenceCode());
+  rmc->setSource(source);
+
+  String utcTime = reader.getFieldAsString(1);
+  double latitude = reader.getFieldAsLatLon(3);
+  double longitude = reader.getFieldAsLatLon(5);
+  double sog = SKKnotToMs(reader.getFieldAsDouble(7));
+  double cog = SKDegToRad(reader.getFieldAsDouble(8));
+  String date = reader.getFieldAsString(9);
+
+  if (!isnan(latitude) && !isnan(longitude)) {
+    rmc->setValue(SKPathNavigationPosition, SKTypePosition(latitude,
+                                                           longitude,
+                                                           SKDoubleNAN));
+  }
+  if (!isnan(sog)) {
+    rmc->setValue(SKPathNavigationSpeedOverGround, sog);
+  }
+  if (!isnan(cog)) {
+    rmc->setValue(SKPathNavigationCourseOverGroundTrue, cog);
+  }
+
+  SKTime timestamp = SKTime::timeFromNMEAStrings(date, utcTime);
+  rmc->setNavigationDatetime(timestamp);
+
+  // _sku is deleted every time a new sentence is parsed
+  _sku = rmc;
+  return *_sku;
+}
+
+const SKUpdate& SKNMEAParser::parseXDR(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& time) {
+  // FIXME: XDR contains group of 4 variables that describe one transducer measurement
+  // We will want to handle all sorts of measurements here.
+  if (reader.getFieldAsChar(1) == 'C') {
+    return parseXDRtemp(input, reader, time);
+  }
+  else {
+    return _invalidSku;
+  }
+}
+
+const SKUpdate& SKNMEAParser::parseXDRtemp(const SKSourceInput &input, NMEASentenceReader &reader,
+                                           const SKTime time){
+  double temperature = reader.getFieldAsDouble(2);
+
+  if (!isnan(temperature) && reader.getFieldAsChar(3) == 'C') {
+    auto *dbt = new SKUpdateStatic<1>();
+    dbt->setTimestamp(time);
+    SKSource source = SKSource::sourceForNMEA0183(input, reader.getTalkerId(), reader.getSentenceCode());
+    dbt->setSource(source);
+
+    dbt->setEnvironmentOutsideTemperature(SKCelsiusToKelvin(temperature));
+
+    _sku = dbt;
+    return *dbt;
+  }
+  else {
+    return _invalidSku;
+  }
 }

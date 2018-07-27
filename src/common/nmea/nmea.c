@@ -49,7 +49,7 @@ uint8_t nmea_compute_checksum(const char *sentence) {
   int i = 1;
 
   int checksum = 0;
-  while (sentence[i] != '*') {
+  while (sentence[i] != '*' && sentence[i] != '\0') {
     checksum ^= sentence[i];
     i++;
   }

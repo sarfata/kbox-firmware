@@ -8,6 +8,8 @@ ifeq ($(UNAME), Darwin)
 endif
 
 
+.PHONY: test clean validation
+
 all:
 	platformio run
 

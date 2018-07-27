@@ -1,0 +1,24 @@
+[
+  {
+    "nmea": "$IIDPT,0.90,,*7B",
+    "expectedValues": [
+      { "path":"environment.depth.belowTransducer", "value": 0.9}
+    ]
+  },
+  {
+    "nmea": "$IIDPT,0.90,-1.1,*78",
+    "expectedValues": [
+      {"path":"environment.depth.belowTransducer","value":0.9},
+      {"path":"environment.depth.transducerToKeel","value":1.1},
+      {"path":"environment.depth.belowKeel","value":-0.20000000000000007}
+    ]
+  },
+  {
+    "nmea": "$IIDPT,0.90,0.21,*66",
+    "expectedValues": [
+      {"path":"environment.depth.belowTransducer","value":0.9},
+      {"path":"environment.depth.surfaceToTransducer","value":0.21},
+      {"path":"environment.depth.belowSurface","value":1.11}
+    ]
+  }
+]

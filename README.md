@@ -192,6 +192,11 @@ been possible!**
 
 ## Changelog
 
+ * (next version - not yet released)
+   * Fix a bug that would cause KBox to crash on NMEA sentences without a checksum
+   * Added support for parsing DPT and DBT NMEA sentences
+   * Added support for generating DBT and DPT sentences. By default only DPT is enabled.
+   * Added support for parsing XDR air temperature measurements.
  * 2018 07 06 - v1.3.4
    * Specify a list of default environment so platformio does not build all variants
      of the project by default.
