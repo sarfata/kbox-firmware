@@ -174,19 +174,32 @@ uint32_t makeTime(const tmElements_t &tm){
 SKTime SKTime::timeFromNMEAStrings(String dateString, String timeString) {
   tmElements_t tm;
 
-  tm.Day = dateString.substring(0, 2).toInt();
-  tm.Month = dateString.substring(2, 4).toInt();
-  // Year 2070 bug incoming ...
-  int year = dateString.substring(4, 6).toInt();
-  if (year < 70) {
-    tm.Year = year + 30;
+  if (dateString.length() == 6) {
+    tm.Day = dateString.substring(0, 2).toInt();
+    tm.Month = dateString.substring(2, 4).toInt();
+    // Year 2070 bug incoming ...
+    int year = dateString.substring(4, 6).toInt();
+    if (year < 70) {
+      tm.Year = year + 30;
+    }
+    else {
+      tm.Year = year - 70;
+    }
   }
   else {
-    tm.Year = year - 70;
+    tm.Year = 0;
+    tm.Month = 1;
+    tm.Day = 1;
   }
-  tm.Hour = timeString.substring(0, 2).toInt();
-  tm.Minute = timeString.substring(2, 4).toInt();
-  tm.Second = timeString.substring(4, 6).toInt();
+
+  if (timeString.length() >= 6) {
+    tm.Hour = timeString.substring(0, 2).toInt();
+    tm.Minute = timeString.substring(2, 4).toInt();
+    tm.Second = timeString.substring(4, 6).toInt();
+  }
+  else {
+    tm.Hour = tm.Minute = tm.Second = 0;
+  }
 
   uint32_t timestamp = makeTime(tm);
   uint32_t milliseconds = unknownMilliseconds;

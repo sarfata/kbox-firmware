@@ -192,6 +192,14 @@ been possible!**
 
 ## Changelog
 
+ * 2018 07 26 - v1.3.5
+   * Fix a bug that would cause KBox to crash on NMEA sentences without a checksum
+   * Fix a bug where RMC sentence without a date would crash KBox
+   * Added support for parsing DPT and DBT NMEA sentences
+   * Added support for generating DBT and DPT sentences. By default only DPT is enabled.
+   * Added support for parsing XDR air temperature measurements.
+   * Parse magnetic variation from RMC sentence
+   * Generate NMEA2000 messages for air temperature measurements
  * 2018 07 06 - v1.3.4
    * Specify a list of default environment so platformio does not build all variants
      of the project by default.
@@ -209,7 +217,6 @@ been possible!**
    * Tested the official ESP uploader on Windows and OS X. Comment out the line 
      `tools/platformio_cfg_esp.py` in `platformio.ini` to use it.
      It will be a little bit slower but might work better for some people.
-
  * 2018 07 06 - v1.3.2
    * Changes to the build configuration to improve compatibility with Windows 
      and address breaking changes in plaformio.

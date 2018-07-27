@@ -46,6 +46,13 @@ void SKNMEA2000Converter::convert(const SKUpdate& update, SKNMEA2000Output& out)
     out.write(msg);
   }
 
+  if (update.hasEnvironmentOutsideTemperature()) {
+    tN2kMsg msg;
+    // PGN 130310 seems to be better supported
+    SetN2kOutsideEnvironmentalParameters(msg, 0, N2kDoubleNA, update.getEnvironmentOutsideTemperature(), N2kDoubleNA);
+    out.write(msg);
+  }
+
   if (update.hasNavigationAttitude()) {
     tN2kMsg msg;
     SKTypeAttitude attitude = update.getNavigationAttitude();
