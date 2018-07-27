@@ -144,6 +144,30 @@ TEST_CASE("NMEA2000Converter") {
     }
   }
 
+  SECTION("Air temperature") {
+    SKUpdateStatic<1> tempUpdate;
+    tempUpdate.setEnvironmentOutsideTemperature(SKCelsiusToKelvin(21));
+
+    converter.convert(tempUpdate, messages);
+
+    CHECK( messages.size() == 1 );
+    const tN2kMsg *m = findMessage(messages, 130310, 0);
+    CHECK(m);
+    if (m) {
+      unsigned char sid;
+      double waterTemperature;
+      double outsideAmbientAirTemperature;
+      double atmosphericPressure;
+
+      CHECK( ParseN2kPGN130310(*m, sid, waterTemperature, outsideAmbientAirTemperature, atmosphericPressure) );
+
+
+      CHECK( N2kIsNA(waterTemperature) );
+      CHECK( outsideAmbientAirTemperature == Approx(SKCelsiusToKelvin(21)) );
+      CHECK( N2kIsNA(atmosphericPressure));
+    }
+  }
+
   SECTION("IMU") {
     SKUpdateStatic<2> imuUpdate;
     imuUpdate.setNavigationHeadingMagnetic(1.5708);
