@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include <signalk/SKNMEAConverterConfig.h>
+#include "common/signalk/SKNMEAConverterConfig.h"
 
 enum SerialMode {
   SerialModeDisabled,

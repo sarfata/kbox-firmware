@@ -23,7 +23,7 @@
 */
 
 #include <WString.h>
-#include "signalk/SKNMEASentence.h"
+#include "common/signalk/SKNMEASentence.h"
 
 /** A utility class to generate a properly formatted and checksum'd NMEA
  * sentence.

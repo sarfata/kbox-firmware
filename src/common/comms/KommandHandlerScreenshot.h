@@ -25,7 +25,7 @@
 #pragma once
 
 #include "KommandHandler.h"
-#include "ui/GC.h"
+#include "common/ui/GC.h"
 
 class KommandHandlerScreenshot : public KommandHandler {
   private:
