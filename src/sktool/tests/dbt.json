@@ -1,6 +1,6 @@
 [
   {
-    "nmea": "$IIDPT,0.90,,*7B",
+    "nmea": "$IIDBT,2.95,f,0.90,M,0.49,F,*07",
     "expectedValues": [
       { "path":"environment.depth.belowTransducer", "value": 0.9}
     ]
