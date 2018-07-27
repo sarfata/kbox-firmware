@@ -34,10 +34,12 @@
  * Configuration for an instance of SKNMEAConverter.
  */
 struct SKNMEAConverterConfig {
+  bool dbt = false;
+  bool dpt = true;
+  bool hdm = true;
+  bool mwv = true;
+  bool rsa = true;
   bool xdrPressure = true;
   bool xdrAttitude = true;
   bool xdrBattery = true;
-  bool hdm = true;
-  bool rsa = true;
-  bool mwv = true;
 };

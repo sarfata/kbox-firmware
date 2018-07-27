@@ -31,22 +31,16 @@
       "description": "Depth transducer is below the surface"
     },
     {
-      "path": "environment.water.temperature",
-      "type": "numberValue",
-      "units": "K",
-      "description": "Current water temperature"
-    },
-    {
-      "path": "environment.outside.apparentWindChillTemperature",
-      "type": "numberValue",
-      "unit": "K",
-      "description": "Current outside apparent wind chill temperature"
-    },
-    {
       "path": "environment.outside.pressure",
       "type": "numberValue",
       "unit": "Pa",
       "description": "Current outside air ambient pressure"
+    },
+    {
+      "path": "environment.outside.temperature",
+      "type": "numberValue",
+      "unit": "K",
+      "description": "Current outside air temperature"
     },
     {
       "path": "environment.wind.angleApparent",
