@@ -192,7 +192,7 @@ been possible!**
 
 ## Changelog
 
- * (next version - not yet released)
+ * 2018 07 26 - v1.3.5
    * Fix a bug that would cause KBox to crash on NMEA sentences without a checksum
    * Added support for parsing DPT and DBT NMEA sentences
    * Added support for generating DBT and DPT sentences. By default only DPT is enabled.
