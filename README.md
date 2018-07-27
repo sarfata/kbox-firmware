@@ -194,10 +194,10 @@ been possible!**
 
  * 2018 07 26 - v1.3.5
    * Fix a bug that would cause KBox to crash on NMEA sentences without a checksum
+   * Fix a bug where RMC sentence without a date would crash KBox
    * Added support for parsing DPT and DBT NMEA sentences
    * Added support for generating DBT and DPT sentences. By default only DPT is enabled.
    * Added support for parsing XDR air temperature measurements.
-   * Fix a bug where RMC sentence without a date would crash KBox
    * Parse magnetic variation from RMC sentence
    * Generate NMEA2000 messages for air temperature measurements
  * 2018 07 06 - v1.3.4
