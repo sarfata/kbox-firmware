@@ -68,10 +68,11 @@ void NMEAServer::start() {
   _server.begin();
 }
 
-void NMEAServer::write(const tN2kMsg &msg) {
+bool NMEAServer::write(const tN2kMsg &msg) {
   char buf[MAX_NMEA2000_MESSAGE_SEASMART_SIZE + 2];
   if (N2kToSeasmart(msg, xTaskGetTickCount(), buf, MAX_NMEA2000_MESSAGE_SEASMART_SIZE) == 0) {
     ERROR("n2k conversion error");
+    return false;
   }
   else {
     for (auto client : _clients) {
@@ -83,6 +84,7 @@ void NMEAServer::write(const tN2kMsg &msg) {
         ERROR("Not enough space on socket to send data.");
       }
     }
+    return true;
   }
 }
 

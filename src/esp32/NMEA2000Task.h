@@ -36,26 +36,29 @@
 
 class NMEA2000WriterInterface {
   public:
-    virtual void write(const tN2kMsg& msg);
+    virtual bool write(const tN2kMsg& msg);
 };
 
-class NMEA2000Task : private tNMEA2000::tMsgHandler {
+class NMEA2000Task : private tNMEA2000::tMsgHandler, public NMEA2000WriterInterface {
   private:
+    tNMEA2000 *_nmea2000;
     std::list<NMEA2000WriterInterface*> _writers;
     uint64_t _rxCounter;
     SemaphoreHandle_t _rxCounterMutex;
 
-    void initializeNMEA2000();
+    void initializeNMEA2000(gpio_num_t rxPin, gpio_num_t txPin);
     void HandleMsg(const tN2kMsg &N2kMsg) override;
 
   public:
     NMEA2000Task();
-    void setup();
+    void setup(gpio_num_t txPin, gpio_num_t rxPin);
     void loop();
 
     void addWriter(NMEA2000WriterInterface* writer) {
       _writers.push_back(writer);
     }
+
+    bool write(const tN2kMsg &msg) override;
 
     uint64_t getRXCounter() const;
     void resetRXCounter();

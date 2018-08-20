@@ -31,12 +31,8 @@
 #include "NMEA2000Task.h"
 
 #include <cstring>
+#include <NMEA2000_esp32.h>
 
-#define ESP32_CAN_TX_PIN GPIO_NUM_5
-#define ESP32_CAN_RX_PIN GPIO_NUM_4
-#include <NMEA2000_CAN.h>
-
-#define GPIO_CAN_DISABLE ((gpio_num_t)16)
 
 NMEA2000Task::NMEA2000Task(): _rxCounter(0) {
   _rxCounterMutex = xSemaphoreCreateMutex();
@@ -59,26 +55,28 @@ void NMEA2000Task::resetRXCounter() {
   xSemaphoreGive(_rxCounterMutex);
 }
 
-void NMEA2000Task::initializeNMEA2000() {
+void NMEA2000Task::initializeNMEA2000(gpio_num_t txPin, gpio_num_t rxPin) {
   // Configure the ENABLE pin of the CAN controller and pull it low
-  pinMode(GPIO_CAN_DISABLE, OUTPUT);
-  digitalWrite(GPIO_CAN_DISABLE, 0);
+  //pinMode(GPIO_CAN_DISABLE, OUTPUT);
+  //digitalWrite(GPIO_CAN_DISABLE, 0);
+
+  _nmea2000 = new tNMEA2000_esp32(txPin, rxPin);
 
   // Initialize NMEA2000 library
-  NMEA2000.SetN2kCANMsgBufSize(8);
-  NMEA2000.SetN2kCANReceiveFrameBufSize(100);
-  NMEA2000.SetMode(tNMEA2000::N2km_ListenAndNode, 32);
-  NMEA2000.AttachMsgHandler(this);
+  _nmea2000->SetN2kCANMsgBufSize(8);
+  _nmea2000->SetN2kCANReceiveFrameBufSize(100);
+  _nmea2000->SetMode(tNMEA2000::N2km_ListenAndNode, 32);
+  _nmea2000->AttachMsgHandler(this);
 
-  NMEA2000.Open();
+  _nmea2000->Open();
 }
 
-void NMEA2000Task::setup() {
-  initializeNMEA2000();
+void NMEA2000Task::setup(gpio_num_t txPin, gpio_num_t rxPin) {
+  initializeNMEA2000(txPin, rxPin);
 }
 
 void NMEA2000Task::loop(){
-  NMEA2000.ParseMessages();
+  _nmea2000->ParseMessages();
 }
 
 void NMEA2000Task::HandleMsg(const tN2kMsg &msg) {
@@ -91,4 +89,8 @@ void NMEA2000Task::HandleMsg(const tN2kMsg &msg) {
   for (auto writer : _writers) {
     writer->write(msg);
   }
+}
+
+bool NMEA2000Task::write(const tN2kMsg &msg) {
+  return _nmea2000->SendMsg(msg);
 }

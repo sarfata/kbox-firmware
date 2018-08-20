@@ -45,7 +45,7 @@ class NMEAServer : public NMEA2000WriterInterface {
 
     void start();
 
-    virtual void write(const tN2kMsg &msg);
+    virtual bool write(const tN2kMsg &msg);
 };
 
 
