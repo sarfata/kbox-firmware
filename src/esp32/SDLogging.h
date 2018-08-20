@@ -30,6 +30,7 @@
 
 #pragma once
 #include <string>
+#include <FS.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 
@@ -37,6 +38,7 @@
 
 class SDLogging : public NMEA2000WriterInterface {
   private:
+    fs::FS &_fs;
     QueueHandle_t  _incomingQueue;
 
     typedef struct {
@@ -45,11 +47,13 @@ class SDLogging : public NMEA2000WriterInterface {
     } SDLoggingQueueItem;
 
   public:
-    SDLogging();
-    bool initializeCard();
+    SDLogging(fs::FS &fs);
     void loop();
 
-    void write(const tN2kMsg &msg) override;
+    bool write(const tN2kMsg &msg) override;
+    void setFS(fs::FS &fs) {
+      _fs = fs;
+    }
 };
 
 
