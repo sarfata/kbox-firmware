@@ -28,9 +28,11 @@
 
 #include "Adafruit_BNO055.h"
 
-// Added for KBox
+// On KBox use Wire1 instead of Wire
+#ifdef __MK20DX256__
 #include <i2c_t3.h>
 #define Wire Wire1
+#endif
 
 #include <KBoxLogging.h>
 
