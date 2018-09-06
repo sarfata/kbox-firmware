@@ -127,6 +127,8 @@ void setup() {
   reader1->addRepeater(usbService);
   reader2->addRepeater(usbService);
 
+  reader1->addRepeater(*reader1);
+
   reader1->addRepeater(sdLoggingService);
   reader2->addRepeater(sdLoggingService);
   n2kService->addSentenceRepeater(sdLoggingService);

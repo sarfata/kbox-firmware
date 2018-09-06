@@ -37,7 +37,7 @@
 
 class HardwareSerial;
 
-class SerialService : public Task, public SKSubscriber, private SKNMEAOutput {
+class SerialService : public Task, public SKSubscriber, public SKNMEAOutput {
   private:
     SerialConfig &_config;
     SKHub &_hub;
