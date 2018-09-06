@@ -284,7 +284,7 @@ String KBoxHardware::rebootReason() {
     return "Loss of Lock in PLL Reset";
   if (RCM_SRS0 & RCM_SRS0_LVD)
     return "Low-voltage Detect Reset";
-  return "unknwon reset";
+  return "unknown reset reason";
 }
 
 void watchdog_isr() {
