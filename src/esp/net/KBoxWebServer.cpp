@@ -158,6 +158,7 @@ void handleRequestSignalK(AsyncWebServerRequest *request) {
     serverInfo["version"] = KBOX_VERSION;
 
     root.printTo(*response);
+    response->addHeader("Access-Control-Allow-Origin","*");
     request->send(response);
   }
   else {

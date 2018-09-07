@@ -68,7 +68,7 @@ Because KBox is open-source, you can do a lot more things with it:
 
 ### Current software status
 
-As of December 2017, the KBox firmware:
+As of September 2018, the KBox firmware:
 
  - General functionality
    - Creates a new WiFi network (KBox) or can join an existing network (via simple
@@ -192,6 +192,18 @@ been possible!**
 
 ## Changelog
 
+ * 2018 09 07 - v1.3.6
+   * Force ESP board definition to generic module w 1MB flash to avoid build
+     error.
+   * Upgrade ESP platform to 1.8.0 to use ESP8266 framework 2.4.2 which improves
+     stability of the WiFi modules and seems to fix a number of connection
+     issues for other people. Hopefully will also improve KBox wifi stability.
+   * Add HTTP CORS header on `/signalk`. This makes KBox compatible with the
+     amazing [Kip](https://github.com/mxtommy/Kip) to display your boat data in
+     a browser.
+   * Fixed a typo in the reboot reasons.
+   * Add missing dependency `pyserial` in the list of dependencies for
+     `kbox.py`.
  * 2018 07 26 - v1.3.5
    * Fix a bug that would cause KBox to crash on NMEA sentences without a checksum
    * Fix a bug where RMC sentence without a date would crash KBox
