@@ -7,7 +7,7 @@
 
   The MIT License
 
-  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -28,26 +28,30 @@
   THE SOFTWARE.
 */
 
-#pragma once
+#include "CurrentMonitorService.h"
+#include <KBoxHardware.h>
+#include "common/signalk/SKUpdateStatic.h"
+#include "common/signalk/SKSource.h"
 
-#include "SerialConfig.h"
-#include "NMEA2000Config.h"
-#include "IMUConfig.h"
-#include "BarometerConfig.h"
-#include "WiFiConfig.h"
-#include "SDLoggingConfig.h"
-#include "CurrentMonitorConfig.h"
+void CurrentMonitorService::setup() {
+  ina219.begin(ina219_address);
+}
 
-/**
- * A KBox configuration in memory
- */
-struct KBoxConfig {
-  SerialConfig serial1Config;
-  SerialConfig serial2Config;
-  NMEA2000Config nmea2000Config;
-  IMUConfig imuConfig;
-  BarometerConfig barometerConfig;
-  WiFiConfig wifiConfig;
-  SDLoggingConfig sdLoggingConfig;
-  CurrentMonitorConfig currentMonitorConfig;
-};
+void CurrentMonitorService::loop() {
+  float shuntVoltageMV = ina219.getShuntVoltage_mV();
+  float busVoltage = ina219.getBusVoltage_V();
+
+
+  SKUpdateStatic<4> sk;
+  sk.setSource(SKSource::sourceForKBoxSensor(SKSourceInputKBoxCurrentMonitor));
+  sk.setElectricalBatteriesVoltage("shunt", busVoltage);
+
+  double current = shuntVoltageMV * 1e-3 * _config.shuntResistance;
+  if (_config.shuntResistance > 0) {
+    // TODO: It would be best to properly configure the INA219 properly and let it do the maths.
+    sk.setElectricalBatteriesCurrent("shunt", current);
+  }
+
+  DEBUG("Current monitor: busVoltage=%.2fV shuntVoltage=%.2fmV current=%.2fA", busVoltage, shuntVoltageMV, current);
+  _skHub.publish(sk);
+}

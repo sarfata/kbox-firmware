@@ -44,6 +44,8 @@
                                                   json[#name] .as<int>(); \
                                               }
 
+#define READ_DOUBLE_VALUE(name) READ_VALUE_WITH_TYPE(name, double)
+
 #define READ_STRING_VALUE(name) if (json[#name].is<const char *>()) {\
                                   config.name = \
                                     String(json[#name].as<const char*>()); \
@@ -100,6 +102,11 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.sdLoggingConfig.logSignalKGeneratedFromNMEA = false;
   config.sdLoggingConfig.logSignalKGeneratedFromNMEA2000 = false;
   config.sdLoggingConfig.logSignalKGeneratedByKBoxSensors = true;
+
+  config.currentMonitorConfig.enabled = false;
+  config.currentMonitorConfig.frequency = 1;
+  // .1mOhm is the resistance of the standard Victron shunt.
+  config.currentMonitorConfig.shuntResistance = 0.0001;
 }
 
 void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &config) {
@@ -112,6 +119,7 @@ void KBoxConfigParser::parseKBoxConfig(const JsonObject &json, KBoxConfig &confi
   parseWiFiConfig(json["wifi"], config.wifiConfig);
   parseNMEA2000Config(json["nmea2000"], config.nmea2000Config);
   parseSDLoggingConfig(json["logging"], config.sdLoggingConfig);
+  parseCurrentMonitorConfig(json["currentMonitor"], config.currentMonitorConfig);
 }
 
 void KBoxConfigParser::parseIMUConfig(const JsonObject &json, IMUConfig &config) {
@@ -174,6 +182,16 @@ void KBoxConfigParser::parseSDLoggingConfig(const JsonObject &json, SDLoggingCon
   READ_BOOL_VALUE(logSignalKGeneratedFromNMEA);
   READ_BOOL_VALUE(logSignalKGeneratedFromNMEA2000);
   READ_BOOL_VALUE(logSignalKGeneratedByKBoxSensors);
+}
+
+void KBoxConfigParser::parseCurrentMonitorConfig(const JsonObject &json, CurrentMonitorConfig &config) {
+  if (json == JsonObject::invalid()) {
+    return ;
+  }
+
+  READ_BOOL_VALUE(enabled);
+  READ_INT_VALUE_WRANGE(frequency, 1, 10);
+  READ_DOUBLE_VALUE(shuntResistance);
 }
 
 void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEAConverterConfig &config) {

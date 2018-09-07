@@ -44,6 +44,8 @@
 #include "host/services/TimeService.h"
 #include "host/services/USBService.h"
 #include "host/services/WiFiService.h"
+#include "services/CurrentMonitorService.h"
+#include "config/KBoxConfig.h"
 
 static const char *configFilename = "kbox-config.json";
 
@@ -131,6 +133,8 @@ void setup() {
   reader2->addRepeater(sdLoggingService);
   n2kService->addSentenceRepeater(sdLoggingService);
 
+  CurrentMonitorService *currentMonitorService = new CurrentMonitorService(skHub, config.currentMonitorConfig);
+
   // Tell the wallClock how to get the number of ms elapsed since boot.
   wallClock.setMillisecondsProvider(millis);
 
@@ -147,6 +151,9 @@ void setup() {
   }
   if (config.barometerConfig.enabled) {
     taskManager.addTask(new IntervalTask(baroService, 1000 / config.barometerConfig.frequency));
+  }
+  if (config.currentMonitorConfig.enabled) {
+    taskManager.addTask(new IntervalTask(currentMonitorService, 1000 / config.currentMonitorConfig.frequency));
   }
   taskManager.addTask(n2kService);
   taskManager.addTask(reader1);

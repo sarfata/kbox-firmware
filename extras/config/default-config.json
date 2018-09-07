@@ -76,5 +76,10 @@
   "nmea2000": {
     "txEnabled": true,
     "rxEnabled": true
+  },
+  "currentMonitor": {
+    "enabled": false,
+    "frequency": 1,
+    "shuntResistance": 0.0001
   }
 }
