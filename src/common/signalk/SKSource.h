@@ -33,7 +33,8 @@ enum SKSourceInput {
   SKSourceInputNMEA2000,
   SKSourceInputKBoxIMU,
   SKSourceInputKBoxADC,
-  SKSourceInputKBoxBarometer
+  SKSourceInputKBoxBarometer,
+  SKSourceInputKBoxCurrentMonitor
 };
 
 const String skSourceInputLabels[] = {

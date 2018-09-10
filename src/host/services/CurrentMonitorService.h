@@ -7,7 +7,7 @@
 
   The MIT License
 
-  Copyright (c) 2017 Thomas Sarlandie thomas@sarlandie.net
+  Copyright (c) 2018 Thomas Sarlandie thomas@sarlandie.net
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -30,24 +30,23 @@
 
 #pragma once
 
-#include "SerialConfig.h"
-#include "NMEA2000Config.h"
-#include "IMUConfig.h"
-#include "BarometerConfig.h"
-#include "WiFiConfig.h"
-#include "SDLoggingConfig.h"
-#include "CurrentMonitorConfig.h"
+#include <host/os/Task.h>
+#include <common/signalk/SKHub.h>
+#include <Adafruit_INA219.h>
+#include <host/config/CurrentMonitorConfig.h>
 
-/**
- * A KBox configuration in memory
- */
-struct KBoxConfig {
-  SerialConfig serial1Config;
-  SerialConfig serial2Config;
-  NMEA2000Config nmea2000Config;
-  IMUConfig imuConfig;
-  BarometerConfig barometerConfig;
-  WiFiConfig wifiConfig;
-  SDLoggingConfig sdLoggingConfig;
-  CurrentMonitorConfig currentMonitorConfig;
+class CurrentMonitorService : public Task {
+  private:
+    SKHub &_skHub;
+    CurrentMonitorConfig &_config;
+    Adafruit_INA219 ina219;
+
+  public:
+    CurrentMonitorService(SKHub& skHub, CurrentMonitorConfig &config) : Task("CurrentMonitor"), _skHub(skHub),
+    _config(config)
+    {};
+
+    void setup();
+    void loop();
 };
+

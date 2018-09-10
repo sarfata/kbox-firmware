@@ -92,6 +92,12 @@
     },
 
     {
+      "path": "electrical.batteries.%%.current",
+      "type": "numberValue",
+      "unit": "V",
+      "description": "Current flowing out (+ve) or in (-ve) to the device"
+    },
+    {
       "path": "electrical.batteries.%%.voltage",
       "type": "numberValue",
       "unit": "V",

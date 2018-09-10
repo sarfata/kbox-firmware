@@ -53,6 +53,11 @@ TEST_CASE("KBoxConfigParser") {
     CHECK( config.wifiConfig.vesselURN == "urn:mrn:kbox:unit-testing" );
     CHECK( config.sdLoggingConfig.enabled == true );
     CHECK( config.sdLoggingConfig.logWithoutTime == false );
+
+    CHECK( config.currentMonitorConfig.enabled == false );
+    CHECK( config.currentMonitorConfig.frequency == 1 );
+    CHECK( config.currentMonitorConfig.shuntResistance == 0.0001 );
+
   }
 
   SECTION("No input") {
@@ -173,5 +178,19 @@ TEST_CASE("KBoxConfigParser") {
 
     CHECK(!sdLoggingConfig.enabled);
     CHECK(sdLoggingConfig.logWithoutTime);
+  }
+
+  SECTION("Shunt config") {
+    const char *jsonConfig = "{ 'enabled': true, 'shuntResistance': 0.00002 }";
+    JsonObject &root = jsonBuffer.parseObject(jsonConfig);
+
+    CHECK(root.success());
+
+    CurrentMonitorConfig config;
+
+    kboxConfigParser.parseCurrentMonitorConfig(root, config);
+
+    CHECK(config.enabled);
+    CHECK(config.shuntResistance == 0.00002);
   }
 }
