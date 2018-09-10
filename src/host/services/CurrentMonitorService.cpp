@@ -46,7 +46,7 @@ void CurrentMonitorService::loop() {
   sk.setSource(SKSource::sourceForKBoxSensor(SKSourceInputKBoxCurrentMonitor));
   sk.setElectricalBatteriesVoltage("shunt", busVoltage);
 
-  double current = shuntVoltageMV * 1e-3 * _config.shuntResistance;
+  double current = (shuntVoltageMV * 1e-3) / _config.shuntResistance;
   if (_config.shuntResistance > 0) {
     // TODO: It would be best to properly configure the INA219 properly and let it do the maths.
     sk.setElectricalBatteriesCurrent("shunt", current);
