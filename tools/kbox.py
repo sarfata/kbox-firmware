@@ -365,11 +365,13 @@ class KBox(object):
         raise KBoxError("Failed to write block - retries exceeded")
 
     def send_wifi_config(self, apSSID, apPassword, clientSSID, clientPassword, vesselURN):
+        logging.warn("This command is intended to be sent directly to the WiFi module."
+                     "Do not use with KBox - it will be ignored.")
         if apSSID is not None:
             request = struct.pack('<?', True)
             request = request + apSSID + '\0' + apPassword + '\0'
         else:
-            request = struct.pack('<?, False')
+            request = struct.pack('<?', False)
             request = request + '\0\0'
 
         if clientSSID is not None:

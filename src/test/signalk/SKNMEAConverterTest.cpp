@@ -56,6 +56,61 @@ TEST_CASE("SKNMEAConverterTest") {
     }
   }
 
+
+  SECTION("Depth") {
+    SKUpdateStatic<3> u;
+    u.setEnvironmentDepthBelowTransducer(0.9);
+
+    SECTION("dbt sentence") {
+      config.dbt = true;
+      config.dpt = false;
+
+      converter.convert(u, out);
+
+      CHECK(out.size() == 1);
+
+      if (out.size() > 0) {
+        String s = *(out.begin());
+        CHECK(s == "$IIDBT,2.95,f,0.90,M,0.49,F,*07");
+      }
+    }
+
+    SECTION("dpt sentence") {
+      // Should be on by default. No need to change the config.
+
+      converter.convert(u, out);
+
+      CHECK(out.size() == 1);
+
+      if (out.size() > 0) {
+        String s = *(out.begin());
+        CHECK(s == "$IIDPT,0.9,*67");
+      }
+    }
+
+    SECTION("dpt sentence with transducer to surface") {
+      u.setEnvironmentDepthSurfaceToTransducer(1.2);
+      converter.convert(u, out);
+
+      CHECK(out.size() == 1);
+      if (out.size() > 0) {
+        String s = *(out.begin());
+        CHECK(s == "$IIDPT,0.9,1.2*4A");
+      }
+    }
+
+    SECTION("dpt sentence with transducer to keel") {
+      u.setEnvironmentDepthTransducerToKeel(0.7);
+      converter.convert(u, out);
+
+      if (out.size() > 0) {
+        String s = *(out.begin());
+        CHECK(out.size() == 1);
+        CHECK(s == "$IIDPT,0.9,-0.7*63");
+      }
+    }
+  }
+
   SECTION("EnvironmentOutsidePressure") {
     SKUpdateStatic<1> u;
     u.setEnvironmentOutsidePressure(102421);

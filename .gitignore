@@ -42,9 +42,16 @@ CMakeListsPrivate.txt
 
 # CLion
 cmake-build-debug
+# User-specific stuff
+.idea/vcs.xml
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
 
 # Python VirtualEnv
 venv
 
-# individual user's config file
+# local config file for personal settings
 extras/config/kbox-config.json

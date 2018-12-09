@@ -181,12 +181,14 @@ void KBoxConfigParser::parseNMEAConverterConfig(const JsonObject &json, SKNMEACo
     return;
   }
 
-  READ_BOOL_VALUE(xdrPressure);
+  READ_BOOL_VALUE(dbt);
+  READ_BOOL_VALUE(dpt);
+  READ_BOOL_VALUE(hdm);
+  READ_BOOL_VALUE(mwv);
+  READ_BOOL_VALUE(rsa);
   READ_BOOL_VALUE(xdrAttitude);
   READ_BOOL_VALUE(xdrBattery);
-  READ_BOOL_VALUE(hdm);
-  READ_BOOL_VALUE(rsa);
-  READ_BOOL_VALUE(mwv);
+  READ_BOOL_VALUE(xdrPressure);
 }
 
 void KBoxConfigParser::parseWiFiNetworkConfig(const JsonObject &json,

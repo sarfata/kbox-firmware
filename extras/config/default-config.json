@@ -13,12 +13,14 @@
   "wifi": {
     "enabled": true,
     "nmeaConverter": {
-      "xdrPressure": true,
-      "xdrAttitude": true,
-      "xdrBattery": true,
+      "dbt": false,
+      "dpt": true,
       "hdm": true,
       "mwv": true,
-      "rsa": true
+      "rsa": true,
+      "xdrPressure": true,
+      "xdrAttitude": true,
+      "xdrBattery": true
     },
     "accessPoint": {
       "enabled": true,
@@ -46,12 +48,14 @@
     "outputMode": "nmea",
     "baudRate": 38400,
     "nmeaConverter": {
-      "xdrPressure": true,
-      "xdrAttitude": true,
-      "xdrBattery": true,
+      "dbt": false,
+      "dpt": true,
       "hdm": true,
       "mwv": true,
-      "rsa": true
+      "rsa": true,
+      "xdrPressure": true,
+      "xdrAttitude": true,
+      "xdrBattery": true
     }
   },
   "serial2": {
@@ -59,12 +63,14 @@
     "outputMode": "nmea",
     "baudRate": 4800,
     "nmeaConverter": {
-      "xdrPressure": false,
-      "xdrAttitude": false,
-      "xdrBattery": false,
+      "dbt": false,
+      "dpt": true,
       "hdm": true,
       "mwv": true,
-      "rsa": true
+      "rsa": true,
+      "xdrPressure": true,
+      "xdrAttitude": true,
+      "xdrBattery": true
     }
   },
   "nmea2000": {

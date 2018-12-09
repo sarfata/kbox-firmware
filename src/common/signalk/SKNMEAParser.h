@@ -51,7 +51,11 @@ class SKNMEAParser {
     const SKUpdate& parse(const SKSourceInput& input, const String& sentence, const SKTime& timestamp);
 
   private:
-    const SKUpdate& parseRMC(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& timestamp);
+    const SKUpdate& parseDBT(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& timestamp);
+    const SKUpdate& parseDPT(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& timestamp);
     const SKUpdate& parseMWV(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& timestamp);
+    const SKUpdate& parseRMC(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& timestamp);
+    const SKUpdate& parseXDR(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime& timestamp);
+    const SKUpdate& parseXDRtemp(const SKSourceInput& input, NMEASentenceReader& reader, const SKTime timestamp);
 };
 

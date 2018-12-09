@@ -25,15 +25,26 @@
 #pragma once
 
 #include <math.h>
+#ifndef M_PI
+  #define M_PI 3.14159265358979323846
+#endif
 
 #define SKKnotToMs(x) (x) * 1852 / 3600
 #define SKStatuteMphToMs(x) (x) * 1609.344 / 3600
 #define SKKmphToMs(x) (x) * 1000 / 3600
 
-#define SKDegToRad(x)   (x) * 2 * M_PI / 360
-#define SKRadToDeg(x)   (x) * 360.0 / (2 * M_PI)
-#define SKMsToKnot(x)   (x) * 3600.0 / 1852.0
-#define SKMsToKmh(x)    (x) * 3.60
+#define SKDegToRad(x)   ((x) * 2 * M_PI / 360)
+#define SKRadToDeg(x)   ((x) * 360.0 / (2 * M_PI))
+#define SKMsToKnot(x)   ((x) * 3600.0 / 1852.0)
+#define SKMsToKmh(x)    ((x) * 3.60)
+
+#define SKMeterToFathom(x) ((x) / 1.8288)
+#define SKMeterToFeet(x)   ((x) / 0.3048)
+#define SKFathomToMeter(x) ((x) * 1.8288)
+#define SKFeetToMeter(x)   ((x) * 0.3048)
+
+#define SKCelsiusToKelvin(x) ((x) + 273.15)
+#define SKKelvinToCelsius(x) ((x) - 273.15)
 
 inline double SKPascalToBar(double x) {
   return x / 1e5;

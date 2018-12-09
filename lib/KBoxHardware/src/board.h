@@ -106,7 +106,8 @@ static const pin_t nmea2_out_enable = 16;
     static const pin_t adc1_analog = A23;
     static const pin_t adc2_analog = A11;
     static const pin_t adc3_analog = A13;
-    static const float analog_max_voltage = 1.1155 * 3.31 / (10000/(10000+56000.0));
+    // factor to nominal 3.3V value for corresponding to true measured voltage
+    static const float analog_max_voltage = 1.11888 * 3.3 / (10000/(10000+56000.0));
     static const pin_t supply_analog = A10;
   #else
     static const pin_t adc1_analog = A12;

@@ -68,7 +68,7 @@ Because KBox is open-source, you can do a lot more things with it:
 
 ### Current software status
 
-As of December 2017, the KBox firmware:
+As of September 2018, the KBox firmware:
 
  - General functionality
    - Creates a new WiFi network (KBox) or can join an existing network (via simple
@@ -192,11 +192,57 @@ been possible!**
 
 ## Changelog
 
- * 2018 06 18 - v1.3.0
-   * New logfile format, compatible with SignalK server, saves NMEA messages, 
+ * 2018 09 07 - v1.3.6
+   * Force ESP board definition to generic module w 1MB flash to avoid build
+     error.
+   * Upgrade ESP platform to 1.8.0 to use ESP8266 framework 2.4.2 which improves
+     stability of the WiFi modules and seems to fix a number of connection
+     issues for other people. Hopefully will also improve KBox wifi stability.
+   * Add HTTP CORS header on `/signalk`. This makes KBox compatible with the
+     amazing [Kip](https://github.com/mxtommy/Kip) to display your boat data in
+     a browser.
+   * Fixed a typo in the reboot reasons.
+   * Add missing dependency `pyserial` in the list of dependencies for
+     `kbox.py`.
+ * 2018 07 26 - v1.3.5
+   * Fix a bug that would cause KBox to crash on NMEA sentences without a checksum
+   * Fix a bug where RMC sentence without a date would crash KBox
+   * Added support for parsing DPT and DBT NMEA sentences
+   * Added support for generating DBT and DPT sentences. By default only DPT is enabled.
+   * Added support for parsing XDR air temperature measurements.
+   * Parse magnetic variation from RMC sentence
+   * Generate NMEA2000 messages for air temperature measurements
+ * 2018 07 06 - v1.3.4
+   * Specify a list of default environment so platformio does not build all variants
+     of the project by default.
+ * 2018 07 06 - v1.3.3
+   * Fix a bug which forced us to use `program-esp` to update the wifi module.
+     It is now possible again to just use the following commands to update KBox:
+     
+            platform run -e host -t upload
+            platformio run -e esp -t upload
+
+   * Change default esp upload speed to 921600 because 2000000 does not seem well
+     supported on Windows.
+   * Changed the 'end of programming' detection method to more reliably detect when
+     we are done programming and reboot KBox.
+   * Tested the official ESP uploader on Windows and OS X. Comment out the line 
+     `tools/platformio_cfg_esp.py` in `platformio.ini` to use it.
+     It will be a little bit slower but might work better for some people.
+ * 2018 07 06 - v1.3.2
+   * Changes to the build configuration to improve compatibility with Windows 
+     and address breaking changes in plaformio.
+   * Fix some issues that prevented the tests and sktool from compiling on Windows.
+   * Also added automatic builds on AppVeyor with Windows to hopefully detect
+     Windows issues sooner in the future.
+ * 2018 05 26 - v1.3.1
+   * Fix bug which prevented WiFiRXError from being displayed on stats page.
+   * Fix bug in `kbox.py` tool send wifi config command.
+ * 2018 05 18 - v1.3.0
+   * New logfile format, compatible with SignalK server, saves NMEA messages,
      NMEA2000 messages and SignalK messages.
    * KBox will get the date from NMEA or NMEA2000 and display it on the screen.
-   * KBox will wait until it knows the current time to start logging (this can 
+   * KBox will wait until it knows the current time to start logging (this can
      be changed via configuration)
    * Log files are named after date and time of their creation
    * KBox will save in the logfile important system messages and some stats
@@ -213,7 +259,7 @@ been possible!**
            "logSignalKGeneratedFromNMEA2000": false,
            "logSignalKGeneratedByKBoxSensors": true
          },
-         
+
    * KBox will print version number and time on the "StatsPage"
    * StatsPage is the new default page
    * ![KBox v1.3.0](kbox-v1.3.0.png)

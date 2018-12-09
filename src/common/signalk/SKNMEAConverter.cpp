@@ -34,40 +34,28 @@
 #include "SKNMEAConverter.h"
 
 void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
-  // Trigger a call of visitSKElectricalBatteriesVoltage for every key with that path
-  // (there can be more than one and we do not know how they are called)
   _currentOutput = &output;
-  if (_config.xdrBattery) {
-    update.accept(*this, SKPathElectricalBatteriesVoltage);
-  }
 
-  if (_config.xdrPressure && update.hasEnvironmentOutsidePressure()) {
-    NMEASentenceBuilder sb("II", "XDR", 4);
-    sb.setField(1, "P");
-    sb.setField(2, SKPascalToBar(update.getEnvironmentOutsidePressure()), 5);
-    sb.setField(3, "B");
-    sb.setField(4, "Barometer");
+  if (_config.dbt && update.hasEnvironmentDepthBelowTransducer()) {
+    NMEASentenceBuilder sb("II", "DBT", 7);
+    sb.setField(1, SKMeterToFeet(update.getEnvironmentDepthBelowTransducer()), 2);
+    sb.setField(2, "f");
+    sb.setField(3, update.getEnvironmentDepthBelowTransducer(), 2);
+    sb.setField(4, "M");
+    sb.setField(5, SKMeterToFathom(update.getEnvironmentDepthBelowTransducer()), 2);
+    sb.setField(6, "F");
     output.write(sb.toNMEA());
   }
 
-  if (_config.xdrAttitude && update.hasNavigationAttitude()) {
-    NMEASentenceBuilder sb( "II", "XDR", 8);
-    sb.setField(1, "A");
-    if (update.getNavigationAttitude().pitch == SKDoubleNAN) {
-      sb.setField(2, "");
-    } else {
-      sb.setField(2, SKRadToDeg(update.getNavigationAttitude().pitch), 1);
+  if (_config.dpt && update.hasEnvironmentDepthBelowTransducer()) {
+    NMEASentenceBuilder sb("II", "DPT", 2);
+    sb.setField(1, update.getEnvironmentDepthBelowTransducer(), 1);
+    if (update.hasEnvironmentDepthSurfaceToTransducer()) {
+      sb.setField(2, update.getEnvironmentDepthSurfaceToTransducer(), 1);
     }
-    sb.setField(3, "D");
-    sb.setField(4, "PTCH");
-    sb.setField(5, "A");
-    if (update.getNavigationAttitude().roll == SKDoubleNAN) {
-      sb.setField(6, "");
-    } else {
-      sb.setField(6, SKRadToDeg(update.getNavigationAttitude().roll), 1);
+    else if (update.hasEnvironmentDepthTransducerToKeel()) {
+      sb.setField(2, -update.getEnvironmentDepthTransducerToKeel(), 1);
     }
-    sb.setField(7, "D");
-    sb.setField(8, "ROLL");
     output.write(sb.toNMEA());
   }
 
@@ -76,6 +64,16 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
     sb.setField(1, SKRadToDeg(update.getNavigationHeadingMagnetic()), 1);
     sb.setField(2, "M");
     output.write(sb.toNMEA());
+  }
+
+  if (_config.mwv && update.hasEnvironmentWindAngleApparent()
+      && update.hasEnvironmentWindSpeedApparent()) {
+    generateMWV(output, update.getEnvironmentWindAngleApparent(), update.getEnvironmentWindSpeedApparent(), true);
+  }
+
+  if (_config.mwv && update.hasEnvironmentWindAngleTrueWater()
+      && update.hasEnvironmentWindSpeedTrue()) {
+    generateMWV(output, update.getEnvironmentWindAngleTrueWater(), update.getEnvironmentWindSpeedTrue(), false);
   }
 
   //  ***********************************************
@@ -101,15 +99,42 @@ void SKNMEAConverter::convert(const SKUpdate& update, SKNMEAOutput& output) {
     output.write(sb.toNMEA());
   }
 
-  if (_config.mwv && update.hasEnvironmentWindAngleApparent()
-      && update.hasEnvironmentWindSpeedApparent()) {
-    generateMWV(output, update.getEnvironmentWindAngleApparent(), update.getEnvironmentWindSpeedApparent(), true);
+  if (_config.xdrAttitude && update.hasNavigationAttitude()) {
+    NMEASentenceBuilder sb( "II", "XDR", 8);
+    sb.setField(1, "A");
+    if (update.getNavigationAttitude().pitch == SKDoubleNAN) {
+      sb.setField(2, "");
+    } else {
+      sb.setField(2, SKRadToDeg(update.getNavigationAttitude().pitch), 1);
+    }
+    sb.setField(3, "D");
+    sb.setField(4, "PTCH");
+    sb.setField(5, "A");
+    if (update.getNavigationAttitude().roll == SKDoubleNAN) {
+      sb.setField(6, "");
+    } else {
+      sb.setField(6, SKRadToDeg(update.getNavigationAttitude().roll), 1);
+    }
+    sb.setField(7, "D");
+    sb.setField(8, "ROLL");
+    output.write(sb.toNMEA());
   }
 
-  if (_config.mwv && update.hasEnvironmentWindAngleTrueWater()
-      && update.hasEnvironmentWindSpeedTrue()) {
-    generateMWV(output, update.getEnvironmentWindAngleTrueWater(), update.getEnvironmentWindSpeedTrue(), false);
+  // Trigger a call of visitSKElectricalBatteriesVoltage for every key with that path
+  // (there can be more than one and we do not know how they are called)
+  if (_config.xdrBattery) {
+    update.accept(*this, SKPathElectricalBatteriesVoltage);
   }
+
+  if (_config.xdrPressure && update.hasEnvironmentOutsidePressure()) {
+    NMEASentenceBuilder sb("II", "XDR", 4);
+    sb.setField(1, "P");
+    sb.setField(2, SKPascalToBar(update.getEnvironmentOutsidePressure()), 5);
+    sb.setField(3, "B");
+    sb.setField(4, "Barometer");
+    output.write(sb.toNMEA());
+  }
+
 
   //  ***********************************************
   //  New NMEA 0183 sentence Leeway

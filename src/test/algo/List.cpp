@@ -23,7 +23,7 @@
 */
 
 #include "../KBoxTest.h"
-#include "algo/List.h"
+#include "common/algo/List.h"
 
 
 TEST_CASE("List basics", "[list]") {

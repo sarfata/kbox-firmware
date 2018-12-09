@@ -130,6 +130,16 @@ TEST_CASE("SKTime") {
         CHECK( t.toString() == "1970-01-01T01:02:03Z" );
       }
     }
+
+    SECTION("Empty date") {
+      SKTime t = SKTime::timeFromNMEAStrings("", "010203");
+      CHECK( t.toString() == "1970-01-01T01:02:03Z" );
+    }
+
+    SECTION("Empty time") {
+      SKTime t = SKTime::timeFromNMEAStrings("231282", "");
+      CHECK( t.toString() == "1982-12-23T00:00:00Z" );
+    }
   }
 
   SECTION("timeFromNMEA2000") {

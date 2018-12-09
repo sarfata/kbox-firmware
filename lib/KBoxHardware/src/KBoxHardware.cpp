@@ -106,9 +106,6 @@ void KBoxHardware::setBacklight(BacklightIntensity intensity) {
 }
 
 void KBoxHardware::espInit() {
-  WiFiSerial.begin(1000000);
-  WiFiSerial.setTimeout(0);
-
   digitalWrite(wifi_enable, 0);
   digitalWrite(wifi_rst, 0);
 
@@ -129,6 +126,9 @@ void KBoxHardware::espInit() {
 }
 
 void KBoxHardware::espRebootInFlasher() {
+  WiFiSerial.begin(115200);
+  WiFiSerial.setTimeout(0);
+
   digitalWrite(wifi_enable, 0);
   digitalWrite(wifi_rst, 0);
   digitalWrite(wifi_program, 0);
@@ -141,6 +141,9 @@ void KBoxHardware::espRebootInFlasher() {
 }
 
 void KBoxHardware::espRebootInProgram() {
+  WiFiSerial.begin(1000000);
+  WiFiSerial.setTimeout(0);
+
   digitalWrite(wifi_enable, 0);
   digitalWrite(wifi_rst, 0);
   digitalWrite(wifi_program, 1);
@@ -281,7 +284,7 @@ String KBoxHardware::rebootReason() {
     return "Loss of Lock in PLL Reset";
   if (RCM_SRS0 & RCM_SRS0_LVD)
     return "Low-voltage Detect Reset";
-  return "unknwon reset";
+  return "unknown reset reason";
 }
 
 void watchdog_isr() {
