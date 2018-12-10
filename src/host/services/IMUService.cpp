@@ -102,11 +102,11 @@ void IMUService::loop() {
   switch (_config.mounting) {
     case verticalRightSideToBow:
       _roll = SKDegToRad(eulerAngles.z());
-      _pitch = SKDegToRad(eulerAngles.y())*(-1);
+      _pitch = SKDegToRad(eulerAngles.y()*(-1));
       _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
     break;
     case verticalLeftSideToBow:
-      _roll = SKDegToRad(eulerAngles.z())*(-1);
+      _roll = SKDegToRad(eulerAngles.z()*(-1));
       _pitch = SKDegToRad(eulerAngles.y());
       _heading = SKDegToRad(fmod(eulerAngles.x() + 90, 360));
     break;
@@ -119,12 +119,12 @@ void IMUService::loop() {
     case verticalTopToBow:
     case horizontalTopToBow:
     case horizontalLeftSideToBow:
-      _roll = SKDegToRad(eulerAngles.y())*(-1);
-      _pitch = SKDegToRad(eulerAngles.z())*(-1);
+      _roll = SKDegToRad(eulerAngles.y()*(-1));
+      _pitch = SKDegToRad(eulerAngles.z()*(-1));
       _heading = SKDegToRad(eulerAngles.x());
     break;
     case horizontalRightSideToBow:
-      _roll = SKDegToRad(eulerAngles.y())*(-1);
+      _roll = SKDegToRad(eulerAngles.y()*(-1));
       _pitch = SKDegToRad(eulerAngles.z());
       _heading = SKDegToRad(eulerAngles.x());
   }
