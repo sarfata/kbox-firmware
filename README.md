@@ -191,6 +191,11 @@ to the authors of these libraries! Without them, this project would not have
 been possible!**
 
 ## Changelog
+* 2018 12 16 - v1.3.7
+  * added all variantions of positioning KBox to IMU Service, including
+    more meaningfull names in config
+  * Fixed bug in calculations of + or - values for pitch and roll
+  * on IMU Page datas shown in red now dependent of each calibration
 
  * 2018 09 07 - v1.3.6
    * Force ESP board definition to generic module w 1MB flash to avoid build
@@ -218,7 +223,7 @@ been possible!**
  * 2018 07 06 - v1.3.3
    * Fix a bug which forced us to use `program-esp` to update the wifi module.
      It is now possible again to just use the following commands to update KBox:
-     
+
             platform run -e host -t upload
             platformio run -e esp -t upload
 
@@ -226,11 +231,11 @@ been possible!**
      supported on Windows.
    * Changed the 'end of programming' detection method to more reliably detect when
      we are done programming and reboot KBox.
-   * Tested the official ESP uploader on Windows and OS X. Comment out the line 
+   * Tested the official ESP uploader on Windows and OS X. Comment out the line
      `tools/platformio_cfg_esp.py` in `platformio.ini` to use it.
      It will be a little bit slower but might work better for some people.
  * 2018 07 06 - v1.3.2
-   * Changes to the build configuration to improve compatibility with Windows 
+   * Changes to the build configuration to improve compatibility with Windows
      and address breaking changes in plaformio.
    * Fix some issues that prevented the tests and sktool from compiling on Windows.
    * Also added automatic builds on AppVeyor with Windows to hopefully detect
