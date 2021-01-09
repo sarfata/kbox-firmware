@@ -21,6 +21,21 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+/*
+           HEEL                    TRIM                   MAGNET COMPASS
+
+    -90° <- I -> +90°       +90° <- I -> -90°                 -> + 360°
+            I                       I                          #
+            I                       I                         ###
+            I                       I                        #####
+            I                       I                        ##o##
+         #######             ################# ->            #####
+          #####              ###############                 #####
+
+        back view           Starboard Side View             Top View
+
+(illustration, thanks to Peter Stefaner)
+*/
 
 #include <KBoxLogging.h>
 #include "common/signalk/SKUpdateStatic.h"
@@ -42,15 +57,26 @@ void IMUService::setup() {
   // Where each can be 00:X, 01: Y, 10:Z
   // Sign is the 3 lsb: 00000xyz
   switch (_config.mounting) {
-    case HorizontalLeftSideToBow:
+    case horizontalTopToBow:
+    case horizontalBottomToBow:
+      _axisConfig = 0b00100001;   // 0x21
+      _signConfig = 0b00000100;   // 0x04
+    break;
+    case horizontalLeftSideToBow: // Bosch P1 (default)
       _axisConfig = 0b00100100;
       _signConfig = 0b00000000;
     break;
-    case VerticalTopToBow:
-    case VerticalStbHull:
-    case VerticalPortHull:
+    case horizontalRightSideToBow:
+      _axisConfig = 0b00100100;
+      _signConfig = 0b00000100;
+    break;
+    case verticalRightSideToBow:
+    case verticalLeftSideToBow:
+    case verticalTopToBow:
+    case verticalBottomToBow:
       _axisConfig = 0b00001001;
       _signConfig = 0b00000000;
+    break;
   }
 
   DEBUG("Initing BNO055");
@@ -71,29 +97,36 @@ void IMUService::loop() {
   update.setSource(SKSource::sourceForKBoxSensor(SKSourceInputKBoxIMU));
 
   // In the SignalK Specification
-  //  roll:   Vessel roll, +ve is list to starboard
+  //  roll:   Vessel roll, +ve is list, heels to starboard
   //  pitch:  Pitch, +ve is bow up
   switch (_config.mounting) {
-    case VerticalPortHull:
+    case verticalRightSideToBow:
       _roll = SKDegToRad(eulerAngles.z());
-      _pitch = SKDegToRad(eulerAngles.y());
+      _pitch = SKDegToRad(eulerAngles.y()*(-1));
       _heading = SKDegToRad(fmod(eulerAngles.x() + 270, 360));
     break;
-    case VerticalStbHull:
-      _roll = SKDegToRad(eulerAngles.z())*(-1);
-      _pitch = SKDegToRad(eulerAngles.y())*(-1);
-      _heading = SKDegToRad(eulerAngles.x());
+    case verticalLeftSideToBow:
+      _roll = SKDegToRad(eulerAngles.z()*(-1));
+      _pitch = SKDegToRad(eulerAngles.y());
+      _heading = SKDegToRad(fmod(eulerAngles.x() + 90, 360));
     break;
-    case VerticalTopToBow:
+    case verticalBottomToBow:
+    case horizontalBottomToBow:
       _roll = SKDegToRad(eulerAngles.y());
       _pitch = SKDegToRad(eulerAngles.z());
       _heading = SKDegToRad(fmod(eulerAngles.x() + 180, 360));
     break;
-    case HorizontalLeftSideToBow:
-      _roll = SKDegToRad(eulerAngles.y());
-      _pitch = SKDegToRad(eulerAngles.z()) * (-1);
+    case verticalTopToBow:
+    case horizontalTopToBow:
+    case horizontalLeftSideToBow:
+      _roll = SKDegToRad(eulerAngles.y()*(-1));
+      _pitch = SKDegToRad(eulerAngles.z()*(-1));
       _heading = SKDegToRad(eulerAngles.x());
     break;
+    case horizontalRightSideToBow:
+      _roll = SKDegToRad(eulerAngles.y()*(-1));
+      _pitch = SKDegToRad(eulerAngles.z());
+      _heading = SKDegToRad(eulerAngles.x());
   }
 
   if (isMagCalibrated()) {
@@ -131,7 +164,6 @@ void IMUService::getLastValues(int &sysCalibration, int &accelCalibration, doubl
 
 //  Calc offset for making Heel=0 and Pitch=0
 //  (e.g. called with long button press in IMUMonitorPage)
-//  If an setOffset will be done a second time within 5 Seconds,
 //  the values will be stored into EEPROM and loaded at start of KBox
 void IMUService::setRollPitchOffset() {
   bool changed = false;
@@ -201,4 +233,3 @@ bool IMUService::restoreCalibration() {
     return false;
   }
 }
-
