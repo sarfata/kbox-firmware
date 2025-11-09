@@ -4,10 +4,20 @@
 status](https://api.travis-ci.org/sarfata/kbox-firmware.svg?branch=master)](https://travis-ci.org/sarfata/kbox-firmware) - [Buy KBox on
 Tindie!](https://www.tindie.com/products/sarfata/kbox-open-source-boat-gateway/)
 
+## Building and flashing with modern tools - 2025
+
+```
+# Install uv
+# See https://docs.astral.sh/uv/getting-started/installation/
+
+# Run
+uv run platformio run
+```
+
 ## KBox Update - May 2020
 
 Thanks for your interest in KBox! As of May 2020, I am not manufacturing or
-selling KBox anymore. All the source code and design files remain available for 
+selling KBox anymore. All the source code and design files remain available for
 your inspiration and if you have any question, feel free to reach out by twitter
 message, email or via a github issue.
 
@@ -211,6 +221,8 @@ been possible!**
 
 ## Changelog
 
+ * 2025 11 09
+   * Updated dependencies to make the project buildable again with modern versions of platformio
  * 2018 09 07 - v1.3.6
    * Force ESP board definition to generic module w 1MB flash to avoid build
      error.
@@ -237,7 +249,7 @@ been possible!**
  * 2018 07 06 - v1.3.3
    * Fix a bug which forced us to use `program-esp` to update the wifi module.
      It is now possible again to just use the following commands to update KBox:
-     
+
             platform run -e host -t upload
             platformio run -e esp -t upload
 
@@ -245,11 +257,11 @@ been possible!**
      supported on Windows.
    * Changed the 'end of programming' detection method to more reliably detect when
      we are done programming and reboot KBox.
-   * Tested the official ESP uploader on Windows and OS X. Comment out the line 
+   * Tested the official ESP uploader on Windows and OS X. Comment out the line
      `tools/platformio_cfg_esp.py` in `platformio.ini` to use it.
      It will be a little bit slower but might work better for some people.
  * 2018 07 06 - v1.3.2
-   * Changes to the build configuration to improve compatibility with Windows 
+   * Changes to the build configuration to improve compatibility with Windows
      and address breaking changes in plaformio.
    * Fix some issues that prevented the tests and sktool from compiling on Windows.
    * Also added automatic builds on AppVeyor with Windows to hopefully detect
