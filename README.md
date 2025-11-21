@@ -220,6 +220,11 @@ to the authors of these libraries! Without them, this project would not have
 been possible!**
 
 ## Changelog
+* 2018 12 16 - v1.3.7
+  * added all variantions of positioning KBox to IMU Service, including
+    more meaningfull names in config
+  * Fixed bug in calculations of + or - values for pitch and roll
+  * on IMU Page datas shown in red now dependent of each calibration
 
  * 2025 11 09
    * Updated dependencies to make the project buildable again with modern versions of platformio

@@ -75,7 +75,7 @@ void KBoxConfigParser::defaultConfig(KBoxConfig &config) {
   config.imuConfig.enabled = true;           // enable internal IMU sensor
   config.imuConfig.enableHdg = true;         // true if values taken from internal sensor
   config.imuConfig.enableHeelPitch = true;   // true if values taken from internal sensor
-  config.imuConfig.mounting = VerticalStbHull;
+  config.imuConfig.mounting = verticalRightSideToBow;
 
   config.barometerConfig.enabled = true;
   config.barometerConfig.frequency = 1;
@@ -209,18 +209,30 @@ enum SerialMode KBoxConfigParser::convertSerialMode(const String &s) {
 }
 
 enum IMUMounting KBoxConfigParser::convertIMUMounting(const String &s) {
-  if (s == "verticalPortHull") {
-    return VerticalPortHull;
+  if (s == "verticalRightSideToBow") {
+    return  verticalRightSideToBow;
   }
-  if (s == "verticalStarboardHull") {
-    return VerticalStbHull;
+  if (s == "verticalLeftSideToBow") {
+    return  verticalLeftSideToBow;
   }
   if (s == "verticalTopToBow") {
-    return VerticalTopToBow;
+    return  verticalTopToBow;
+  }
+  if (s == "verticalBottomToBow") {
+    return  verticalBottomToBow;
+  }
+  if (s == "horizontalTopToBow") {
+    return  horizontalTopToBow;
   }
   if (s == "horizontalLeftSideToBow") {
-    return HorizontalLeftSideToBow;
+    return  horizontalLeftSideToBow;
+  }
+  if (s == "horizontalBottomToBow") {
+    return  horizontalBottomToBow;
+  }
+  if (s == "horizontalRightSideToBow") {
+    return  horizontalRightSideToBow;
   }
   // default
-  return VerticalPortHull;
+  return verticalRightSideToBow;
 }

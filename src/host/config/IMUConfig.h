@@ -27,16 +27,29 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+/*          horizontal top (KBox or sensor)
+              __________________
+             / o               /|
+            /                 / /
+Left Side  /     BNO055      / /   Right Side
+          /  vertical top   / /
+         /_________________/ /
+         |________________ |/
+
+       horiz. bottom (KBox or sensor)
+*/
 
 #pragma once
 
 enum IMUMounting {
-  VerticalStbHull,
-  VerticalPortHull,
-  VerticalTopToBow,
-  //VerticalTopToStern,
-  HorizontalLeftSideToBow,
-  //HorizontalRightSideToBow
+  verticalRightSideToBow,     // KBox mounted on port hull
+  verticalLeftSideToBow,      // KBox mounted on stb. hull
+  verticalTopToBow,           // KBox mounted on rear bulkhead
+  verticalBottomToBow,        // KBox mounted on front bulkhead,
+  horizontalTopToBow,
+  horizontalLeftSideToBow,
+  horizontalBottomToBow,
+  horizontalRightSideToBow,
 };
 
 struct IMUConfig {
@@ -44,5 +57,5 @@ struct IMUConfig {
   int frequency;
   bool enableHdg;
   bool enableHeelPitch;
-  enum IMUMounting mounting = VerticalPortHull;
+  enum IMUMounting mounting = verticalRightSideToBow;
 };

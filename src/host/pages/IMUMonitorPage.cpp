@@ -83,12 +83,23 @@ bool IMUMonitorPage::processEvent(const TickEvent &te){
 
   // Always show Hdg from IMU-sensor, but if the value is not trusted (which means
   // calibrationData below default setting, change color to red
+  // red color also means, that values are not sent as SKUpdate to SKHub
   if ( ! _imuService.isMagCalibrated() || ! _imuService.isRollAndPitchCalibrated()) {
-    _hdgTL->setColor(ColorRed);
     _calTL->setColor(ColorRed);
   } else {
-    _hdgTL->setColor(ColorWhite);
     _calTL->setColor(ColorWhite);
+  };
+  if ( ! _imuService.isMagCalibrated() ) {
+    _hdgTL->setColor(ColorRed);
+  } else {
+    _hdgTL->setColor(ColorWhite);
+  };
+  if ( ! _imuService.isRollAndPitchCalibrated()) {
+    _pitchTL->setColor(ColorRed);
+    _rollTL->setColor(ColorRed);
+  } else {
+    _pitchTL->setColor(ColorWhite);
+    _rollTL->setColor(ColorWhite);
   };
 
   return true;
